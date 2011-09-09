@@ -10,13 +10,15 @@ TODO:	remove the 1 analog device per port limitation
 
 ***************************************************************************/
 
-#include "driver.h"
 #include <math.h>
+#include "driver.h"
+#include "config.h"
 
 #ifdef MESS
 #include "inputx.h"
 #endif
 
+/* MAMEnet support */
 #if defined MAME_NET || defined XMAME_NET
 #include "network.h"
 
@@ -25,22 +27,13 @@ static int default_player;
 static int analog_player_port[MAX_INPUT_PORTS];
 #endif /* MAME_NET */
 
-/* header identifying the version of the game.cfg file */
-/* mame 0.36b11 */
-#define MAMECFGSTRING_V5 "MAMECFG\5"
-#define MAMEDEFSTRING_V5 "MAMEDEF\4"
 
-/* mame 0.36b12 with multi key/joy extension */
-#define MAMECFGSTRING_V6 "MAMECFG\6"
-#define MAMEDEFSTRING_V6 "MAMEDEF\5"
 
-/* mame 0.36b13 with and/or/not combination */
-#define MAMECFGSTRING_V7 "MAMECFG\7"
-#define MAMEDEFSTRING_V7 "MAMEDEF\6"
+/***************************************************************************
 
-/* mame 0.36b16 with key/joy merge */
-#define MAMECFGSTRING_V8 "MAMECFG\x8"
-#define MAMEDEFSTRING_V8 "MAMEDEF\7"
+	Extern declarations
+
+***************************************************************************/
 
 extern void *record;
 extern void *playback;
@@ -62,6 +55,14 @@ static int joymouse;  // option to simulate trackball with analog joystick
 
 static unsigned short input_port_value[MAX_INPUT_PORTS];
 static unsigned short input_vblank[MAX_INPUT_PORTS];
+
+
+
+/***************************************************************************
+
+	Local variables
+
+***************************************************************************/
 
 /* Assuming a maxium of one analog input device per port BW 101297 */
 static struct InputPort *input_analog[MAX_INPUT_PORTS];
@@ -350,20 +351,20 @@ struct ipd inputport_defaults[] =
 	{ IPT_JOYSTICKLEFT_LEFT   | IPF_PLAYER4, "P4 Left/Left",   SEQ_DEF_0 },
 	{ IPT_JOYSTICKLEFT_RIGHT  | IPF_PLAYER4, "P4 Left/Right",  SEQ_DEF_0 },
 
-	{ IPT_JOYSTICK_UP         | IPF_PLAYER5, "P5 Up",          SEQ_DEF_0 },
-	{ IPT_JOYSTICK_DOWN       | IPF_PLAYER5, "P5 Down",        SEQ_DEF_0 },
-	{ IPT_JOYSTICK_LEFT       | IPF_PLAYER5, "P5 Left",        SEQ_DEF_0 },
-	{ IPT_JOYSTICK_RIGHT      | IPF_PLAYER5, "P5 Right",       SEQ_DEF_0 },
-	{ IPT_BUTTON1             | IPF_PLAYER5, "P5 Button 1",    SEQ_DEF_0 },
-	{ IPT_BUTTON2             | IPF_PLAYER5, "P5 Button 2",    SEQ_DEF_0 },
-	{ IPT_BUTTON3             | IPF_PLAYER5, "P5 Button 3",    SEQ_DEF_0 },
-	{ IPT_BUTTON4             | IPF_PLAYER5, "P5 Button 4",    SEQ_DEF_0 },
-	{ IPT_BUTTON5             | IPF_PLAYER5, "P5 Button 5",    SEQ_DEF_0 },
-	{ IPT_BUTTON6             | IPF_PLAYER5, "P5 Button 6",    SEQ_DEF_0 },
-	{ IPT_BUTTON7             | IPF_PLAYER5, "P5 Button 7",    SEQ_DEF_0 },
-	{ IPT_BUTTON8             | IPF_PLAYER5, "P5 Button 8",    SEQ_DEF_0 },
-	{ IPT_BUTTON9             | IPF_PLAYER5, "P5 Button 9",    SEQ_DEF_0 },
-	{ IPT_BUTTON10            | IPF_PLAYER5, "P5 Button 10",   SEQ_DEF_0 },
+	{ IPT_JOYSTICK_UP         | IPF_PLAYER5, "P5 Up",          SEQ_DEF_1(JOYCODE_5_UP) },
+	{ IPT_JOYSTICK_DOWN       | IPF_PLAYER5, "P5 Down",        SEQ_DEF_1(JOYCODE_5_DOWN) },
+	{ IPT_JOYSTICK_LEFT       | IPF_PLAYER5, "P5 Left",        SEQ_DEF_1(JOYCODE_5_LEFT) },
+	{ IPT_JOYSTICK_RIGHT      | IPF_PLAYER5, "P5 Right",       SEQ_DEF_1(JOYCODE_5_RIGHT) },
+	{ IPT_BUTTON1             | IPF_PLAYER5, "P5 Button 1",    SEQ_DEF_1(JOYCODE_5_BUTTON1) },
+	{ IPT_BUTTON2             | IPF_PLAYER5, "P5 Button 2",    SEQ_DEF_1(JOYCODE_5_BUTTON2) },
+	{ IPT_BUTTON3             | IPF_PLAYER5, "P5 Button 3",    SEQ_DEF_1(JOYCODE_5_BUTTON3) },
+	{ IPT_BUTTON4             | IPF_PLAYER5, "P5 Button 4",    SEQ_DEF_1(JOYCODE_5_BUTTON4) },
+	{ IPT_BUTTON5             | IPF_PLAYER5, "P5 Button 5",    SEQ_DEF_1(JOYCODE_5_BUTTON5) },
+	{ IPT_BUTTON6             | IPF_PLAYER5, "P5 Button 6",    SEQ_DEF_1(JOYCODE_5_BUTTON6) },
+	{ IPT_BUTTON7             | IPF_PLAYER5, "P5 Button 7",    SEQ_DEF_1(JOYCODE_5_BUTTON7) },
+	{ IPT_BUTTON8             | IPF_PLAYER5, "P5 Button 8",    SEQ_DEF_1(JOYCODE_5_BUTTON8) },
+	{ IPT_BUTTON9             | IPF_PLAYER5, "P5 Button 9",    SEQ_DEF_1(JOYCODE_5_BUTTON9) },
+	{ IPT_BUTTON10            | IPF_PLAYER5, "P5 Button 10",   SEQ_DEF_1(JOYCODE_5_BUTTON10) },
 	{ IPT_JOYSTICKRIGHT_UP    | IPF_PLAYER5, "P5 Right/Up",    SEQ_DEF_0 },
 	{ IPT_JOYSTICKRIGHT_DOWN  | IPF_PLAYER5, "P5 Right/Down",  SEQ_DEF_0 },
 	{ IPT_JOYSTICKRIGHT_LEFT  | IPF_PLAYER5, "P5 Right/Left",  SEQ_DEF_0 },
@@ -373,20 +374,20 @@ struct ipd inputport_defaults[] =
 	{ IPT_JOYSTICKLEFT_LEFT   | IPF_PLAYER5, "P5 Left/Left",   SEQ_DEF_0 },
 	{ IPT_JOYSTICKLEFT_RIGHT  | IPF_PLAYER5, "P5 Left/Right",  SEQ_DEF_0 },
 
-	{ IPT_JOYSTICK_UP         | IPF_PLAYER6, "P6 Up",          SEQ_DEF_0 },
-	{ IPT_JOYSTICK_DOWN       | IPF_PLAYER6, "P6 Down",        SEQ_DEF_0 },
-	{ IPT_JOYSTICK_LEFT       | IPF_PLAYER6, "P6 Left",        SEQ_DEF_0 },
-	{ IPT_JOYSTICK_RIGHT      | IPF_PLAYER6, "P6 Right",       SEQ_DEF_0 },
-	{ IPT_BUTTON1             | IPF_PLAYER6, "P6 Button 1",    SEQ_DEF_0 },
-	{ IPT_BUTTON2             | IPF_PLAYER6, "P6 Button 2",    SEQ_DEF_0 },
-	{ IPT_BUTTON3             | IPF_PLAYER6, "P6 Button 3",    SEQ_DEF_0 },
-	{ IPT_BUTTON4             | IPF_PLAYER6, "P6 Button 4",    SEQ_DEF_0 },
-	{ IPT_BUTTON5             | IPF_PLAYER6, "P6 Button 5",    SEQ_DEF_0 },
-	{ IPT_BUTTON6             | IPF_PLAYER6, "P6 Button 6",    SEQ_DEF_0 },
-	{ IPT_BUTTON7             | IPF_PLAYER6, "P6 Button 7",    SEQ_DEF_0 },
-	{ IPT_BUTTON8             | IPF_PLAYER6, "P6 Button 8",    SEQ_DEF_0 },
-	{ IPT_BUTTON9             | IPF_PLAYER6, "P6 Button 9",    SEQ_DEF_0 },
-	{ IPT_BUTTON10            | IPF_PLAYER6, "P6 Button 10",   SEQ_DEF_0 },
+	{ IPT_JOYSTICK_UP         | IPF_PLAYER6, "P6 Up",          SEQ_DEF_1(JOYCODE_6_UP) },
+	{ IPT_JOYSTICK_DOWN       | IPF_PLAYER6, "P6 Down",        SEQ_DEF_1(JOYCODE_6_DOWN) },
+	{ IPT_JOYSTICK_LEFT       | IPF_PLAYER6, "P6 Left",        SEQ_DEF_1(JOYCODE_6_LEFT) },
+	{ IPT_JOYSTICK_RIGHT      | IPF_PLAYER6, "P6 Right",       SEQ_DEF_1(JOYCODE_6_RIGHT) },
+	{ IPT_BUTTON1             | IPF_PLAYER6, "P6 Button 1",    SEQ_DEF_1(JOYCODE_6_BUTTON1) },
+	{ IPT_BUTTON2             | IPF_PLAYER6, "P6 Button 2",    SEQ_DEF_1(JOYCODE_6_BUTTON2) },
+	{ IPT_BUTTON3             | IPF_PLAYER6, "P6 Button 3",    SEQ_DEF_1(JOYCODE_6_BUTTON3) },
+	{ IPT_BUTTON4             | IPF_PLAYER6, "P6 Button 4",    SEQ_DEF_1(JOYCODE_6_BUTTON4) },
+	{ IPT_BUTTON5             | IPF_PLAYER6, "P6 Button 5",    SEQ_DEF_1(JOYCODE_6_BUTTON5) },
+	{ IPT_BUTTON6             | IPF_PLAYER6, "P6 Button 6",    SEQ_DEF_1(JOYCODE_6_BUTTON6) },
+	{ IPT_BUTTON7             | IPF_PLAYER6, "P6 Button 7",    SEQ_DEF_1(JOYCODE_6_BUTTON7) },
+	{ IPT_BUTTON8             | IPF_PLAYER6, "P6 Button 8",    SEQ_DEF_1(JOYCODE_6_BUTTON8) },
+	{ IPT_BUTTON9             | IPF_PLAYER6, "P6 Button 9",    SEQ_DEF_1(JOYCODE_6_BUTTON9) },
+	{ IPT_BUTTON10            | IPF_PLAYER6, "P6 Button 10",   SEQ_DEF_1(JOYCODE_6_BUTTON10) },
 	{ IPT_JOYSTICKRIGHT_UP    | IPF_PLAYER6, "P6 Right/Up",    SEQ_DEF_0 },
 	{ IPT_JOYSTICKRIGHT_DOWN  | IPF_PLAYER6, "P6 Right/Down",  SEQ_DEF_0 },
 	{ IPT_JOYSTICKRIGHT_LEFT  | IPF_PLAYER6, "P6 Right/Left",  SEQ_DEF_0 },
@@ -396,20 +397,20 @@ struct ipd inputport_defaults[] =
 	{ IPT_JOYSTICKLEFT_LEFT   | IPF_PLAYER6, "P6 Left/Left",   SEQ_DEF_0 },
 	{ IPT_JOYSTICKLEFT_RIGHT  | IPF_PLAYER6, "P6 Left/Right",  SEQ_DEF_0 },
 
-	{ IPT_JOYSTICK_UP         | IPF_PLAYER7, "P7 Up",          SEQ_DEF_0 },
-	{ IPT_JOYSTICK_DOWN       | IPF_PLAYER7, "P7 Down",        SEQ_DEF_0 },
-	{ IPT_JOYSTICK_LEFT       | IPF_PLAYER7, "P7 Left",        SEQ_DEF_0 },
-	{ IPT_JOYSTICK_RIGHT      | IPF_PLAYER7, "P7 Right",       SEQ_DEF_0 },
-	{ IPT_BUTTON1             | IPF_PLAYER7, "P7 Button 1",    SEQ_DEF_0 },
-	{ IPT_BUTTON2             | IPF_PLAYER7, "P7 Button 2",    SEQ_DEF_0 },
-	{ IPT_BUTTON3             | IPF_PLAYER7, "P7 Button 3",    SEQ_DEF_0 },
-	{ IPT_BUTTON4             | IPF_PLAYER7, "P7 Button 4",    SEQ_DEF_0 },
-	{ IPT_BUTTON5             | IPF_PLAYER7, "P7 Button 5",    SEQ_DEF_0 },
-	{ IPT_BUTTON6             | IPF_PLAYER7, "P7 Button 6",    SEQ_DEF_0 },
-	{ IPT_BUTTON7             | IPF_PLAYER7, "P7 Button 7",    SEQ_DEF_0 },
-	{ IPT_BUTTON8             | IPF_PLAYER7, "P7 Button 8",    SEQ_DEF_0 },
-	{ IPT_BUTTON9             | IPF_PLAYER7, "P7 Button 9",    SEQ_DEF_0 },
-	{ IPT_BUTTON10            | IPF_PLAYER7, "P7 Button 10",   SEQ_DEF_0 },
+	{ IPT_JOYSTICK_UP         | IPF_PLAYER7, "P7 Up",          SEQ_DEF_1(JOYCODE_7_UP) },
+	{ IPT_JOYSTICK_DOWN       | IPF_PLAYER7, "P7 Down",        SEQ_DEF_1(JOYCODE_7_DOWN) },
+	{ IPT_JOYSTICK_LEFT       | IPF_PLAYER7, "P7 Left",        SEQ_DEF_1(JOYCODE_7_LEFT) },
+	{ IPT_JOYSTICK_RIGHT      | IPF_PLAYER7, "P7 Right",       SEQ_DEF_1(JOYCODE_7_RIGHT) },
+	{ IPT_BUTTON1             | IPF_PLAYER7, "P7 Button 1",    SEQ_DEF_1(JOYCODE_7_BUTTON1) },
+	{ IPT_BUTTON2             | IPF_PLAYER7, "P7 Button 2",    SEQ_DEF_1(JOYCODE_7_BUTTON2) },
+	{ IPT_BUTTON3             | IPF_PLAYER7, "P7 Button 3",    SEQ_DEF_1(JOYCODE_7_BUTTON3) },
+	{ IPT_BUTTON4             | IPF_PLAYER7, "P7 Button 4",    SEQ_DEF_1(JOYCODE_7_BUTTON4) },
+	{ IPT_BUTTON5             | IPF_PLAYER7, "P7 Button 5",    SEQ_DEF_1(JOYCODE_7_BUTTON5) },
+	{ IPT_BUTTON6             | IPF_PLAYER7, "P7 Button 6",    SEQ_DEF_1(JOYCODE_7_BUTTON6) },
+	{ IPT_BUTTON7             | IPF_PLAYER7, "P7 Button 7",    SEQ_DEF_1(JOYCODE_7_BUTTON7) },
+	{ IPT_BUTTON8             | IPF_PLAYER7, "P7 Button 8",    SEQ_DEF_1(JOYCODE_7_BUTTON8) },
+	{ IPT_BUTTON9             | IPF_PLAYER7, "P7 Button 9",    SEQ_DEF_1(JOYCODE_7_BUTTON9) },
+	{ IPT_BUTTON10            | IPF_PLAYER7, "P7 Button 10",   SEQ_DEF_1(JOYCODE_7_BUTTON10) },
 	{ IPT_JOYSTICKRIGHT_UP    | IPF_PLAYER7, "P7 Right/Up",    SEQ_DEF_0 },
 	{ IPT_JOYSTICKRIGHT_DOWN  | IPF_PLAYER7, "P7 Right/Down",  SEQ_DEF_0 },
 	{ IPT_JOYSTICKRIGHT_LEFT  | IPF_PLAYER7, "P7 Right/Left",  SEQ_DEF_0 },
@@ -419,20 +420,20 @@ struct ipd inputport_defaults[] =
 	{ IPT_JOYSTICKLEFT_LEFT   | IPF_PLAYER7, "P7 Left/Left",   SEQ_DEF_0 },
 	{ IPT_JOYSTICKLEFT_RIGHT  | IPF_PLAYER7, "P7 Left/Right",  SEQ_DEF_0 },
 
-	{ IPT_JOYSTICK_UP         | IPF_PLAYER8, "P8 Up",          SEQ_DEF_0 },
-	{ IPT_JOYSTICK_DOWN       | IPF_PLAYER8, "P8 Down",        SEQ_DEF_0 },
-	{ IPT_JOYSTICK_LEFT       | IPF_PLAYER8, "P8 Left",        SEQ_DEF_0 },
-	{ IPT_JOYSTICK_RIGHT      | IPF_PLAYER8, "P8 Right",       SEQ_DEF_0 },
-	{ IPT_BUTTON1             | IPF_PLAYER8, "P8 Button 1",    SEQ_DEF_0 },
-	{ IPT_BUTTON2             | IPF_PLAYER8, "P8 Button 2",    SEQ_DEF_0 },
-	{ IPT_BUTTON3             | IPF_PLAYER8, "P8 Button 3",    SEQ_DEF_0 },
-	{ IPT_BUTTON4             | IPF_PLAYER8, "P8 Button 4",    SEQ_DEF_0 },
-	{ IPT_BUTTON5             | IPF_PLAYER8, "P8 Button 5",    SEQ_DEF_0 },
-	{ IPT_BUTTON6             | IPF_PLAYER8, "P8 Button 6",    SEQ_DEF_0 },
-	{ IPT_BUTTON7             | IPF_PLAYER8, "P8 Button 7",    SEQ_DEF_0 },
-	{ IPT_BUTTON8             | IPF_PLAYER8, "P8 Button 8",    SEQ_DEF_0 },
-	{ IPT_BUTTON9             | IPF_PLAYER8, "P8 Button 9",    SEQ_DEF_0 },
-	{ IPT_BUTTON10            | IPF_PLAYER8, "P8 Button 10",   SEQ_DEF_0 },
+	{ IPT_JOYSTICK_UP         | IPF_PLAYER8, "P8 Up",          SEQ_DEF_1(JOYCODE_8_UP) },
+	{ IPT_JOYSTICK_DOWN       | IPF_PLAYER8, "P8 Down",        SEQ_DEF_1(JOYCODE_8_DOWN) },
+	{ IPT_JOYSTICK_LEFT       | IPF_PLAYER8, "P8 Left",        SEQ_DEF_1(JOYCODE_8_LEFT) },
+	{ IPT_JOYSTICK_RIGHT      | IPF_PLAYER8, "P8 Right",       SEQ_DEF_1(JOYCODE_8_RIGHT) },
+	{ IPT_BUTTON1             | IPF_PLAYER8, "P8 Button 1",    SEQ_DEF_1(JOYCODE_8_BUTTON1) },
+	{ IPT_BUTTON2             | IPF_PLAYER8, "P8 Button 2",    SEQ_DEF_1(JOYCODE_8_BUTTON2) },
+	{ IPT_BUTTON3             | IPF_PLAYER8, "P8 Button 3",    SEQ_DEF_1(JOYCODE_8_BUTTON3) },
+	{ IPT_BUTTON4             | IPF_PLAYER8, "P8 Button 4",    SEQ_DEF_1(JOYCODE_8_BUTTON4) },
+	{ IPT_BUTTON5             | IPF_PLAYER8, "P8 Button 5",    SEQ_DEF_1(JOYCODE_8_BUTTON5) },
+	{ IPT_BUTTON6             | IPF_PLAYER8, "P8 Button 6",    SEQ_DEF_1(JOYCODE_8_BUTTON6) },
+	{ IPT_BUTTON7             | IPF_PLAYER8, "P8 Button 7",    SEQ_DEF_1(JOYCODE_8_BUTTON7) },
+	{ IPT_BUTTON8             | IPF_PLAYER8, "P8 Button 8",    SEQ_DEF_1(JOYCODE_8_BUTTON8) },
+	{ IPT_BUTTON9             | IPF_PLAYER8, "P8 Button 9",    SEQ_DEF_1(JOYCODE_8_BUTTON9) },
+	{ IPT_BUTTON10            | IPF_PLAYER8, "P8 Button 10",   SEQ_DEF_1(JOYCODE_8_BUTTON10) },
 	{ IPT_JOYSTICKRIGHT_UP    | IPF_PLAYER8, "P8 Right/Up",    SEQ_DEF_0 },
 	{ IPT_JOYSTICKRIGHT_DOWN  | IPF_PLAYER8, "P8 Right/Down",  SEQ_DEF_0 },
 	{ IPT_JOYSTICKRIGHT_LEFT  | IPF_PLAYER8, "P8 Right/Left",  SEQ_DEF_0 },
@@ -442,7 +443,7 @@ struct ipd inputport_defaults[] =
 	{ IPT_JOYSTICKLEFT_LEFT   | IPF_PLAYER8, "P8 Left/Left",   SEQ_DEF_0 },
 	{ IPT_JOYSTICKLEFT_RIGHT  | IPF_PLAYER8, "P8 Left/Right",  SEQ_DEF_0 },
 
-	{ IPT_PEDAL	                | IPF_PLAYER1, "P1 Pedal 1",     SEQ_DEF_3(KEYCODE_LCONTROL, CODE_OR, JOYCODE_1_BUTTON1) },
+	{ IPT_PEDAL                 | IPF_PLAYER1, "P1 Pedal 1",     SEQ_DEF_3(KEYCODE_LCONTROL, CODE_OR, JOYCODE_1_BUTTON1) },
 	{ (IPT_PEDAL+IPT_EXTENSION) | IPF_PLAYER1, "P1 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
 	{ IPT_PEDAL                 | IPF_PLAYER2, "P2 Pedal 1",     SEQ_DEF_3(KEYCODE_A, CODE_OR, JOYCODE_2_BUTTON1) },
 	{ (IPT_PEDAL+IPT_EXTENSION) | IPF_PLAYER2, "P2 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
@@ -450,30 +451,30 @@ struct ipd inputport_defaults[] =
 	{ (IPT_PEDAL+IPT_EXTENSION) | IPF_PLAYER3, "P3 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
 	{ IPT_PEDAL                 | IPF_PLAYER4, "P4 Pedal 1",     SEQ_DEF_1(JOYCODE_4_BUTTON1) },
 	{ (IPT_PEDAL+IPT_EXTENSION) | IPF_PLAYER4, "P4 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
-	{ IPT_PEDAL                 | IPF_PLAYER5, "P5 Pedal 1",     SEQ_DEF_0 },
+	{ IPT_PEDAL                 | IPF_PLAYER5, "P5 Pedal 1",     SEQ_DEF_1(JOYCODE_5_BUTTON1) },
 	{ (IPT_PEDAL+IPT_EXTENSION) | IPF_PLAYER5, "P5 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
-	{ IPT_PEDAL                 | IPF_PLAYER6, "P6 Pedal 1",     SEQ_DEF_0 },
+	{ IPT_PEDAL                 | IPF_PLAYER6, "P6 Pedal 1",     SEQ_DEF_1(JOYCODE_6_BUTTON1) },
 	{ (IPT_PEDAL+IPT_EXTENSION) | IPF_PLAYER6, "P6 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
-	{ IPT_PEDAL                 | IPF_PLAYER7, "P7 Pedal 1",     SEQ_DEF_0 },
+	{ IPT_PEDAL                 | IPF_PLAYER7, "P7 Pedal 1",     SEQ_DEF_1(JOYCODE_7_BUTTON1) },
 	{ (IPT_PEDAL+IPT_EXTENSION) | IPF_PLAYER7, "P7 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
-	{ IPT_PEDAL                 | IPF_PLAYER8, "P8 Pedal 1",     SEQ_DEF_0 },
+	{ IPT_PEDAL                 | IPF_PLAYER8, "P8 Pedal 1",     SEQ_DEF_1(JOYCODE_8_BUTTON1) },
 	{ (IPT_PEDAL+IPT_EXTENSION) | IPF_PLAYER8, "P8 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
 
-	{ IPT_PEDAL2	             | IPF_PLAYER1, "P1 Pedal 2",    SEQ_DEF_1(JOYCODE_1_DOWN) },
+	{ IPT_PEDAL2                 | IPF_PLAYER1, "P1 Pedal 2",     SEQ_DEF_1(JOYCODE_1_DOWN) },
 	{ (IPT_PEDAL2+IPT_EXTENSION) | IPF_PLAYER1, "P1 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
-	{ IPT_PEDAL2                 | IPF_PLAYER2, "P2 Pedal 2",    SEQ_DEF_1(JOYCODE_2_DOWN) },
+	{ IPT_PEDAL2                 | IPF_PLAYER2, "P2 Pedal 2",     SEQ_DEF_1(JOYCODE_2_DOWN) },
 	{ (IPT_PEDAL2+IPT_EXTENSION) | IPF_PLAYER2, "P2 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
-	{ IPT_PEDAL2                 | IPF_PLAYER3, "P3 Pedal 2",    SEQ_DEF_1(JOYCODE_3_DOWN) },
+	{ IPT_PEDAL2                 | IPF_PLAYER3, "P3 Pedal 2",     SEQ_DEF_1(JOYCODE_3_DOWN) },
 	{ (IPT_PEDAL2+IPT_EXTENSION) | IPF_PLAYER3, "P3 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
-	{ IPT_PEDAL2                 | IPF_PLAYER4, "P4 Pedal 2",    SEQ_DEF_1(JOYCODE_4_DOWN) },
+	{ IPT_PEDAL2                 | IPF_PLAYER4, "P4 Pedal 2",     SEQ_DEF_1(JOYCODE_4_DOWN) },
 	{ (IPT_PEDAL2+IPT_EXTENSION) | IPF_PLAYER4, "P4 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
-	{ IPT_PEDAL                  | IPF_PLAYER5, "P5 Pedal 2",     SEQ_DEF_0 },
+	{ IPT_PEDAL2                 | IPF_PLAYER5, "P5 Pedal 2",     SEQ_DEF_1(JOYCODE_5_DOWN) },
 	{ (IPT_PEDAL2+IPT_EXTENSION) | IPF_PLAYER5, "P5 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
-	{ IPT_PEDAL                  | IPF_PLAYER6, "P6 Pedal 2",     SEQ_DEF_0 },
+	{ IPT_PEDAL2                 | IPF_PLAYER6, "P6 Pedal 2",     SEQ_DEF_1(JOYCODE_6_DOWN) },
 	{ (IPT_PEDAL2+IPT_EXTENSION) | IPF_PLAYER6, "P6 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
-	{ IPT_PEDAL                  | IPF_PLAYER7, "P7 Pedal 2",     SEQ_DEF_0 },
+	{ IPT_PEDAL2                 | IPF_PLAYER7, "P7 Pedal 2",     SEQ_DEF_1(JOYCODE_7_DOWN) },
 	{ (IPT_PEDAL2+IPT_EXTENSION) | IPF_PLAYER7, "P7 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
-	{ IPT_PEDAL                  | IPF_PLAYER8, "P8 Pedal 2",     SEQ_DEF_0 },
+	{ IPT_PEDAL2                 | IPF_PLAYER8, "P8 Pedal 2",     SEQ_DEF_1(JOYCODE_8_DOWN) },
 	{ (IPT_PEDAL2+IPT_EXTENSION) | IPF_PLAYER8, "P8 Auto Release <Y/N>", SEQ_DEF_1(KEYCODE_Y) },
 
 	{ IPT_PADDLE | IPF_PLAYER1,  "Paddle",        SEQ_DEF_3(KEYCODE_LEFT, CODE_OR, JOYCODE_1_LEFT) },
@@ -484,14 +485,14 @@ struct ipd inputport_defaults[] =
 	{ (IPT_PADDLE | IPF_PLAYER3)+IPT_EXTENSION,             "Paddle 3",      SEQ_DEF_3(KEYCODE_L, CODE_OR, JOYCODE_3_RIGHT) },
 	{ IPT_PADDLE | IPF_PLAYER4,  "Paddle 4",      SEQ_DEF_1(JOYCODE_4_LEFT) },
 	{ (IPT_PADDLE | IPF_PLAYER4)+IPT_EXTENSION,             "Paddle 4",      SEQ_DEF_1(JOYCODE_4_RIGHT) },
-	{ IPT_PADDLE | IPF_PLAYER5,  "Paddle 5",      SEQ_DEF_0 },
-	{ (IPT_PADDLE | IPF_PLAYER5)+IPT_EXTENSION,             "Paddle 5",      SEQ_DEF_0 },
-	{ IPT_PADDLE | IPF_PLAYER6,  "Paddle 6",      SEQ_DEF_0 },
-	{ (IPT_PADDLE | IPF_PLAYER6)+IPT_EXTENSION,             "Paddle 6",      SEQ_DEF_0 },
-	{ IPT_PADDLE | IPF_PLAYER7,  "Paddle 7",      SEQ_DEF_0 },
-	{ (IPT_PADDLE | IPF_PLAYER7)+IPT_EXTENSION,             "Paddle 7",      SEQ_DEF_0 },
-	{ IPT_PADDLE | IPF_PLAYER8,  "Paddle 8",      SEQ_DEF_0 },
-	{ (IPT_PADDLE | IPF_PLAYER8)+IPT_EXTENSION,             "Paddle 8",      SEQ_DEF_0 },
+	{ IPT_PADDLE | IPF_PLAYER5,  "Paddle 5",      SEQ_DEF_1(JOYCODE_5_LEFT) },
+	{ (IPT_PADDLE | IPF_PLAYER5)+IPT_EXTENSION,             "Paddle 5",      SEQ_DEF_1(JOYCODE_5_RIGHT) },
+	{ IPT_PADDLE | IPF_PLAYER6,  "Paddle 6",      SEQ_DEF_1(JOYCODE_6_LEFT) },
+	{ (IPT_PADDLE | IPF_PLAYER6)+IPT_EXTENSION,             "Paddle 6",      SEQ_DEF_1(JOYCODE_6_RIGHT) },
+	{ IPT_PADDLE | IPF_PLAYER7,  "Paddle 7",      SEQ_DEF_1(JOYCODE_7_LEFT) },
+	{ (IPT_PADDLE | IPF_PLAYER7)+IPT_EXTENSION,             "Paddle 7",      SEQ_DEF_1(JOYCODE_7_RIGHT) },
+	{ IPT_PADDLE | IPF_PLAYER8,  "Paddle 8",      SEQ_DEF_1(JOYCODE_8_LEFT) },
+	{ (IPT_PADDLE | IPF_PLAYER8)+IPT_EXTENSION,             "Paddle 8",      SEQ_DEF_1(JOYCODE_8_RIGHT) },
 
 	{ IPT_PADDLE_V | IPF_PLAYER1,  "Paddle V",          SEQ_DEF_3(KEYCODE_UP, CODE_OR, JOYCODE_1_UP) },
 	{ (IPT_PADDLE_V | IPF_PLAYER1)+IPT_EXTENSION,             "Paddle V",        SEQ_DEF_3(KEYCODE_DOWN, CODE_OR, JOYCODE_1_DOWN) },
@@ -501,14 +502,14 @@ struct ipd inputport_defaults[] =
 	{ (IPT_PADDLE_V | IPF_PLAYER3)+IPT_EXTENSION,             "Paddle V 3",      SEQ_DEF_3(KEYCODE_K, CODE_OR, JOYCODE_3_DOWN) },
 	{ IPT_PADDLE_V | IPF_PLAYER4,  "Paddle V 4",        SEQ_DEF_1(JOYCODE_4_UP) },
 	{ (IPT_PADDLE_V | IPF_PLAYER4)+IPT_EXTENSION,             "Paddle V 4",      SEQ_DEF_1(JOYCODE_4_DOWN) },
-	{ IPT_PADDLE_V | IPF_PLAYER5,  "Paddle V 5",        SEQ_DEF_0 },
-	{ (IPT_PADDLE_V | IPF_PLAYER5)+IPT_EXTENSION,             "Paddle V 5",      SEQ_DEF_0 },
-	{ IPT_PADDLE_V | IPF_PLAYER6,  "Paddle V 6",        SEQ_DEF_0 },
-	{ (IPT_PADDLE_V | IPF_PLAYER6)+IPT_EXTENSION,             "Paddle V 6",      SEQ_DEF_0 },
-	{ IPT_PADDLE_V | IPF_PLAYER7,  "Paddle V 7",        SEQ_DEF_0 },
-	{ (IPT_PADDLE_V | IPF_PLAYER7)+IPT_EXTENSION,             "Paddle V 7",      SEQ_DEF_0 },
-	{ IPT_PADDLE_V | IPF_PLAYER8,  "Paddle V 8",        SEQ_DEF_0 },
-	{ (IPT_PADDLE_V | IPF_PLAYER8)+IPT_EXTENSION,             "Paddle V 8",      SEQ_DEF_0 },
+	{ IPT_PADDLE_V | IPF_PLAYER5,  "Paddle V 5",        SEQ_DEF_1(JOYCODE_5_UP) },
+	{ (IPT_PADDLE_V | IPF_PLAYER5)+IPT_EXTENSION,             "Paddle V 5",      SEQ_DEF_1(JOYCODE_5_DOWN) },
+	{ IPT_PADDLE_V | IPF_PLAYER6,  "Paddle V 6",        SEQ_DEF_1(JOYCODE_6_UP) },
+	{ (IPT_PADDLE_V | IPF_PLAYER6)+IPT_EXTENSION,             "Paddle V 6",      SEQ_DEF_1(JOYCODE_6_DOWN) },
+	{ IPT_PADDLE_V | IPF_PLAYER7,  "Paddle V 7",        SEQ_DEF_1(JOYCODE_7_UP) },
+	{ (IPT_PADDLE_V | IPF_PLAYER7)+IPT_EXTENSION,             "Paddle V 7",      SEQ_DEF_1(JOYCODE_7_DOWN) },
+	{ IPT_PADDLE_V | IPF_PLAYER8,  "Paddle V 8",        SEQ_DEF_1(JOYCODE_8_UP) },
+	{ (IPT_PADDLE_V | IPF_PLAYER8)+IPT_EXTENSION,             "Paddle V 8",      SEQ_DEF_1(JOYCODE_8_DOWN) },
 
 	{ IPT_DIAL | IPF_PLAYER1,    "Dial",          SEQ_DEF_3(KEYCODE_LEFT, CODE_OR, JOYCODE_1_LEFT) },
 	{ (IPT_DIAL | IPF_PLAYER1)+IPT_EXTENSION,               "Dial",          SEQ_DEF_3(KEYCODE_RIGHT, CODE_OR, JOYCODE_1_RIGHT) },
@@ -518,14 +519,14 @@ struct ipd inputport_defaults[] =
 	{ (IPT_DIAL | IPF_PLAYER3)+IPT_EXTENSION,               "Dial 3",      SEQ_DEF_3(KEYCODE_L, CODE_OR, JOYCODE_3_RIGHT) },
 	{ IPT_DIAL | IPF_PLAYER4,    "Dial 4",        SEQ_DEF_1(JOYCODE_4_LEFT) },
 	{ (IPT_DIAL | IPF_PLAYER4)+IPT_EXTENSION,               "Dial 4",      SEQ_DEF_1(JOYCODE_4_RIGHT) },
-	{ IPT_DIAL | IPF_PLAYER5,    "Dial 5",        SEQ_DEF_0 },
-	{ (IPT_DIAL | IPF_PLAYER5)+IPT_EXTENSION,               "Dial 5",      SEQ_DEF_0 },
-	{ IPT_DIAL | IPF_PLAYER6,    "Dial 6",        SEQ_DEF_0 },
-	{ (IPT_DIAL | IPF_PLAYER6)+IPT_EXTENSION,               "Dial 6",      SEQ_DEF_0 },
-	{ IPT_DIAL | IPF_PLAYER7,    "Dial 7",        SEQ_DEF_0 },
-	{ (IPT_DIAL | IPF_PLAYER7)+IPT_EXTENSION,               "Dial 7",      SEQ_DEF_0 },
-	{ IPT_DIAL | IPF_PLAYER8,    "Dial 8",        SEQ_DEF_0 },
-	{ (IPT_DIAL | IPF_PLAYER8)+IPT_EXTENSION,               "Dial 8",      SEQ_DEF_0 },
+	{ IPT_DIAL | IPF_PLAYER5,    "Dial 5",        SEQ_DEF_1(JOYCODE_5_LEFT) },
+	{ (IPT_DIAL | IPF_PLAYER5)+IPT_EXTENSION,               "Dial 5",      SEQ_DEF_1(JOYCODE_5_RIGHT) },
+	{ IPT_DIAL | IPF_PLAYER6,    "Dial 6",        SEQ_DEF_1(JOYCODE_6_LEFT) },
+	{ (IPT_DIAL | IPF_PLAYER6)+IPT_EXTENSION,               "Dial 6",      SEQ_DEF_1(JOYCODE_6_RIGHT) },
+	{ IPT_DIAL | IPF_PLAYER7,    "Dial 7",        SEQ_DEF_1(JOYCODE_7_LEFT) },
+	{ (IPT_DIAL | IPF_PLAYER7)+IPT_EXTENSION,               "Dial 7",      SEQ_DEF_1(JOYCODE_7_RIGHT) },
+	{ IPT_DIAL | IPF_PLAYER8,    "Dial 8",        SEQ_DEF_1(JOYCODE_8_LEFT) },
+	{ (IPT_DIAL | IPF_PLAYER8)+IPT_EXTENSION,               "Dial 8",      SEQ_DEF_1(JOYCODE_8_RIGHT) },
 
 	{ IPT_DIAL_V | IPF_PLAYER1,  "Dial V",          SEQ_DEF_3(KEYCODE_UP, CODE_OR, JOYCODE_1_UP) },
 	{ (IPT_DIAL_V | IPF_PLAYER1)+IPT_EXTENSION,             "Dial V",        SEQ_DEF_3(KEYCODE_DOWN, CODE_OR, JOYCODE_1_DOWN) },
@@ -535,14 +536,14 @@ struct ipd inputport_defaults[] =
 	{ (IPT_DIAL_V | IPF_PLAYER3)+IPT_EXTENSION,             "Dial V 3",      SEQ_DEF_3(KEYCODE_K, CODE_OR, JOYCODE_3_DOWN) },
 	{ IPT_DIAL_V | IPF_PLAYER4,  "Dial V 4",        SEQ_DEF_1(JOYCODE_4_UP) },
 	{ (IPT_DIAL_V | IPF_PLAYER4)+IPT_EXTENSION,             "Dial V 4",      SEQ_DEF_1(JOYCODE_4_DOWN) },
-	{ IPT_DIAL_V | IPF_PLAYER5,  "Dial V 5",        SEQ_DEF_0 },
-	{ (IPT_DIAL_V | IPF_PLAYER5)+IPT_EXTENSION,             "Dial V 5",      SEQ_DEF_0 },
-	{ IPT_DIAL_V | IPF_PLAYER6,  "Dial V 6",        SEQ_DEF_0 },
-	{ (IPT_DIAL_V | IPF_PLAYER6)+IPT_EXTENSION,             "Dial V 6",      SEQ_DEF_0 },
-	{ IPT_DIAL_V | IPF_PLAYER7,  "Dial V 7",        SEQ_DEF_0 },
-	{ (IPT_DIAL_V | IPF_PLAYER7)+IPT_EXTENSION,             "Dial V 7",      SEQ_DEF_0 },
-	{ IPT_DIAL_V | IPF_PLAYER8,  "Dial V 8",        SEQ_DEF_0 },
-	{ (IPT_DIAL_V | IPF_PLAYER8)+IPT_EXTENSION,             "Dial V 8",      SEQ_DEF_0 },
+	{ IPT_DIAL_V | IPF_PLAYER5,  "Dial V 5",        SEQ_DEF_1(JOYCODE_5_UP) },
+	{ (IPT_DIAL_V | IPF_PLAYER5)+IPT_EXTENSION,             "Dial V 5",      SEQ_DEF_1(JOYCODE_5_DOWN) },
+	{ IPT_DIAL_V | IPF_PLAYER6,  "Dial V 6",        SEQ_DEF_1(JOYCODE_6_UP) },
+	{ (IPT_DIAL_V | IPF_PLAYER6)+IPT_EXTENSION,             "Dial V 6",      SEQ_DEF_1(JOYCODE_6_DOWN) },
+	{ IPT_DIAL_V | IPF_PLAYER7,  "Dial V 7",        SEQ_DEF_1(JOYCODE_7_UP) },
+	{ (IPT_DIAL_V | IPF_PLAYER7)+IPT_EXTENSION,             "Dial V 7",      SEQ_DEF_1(JOYCODE_7_DOWN) },
+	{ IPT_DIAL_V | IPF_PLAYER8,  "Dial V 8",        SEQ_DEF_1(JOYCODE_8_UP) },
+	{ (IPT_DIAL_V | IPF_PLAYER8)+IPT_EXTENSION,             "Dial V 8",      SEQ_DEF_1(JOYCODE_8_DOWN) },
 
 	{ IPT_TRACKBALL_X | IPF_PLAYER1, "Track X",   SEQ_DEF_3(KEYCODE_LEFT, CODE_OR, JOYCODE_1_LEFT) },
 	{ (IPT_TRACKBALL_X | IPF_PLAYER1)+IPT_EXTENSION,                 "Track X",   SEQ_DEF_3(KEYCODE_RIGHT, CODE_OR, JOYCODE_1_RIGHT) },
@@ -552,14 +553,14 @@ struct ipd inputport_defaults[] =
 	{ (IPT_TRACKBALL_X | IPF_PLAYER3)+IPT_EXTENSION,                 "Track X 3", SEQ_DEF_3(KEYCODE_L, CODE_OR, JOYCODE_3_RIGHT) },
 	{ IPT_TRACKBALL_X | IPF_PLAYER4, "Track X 4", SEQ_DEF_1(JOYCODE_4_LEFT) },
 	{ (IPT_TRACKBALL_X | IPF_PLAYER4)+IPT_EXTENSION,                 "Track X 4", SEQ_DEF_1(JOYCODE_4_RIGHT) },
-	{ IPT_TRACKBALL_X | IPF_PLAYER5, "Track X 5", SEQ_DEF_0 },
-	{ (IPT_TRACKBALL_X | IPF_PLAYER5)+IPT_EXTENSION,                 "Track X 5", SEQ_DEF_0 },
-	{ IPT_TRACKBALL_X | IPF_PLAYER6, "Track X 6", SEQ_DEF_0 },
-	{ (IPT_TRACKBALL_X | IPF_PLAYER6)+IPT_EXTENSION,                 "Track X 6", SEQ_DEF_0 },
-	{ IPT_TRACKBALL_X | IPF_PLAYER7, "Track X 7", SEQ_DEF_0 },
-	{ (IPT_TRACKBALL_X | IPF_PLAYER7)+IPT_EXTENSION,                 "Track X 7", SEQ_DEF_0 },
-	{ IPT_TRACKBALL_X | IPF_PLAYER8, "Track X 8", SEQ_DEF_0 },
-	{ (IPT_TRACKBALL_X | IPF_PLAYER8)+IPT_EXTENSION,                 "Track X 8", SEQ_DEF_0 },
+	{ IPT_TRACKBALL_X | IPF_PLAYER5, "Track X 5", SEQ_DEF_1(JOYCODE_5_LEFT) },
+	{ (IPT_TRACKBALL_X | IPF_PLAYER5)+IPT_EXTENSION,                 "Track X 5", SEQ_DEF_1(JOYCODE_5_RIGHT) },
+	{ IPT_TRACKBALL_X | IPF_PLAYER6, "Track X 6", SEQ_DEF_1(JOYCODE_6_LEFT) },
+	{ (IPT_TRACKBALL_X | IPF_PLAYER6)+IPT_EXTENSION,                 "Track X 6", SEQ_DEF_1(JOYCODE_6_RIGHT) },
+	{ IPT_TRACKBALL_X | IPF_PLAYER7, "Track X 7", SEQ_DEF_1(JOYCODE_7_LEFT) },
+	{ (IPT_TRACKBALL_X | IPF_PLAYER7)+IPT_EXTENSION,                 "Track X 7", SEQ_DEF_1(JOYCODE_7_RIGHT) },
+	{ IPT_TRACKBALL_X | IPF_PLAYER8, "Track X 8", SEQ_DEF_1(JOYCODE_8_LEFT) },
+	{ (IPT_TRACKBALL_X | IPF_PLAYER8)+IPT_EXTENSION,                 "Track X 8", SEQ_DEF_1(JOYCODE_8_RIGHT) },
 	
 	{ IPT_TRACKBALL_Y | IPF_PLAYER1, "Track Y",   SEQ_DEF_3(KEYCODE_UP, CODE_OR, JOYCODE_1_UP) },
 	{ (IPT_TRACKBALL_Y | IPF_PLAYER1)+IPT_EXTENSION,                 "Track Y",   SEQ_DEF_3(KEYCODE_DOWN, CODE_OR, JOYCODE_1_DOWN) },
@@ -569,14 +570,14 @@ struct ipd inputport_defaults[] =
 	{ (IPT_TRACKBALL_Y | IPF_PLAYER3)+IPT_EXTENSION,                 "Track Y 3", SEQ_DEF_3(KEYCODE_K, CODE_OR, JOYCODE_3_DOWN) },
 	{ IPT_TRACKBALL_Y | IPF_PLAYER4, "Track Y 4", SEQ_DEF_1(JOYCODE_4_UP) },
 	{ (IPT_TRACKBALL_Y | IPF_PLAYER4)+IPT_EXTENSION,                 "Track Y 4", SEQ_DEF_1(JOYCODE_4_DOWN) },
-	{ IPT_TRACKBALL_Y | IPF_PLAYER5, "Track Y 5", SEQ_DEF_0 },
-	{ (IPT_TRACKBALL_Y | IPF_PLAYER5)+IPT_EXTENSION,                 "Track Y 5", SEQ_DEF_0 },
-	{ IPT_TRACKBALL_Y | IPF_PLAYER6, "Track Y 6", SEQ_DEF_0 },
-	{ (IPT_TRACKBALL_Y | IPF_PLAYER6)+IPT_EXTENSION,                 "Track Y 6", SEQ_DEF_0 },
-	{ IPT_TRACKBALL_Y | IPF_PLAYER7, "Track Y 7", SEQ_DEF_0 },
-	{ (IPT_TRACKBALL_Y | IPF_PLAYER7)+IPT_EXTENSION,                 "Track Y 7", SEQ_DEF_0 },
-	{ IPT_TRACKBALL_Y | IPF_PLAYER8, "Track Y 8", SEQ_DEF_0 },
-	{ (IPT_TRACKBALL_Y | IPF_PLAYER8)+IPT_EXTENSION,                 "Track Y 8", SEQ_DEF_0 },
+	{ IPT_TRACKBALL_Y | IPF_PLAYER5, "Track Y 5", SEQ_DEF_1(JOYCODE_5_UP) },
+	{ (IPT_TRACKBALL_Y | IPF_PLAYER5)+IPT_EXTENSION,                 "Track Y 5", SEQ_DEF_1(JOYCODE_5_DOWN) },
+	{ IPT_TRACKBALL_Y | IPF_PLAYER6, "Track Y 6", SEQ_DEF_1(JOYCODE_6_UP) },
+	{ (IPT_TRACKBALL_Y | IPF_PLAYER6)+IPT_EXTENSION,                 "Track Y 6", SEQ_DEF_1(JOYCODE_6_DOWN) },
+	{ IPT_TRACKBALL_Y | IPF_PLAYER7, "Track Y 7", SEQ_DEF_1(JOYCODE_7_UP) },
+	{ (IPT_TRACKBALL_Y | IPF_PLAYER7)+IPT_EXTENSION,                 "Track Y 7", SEQ_DEF_1(JOYCODE_7_DOWN) },
+	{ IPT_TRACKBALL_Y | IPF_PLAYER8, "Track Y 8", SEQ_DEF_1(JOYCODE_8_UP) },
+	{ (IPT_TRACKBALL_Y | IPF_PLAYER8)+IPT_EXTENSION,                 "Track Y 8", SEQ_DEF_1(JOYCODE_8_DOWN) },
 
 	{ IPT_AD_STICK_X | IPF_PLAYER1, "AD Stick X",   SEQ_DEF_3(KEYCODE_LEFT, CODE_OR, JOYCODE_1_LEFT) },
 	{ (IPT_AD_STICK_X | IPF_PLAYER1)+IPT_EXTENSION,                "AD Stick X",   SEQ_DEF_3(KEYCODE_RIGHT, CODE_OR, JOYCODE_1_RIGHT) },
@@ -586,14 +587,14 @@ struct ipd inputport_defaults[] =
 	{ (IPT_AD_STICK_X | IPF_PLAYER3)+IPT_EXTENSION,                "AD Stick X 3", SEQ_DEF_3(KEYCODE_L, CODE_OR, JOYCODE_3_RIGHT) },
 	{ IPT_AD_STICK_X | IPF_PLAYER4, "AD Stick X 4", SEQ_DEF_1(JOYCODE_4_LEFT) },
 	{ (IPT_AD_STICK_X | IPF_PLAYER4)+IPT_EXTENSION,                "AD Stick X 4", SEQ_DEF_1(JOYCODE_4_RIGHT) },
-	{ IPT_AD_STICK_X | IPF_PLAYER5, "AD Stick X 5", SEQ_DEF_0 },
-	{ (IPT_AD_STICK_X | IPF_PLAYER5)+IPT_EXTENSION,                "AD Stick X 5", SEQ_DEF_0 },
-	{ IPT_AD_STICK_X | IPF_PLAYER6, "AD Stick X 6", SEQ_DEF_0 },
-	{ (IPT_AD_STICK_X | IPF_PLAYER6)+IPT_EXTENSION,                "AD Stick X 6", SEQ_DEF_0 },
-	{ IPT_AD_STICK_X | IPF_PLAYER7, "AD Stick X 7", SEQ_DEF_0 },
-	{ (IPT_AD_STICK_X | IPF_PLAYER7)+IPT_EXTENSION,                "AD Stick X 7", SEQ_DEF_0 },
-	{ IPT_AD_STICK_X | IPF_PLAYER8, "AD Stick X 8", SEQ_DEF_0 },
-	{ (IPT_AD_STICK_X | IPF_PLAYER8)+IPT_EXTENSION,                "AD Stick X 8", SEQ_DEF_0 },
+	{ IPT_AD_STICK_X | IPF_PLAYER5, "AD Stick X 5", SEQ_DEF_1(JOYCODE_5_LEFT) },
+	{ (IPT_AD_STICK_X | IPF_PLAYER5)+IPT_EXTENSION,                "AD Stick X 5", SEQ_DEF_1(JOYCODE_5_RIGHT) },
+	{ IPT_AD_STICK_X | IPF_PLAYER6, "AD Stick X 6", SEQ_DEF_1(JOYCODE_6_LEFT) },
+	{ (IPT_AD_STICK_X | IPF_PLAYER6)+IPT_EXTENSION,                "AD Stick X 6", SEQ_DEF_1(JOYCODE_6_RIGHT) },
+	{ IPT_AD_STICK_X | IPF_PLAYER7, "AD Stick X 7", SEQ_DEF_1(JOYCODE_7_LEFT) },
+	{ (IPT_AD_STICK_X | IPF_PLAYER7)+IPT_EXTENSION,                "AD Stick X 7", SEQ_DEF_1(JOYCODE_7_RIGHT) },
+	{ IPT_AD_STICK_X | IPF_PLAYER8, "AD Stick X 8", SEQ_DEF_1(JOYCODE_8_LEFT) },
+	{ (IPT_AD_STICK_X | IPF_PLAYER8)+IPT_EXTENSION,                "AD Stick X 8", SEQ_DEF_1(JOYCODE_8_RIGHT) },
 
 	{ IPT_AD_STICK_Y | IPF_PLAYER1, "AD Stick Y",   SEQ_DEF_3(KEYCODE_UP, CODE_OR, JOYCODE_1_UP) },
 	{ (IPT_AD_STICK_Y | IPF_PLAYER1)+IPT_EXTENSION,                "AD Stick Y",   SEQ_DEF_3(KEYCODE_DOWN, CODE_OR, JOYCODE_1_DOWN) },
@@ -603,14 +604,14 @@ struct ipd inputport_defaults[] =
 	{ (IPT_AD_STICK_Y | IPF_PLAYER3)+IPT_EXTENSION,                "AD Stick Y 3", SEQ_DEF_3(KEYCODE_K, CODE_OR, JOYCODE_3_DOWN) },
 	{ IPT_AD_STICK_Y | IPF_PLAYER4, "AD Stick Y 4", SEQ_DEF_1(JOYCODE_4_UP) },
 	{ (IPT_AD_STICK_Y | IPF_PLAYER4)+IPT_EXTENSION,                "AD Stick Y 4", SEQ_DEF_1(JOYCODE_4_DOWN) },
-	{ IPT_AD_STICK_Y | IPF_PLAYER5, "AD Stick Y 5", SEQ_DEF_0 },
-	{ (IPT_AD_STICK_Y | IPF_PLAYER5)+IPT_EXTENSION,                "AD Stick Y 5", SEQ_DEF_0 },
-	{ IPT_AD_STICK_Y | IPF_PLAYER6, "AD Stick Y 6", SEQ_DEF_0 },
-	{ (IPT_AD_STICK_Y | IPF_PLAYER6)+IPT_EXTENSION,                "AD Stick Y 6", SEQ_DEF_0 },
-	{ IPT_AD_STICK_Y | IPF_PLAYER7, "AD Stick Y 7", SEQ_DEF_0 },
-	{ (IPT_AD_STICK_Y | IPF_PLAYER7)+IPT_EXTENSION,                "AD Stick Y 7", SEQ_DEF_0 },
-	{ IPT_AD_STICK_Y | IPF_PLAYER8, "AD Stick Y 8", SEQ_DEF_0 },
-	{ (IPT_AD_STICK_Y | IPF_PLAYER8)+IPT_EXTENSION,                "AD Stick Y 8", SEQ_DEF_0 },
+	{ IPT_AD_STICK_Y | IPF_PLAYER5, "AD Stick Y 5", SEQ_DEF_1(JOYCODE_5_UP) },
+	{ (IPT_AD_STICK_Y | IPF_PLAYER5)+IPT_EXTENSION,                "AD Stick Y 5", SEQ_DEF_1(JOYCODE_5_DOWN) },
+	{ IPT_AD_STICK_Y | IPF_PLAYER6, "AD Stick Y 6", SEQ_DEF_1(JOYCODE_6_UP) },
+	{ (IPT_AD_STICK_Y | IPF_PLAYER6)+IPT_EXTENSION,                "AD Stick Y 6", SEQ_DEF_1(JOYCODE_6_DOWN) },
+	{ IPT_AD_STICK_Y | IPF_PLAYER7, "AD Stick Y 7", SEQ_DEF_1(JOYCODE_7_UP) },
+	{ (IPT_AD_STICK_Y | IPF_PLAYER7)+IPT_EXTENSION,                "AD Stick Y 7", SEQ_DEF_1(JOYCODE_7_DOWN) },
+	{ IPT_AD_STICK_Y | IPF_PLAYER8, "AD Stick Y 8", SEQ_DEF_1(JOYCODE_8_UP) },
+	{ (IPT_AD_STICK_Y | IPF_PLAYER8)+IPT_EXTENSION,                "AD Stick Y 8", SEQ_DEF_1(JOYCODE_8_DOWN) },
 
 	{ IPT_AD_STICK_Z | IPF_PLAYER1, "AD Stick Z",   SEQ_DEF_0 },
 	{ (IPT_AD_STICK_Z | IPF_PLAYER1)+IPT_EXTENSION,                "AD Stick Z",   SEQ_DEF_0 },
@@ -637,14 +638,14 @@ struct ipd inputport_defaults[] =
 	{ (IPT_LIGHTGUN_X | IPF_PLAYER3)+IPT_EXTENSION,                "Lightgun X 3", SEQ_DEF_3(KEYCODE_L, CODE_OR, JOYCODE_3_RIGHT) },
 	{ IPT_LIGHTGUN_X | IPF_PLAYER4, "Lightgun X 4", SEQ_DEF_1(JOYCODE_4_LEFT) },
 	{ (IPT_LIGHTGUN_X | IPF_PLAYER4)+IPT_EXTENSION,                "Lightgun X 4", SEQ_DEF_1(JOYCODE_4_RIGHT) },
-	{ IPT_LIGHTGUN_X | IPF_PLAYER5, "Lightgun X 5", SEQ_DEF_0 },
-	{ (IPT_LIGHTGUN_X | IPF_PLAYER5)+IPT_EXTENSION,                "Lightgun X 5", SEQ_DEF_0 },
-	{ IPT_LIGHTGUN_X | IPF_PLAYER6, "Lightgun X 6", SEQ_DEF_0 },
-	{ (IPT_LIGHTGUN_X | IPF_PLAYER6)+IPT_EXTENSION,                "Lightgun X 6", SEQ_DEF_0 },
-	{ IPT_LIGHTGUN_X | IPF_PLAYER7, "Lightgun X 7", SEQ_DEF_0 },
-	{ (IPT_LIGHTGUN_X | IPF_PLAYER7)+IPT_EXTENSION,                "Lightgun X 7", SEQ_DEF_0 },
-	{ IPT_LIGHTGUN_X | IPF_PLAYER8, "Lightgun X 8", SEQ_DEF_0 },
-	{ (IPT_LIGHTGUN_X | IPF_PLAYER8)+IPT_EXTENSION,                "Lightgun X 8", SEQ_DEF_0 },
+	{ IPT_LIGHTGUN_X | IPF_PLAYER5, "Lightgun X 5", SEQ_DEF_1(JOYCODE_5_LEFT) },
+	{ (IPT_LIGHTGUN_X | IPF_PLAYER5)+IPT_EXTENSION,                "Lightgun X 5", SEQ_DEF_1(JOYCODE_5_RIGHT) },
+	{ IPT_LIGHTGUN_X | IPF_PLAYER6, "Lightgun X 6", SEQ_DEF_1(JOYCODE_6_LEFT) },
+	{ (IPT_LIGHTGUN_X | IPF_PLAYER6)+IPT_EXTENSION,                "Lightgun X 6", SEQ_DEF_1(JOYCODE_6_RIGHT) },
+	{ IPT_LIGHTGUN_X | IPF_PLAYER7, "Lightgun X 7", SEQ_DEF_1(JOYCODE_7_LEFT) },				   
+	{ (IPT_LIGHTGUN_X | IPF_PLAYER7)+IPT_EXTENSION,                "Lightgun X 7", SEQ_DEF_1(JOYCODE_7_RIGHT) },
+	{ IPT_LIGHTGUN_X | IPF_PLAYER8, "Lightgun X 8", SEQ_DEF_1(JOYCODE_8_LEFT) },
+	{ (IPT_LIGHTGUN_X | IPF_PLAYER8)+IPT_EXTENSION,                "Lightgun X 8", SEQ_DEF_1(JOYCODE_8_RIGHT) },
 
 	{ IPT_LIGHTGUN_Y | IPF_PLAYER1, "Lightgun Y",   SEQ_DEF_3(KEYCODE_UP, CODE_OR, JOYCODE_1_UP) },
 	{ (IPT_LIGHTGUN_Y | IPF_PLAYER1)+IPT_EXTENSION,                "Lightgun Y",   SEQ_DEF_3(KEYCODE_DOWN, CODE_OR, JOYCODE_1_DOWN) },
@@ -654,14 +655,14 @@ struct ipd inputport_defaults[] =
 	{ (IPT_LIGHTGUN_Y | IPF_PLAYER3)+IPT_EXTENSION,                "Lightgun Y 3", SEQ_DEF_3(KEYCODE_K, CODE_OR, JOYCODE_3_DOWN) },
 	{ IPT_LIGHTGUN_Y | IPF_PLAYER4, "Lightgun Y 4", SEQ_DEF_1(JOYCODE_4_UP) },
 	{ (IPT_LIGHTGUN_Y | IPF_PLAYER4)+IPT_EXTENSION,                "Lightgun Y 4", SEQ_DEF_1(JOYCODE_4_DOWN) },
-	{ IPT_LIGHTGUN_Y | IPF_PLAYER5, "Lightgun Y 5", SEQ_DEF_0 },
-	{ (IPT_LIGHTGUN_Y | IPF_PLAYER5)+IPT_EXTENSION,                "Lightgun Y 5", SEQ_DEF_0 },
-	{ IPT_LIGHTGUN_Y | IPF_PLAYER6, "Lightgun Y 6", SEQ_DEF_0 },
-	{ (IPT_LIGHTGUN_Y | IPF_PLAYER6)+IPT_EXTENSION,                "Lightgun Y 6", SEQ_DEF_0 },
-	{ IPT_LIGHTGUN_Y | IPF_PLAYER7, "Lightgun Y 7", SEQ_DEF_0 },
-	{ (IPT_LIGHTGUN_Y | IPF_PLAYER7)+IPT_EXTENSION,                "Lightgun Y 7", SEQ_DEF_0 },
-	{ IPT_LIGHTGUN_Y | IPF_PLAYER8, "Lightgun Y 8", SEQ_DEF_0 },
-	{ (IPT_LIGHTGUN_Y | IPF_PLAYER8)+IPT_EXTENSION,                "Lightgun Y 8", SEQ_DEF_0 },
+	{ IPT_LIGHTGUN_Y | IPF_PLAYER5, "Lightgun Y 5", SEQ_DEF_1(JOYCODE_5_UP) },
+	{ (IPT_LIGHTGUN_Y | IPF_PLAYER5)+IPT_EXTENSION,                "Lightgun Y 5", SEQ_DEF_1(JOYCODE_5_DOWN) },
+	{ IPT_LIGHTGUN_Y | IPF_PLAYER6, "Lightgun Y 6", SEQ_DEF_1(JOYCODE_6_UP) },
+	{ (IPT_LIGHTGUN_Y | IPF_PLAYER6)+IPT_EXTENSION,                "Lightgun Y 6", SEQ_DEF_1(JOYCODE_6_DOWN) },
+	{ IPT_LIGHTGUN_Y | IPF_PLAYER7, "Lightgun Y 7", SEQ_DEF_1(JOYCODE_7_UP) },
+	{ (IPT_LIGHTGUN_Y | IPF_PLAYER7)+IPT_EXTENSION,                "Lightgun Y 7", SEQ_DEF_1(JOYCODE_7_DOWN) },
+	{ IPT_LIGHTGUN_Y | IPF_PLAYER8, "Lightgun Y 8", SEQ_DEF_1(JOYCODE_8_UP) },
+	{ (IPT_LIGHTGUN_Y | IPF_PLAYER8)+IPT_EXTENSION,                "Lightgun Y 8", SEQ_DEF_1(JOYCODE_8_DOWN) },
 
 #ifdef MESS
 	{ IPT_MOUSE_X | IPF_PLAYER1, "MOUSE X",   SEQ_DEF_3(KEYCODE_LEFT, CODE_OR, JOYCODE_1_LEFT) },
@@ -910,6 +911,70 @@ struct ik input_keywords[] =
 	{ "JOYCODE_4_BUTTON10",	  	IKT_STD,		JOYCODE_4_BUTTON10 },
 	{ "JOYCODE_4_START",	  	IKT_STD,		JOYCODE_4_START },
 	{ "JOYCODE_4_SELECT",	  	IKT_STD,		JOYCODE_4_SELECT },
+	{ "JOYCODE_5_LEFT",		  	IKT_STD,		JOYCODE_5_LEFT },
+	{ "JOYCODE_5_RIGHT",	  	IKT_STD,		JOYCODE_5_RIGHT },
+	{ "JOYCODE_5_UP",		  	IKT_STD,		JOYCODE_5_UP },
+	{ "JOYCODE_5_DOWN",		  	IKT_STD,		JOYCODE_5_DOWN },
+	{ "JOYCODE_5_BUTTON1",	  	IKT_STD,		JOYCODE_5_BUTTON1 },
+	{ "JOYCODE_5_BUTTON2",	  	IKT_STD,		JOYCODE_5_BUTTON2 },
+	{ "JOYCODE_5_BUTTON3",	  	IKT_STD,		JOYCODE_5_BUTTON3 },
+	{ "JOYCODE_5_BUTTON4",	  	IKT_STD,		JOYCODE_5_BUTTON4 },
+	{ "JOYCODE_5_BUTTON5",	  	IKT_STD,		JOYCODE_5_BUTTON5 },
+	{ "JOYCODE_5_BUTTON6",	  	IKT_STD,		JOYCODE_5_BUTTON6 },
+	{ "JOYCODE_5_BUTTON7",	  	IKT_STD,		JOYCODE_5_BUTTON7 },
+	{ "JOYCODE_5_BUTTON8",	  	IKT_STD,		JOYCODE_5_BUTTON8 },
+	{ "JOYCODE_5_BUTTON9",	  	IKT_STD,		JOYCODE_5_BUTTON9 },
+	{ "JOYCODE_5_BUTTON10",	  	IKT_STD,		JOYCODE_5_BUTTON10 },
+	{ "JOYCODE_5_START",	  	IKT_STD,		JOYCODE_5_START },
+	{ "JOYCODE_5_SELECT",	  	IKT_STD,		JOYCODE_5_SELECT },
+	{ "JOYCODE_6_LEFT",		  	IKT_STD,		JOYCODE_6_LEFT },
+	{ "JOYCODE_6_RIGHT",	  	IKT_STD,		JOYCODE_6_RIGHT },
+	{ "JOYCODE_6_UP",		  	IKT_STD,		JOYCODE_6_UP },
+	{ "JOYCODE_6_DOWN",		  	IKT_STD,		JOYCODE_6_DOWN },
+	{ "JOYCODE_6_BUTTON1",	  	IKT_STD,		JOYCODE_6_BUTTON1 },
+	{ "JOYCODE_6_BUTTON2",	  	IKT_STD,		JOYCODE_6_BUTTON2 },
+	{ "JOYCODE_6_BUTTON3",	  	IKT_STD,		JOYCODE_6_BUTTON3 },
+	{ "JOYCODE_6_BUTTON4",	  	IKT_STD,		JOYCODE_6_BUTTON4 },
+	{ "JOYCODE_6_BUTTON5",	  	IKT_STD,		JOYCODE_6_BUTTON5 },
+	{ "JOYCODE_6_BUTTON6",	  	IKT_STD,		JOYCODE_6_BUTTON6 },
+	{ "JOYCODE_6_BUTTON7",	  	IKT_STD,		JOYCODE_6_BUTTON7 },
+	{ "JOYCODE_6_BUTTON8",	  	IKT_STD,		JOYCODE_6_BUTTON8 },
+	{ "JOYCODE_6_BUTTON9",	  	IKT_STD,		JOYCODE_6_BUTTON9 },
+	{ "JOYCODE_6_BUTTON10",	  	IKT_STD,		JOYCODE_6_BUTTON10 },
+	{ "JOYCODE_6_START",	  	IKT_STD,		JOYCODE_6_START },
+	{ "JOYCODE_6_SELECT",	  	IKT_STD,		JOYCODE_6_SELECT },
+	{ "JOYCODE_7_LEFT",		  	IKT_STD,		JOYCODE_7_LEFT },
+	{ "JOYCODE_7_RIGHT",	  	IKT_STD,		JOYCODE_7_RIGHT },
+	{ "JOYCODE_7_UP",		  	IKT_STD,		JOYCODE_7_UP },
+	{ "JOYCODE_7_DOWN",		  	IKT_STD,		JOYCODE_7_DOWN },
+	{ "JOYCODE_7_BUTTON1",	  	IKT_STD,		JOYCODE_7_BUTTON1 },
+	{ "JOYCODE_7_BUTTON2",	  	IKT_STD,		JOYCODE_7_BUTTON2 },
+	{ "JOYCODE_7_BUTTON3",	  	IKT_STD,		JOYCODE_7_BUTTON3 },
+	{ "JOYCODE_7_BUTTON4",	  	IKT_STD,		JOYCODE_7_BUTTON4 },
+	{ "JOYCODE_7_BUTTON5",	  	IKT_STD,		JOYCODE_7_BUTTON5 },
+	{ "JOYCODE_7_BUTTON6",	  	IKT_STD,		JOYCODE_7_BUTTON6 },
+	{ "JOYCODE_7_BUTTON7",	  	IKT_STD,		JOYCODE_7_BUTTON7 },
+	{ "JOYCODE_7_BUTTON8",	  	IKT_STD,		JOYCODE_7_BUTTON8 },
+	{ "JOYCODE_7_BUTTON9",	  	IKT_STD,		JOYCODE_7_BUTTON9 },
+	{ "JOYCODE_7_BUTTON10",	  	IKT_STD,		JOYCODE_7_BUTTON10 },
+	{ "JOYCODE_7_START",	  	IKT_STD,		JOYCODE_7_START },
+	{ "JOYCODE_7_SELECT",	  	IKT_STD,		JOYCODE_7_SELECT },
+	{ "JOYCODE_8_LEFT",		  	IKT_STD,		JOYCODE_8_LEFT },
+	{ "JOYCODE_8_RIGHT",	  	IKT_STD,		JOYCODE_8_RIGHT },
+	{ "JOYCODE_8_UP",		  	IKT_STD,		JOYCODE_8_UP },
+	{ "JOYCODE_8_DOWN",		  	IKT_STD,		JOYCODE_8_DOWN },
+	{ "JOYCODE_8_BUTTON1",	  	IKT_STD,		JOYCODE_8_BUTTON1 },
+	{ "JOYCODE_8_BUTTON2",	  	IKT_STD,		JOYCODE_8_BUTTON2 },
+	{ "JOYCODE_8_BUTTON3",	  	IKT_STD,		JOYCODE_8_BUTTON3 },
+	{ "JOYCODE_8_BUTTON4",	  	IKT_STD,		JOYCODE_8_BUTTON4 },
+	{ "JOYCODE_8_BUTTON5",	  	IKT_STD,		JOYCODE_8_BUTTON5 },
+	{ "JOYCODE_8_BUTTON6",	  	IKT_STD,		JOYCODE_8_BUTTON6 },
+	{ "JOYCODE_8_BUTTON7",	  	IKT_STD,		JOYCODE_8_BUTTON7 },
+	{ "JOYCODE_8_BUTTON8",	  	IKT_STD,		JOYCODE_8_BUTTON8 },
+	{ "JOYCODE_8_BUTTON9",	  	IKT_STD,		JOYCODE_8_BUTTON9 },
+	{ "JOYCODE_8_BUTTON10",	  	IKT_STD,		JOYCODE_8_BUTTON10 },
+	{ "JOYCODE_8_START",	  	IKT_STD,		JOYCODE_8_START },
+	{ "JOYCODE_8_SELECT",	  	IKT_STD,		JOYCODE_8_SELECT },
 
 	{ "MOUSECODE_1_BUTTON1", 	IKT_STD,		JOYCODE_MOUSE_1_BUTTON1 },
 	{ "MOUSECODE_1_BUTTON2", 	IKT_STD,		JOYCODE_MOUSE_1_BUTTON2 },
@@ -1543,205 +1608,46 @@ static void writeword(mame_file *f,UINT16 num)
 	}
 }
 
-#ifndef NOLEGACY
-#include "legacy.h"
-#endif
-
-static int seq_read_ver_8(void* f, InputSeq* seq)
-{
-	int j,len;
-	UINT32 i;
-	UINT16 w;
-
-	if (readword(f,&w) != 0)
-		return -1;
-
-	len = w;
-	seq_set_0(seq);
-	for(j=0;j<len;++j)
-	{
-		if (readint(f,&i) != 0)
- 			return -1;
-		(*seq)[j] = savecode_to_code(i);
- 	}
-
- 	return 0;
-  }
-
-static int seq_read(void* f, InputSeq* seq, int ver)
-  {
-#ifdef NOLEGACY
-	if (ver==8)
-		return seq_read_ver_8(f,seq);
-#else
-	switch (ver) {
-		case 5 : return seq_read_ver_5(f,seq);
-		case 6 : return seq_read_ver_6(f,seq);
-		case 7 : return seq_read_ver_7(f,seq);
-		case 8 : return seq_read_ver_8(f,seq);
-	}
-#endif
-	return -1;
-  }
-
-static void seq_write(void* f, InputSeq* seq)
-  {
-	int j,len;
-        for(len=0;len<SEQ_MAX;++len)
-		if ((*seq)[len] == CODE_NONE)
-			break;
-	writeword(f,len);
-	for(j=0;j<len;++j)
-		writeint(f, code_to_savecode( (*seq)[j] ));
-  }
-
 /***************************************************************************/
 /* Load */
 
 static void load_default_keys(void)
 {
-	mame_file *f;
+	config_file *cfg;
 
 
 	osd_customize_inputport_defaults(inputport_defaults);
 	memcpy(inputport_defaults_backup,inputport_defaults,sizeof(inputport_defaults));
 
-	if ((f = mame_fopen("default",0,FILETYPE_CONFIG,0)) != 0)
+	cfg = config_open(NULL);
+	if (cfg)
 	{
-		char buf[8];
-		int version;
-
-		/* read header */
-		if (mame_fread(f,buf,8) != 8)
-			goto getout;
-
-		if (memcmp(buf,MAMEDEFSTRING_V5,8) == 0)
-			version = 5;
-		else if (memcmp(buf,MAMEDEFSTRING_V6,8) == 0)
-			version = 6;
-		else if (memcmp(buf,MAMEDEFSTRING_V7,8) == 0)
-			version = 7;
-		else if (memcmp(buf,MAMEDEFSTRING_V8,8) == 0)
-			version = 8;
-		else
-			goto getout;	/* header invalid */
-
-		for (;;)
-		{
-			UINT32 type;
-			InputSeq def_seq;
-			InputSeq seq;
-			int i;
-
-			if (readint(f,&type) != 0)
-				goto getout;
-
-			if (seq_read(f,&def_seq,version)!=0)
-				goto getout;
-			if (seq_read(f,&seq,version)!=0)
-				goto getout;
-
-			i = 0;
-			while (inputport_defaults[i].type != IPT_END)
-			{
-				if (inputport_defaults[i].type == type)
-				{
-					/* load stored settings only if the default hasn't changed */
-					if (seq_cmp(&inputport_defaults[i].seq,&def_seq)==0)
-						seq_copy(&inputport_defaults[i].seq,&seq);
-				}
-
-				i++;
-			}
-		}
-
-getout:
-		mame_fclose(f);
+		config_read_default_ports(cfg, inputport_defaults);
+		config_close(cfg);
 	}
 }
 
 static void save_default_keys(void)
 {
-	mame_file *f;
+	config_file *cfg;
 
 
-	if ((f = mame_fopen("default",0,FILETYPE_CONFIG,1)) != 0)
+	cfg = config_open(NULL);
+	if (cfg)
 	{
-		int i;
-
-
-		/* write header */
-		mame_fwrite(f,MAMEDEFSTRING_V8,8);
-
-		i = 0;
-		while (inputport_defaults[i].type != IPT_END)
-		{
-			if (inputport_defaults[i].type != IPT_OSD_RESERVED)
-			{
-				writeint(f,inputport_defaults[i].type);
-
-				seq_write(f,&inputport_defaults_backup[i].seq);
-				seq_write(f,&inputport_defaults[i].seq);
+		config_write_default_ports(cfg, inputport_defaults_backup, inputport_defaults);
+		config_close(cfg);
 			}
 
-			i++;
-		}
-
-		mame_fclose(f);
-	}
 	memcpy(inputport_defaults,inputport_defaults_backup,sizeof(inputport_defaults_backup));
-}
-
-static int input_port_read_ver_8(void *f,struct InputPort *in)
-{
-	UINT32 i;
-	UINT16 w;
-	if (readint(f,&i) != 0)
-		return -1;
-	in->type = i;
-
-	if (readword(f,&w) != 0)
-		return -1;
-	in->mask = w;
-
-	if (readword(f,&w) != 0)
-		return -1;
-	in->default_value = w;
-
-	if (seq_read_ver_8(f,&in->seq) != 0)
-		return -1;
-
-	return 0;
-}
-
-static int input_port_read(void *f,struct InputPort *in, int ver)
-{
-#ifdef NOLEGACY
-	if (ver==8)
-		return input_port_read_ver_8(f,in);
-#else
-	switch (ver) {
-		case 5 : return	input_port_read_ver_5(f,in);
-		case 6 : return	input_port_read_ver_6(f,in);
-		case 7 : return	input_port_read_ver_7(f,in);
-		case 8 : return	input_port_read_ver_8(f,in);
-	}
-#endif
-	return -1;
-}
-
-static void input_port_write(void *f,struct InputPort *in)
-{
-	writeint(f,in->type);
-	writeword(f,in->mask);
-	writeword(f,in->default_value);
-	seq_write(f,&in->seq);
 }
 
 
 int load_input_port_settings(void)
 {
-	mame_file *f;
+	config_file *cfg;
+	int err;
+	struct mixer_config mixercfg;
 /*start MAME:analog+*/
 	mame_file *fa;		// different var then *f so "OK' screen is correctly displayed
 /*end MAME:analog+  */
@@ -1753,92 +1659,25 @@ int load_input_port_settings(void)
 
 	load_default_keys();
 
-	if ((f = mame_fopen(Machine->gamedrv->name,0,FILETYPE_CONFIG,0)) != 0)
-	{
-#ifndef MAME_NET
-		struct InputPort *in;
-#endif
-		unsigned int total,savedtotal;
-		char buf[8];
-		int i;
-		int version;
-
-		in = Machine->input_ports_default;
-
-		/* calculate the size of the array */
-		total = 0;
-		while (in->type != IPT_END)
+	cfg = config_open(Machine->gamedrv->name);
+	if (cfg)
 		{
-			total++;
-			in++;
-		}
-
-		/* read header */
-		if (mame_fread(f,buf,8) != 8)
-			goto getout;
-
-		if (memcmp(buf,MAMECFGSTRING_V5,8) == 0)
-			version = 5;
-		else if (memcmp(buf,MAMECFGSTRING_V6,8) == 0)
-			version = 6;
-		else if (memcmp(buf,MAMECFGSTRING_V7,8) == 0)
-			version = 7;
-		else if (memcmp(buf,MAMECFGSTRING_V8,8) == 0)
-			version = 8;
-		else
-			goto getout;	/* header invalid */
-
-		/* read array size */
-		if (readint(f,&savedtotal) != 0)
-			goto getout;
-		if (total != savedtotal)
-			goto getout;	/* different size */
-
-		/* read the original settings and compare them with the ones defined in the driver */
-		in = Machine->input_ports_default;
-		while (in->type != IPT_END)
-		{
-			struct InputPort saved;
-
-			if (input_port_read(f,&saved,version) != 0)
+		err = config_read_ports(cfg, Machine->input_ports_default, Machine->input_ports);
+		if (err)
 				goto getout;
 
-			if (in->mask != saved.mask ||
-				in->default_value != saved.default_value ||
-				in->type != saved.type ||
-				seq_cmp(&in->seq,&saved.seq) !=0 )
-			goto getout;	/* the default values are different */
-
-			in++;
-		}
-
-		/* read the current settings */
-		in = Machine->input_ports;
-		while (in->type != IPT_END)
-		{
-			if (input_port_read(f,in,version) != 0)
+		err = config_read_coin_and_ticket_counters(cfg, coins, lastcoin, coinlockedout, &dispensed_tickets);
+		if (err)
 				goto getout;
-			in++;
-		}
 
-		/* Clear the coin & ticket counters/flags - LBO 042898 */
-		for (i = 0; i < COIN_COUNTERS; i ++)
-			coins[i] = lastcoin[i] = coinlockedout[i] = 0;
-		dispensed_tickets = 0;
-
-		/* read in the coin/ticket counters */
-		for (i = 0; i < COIN_COUNTERS; i ++)
-		{
-			if (readint(f,&coins[i]) != 0)
-				goto getout;
-		}
-		if (readint(f,&dispensed_tickets) != 0)
+		err = config_read_mixer_config(cfg, &mixercfg);
+		if (err)
 			goto getout;
 
-		mixer_read_config(f);
+		mixer_load_config(&mixercfg);
 
 getout:
-		mame_fclose(f);
+		config_close(cfg);
 	}
 
 /*start MAME:analog+*/
@@ -1851,8 +1690,8 @@ getout:
 		/* read header */
 		if (mame_fread(fa,buf,8) != 8)
 			goto getoutanalogplus;
-		if (!memcmp(buf,MAMECFGSTRING_V8,8) == 0)
-			goto getoutanalogplus;	/* header invalid */
+//		if (!memcmp(buf,MAMECFGSTRING_V8,8) == 0)
+//			goto getoutanalogplus;	/* header invalid */
 
 		// read mouse settings
 		for (p=0; p<MAX_PLAYERS; p++)
@@ -1892,8 +1731,8 @@ getout:
 		/* read header */
 		if (mame_fread(fa,buf,8) != 8)
 			goto getoutanalogplusdef;
-		if (!memcmp(buf,MAMECFGSTRING_V8,8) == 0)
-			goto getoutanalogplusdef;	/* header invalid */
+//		if (!memcmp(buf,MAMECFGSTRING_V8,8) == 0)
+//			goto getoutanalogplusdef;	/* header invalid */
 
 		// read mouse settings
 		for (p=0; p<MAX_PLAYERS; p++)
@@ -1954,6 +1793,9 @@ getout:
 		while (in->type != IPT_END && in->type != IPT_PORT)
 		{
 			if ((in->type & ~IPF_MASK) != IPT_DIPSWITCH_SETTING &&	/* skip dipswitch definitions */
+#ifdef MESS
+				(in->type & ~IPF_MASK) != IPT_CONFIG_SETTING &&		/* skip config definitions */
+#endif
 				(in->type & ~IPF_MASK) != IPT_EXTENSION &&			/* skip analog extension fields */
 				(in->type & IPF_UNUSED) == 0 &&						/* skip unused bits */
 				!(!options.cheat && (in->type & IPF_CHEAT)) &&				/* skip cheats if cheats disabled */
@@ -2055,8 +1897,7 @@ getout:
 
 	/* if we didn't find a saved config, return 0 so the main core knows that it */
 	/* is the first time the game is run and it should diplay the disclaimer. */
-	if (f) return 1;
-	else return 0;
+	return cfg ? 1 : 0;
 }
 
 /***************************************************************************/
@@ -2064,7 +1905,8 @@ getout:
 
 void save_input_port_settings(void)
 {
-	mame_file *f;
+	config_file *cfg;
+	struct mixer_config mixercfg;
 #ifdef MAME_NET
 	struct InputPort *in;
 	int port, player;
@@ -2090,6 +1932,9 @@ void save_input_port_settings(void)
 		while (in->type != IPT_END && in->type != IPT_PORT)
 		{
 			if ((in->type & ~IPF_MASK) != IPT_DIPSWITCH_SETTING &&	/* skip dipswitch definitions */
+#ifdef MESS
+				(in->type & ~IPF_MASK) != IPT_CONFIG_SETTING &&		/* skip config definitions */
+#endif
 				(in->type & ~IPF_MASK) != IPT_EXTENSION &&			/* skip analog extension fields */
 				(in->type & IPF_UNUSED) == 0 &&						/* skip unused bits */
 				!(!options.cheat && (in->type & IPF_CHEAT)) &&				/* skip cheats if cheats disabled */
@@ -2186,70 +2031,33 @@ void save_input_port_settings(void)
 
 	save_default_keys();
 
-	if ((f = mame_fopen(Machine->gamedrv->name,0,FILETYPE_CONFIG,1)) != 0)
-	{
-#ifndef MAME_NET
-		struct InputPort *in;
-#endif /* MAME_NET */
-		int total;
-		int i;
-
-
-		in = Machine->input_ports_default;
-
-		/* calculate the size of the array */
-		total = 0;
-		while (in->type != IPT_END)
+	cfg = config_create(Machine->gamedrv->name);
+	if (cfg)
 		{
-			total++;
-			in++;
-		}
+		mixer_save_config(&mixercfg);
 
-		/* write header */
-		mame_fwrite(f,MAMECFGSTRING_V8,8);
-		/* write array size */
-		writeint(f,total);
-		/* write the original settings as defined in the driver */
-		in = Machine->input_ports_default;
-		while (in->type != IPT_END)
-		{
-			input_port_write(f,in);
-			in++;
-		}
-		/* write the current settings */
-		in = Machine->input_ports;
-		while (in->type != IPT_END)
-		{
-			input_port_write(f,in);
-			in++;
-		}
-
-		/* write out the coin/ticket counters for this machine - LBO 042898 */
-		for (i = 0; i < COIN_COUNTERS; i ++)
-			writeint(f,coins[i]);
-		writeint(f,dispensed_tickets);
-
-		mixer_write_config(f);
-
-		mame_fclose(f);
+		config_write_ports(cfg, Machine->input_ports_default, Machine->input_ports);
+		config_write_coin_and_ticket_counters(cfg, coins, lastcoin, coinlockedout, dispensed_tickets);
+		config_write_mixer_config(cfg, &mixercfg);
+		config_close(cfg);
 	}
 
 /*start MAME:analog+*/
-	if ((f = mame_fopen(Machine->gamedrv->name,0,FILETYPE_CONFIG_ANALOGPLUS,1)) != 0)
-	{
-		int p, a;
-		/* write header */
-		mame_fwrite(f,MAMECFGSTRING_V8,8);
-
-		for (p=0; p<MAX_PLAYERS; p++)
-			for (a=0; a<2; a++)			// max of two analog axes, for now
-			{
-				writeint(f, osd_getplayer_mousesplit(p,a));		// player p's mouse for axis a
-				writeint(f, osd_getplayer_mouseaxis(p,a));		// player p's mouse axis for axis a
-			}
-
-		mame_fclose(f);
-	}
+//	if ((f = mame_fopen(Machine->gamedrv->name,0,FILETYPE_CONFIG_ANALOGPLUS,1)) != 0)
+//	{
+//		int p, a;
+//		/* write header */
+//		mame_fwrite(f,MAMECFGSTRING_V8,8);
+//
+//		for (p=0; p<MAX_PLAYERS; p++)
+//			for (a=0; a<2; a++)			// max of two analog axes, for now
+//			{
+//				writeint(f, osd_getplayer_mousesplit(p,a));		// player p's mouse for axis a
+//				writeint(f, osd_getplayer_mouseaxis(p,a));		// player p's mouse axis for axis a
+//			}
+//
+//		mame_fclose(f);
+//	}
 /*end MAME:analog+  */
 }
 

@@ -1203,8 +1203,10 @@ static int display_rom_load_results(struct rom_load_data *romdata)
 		/* display the result */
 		printf("%s", romdata->errorbuf);
 
+		if (!options.skip_baddumps)
+		{
 		/* if we're not getting out of here, wait for a keypress */
-		if (!options.gui_host && !bailing && !options.skip_baddumps)
+		if (!options.gui_host && !bailing)
 		{
 			int k;
 
@@ -1219,6 +1221,7 @@ static int display_rom_load_results(struct rom_load_data *romdata)
 			/* bail on a control + C */
 			if (keyboard_pressed(KEYCODE_LCONTROL) && keyboard_pressed(KEYCODE_C))
 				return 1;
+		}
 		}
 	}
 

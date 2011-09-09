@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 
   #ifndef MESS
    #define APPLICATION "No Name MAME"
-		sprintf(message_text, APPLICATION " v%s\n"
+		sprintf(message_text, APPLONGNAME " v%s\n"
 							  "\tModified by David Maher (aka TheGatesofBill)\n"
 							  "\n"
 							  "Usage:\tNONAME gamename [options]\n"
@@ -141,8 +141,7 @@ int main(int argc, char **argv)
 							  "Copyright (C) 1997-2003 by Nicola Salmoria and the MAME Team\n"
 							  "Would you like to open the documentation now?", build_version);
   #else
-   #define APPLICATION "M.E.S.S."
-		sprintf(message_text, APPLICATION " is a console application, you should launch it from a command prompt.\n"
+		sprintf(message_text, APPLONGNAME " is a console application, you should launch it from a command prompt.\n"
 							  "\n"
 							  "Please consult the documentation for more information.\n"
 							  "\n"
@@ -150,7 +149,7 @@ int main(int argc, char **argv)
   #endif
 
 		// pop up a messagebox with some information
-		button = MessageBox(NULL, message_text, APPLICATION " usage information...", MB_YESNO | MB_ICONASTERISK);
+		button = MessageBox(NULL, message_text, APPLONGNAME " usage information...", MB_YESNO | MB_ICONASTERISK);
 
 		if (button == IDYES)
 		{
@@ -170,7 +169,6 @@ int main(int argc, char **argv)
 		}
 		return 1;
 	}
-  #undef APPLICATION
  #endif
 #endif
 

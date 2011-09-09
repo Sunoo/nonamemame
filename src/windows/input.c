@@ -453,6 +453,50 @@ static int joy_trans_table[][2] =
 	{ JOYCODE(3, JOYTYPE_BUTTON, 4),	JOYCODE_4_BUTTON5 },
 	{ JOYCODE(3, JOYTYPE_BUTTON, 5),	JOYCODE_4_BUTTON6 },
 
+	{ JOYCODE(4, JOYTYPE_AXIS_NEG, 0),	JOYCODE_5_LEFT },
+	{ JOYCODE(4, JOYTYPE_AXIS_POS, 0),	JOYCODE_5_RIGHT },
+	{ JOYCODE(4, JOYTYPE_AXIS_NEG, 1),	JOYCODE_5_UP },
+	{ JOYCODE(4, JOYTYPE_AXIS_POS, 1),	JOYCODE_5_DOWN },
+	{ JOYCODE(4, JOYTYPE_BUTTON, 0),	JOYCODE_5_BUTTON1 },
+	{ JOYCODE(4, JOYTYPE_BUTTON, 1),	JOYCODE_5_BUTTON2 },
+	{ JOYCODE(4, JOYTYPE_BUTTON, 2),	JOYCODE_5_BUTTON3 },
+	{ JOYCODE(4, JOYTYPE_BUTTON, 3),	JOYCODE_5_BUTTON4 },
+	{ JOYCODE(4, JOYTYPE_BUTTON, 4),	JOYCODE_5_BUTTON5 },
+	{ JOYCODE(4, JOYTYPE_BUTTON, 5),	JOYCODE_5_BUTTON6 },
+
+	{ JOYCODE(5, JOYTYPE_AXIS_NEG, 0),	JOYCODE_6_LEFT },
+	{ JOYCODE(5, JOYTYPE_AXIS_POS, 0),	JOYCODE_6_RIGHT },
+	{ JOYCODE(5, JOYTYPE_AXIS_NEG, 1),	JOYCODE_6_UP },
+	{ JOYCODE(5, JOYTYPE_AXIS_POS, 1),	JOYCODE_6_DOWN },
+	{ JOYCODE(5, JOYTYPE_BUTTON, 0),	JOYCODE_6_BUTTON1 },
+	{ JOYCODE(5, JOYTYPE_BUTTON, 1),	JOYCODE_6_BUTTON2 },
+	{ JOYCODE(5, JOYTYPE_BUTTON, 2),	JOYCODE_6_BUTTON3 },
+	{ JOYCODE(5, JOYTYPE_BUTTON, 3),	JOYCODE_6_BUTTON4 },
+	{ JOYCODE(5, JOYTYPE_BUTTON, 4),	JOYCODE_6_BUTTON5 },
+	{ JOYCODE(5, JOYTYPE_BUTTON, 5),	JOYCODE_6_BUTTON6 },
+
+	{ JOYCODE(6, JOYTYPE_AXIS_NEG, 0),	JOYCODE_7_LEFT },
+	{ JOYCODE(6, JOYTYPE_AXIS_POS, 0),	JOYCODE_7_RIGHT },
+	{ JOYCODE(6, JOYTYPE_AXIS_NEG, 1),	JOYCODE_7_UP },
+	{ JOYCODE(6, JOYTYPE_AXIS_POS, 1),	JOYCODE_7_DOWN },
+	{ JOYCODE(6, JOYTYPE_BUTTON, 0),	JOYCODE_7_BUTTON1 },
+	{ JOYCODE(6, JOYTYPE_BUTTON, 1),	JOYCODE_7_BUTTON2 },
+	{ JOYCODE(6, JOYTYPE_BUTTON, 2),	JOYCODE_7_BUTTON3 },
+	{ JOYCODE(6, JOYTYPE_BUTTON, 3),	JOYCODE_7_BUTTON4 },
+	{ JOYCODE(6, JOYTYPE_BUTTON, 4),	JOYCODE_7_BUTTON5 },
+	{ JOYCODE(6, JOYTYPE_BUTTON, 5),	JOYCODE_7_BUTTON6 },
+
+	{ JOYCODE(7, JOYTYPE_AXIS_NEG, 0),	JOYCODE_8_LEFT },
+	{ JOYCODE(7, JOYTYPE_AXIS_POS, 0),	JOYCODE_8_RIGHT },
+	{ JOYCODE(7, JOYTYPE_AXIS_NEG, 1),	JOYCODE_8_UP },
+	{ JOYCODE(7, JOYTYPE_AXIS_POS, 1),	JOYCODE_8_DOWN },
+	{ JOYCODE(7, JOYTYPE_BUTTON, 0),	JOYCODE_8_BUTTON1 },
+	{ JOYCODE(7, JOYTYPE_BUTTON, 1),	JOYCODE_8_BUTTON2 },
+	{ JOYCODE(7, JOYTYPE_BUTTON, 2),	JOYCODE_8_BUTTON3 },
+	{ JOYCODE(7, JOYTYPE_BUTTON, 3),	JOYCODE_8_BUTTON4 },
+	{ JOYCODE(7, JOYTYPE_BUTTON, 4),	JOYCODE_8_BUTTON5 },
+	{ JOYCODE(7, JOYTYPE_BUTTON, 5),	JOYCODE_8_BUTTON6 },
+
 	{ JOYCODE(0, JOYTYPE_MOUSEBUTTON, 0), 	JOYCODE_MOUSE_1_BUTTON1 },
 	{ JOYCODE(0, JOYTYPE_MOUSEBUTTON, 1), 	JOYCODE_MOUSE_1_BUTTON2 },
 	{ JOYCODE(0, JOYTYPE_MOUSEBUTTON, 2), 	JOYCODE_MOUSE_1_BUTTON3 },
@@ -1472,6 +1516,13 @@ int osd_is_joy_pressed(int joycode)
 	switch (joytype)
 	{
 		case JOYTYPE_MOUSEBUTTON:
+			/* ActLabs lightgun - remap button 2 (shot off-screen) as button 1 */
+			if (use_lightgun && joynum==0) {
+				if (joyindex==0 && (mouse_state[0].rgbButtons[1]&0x80))
+					return 1;
+				if (joyindex==1 && (mouse_state[0].rgbButtons[1]&0x80))
+					return 0;
+			}
 			return mouse_state[joynum].rgbButtons[joyindex] >> 7;
 
 		case JOYTYPE_BUTTON:
@@ -1607,6 +1658,13 @@ void osd_lightgun_read(int player,int *deltax,int *deltay)
 	// Warning message to users - design wise this probably isn't the best function to put this in...
 	if (win_window_mode)
 		usrintf_showmessage("Lightgun not supported in windowed mode");
+
+	// Hack - if button 2 is pressed on lightgun, then return 0,0 (off-screen) to simulate reload
+	if (mouse_state[0].rgbButtons[1]&0x80) {
+		*deltax = -128;
+		*deltay = -128;
+		return;
+	}
 
 	// I would much prefer to use DirectInput to read the gun values but there seem to be
 	// some problems...  DirectInput (8.0 tested) on Win98 returns garbage for both buffered
@@ -2386,6 +2444,17 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 					seq_set_2 (&idef->seq, KEYCODE_LALT, KEYCODE_ENTER);
 				break;
 
+#ifdef MESS
+				case IPT_OSD_2:
+					if (options.disable_normal_ui)
+					{
+						idef->type = next_reserved;
+						idef->name = "Toggle menubar";
+						seq_set_1 (&idef->seq, KEYCODE_SCRLOCK);
+					}
+				break;
+#endif /* MESS */
+
 				default:
 				break;
 			}
@@ -2398,6 +2467,14 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 		{
 			seq_copy(&idef->seq, &no_alt_tab_seq);
 		}
+
+#ifdef MESS
+		if (idef->type == IPT_UI_THROTTLE)
+		{
+			static InputSeq empty_seq = SEQ_DEF_0;
+			seq_copy(&idef->seq, &empty_seq);
+		}
+#endif /* MESS */
 
 		// find the next one
 		idef++;

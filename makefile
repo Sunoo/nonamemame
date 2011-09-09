@@ -22,7 +22,7 @@ else
 ifeq ($(OS),dos)
 MAMEOS = msdos
 else
-MAMEOS =
+MAMEOS = windows
 endif
 endif
 endif

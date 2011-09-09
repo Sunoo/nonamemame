@@ -23,7 +23,25 @@ RBG1
 
 -- other crap
 EXBG (external)
+
+------------------------------------------------------------------------------------------
+
+Notes of Interest:
+
+-the test mode / bios is drawn with layer NBG3
+
+-Hanagumi Puts a 'RED' dragon logo in tileram (base 0x64000, 4bpp, 8x8 tiles) but
+its not displayed in gurus video.Update:It's actually not drawn because his
+priority value is 0.
+
+-Scrolling is screen display wise,meaning that a scrolling value is masked with the
+screen resolution size values.
+
+-VDP1 "general purpose" priority isn't taken into account yet,for now we fix the priority
+value to six...
+
 */
+
 #include "driver.h"
 
 data32_t* stv_vdp2_regs;
@@ -35,7 +53,7 @@ data8_t*  stv_vdp2_vram_dirty_8x8x8;
 data32_t* stv_vdp2_cram;
 extern void video_update_vdp1(struct mame_bitmap *bitmap, const struct rectangle *cliprect);
 extern int stv_vdp1_start ( void );
-
+static void stv_vdp2_dynamic_res_change(void);
 
 /*
 
@@ -44,7 +62,7 @@ extern int stv_vdp1_start ( void );
 |                  |-----------------------------|-----------------------------|------------------------------
 |                  | NBG0         | NBG1         | NBG2         | NBG3         | RBG0         | RBG1         |
 -------------------------------------------------|-----------------------------|------------------------------
-| Character Colour | 16 colours   | 16 colours   | 16 colours   | 16 colours   | 16 colours   | 16 colours   |   
+| Character Colour | 16 colours   | 16 colours   | 16 colours   | 16 colours   | 16 colours   | 16 colours   |
 | Count            | 256 " "      | 256 " "      | 256 " "      | 256 " "      | 256 " "      | 256 " "      |
 |                  | 2048 " "     | 2048 " "     |              |              | 2048 " "     | 2048 " "     |
 |                  | 32768 " "    | 32768 " "    |              |              | 32768 " "    | 32768 " "    |
@@ -85,6 +103,11 @@ extern int stv_vdp1_start ( void );
        |----07----|----06----|----05----|----04----|----03----|----02----|----01----|----00----|
        | LSMD1    | LSMD0    | VRESO1   | VRESO0   |    --    | HRESO2   | HRESO1   | HRESO0   |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
+
+	#define STV_VDP2_TVMD ((stv_vdp2_regs[0x000/4] >> 16)&0x0000ffff)
+
+	#define STV_VDP2_VRES ((STV_VDP2_TVMD & 0x0030) >> 4)
+	#define STV_VDP2_HRES ((STV_VDP2_TVMD & 0x0007) >> 0)
 
 /* 180002 - r/w - EXTEN - External Signal Enable Register
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
@@ -770,12 +793,15 @@ extern int stv_vdp1_start ( void );
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
 
-/* 180070 - Screen Scroll (NBG0, Horizontal Integer Part)
+/* 180070 - SCXIN0 - Screen Scroll (NBG0, Horizontal Integer Part)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        |----07----|----06----|----05----|----04----|----03----|----02----|----01----|----00----|
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
+
+	#define STV_VDP2_SCXIN0 ((stv_vdp2_regs[0x070/4] >> 16)&0x0000ffff)
+
 
 /* 180072 - Screen Scroll (NBG0, Horizontal Fractional Part)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
@@ -784,12 +810,15 @@ extern int stv_vdp1_start ( void );
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
 
-/* 180074 - Screen Scroll (NBG0, Vertical Integer Part)
+/* 180074 - SCYIN0 - Screen Scroll (NBG0, Vertical Integer Part)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        |----07----|----06----|----05----|----04----|----03----|----02----|----01----|----00----|
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
+
+	#define STV_VDP2_SCYIN0 ((stv_vdp2_regs[0x074/4] >> 16)&0x0000ffff)
+
 
 /* 180076 - Screen Scroll (NBG0, Vertical Fractional Part)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
@@ -826,12 +855,14 @@ extern int stv_vdp1_start ( void );
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
 
-/* 180080 - Screen Scroll (NBG1, Horizontal Integer Part)
+/* 180080 - SCXIN1 - Screen Scroll (NBG1, Horizontal Integer Part)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        |----07----|----06----|----05----|----04----|----03----|----02----|----01----|----00----|
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
+
+	#define STV_VDP2_SCXIN1 ((stv_vdp2_regs[0x080/4] >> 16)&0x0000ffff)
 
 /* 180082 - Screen Scroll (NBG1, Horizontal Fractional Part)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
@@ -840,12 +871,14 @@ extern int stv_vdp1_start ( void );
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
 
-/* 180084 - Screen Scroll (NBG1, Vertical Integer Part)
+/* 180084 - SCYIN1 - Screen Scroll (NBG1, Vertical Integer Part)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        |----07----|----06----|----05----|----04----|----03----|----02----|----01----|----00----|
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
+
+	#define STV_VDP2_SCYIN1 ((stv_vdp2_regs[0x084/4] >> 16)&0x0000ffff)
 
 /* 180086 - Screen Scroll (NBG1, Vertical Fractional Part)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
@@ -882,33 +915,41 @@ extern int stv_vdp1_start ( void );
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
 
-/* 180090 - Screen Scroll (NBG2, Horizontal)
+/* 180090 - SCXN2 - Screen Scroll (NBG2, Horizontal)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        |----07----|----06----|----05----|----04----|----03----|----02----|----01----|----00----|
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
 
-/* 180092 - Screen Scroll (NBG2, Vertical)
+	#define STV_VDP2_SCXN2 ((stv_vdp2_regs[0x090/4] >> 16)&0x0000ffff)
+
+/* 180092 - SCYN2 - Screen Scroll (NBG2, Vertical)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        |----07----|----06----|----05----|----04----|----03----|----02----|----01----|----00----|
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
 
-/* 180094 - Screen Scroll (NBG3, Horizontal)
+	#define STV_VDP2_SCYN2 ((stv_vdp2_regs[0x090/4] >> 0)&0x0000ffff)
+
+/* 180094 - SCXN3 - Screen Scroll (NBG3, Horizontal)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        |----07----|----06----|----05----|----04----|----03----|----02----|----01----|----00----|
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
 
-/* 180096 - Screen Scroll (NBG3, Vertical)
+	#define STV_VDP2_SCXN3 ((stv_vdp2_regs[0x094/4] >> 16)&0x0000ffff)
+
+/* 180096 - SCYN3 - Screen Scroll (NBG3, Vertical)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        |----07----|----06----|----05----|----04----|----03----|----02----|----01----|----00----|
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
+
+	#define STV_VDP2_SCYN3 ((stv_vdp2_regs[0x094/4] >> 0)&0x0000ffff)
 
 /* 180098 - Reduction Enable
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
@@ -1256,19 +1297,29 @@ extern int stv_vdp1_start ( void );
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
 
-/* 1800f8 - Priority Number (NBG 0,1)
+/* 1800f8 - PRINA - Priority Number (NBG 0,1)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        |----07----|----06----|----05----|----04----|----03----|----02----|----01----|----00----|
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
 
-/* 1800fa - Priority Number (NBG 2,3)
+	#define STV_VDP2_PRINA ((stv_vdp2_regs[0x0f8/4] >> 16)&0x0000ffff)
+
+	#define STV_VDP2_N1PRIN ((STV_VDP2_PRINA & 0x0700) >> 8)
+	#define STV_VDP2_N0PRIN ((STV_VDP2_PRINA & 0x0007) >> 0)
+
+/* 1800fa - PRINB - Priority Number (NBG 2,3)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        |----07----|----06----|----05----|----04----|----03----|----02----|----01----|----00----|
        |    --    |    --    |    --    |    --    |    --    |    --    |    --    |    --    |
        \----------|----------|----------|----------|----------|----------|----------|---------*/
+
+	#define STV_VDP2_PRINB ((stv_vdp2_regs[0x0f8/4] >> 0)&0x0000ffff)
+
+	#define STV_VDP2_N3PRIN ((STV_VDP2_PRINB & 0x0700) >> 8)
+	#define STV_VDP2_N2PRIN ((STV_VDP2_PRINB & 0x0007) >> 0)
 
 /* 1800fc - Priority Number (RBG0)
  bit-> /----15----|----14----|----13----|----12----|----11----|----10----|----09----|----08----\
@@ -1415,12 +1466,20 @@ static struct stv_vdp2_tilemap_capabilities
 	UINT8  supplementary_palette_bits;
 	UINT8  supplementary_character_bits;
 
+	INT16 scrollx;
+	INT16 scrolly;
+
 	UINT8  plane_size;
 	UINT8  colour_ram_address_offset;
 
 	UINT8  real_map_offset[16];
 } stv2_current_tilemap;
 
+
+static void stv_vdp2_draw_basic_bitmap(struct mame_bitmap *bitmap, const struct rectangle *cliprect)
+{
+	/* not done */
+}
 
    /*---------------------------------------------------------------------------
    | Plane Size | Pattern Name Data Size | Character Size | Map Bits / Address |
@@ -1479,16 +1538,17 @@ static void stv_vdp2_draw_basic_tilemap(struct mame_bitmap *bitmap, const struct
 
 //	usrintf_showmessage("E %02x t%01x dp%01x ts%01x mp%08x ds%02x ps%02x", STV_VDP2_xxON, STV_VDP2_N3TPON, STV_VDP2_N3CHCN, STV_VDP2_N3CHSZ, base,STV_VDP2_N3PNB,STV_VDP2_N3PLSZ   );
 
-
-
 //		base = 0x60000;
 
-			base = base / 4;
+	base = base / 4;
+
+	stv2_current_tilemap.trans_enabled = stv2_current_tilemap.trans_enabled ? TRANSPARENCY_NONE : TRANSPARENCY_PEN;
+
+	stv2_current_tilemap.scrollx &= 0x1ff;
+	stv2_current_tilemap.scrolly &= 0x1ff;
 
 	for (y = 0; y<32*(2-stv2_current_tilemap.tile_size+1); y++) {
 		for (x = 0; x<32*(2-(stv2_current_tilemap.tile_size)); x++) {
-
-
 
 		int tilecode, data, flipyx, pal, specialc;
 		offs = y*(32*(2-stv2_current_tilemap.tile_size))+x;
@@ -1573,39 +1633,44 @@ static void stv_vdp2_draw_basic_tilemap(struct mame_bitmap *bitmap, const struct
 
 			if (stv2_current_tilemap.tile_size==1)
 			{
-				if (flipyx == 0)
+				/* normal */
+				drawgfx(bitmap,Machine->gfx[gfx],tilecode+0+(flipyx&1)+(flipyx&2),pal,flipyx&1,flipyx&2,(x*16)-stv2_current_tilemap.scrollx,(y*16)-stv2_current_tilemap.scrolly,cliprect,stv2_current_tilemap.trans_enabled,0);
+				drawgfx(bitmap,Machine->gfx[gfx],tilecode+1-(flipyx&1)+(flipyx&2),pal,flipyx&1,flipyx&2,(x*16+8)-stv2_current_tilemap.scrollx,(y*16)-stv2_current_tilemap.scrolly,cliprect,stv2_current_tilemap.trans_enabled,0);
+				drawgfx(bitmap,Machine->gfx[gfx],tilecode+2+(flipyx&1)-(flipyx&2),pal,flipyx&1,flipyx&2,(x*16)-stv2_current_tilemap.scrollx,(y*16+8)-stv2_current_tilemap.scrolly,cliprect,stv2_current_tilemap.trans_enabled,0);
+				drawgfx(bitmap,Machine->gfx[gfx],tilecode+3-(flipyx&1)-(flipyx&2),pal,flipyx&1,flipyx&2,(x*16+8)-stv2_current_tilemap.scrollx,(y*16+8)-stv2_current_tilemap.scrolly,cliprect,stv2_current_tilemap.trans_enabled,0);
+
+				if (stv2_current_tilemap.scrollx) /* wraparound x */
 				{
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode,pal,0,0,  x*16,y*16,cliprect,TRANSPARENCY_PEN,0);
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+1,pal,0,0,x*16+8,y*16,cliprect,TRANSPARENCY_PEN,0);
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+2,pal,0,0,x*16,y*16+8,cliprect,TRANSPARENCY_PEN,0);
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+3,pal,0,0,x*16+8,y*16+8,cliprect,TRANSPARENCY_PEN,0);
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode+0+(flipyx&1)+(flipyx&2),pal,flipyx&1,flipyx&2,(x*16)-stv2_current_tilemap.scrollx+0x200,(y*16)-stv2_current_tilemap.scrolly,cliprect,stv2_current_tilemap.trans_enabled,0);
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode+1-(flipyx&1)+(flipyx&2),pal,flipyx&1,flipyx&2,(x*16+8)-stv2_current_tilemap.scrollx+0x200,(y*16)-stv2_current_tilemap.scrolly,cliprect,stv2_current_tilemap.trans_enabled,0);
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode+2+(flipyx&1)-(flipyx&2),pal,flipyx&1,flipyx&2,(x*16)-stv2_current_tilemap.scrollx+0x200,(y*16+8)-stv2_current_tilemap.scrolly,cliprect,stv2_current_tilemap.trans_enabled,0);
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode+3-(flipyx&1)-(flipyx&2),pal,flipyx&1,flipyx&2,(x*16+8)-stv2_current_tilemap.scrollx+0x200,(y*16+8)-stv2_current_tilemap.scrolly,cliprect,stv2_current_tilemap.trans_enabled,0);
 				}
-				else if (flipyx == 1)
+				if (stv2_current_tilemap.scrolly) /* wraparound y */
 				{
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+1,pal,1,0,  x*16,y*16,cliprect,TRANSPARENCY_PEN,0);
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode,pal,1,0,x*16+8,y*16,cliprect,TRANSPARENCY_PEN,0);
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+3,pal,1,0,x*16,y*16+8,cliprect,TRANSPARENCY_PEN,0);
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+2,pal,1,0,x*16+8,y*16+8,cliprect,TRANSPARENCY_PEN,0);
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode+0+(flipyx&1)+(flipyx&2),pal,flipyx&1,flipyx&2,(x*16)-stv2_current_tilemap.scrollx,(y*16)-stv2_current_tilemap.scrolly+0x200,cliprect,stv2_current_tilemap.trans_enabled,0);
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode+1-(flipyx&1)+(flipyx&2),pal,flipyx&1,flipyx&2,(x*16+8)-stv2_current_tilemap.scrollx,(y*16)-stv2_current_tilemap.scrolly+0x200,cliprect,stv2_current_tilemap.trans_enabled,0);
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode+2+(flipyx&1)-(flipyx&2),pal,flipyx&1,flipyx&2,(x*16)-stv2_current_tilemap.scrollx,(y*16+8)-stv2_current_tilemap.scrolly+0x200,cliprect,stv2_current_tilemap.trans_enabled,0);
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode+3-(flipyx&1)-(flipyx&2),pal,flipyx&1,flipyx&2,(x*16+8)-stv2_current_tilemap.scrollx,(y*16+8)-stv2_current_tilemap.scrolly+0x200,cliprect,stv2_current_tilemap.trans_enabled,0);
 				}
-				else if (flipyx == 2)
+				if (stv2_current_tilemap.scrollx && stv2_current_tilemap.scrolly) /* wraparound x & y */
 				{
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+2,pal,0,1,  x*16,y*16,cliprect,TRANSPARENCY_PEN,0);
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+3,pal,0,1,x*16+8,y*16,cliprect,TRANSPARENCY_PEN,0);
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+0,pal,0,1,x*16,y*16+8,cliprect,TRANSPARENCY_PEN,0);
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+1,pal,0,1,x*16+8,y*16+8,cliprect,TRANSPARENCY_PEN,0);
-				}
-				else
-				{
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+3,pal,1,1,  x*16,y*16,cliprect,TRANSPARENCY_PEN,0);
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+2,pal,1,1,x*16+8,y*16,cliprect,TRANSPARENCY_PEN,0);
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+1,pal,1,1,x*16,y*16+8,cliprect,TRANSPARENCY_PEN,0);
-					drawgfx(bitmap,Machine->gfx[gfx],tilecode+0,pal,1,1,x*16+8,y*16+8,cliprect,TRANSPARENCY_PEN,0);
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode+0+(flipyx&1)+(flipyx&2),pal,flipyx&1,flipyx&2,(x*16)-stv2_current_tilemap.scrollx+0x200,(y*16)-stv2_current_tilemap.scrolly+0x200,cliprect,stv2_current_tilemap.trans_enabled,0);
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode+1-(flipyx&1)+(flipyx&2),pal,flipyx&1,flipyx&2,(x*16+8)-stv2_current_tilemap.scrollx+0x200,(y*16)-stv2_current_tilemap.scrolly+0x200,cliprect,stv2_current_tilemap.trans_enabled,0);
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode+2+(flipyx&1)-(flipyx&2),pal,flipyx&1,flipyx&2,(x*16)-stv2_current_tilemap.scrollx+0x200,(y*16+8)-stv2_current_tilemap.scrolly+0x200,cliprect,stv2_current_tilemap.trans_enabled,0);
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode+3-(flipyx&1)-(flipyx&2),pal,flipyx&1,flipyx&2,(x*16+8)-stv2_current_tilemap.scrollx+0x200,(y*16+8)-stv2_current_tilemap.scrolly+0x200,cliprect,stv2_current_tilemap.trans_enabled,0);
 				}
 
 			}
 			else
 			{
-				drawgfx(bitmap,Machine->gfx[gfx],tilecode,pal,flipyx&1,flipyx&2,  x*8,y*8,cliprect,TRANSPARENCY_PEN,0);
+				drawgfx(bitmap,Machine->gfx[gfx],tilecode,pal,flipyx&1,flipyx&2, (x*8)-stv2_current_tilemap.scrollx,(y*8)-stv2_current_tilemap.scrolly,cliprect,stv2_current_tilemap.trans_enabled,0);
+				if (stv2_current_tilemap.scrollx) /* wraparound x */
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode,pal,flipyx&1,flipyx&2, (x*8)-stv2_current_tilemap.scrollx+0x200,(y*8)-stv2_current_tilemap.scrolly,cliprect,stv2_current_tilemap.trans_enabled,0);
+				if (stv2_current_tilemap.scrolly) /* wraparound y */
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode,pal,flipyx&1,flipyx&2, (x*8)-stv2_current_tilemap.scrollx,(y*8)-stv2_current_tilemap.scrolly+0x200,cliprect,stv2_current_tilemap.trans_enabled,0);
+				if (stv2_current_tilemap.scrollx && stv2_current_tilemap.scrolly) /* wraparound x & y */
+					drawgfx(bitmap,Machine->gfx[gfx],tilecode,pal,flipyx&1,flipyx&2, (x*8)-stv2_current_tilemap.scrollx+0x200,(y*8)-stv2_current_tilemap.scrolly+0x200,cliprect,stv2_current_tilemap.trans_enabled,0);
 			}
 
 		}
@@ -1618,7 +1683,14 @@ static void stv_vdp2_check_tilemap(struct mame_bitmap *bitmap, const struct rect
 	/* the idea is here we check the tilemap capabilities / whats enabled and call an appropriate tilemap drawing routine, or
 	  at the very list throw up a few errors if the tilemaps want to do something we don't support yet */
 
-	stv_vdp2_draw_basic_tilemap(bitmap, cliprect);
+	if (stv2_current_tilemap.bitmap_enable) // this layer is a bitmap
+	{
+		stv_vdp2_draw_basic_bitmap(bitmap, cliprect);
+	}
+	else
+	{
+		stv_vdp2_draw_basic_tilemap(bitmap, cliprect);
+	}
 }
 
 
@@ -1658,6 +1730,9 @@ static void stv_vdp2_draw_NBG0(struct mame_bitmap *bitmap, const struct rectangl
 	stv2_current_tilemap.special_colour_control_register = STV_VDP2_PNCN0;
 	stv2_current_tilemap.supplementary_palette_bits = STV_VDP2_N0SPLT;
 	stv2_current_tilemap.supplementary_character_bits = STV_VDP2_N0SPCN;
+
+	stv2_current_tilemap.scrollx = STV_VDP2_SCXIN0;
+	stv2_current_tilemap.scrolly = STV_VDP2_SCYIN0;
 
 	stv2_current_tilemap.plane_size = STV_VDP2_N0PLSZ;
 	stv2_current_tilemap.colour_ram_address_offset = STV_VDP2_N0CAOS;
@@ -1702,6 +1777,9 @@ static void stv_vdp2_draw_NBG1(struct mame_bitmap *bitmap, const struct rectangl
 	stv2_current_tilemap.supplementary_palette_bits = STV_VDP2_N1SPLT;
 	stv2_current_tilemap.supplementary_character_bits = STV_VDP2_N1SPCN;
 
+	stv2_current_tilemap.scrollx = STV_VDP2_SCXIN1;
+	stv2_current_tilemap.scrolly = STV_VDP2_SCYIN1;
+
 	stv2_current_tilemap.plane_size = STV_VDP2_N1PLSZ;
 	stv2_current_tilemap.colour_ram_address_offset = STV_VDP2_N1CAOS;
 
@@ -1735,8 +1813,8 @@ static void stv_vdp2_draw_NBG2(struct mame_bitmap *bitmap, const struct rectangl
 	stv2_current_tilemap.trans_enabled = STV_VDP2_N2TPON;
 	stv2_current_tilemap.colour_depth = STV_VDP2_N2CHCN;
 	stv2_current_tilemap.tile_size = STV_VDP2_N2CHSZ;
-//	stv2_current_tilemap.bitmap_enable = STV_VDP2_N3BMEN;
-//	stv2_current_tilemap.bitmap_size = STV_VDP2_N3BMSZ;
+	stv2_current_tilemap.bitmap_enable = 0; // this layer can't be a bitmap
+	stv2_current_tilemap.bitmap_size = 0; // this layer can't be a bitmap
 	stv2_current_tilemap.map_offset[0] = STV_VDP2_N2MPA | (STV_VDP2_N2MP_ << 6);
 	stv2_current_tilemap.map_offset[1] = STV_VDP2_N2MPB | (STV_VDP2_N2MP_ << 6);
 	stv2_current_tilemap.map_offset[2] = STV_VDP2_N2MPC | (STV_VDP2_N2MP_ << 6);
@@ -1748,6 +1826,9 @@ static void stv_vdp2_draw_NBG2(struct mame_bitmap *bitmap, const struct rectangl
 	stv2_current_tilemap.special_colour_control_register = STV_VDP2_PNCN2;
 	stv2_current_tilemap.supplementary_palette_bits = STV_VDP2_N2SPLT;
 	stv2_current_tilemap.supplementary_character_bits = STV_VDP2_N2SPCN;
+
+	stv2_current_tilemap.scrollx = STV_VDP2_SCXN2;
+	stv2_current_tilemap.scrolly = STV_VDP2_SCYN2;
 
 	stv2_current_tilemap.plane_size = 0;
 	stv2_current_tilemap.colour_ram_address_offset = STV_VDP2_N2CAOS;
@@ -1783,8 +1864,8 @@ static void stv_vdp2_draw_NBG3(struct mame_bitmap *bitmap, const struct rectangl
 	stv2_current_tilemap.trans_enabled = STV_VDP2_N3TPON;
 	stv2_current_tilemap.colour_depth = STV_VDP2_N3CHCN;
 	stv2_current_tilemap.tile_size = STV_VDP2_N3CHSZ;
-//	stv2_current_tilemap.bitmap_enable = STV_VDP2_N3BMEN;
-//	stv2_current_tilemap.bitmap_size = STV_VDP2_N3BMSZ;
+	stv2_current_tilemap.bitmap_enable = 0; // this layer can't be a bitmap
+	stv2_current_tilemap.bitmap_size = 0; // this layer can't be a bitmap
 	stv2_current_tilemap.map_offset[0] = STV_VDP2_N3MPA | (STV_VDP2_N3MP_ << 6);
 	stv2_current_tilemap.map_offset[1] = STV_VDP2_N3MPB | (STV_VDP2_N3MP_ << 6);
 	stv2_current_tilemap.map_offset[2] = STV_VDP2_N3MPC | (STV_VDP2_N3MP_ << 6);
@@ -1796,6 +1877,9 @@ static void stv_vdp2_draw_NBG3(struct mame_bitmap *bitmap, const struct rectangl
 	stv2_current_tilemap.special_colour_control_register = STV_VDP2_PNCN3;
 	stv2_current_tilemap.supplementary_palette_bits = STV_VDP2_N3SPLT;
 	stv2_current_tilemap.supplementary_character_bits = STV_VDP2_N3SPCN;
+
+	stv2_current_tilemap.scrollx = STV_VDP2_SCXN3;
+	stv2_current_tilemap.scrolly = STV_VDP2_SCYN3;
 
 	stv2_current_tilemap.plane_size = 0;
 	stv2_current_tilemap.colour_ram_address_offset = STV_VDP2_N3CAOS;
@@ -1881,6 +1965,7 @@ extern int stv_vblank;
 READ32_HANDLER ( stv_vdp2_regs_r )
 {
 //	if (offset!=1) logerror ("VDP2: Read from Registers, Offset %04x\n",offset);
+
 	switch(offset)
 	{
 		case 1:
@@ -1924,27 +2009,56 @@ VIDEO_START( stv_vdp2 )
 	stv_vdp2_start();
 	stv_vdp1_start();
 
-return 0;
+	return 0;
+}
+
+static void stv_vdp2_dynamic_res_change()
+{
+	static UINT16 horz,vert;
+
+	switch( STV_VDP2_VRES & 3 )
+	{
+		case 0: vert = 224; break;
+		case 1: vert = 240; break;
+		case 2: vert = 256; break;
+		case 3:
+		logerror("WARNING: V Res setting (3) not allowed!\n");
+		vert = 256;
+		break;
+	}
+	switch( STV_VDP2_HRES & 7 )
+	{
+		case 0: horz = 320; break;
+		case 1: horz = 352; break;
+		case 2: horz = 640; break;
+		case 3: horz = 704; break;
+/*Exclusive modes,they sets the Vertical Resolution without considering the VRES register.*/
+		case 4: horz = 320; vert = 480; break;
+		case 5: horz = 352; vert = 480; break;
+		case 6: horz = 640; vert = 480; break;
+		case 7: horz = 704; vert = 480; break;
+	}
+
+	set_visible_area(0*8, horz-1,0*8, vert-1);
 }
 
 VIDEO_UPDATE( stv_vdp2 )
 {
+	static UINT8 pri;
 
 	fillbitmap(bitmap, get_black_pen(), NULL);
 
-//	if (!(keyboard_pressed (KEYCODE_L)))
-	stv_vdp2_draw_NBG3(bitmap,cliprect);
+	/*If a plane has a priority value of zero it isn't shown at all.*/
+	for(pri=1;pri<8;pri++)
+	{
+		if(pri==STV_VDP2_N3PRIN) stv_vdp2_draw_NBG3(bitmap,cliprect);
+		if(pri==STV_VDP2_N2PRIN) stv_vdp2_draw_NBG2(bitmap,cliprect);
+		if(pri==STV_VDP2_N1PRIN) stv_vdp2_draw_NBG1(bitmap,cliprect);
+		if(pri==STV_VDP2_N0PRIN) stv_vdp2_draw_NBG0(bitmap,cliprect);
+		if(pri==6)               video_update_vdp1(bitmap,cliprect);
+	}
 
-//	if (!(keyboard_pressed (KEYCODE_K)))
-	stv_vdp2_draw_NBG0(bitmap,cliprect);
-
-//	if (!(keyboard_pressed (KEYCODE_N)))
-	stv_vdp2_draw_NBG1(bitmap,cliprect);
-
-	video_update_vdp1(bitmap,cliprect);
-
-//	if (!(keyboard_pressed (KEYCODE_M)))
-	stv_vdp2_draw_NBG2(bitmap,cliprect);
+	stv_vdp2_dynamic_res_change();
 
 /*
 	if ( keyboard_pressed_memory(KEYCODE_W) )
@@ -1963,15 +2077,6 @@ VIDEO_UPDATE( stv_vdp2 )
 
 
 }
-
-/* Notes of Interest
-
-the test mode / bios is drawn with layer NBG3
-
-Hanagumi Puts a 'RED' dragon logo in tileram (base 0x64000, 4bpp, 8x8 tiles) but its not displayed in gurus video.
-
-
-*/
 
 /* below is some old code we might use .. */
 
@@ -2348,36 +2453,6 @@ static WRITE32_HANDLER ( stv_vdp2_regs_w32 )
 ** Functions to emulate some aspects of the VDP-2.
 **
 */
-
-static void res_change()
-{
-	static UINT16 horz,vert;
-
-	switch( VRES & 3 )
-	{
-		case 0: vert = 224; break;
-		case 1: vert = 240; break;
-		case 2: vert = 256; break;
-		case 3:
-		usrintf_showmessage("WARNING: V Res setting not allowed");
-		vert = 256;
-		break;
-	}
-	switch( HRES & 7 )
-	{
-		case 0: horz = 320; break;
-		case 1: horz = 352; break;
-		case 2: horz = 640; break;
-		case 3: horz = 704; break;
-		/*Exclusive modes,they sets the Vertical Resolution without considering the VRES register.*/
-		case 4: horz = 320; vert = 480; break;
-		case 5: horz = 352; vert = 480; break;
-		case 6: horz = 640; vert = 480; break;
-		case 7: horz = 704; vert = 480; break;
-	}
-
-	set_visible_area(0*8, horz-1,0*8, vert-1);
-}
 
 /*This is WRONG,the actual brightness control is much more complex than this...*/
 static void stv_bright()

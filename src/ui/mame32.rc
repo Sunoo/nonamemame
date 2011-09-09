@@ -236,8 +236,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,73,0,07
- PRODUCTVERSION 0,73,0,07
+ FILEVERSION 0,74,0,8
+ PRODUCTVERSION 0,74,0,8
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -256,13 +256,15 @@ BEGIN
             VALUE "Comments", "No Name M.A.M.E. for Win32\0"
             VALUE "CompanyName", "No Name Development\0"
             VALUE "FileDescription", "No Name M.A.M.E. for Win32\0"
-            VALUE "FileVersion", "0.73.07\0"
+            VALUE "FileVersion", "0.74.08\0"
             VALUE "InternalName", "No Name MAME32\0"
-            VALUE "LegalCopyright", "Copyright 1997-2003 Nicola Salmoria and the MAME team\0"
+            VALUE "LegalCopyright", "MAME is Copyright 1997-2003 Nicola Salmoria and the MAME team\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "noname32.exe\0"
+            VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "No Name MAME32\0"
-            VALUE "ProductVersion", "0.73.07\0"
+            VALUE "ProductVersion", "0.74.08\0"
+            VALUE "SpecialBuild", "\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -320,20 +322,20 @@ CAPTION "About MAME32"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "&OK",IDOK,200,109,50,14,WS_GROUP
-    CTEXT           "Multiple Arcade Machine Emulator",IDC_STATIC,147,7,142,
-                    11,NOT WS_GROUP
+    CTEXT           "No Name MAME (Modified by David Maher)",IDC_STATIC,147,
+                    7,142,11,NOT WS_GROUP
     CTEXT           "Version 0",IDC_VERSION,147,18,142,11,NOT WS_GROUP
-    CTEXT           "Copyright (C) 1997-2003 The MAME Team",IDC_STATIC,147,
-                    29,142,10,NOT WS_GROUP
+    CTEXT           "MAME is (C) 1997-2003 The MAME Team",IDC_STATIC,147,29,
+                    142,10,NOT WS_GROUP
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,147,44,142,1
     CTEXT           "MAME32 version by",IDC_STATIC,147,51,142,10,NOT 
                     WS_GROUP
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,147,44,142,1
-    CTEXT           "Additional MAME32 code by",IDC_STATIC,147,74,142,9
+    CTEXT           "See ReadMe for Additional Credits",IDC_STATIC,147,74,
+                    142,9
     CTEXT           "Christopher Kirmse and Michael Soderstrom",IDC_STATIC,
                     147,62,142,9,NOT WS_GROUP
-    CTEXT           "Mike Haaland, Andrew Kirmse, Jeff Miller",IDC_STATIC,
-                    147,85,142,9
-    CTEXT           "and John Hardy IV",IDC_STATIC,147,96,142,9
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,147,85,142,1
+    CTEXT           "Graphics by: Curt Grymala",IDC_STATIC,147,92,142,9
     CONTROL         "",IDC_ABOUT,"Static",SS_BITMAP | SS_SUNKEN,7,7,16,14
 END
 
@@ -580,7 +582,7 @@ END
 IDD_PROP_SOUND DIALOGEX 0, 0, 220, 205
 STYLE WS_CHILD | WS_CAPTION
 CAPTION "Sound"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     ICON            IDI_SOUND,IDC_STATIC,20,11,20,20
     LTEXT           "Title\nDirectory\nExtra",IDC_PROP_TITLE,52,9,161,25,
@@ -740,8 +742,8 @@ BEGIN
                     WS_TABSTOP,15,135,80,10,0,HIDC_CHEAT
     CONTROL         "Use less CPU time when possible",IDC_SLEEP,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,15,145,120,10,0,HIDC_SLEEP
-    CONTROL         "Use RDTSC timing system (for desktops)",IDC_OLD_TIMING,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,15,155,95,10,0,
+    CONTROL         "Use RDTSC timing system (for desktops)",IDC_OLD_TIMING,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,155,95,10,0,
                     HIDC_OLD_TIMING
     CONTROL         "Error log (for developers)",IDC_LOG,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,15,165,95,10,0,HIDC_LOG
@@ -892,7 +894,7 @@ IDD_INTERFACE_OPTIONS DIALOGEX 0, 0, 202, 221
 STYLE DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP
 CAPTION "Interface Options"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "Game Selection",IDC_STATIC,5,5,190,130
     CONTROL         "&Search for new games on start",IDC_START_GAME_CHECK,
@@ -1177,6 +1179,8 @@ END
 
 IDB_ABOUT               BITMAP  DISCARDABLE     "res\\about.bmp"
 IDB_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar.bmp"
+IDB_BKGROUND16          BITMAP  DISCARDABLE     "res\\bkgnd16.bmp"
+IDB_BKGROUND            BITMAP  DISCARDABLE     "res\\bkground.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

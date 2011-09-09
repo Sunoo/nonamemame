@@ -56,6 +56,7 @@ static int readconfig;
 static int createconfig;
 extern int verbose;
 extern int showinput;
+extern int furrycode;
 
 struct rc_struct *rc;
 

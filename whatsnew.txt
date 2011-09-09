@@ -1,3 +1,11 @@
+0.74u1.08:
+ - Updated to MAME 0.74u1 source code
+ - Now using the folders from the MAME32 0.74
+ - Further graphical customization of MAME32 version (Thanks Curt Grymala)
+ - Added Controls folder to MAME32 (from hooded_paladin, old and outdated though)
+ - Fixed SirPoonga's -skip_baddumps
+ - Screwed up Analog+ parts inptport.c during MAME source upgrade, commented out lines so it would compile
+
 0.73.07:
  - Updated to MAME 0.73 source code
  - Added Analog+ changes to MAME32 version
@@ -18,7 +26,7 @@
  - Fixed message when opening noname.exe in Windows
 
 0.72u1.04:
- - Updated to MAME 0.072u1 source code
+ - Updated to MAME 0.72u1 source code
  - Started adding documentation
 
 0.71u2.04:
