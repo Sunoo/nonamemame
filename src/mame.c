@@ -387,9 +387,9 @@ static int init_machine(void)
 
 #ifdef MESS
 	/* initialize the devices */
-	if (init_devices(gamedrv))
+	if (devices_init(gamedrv) || devices_initialload(gamedrv, TRUE))
 	{
-		logerror("init_devices failed\n");
+		logerror("devices_init failed\n");
 		goto cant_load_roms;
 	}
 #endif
@@ -410,6 +410,16 @@ static int init_machine(void)
 	/* call the game driver's init function */
 	if (gamedrv->driver_init)
 		(*gamedrv->driver_init)();
+
+#ifdef MESS
+	/* initialize the devices */
+	if (devices_initialload(gamedrv, FALSE))
+	{
+		logerror("devices_initialload failed\n");
+		goto cant_load_roms;
+	}
+#endif
+
 	return 0;
 
 cant_init_memory:
@@ -502,7 +512,7 @@ void run_machine_core(void)
 {
 	/* disable artwork for the start */
 	artwork_enable(0);
-#ifdef NAG
+//#ifdef NAG
 	/* if we didn't find a settings file, show the disclaimer */
 	if (settingsloaded || options.skip_disclaimer || showcopyright(artwork_get_ui_bitmap()) == 0)
 	{
@@ -512,7 +522,7 @@ void run_machine_core(void)
 			/* show info about the game */
 			if (options.skip_gameinfo || showgameinfo(artwork_get_ui_bitmap()) == 0)
 			{
-#endif
+//#endif
 				init_user_interface();
 
 				/* enable artwork now */
@@ -555,11 +565,11 @@ void run_machine_core(void)
 
 				/* save input ports settings */
 				save_input_port_settings();
-#ifdef NAG
+//#ifdef NAG
 			}
 		}
 	}
-#endif
+//#endif
 }
 
 
@@ -575,7 +585,7 @@ static void shutdown_machine(void)
 
 #ifdef MESS
 	/* close down any devices */
-	exit_devices();
+	devices_exit();
 #endif
 
 	/* release any allocated memory */
@@ -1267,12 +1277,14 @@ static void recompute_fps(int skipped_it)
 	vfcount++;
 	if (vfcount >= (int)Machine->drv->frames_per_second)
 	{
+#ifndef MESS
 		/* from vidhrdw/avgdvg.c */
 		extern int vector_updates;
 
-		vfcount -= (int)Machine->drv->frames_per_second;
 		performance.vector_updates_last_second = vector_updates;
 		vector_updates = 0;
+#endif
+		vfcount -= (int)Machine->drv->frames_per_second;
 	}
 }
 
@@ -1541,12 +1553,22 @@ void *mame_hard_disk_open(const char *filename, const char *mode)
 	/* look for read-only drives first in the ROM path */
 	if (mode[0] == 'r' && !strchr(mode, '+'))
 	{
-		mame_file *file = mame_fopen(Machine->gamedrv->name, filename, FILETYPE_IMAGE, 0);
-		return (void *)file;
+		const struct GameDriver *drv;
+
+		/* attempt reading up the chain through the parents */
+		for (drv = Machine->gamedrv; drv != NULL; drv = drv->clone_of)
+		{
+			void* file = mame_fopen(drv->name, filename, FILETYPE_IMAGE, 0);
+
+			if (file != NULL)
+				return file;
+		}
+
+		return NULL;
 	}
 
 	/* look for read/write drives in the diff area */
-	return (void *)mame_fopen(NULL, filename, FILETYPE_IMAGE_DIFF, 1);
+	return mame_fopen(NULL, filename, FILETYPE_IMAGE_DIFF, 1);
 }
 
 
@@ -1675,6 +1697,7 @@ static int validitychecks(void)
 				printf("%s: %s is a duplicate description (%s, %s)\n",drivers[i]->description,drivers[i]->source_file,drivers[i]->name,drivers[j]->name);
 				error = 1;
 			}
+#ifndef MESS
 			if (drivers[i]->rom && drivers[i]->rom == drivers[j]->rom
 					&& (drivers[i]->flags & NOT_A_DRIVER) == 0
 					&& (drivers[j]->flags & NOT_A_DRIVER) == 0)
@@ -1682,6 +1705,7 @@ static int validitychecks(void)
 				printf("%s: %s and %s use the same ROM set\n",drivers[i]->source_file,drivers[i]->name,drivers[j]->name);
 				error = 1;
 			}
+#endif
 		}
 
 #ifndef MESS

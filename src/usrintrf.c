@@ -1515,7 +1515,7 @@ static void showcharset(struct mame_bitmap *bitmap)
 		}
 
 		if (input_ui_pressed(IPT_UI_SNAPSHOT))
-			artwork_save_snapshot(bitmap);
+			save_screen_snapshot(bitmap);
 	} while (!input_ui_pressed(IPT_UI_SHOW_GFX) &&
 			!input_ui_pressed(IPT_UI_CANCEL));
 
@@ -2493,7 +2493,7 @@ static int displaygameinfo(struct mame_bitmap *bitmap,int selected)
 
 int showgamewarnings(struct mame_bitmap *bitmap)
 {
-#ifdef NAG
+//#ifdef NAG
 	int i;
 	char buf[2048];
 
@@ -2616,19 +2616,30 @@ int showgamewarnings(struct mame_bitmap *bitmap)
 				done = 2;
 		} while (done < 2);
 	}
-#endif
+//#endif
 
 	erase_screen(bitmap);
+//#ifdef NAG
+	update_video_and_audio();
 
+	return 0;
+}
+
+
+int showgameinfo(struct mame_bitmap *bitmap)
+{
+//#endif
 	/* clear the input memory */
 	while (code_read_async() != CODE_NONE) {};
 
-#ifdef NAG
+//#ifdef NAG
+
 	while (displaygameinfo(bitmap,0) == 1)
 	{
 		update_video_and_audio();
 	}
-#endif
+
+//#endif
 
 	#ifdef MESS
 	while (displayimageinfo(bitmap,0) == 1)
@@ -3974,7 +3985,7 @@ int handle_user_interface(struct mame_bitmap *bitmap)
 
 	/* if the user pressed F12, save the screen to a file */
 	if (input_ui_pressed(IPT_UI_SNAPSHOT))
-		artwork_save_snapshot(bitmap);
+		save_screen_snapshot(bitmap);
 
 	/* This call is for the cheat, it must be called once a frame */
 	if (options.cheat) DoCheat(bitmap);
@@ -4090,7 +4101,7 @@ int handle_user_interface(struct mame_bitmap *bitmap)
 			profiler_mark(PROFILER_END);
 
 			if (input_ui_pressed(IPT_UI_SNAPSHOT))
-				artwork_save_snapshot(bitmap);
+				save_screen_snapshot(bitmap);
 
 
 			if (input_ui_pressed(IPT_UI_SAVE_STATE))
