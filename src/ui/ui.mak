@@ -56,7 +56,8 @@ DEFS += -DDIRECTSOUND_VERSION=0x0300 \
         -UWINNT \
 	-DCLIB_DECL=__cdecl \
 	-DDECL_SPEC= \
-        -DZEXTERN=extern
+        -DZEXTERN=extern \
+	-DSHOW_UNAVAILABLE_FOLDER
 else
 DEFS += -DDIRECTSOUND_VERSION=0x0300 \
         -DDIRECTINPUT_VERSION=0x0500 \
@@ -68,9 +69,9 @@ DEFS += -DDIRECTSOUND_VERSION=0x0300 \
         -UWINNT \
 	-DCLIB_DECL=__cdecl \
 	-DDECL_SPEC= \
-        -DZEXTERN=extern
+        -DZEXTERN=extern \
+	-DSHOW_UNAVAILABLE_FOLDER
 endif
-#	-DSHOW_UNAVAILABLE_FOLDER
 
 
 #####################################################################

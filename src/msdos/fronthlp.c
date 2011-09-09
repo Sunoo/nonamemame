@@ -474,8 +474,8 @@ int frontend_help (const char *gamename)
 				"       DNONAME -listfull     for a full list of supported games\n"
 				"       DNONAME -showusage    for a brief list of options\n"
 				"       DNONAME -showconfig   for a list of configuration options\n"
-				"       DNONAME -createconfig to create a noname.ini\n\n"
-				"MAME is Copyright (C) 1997-2003 by Nicola Salmoria and the MAME Team\n");
+				"       DNONAME -createconfig to create a mame.ini\n\n"
+				"MAME is Copyright (C) 1997-2004 by Nicola Salmoria and the MAME Team\n");
 		#else
 		showmessinfo();
 		#endif

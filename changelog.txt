@@ -1,3 +1,9 @@
+0.80u1.08:
+ - Added Horiz Pac, the Alpacas, the Pac Snoops, and the rest of Jerry's stuff
+ - Hopefully fixed the DOS version
+ - Enabled the Unavailable folder in MAME32
+ - Fixed the parent ROMs for the PacMAME games
+
 0.80u1.07:
  - Updated to MAME 0.80u1 source
  - Updated to MAME32 0.80 source

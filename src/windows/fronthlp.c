@@ -469,13 +469,23 @@ int frontend_help (const char *gamename)
 		showlogo();
 		printf("\nNo Name MAME v%s\n"
 				"        Modified by David Maher (aka TheGatesofBill)\n\n",build_version);
+		#ifndef WINXPANANLOG
 		printf("Usage:  NONAME gamename [options]\n\n"
 				"        NONAME -list         for a brief list of supported games\n"
 				"        NONAME -listfull     for a full list of supported games\n"
 				"        NONAME -showusage    for a brief list of options\n"
 				"        NONAME -showconfig   for a list of configuration options\n"
-				"        NONAME -createconfig to create a noname.ini\n\n"
-				"MAME is Copyright (C) 1997-2003 by Nicola Salmoria and the MAME Team\n");
+				"        NONAME -createconfig to create a mame.ini\n\n"
+				"MAME is Copyright (C) 1997-2004 by Nicola Salmoria and the MAME Team\n");
+		#else
+		printf("Usage:  NONAME gamename [options]\n\n"
+				"        NONAMEXP -list         for a brief list of supported games\n"
+				"        NONAMEXP -listfull     for a full list of supported games\n"
+				"        NONAMEXP -showusage    for a brief list of options\n"
+				"        NONAMEXP -showconfig   for a list of configuration options\n"
+				"        NONAMEXP -createconfig to create a mame.ini\n\n"
+				"MAME is Copyright (C) 1997-2004 by Nicola Salmoria and the MAME Team\n");
+		#endif
 		#else
 		showmessinfo();
 		#endif

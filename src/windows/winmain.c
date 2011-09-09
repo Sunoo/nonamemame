@@ -123,6 +123,7 @@ int main(int argc, char **argv)
 		FILE* fp;
 
   #ifndef MESS
+		#ifndef WINXPANANLOG
 		sprintf(message_text, APPLONGNAME " v%s\n"
 							  "\tModified by David Maher (aka TheGatesofBill)\n"
 							  "\n"
@@ -134,12 +135,31 @@ int main(int argc, char **argv)
 							  "\tNONAME -listfull\t\tfor a full list of supported games\n"
 							  "\tNONAME -showusage\tfor a brief list of options\n"
 							  "\tNONAME -showconfig\tfor a list of configuration options\n"
-							  "\tNONAME -createconfig\tto create a noname.ini\n"
+							  "\tNONAME -createconfig\tto create a mame.ini\n"
 							  "\n"
 							  "Please consult the documentation for more information.\n"
 							  "\n"
 							  "Would you like to open the documentation now?"
 							  , build_version);
+		#else
+		sprintf(message_text, APPLONGNAME " v%s\n"
+							  "\tModified by David Maher (aka TheGatesofBill)\n"
+							  "\n"
+							  APPLONGNAME " is a console application, you should launch it from a command prompt.\n"
+							  "\n"
+							  "Usage:\tNONAMEXP gamename [options]\n"
+							  "\n"
+							  "\tNONAMEXP -list\t\tfor a brief list of supported games\n"
+							  "\tNONAMEXP -listfull\t\tfor a full list of supported games\n"
+							  "\tNONAMEXP -showusage\tfor a brief list of options\n"
+							  "\tNONAMEXP -showconfig\tfor a list of configuration options\n"
+							  "\tNONAMEXP -createconfig\tto create a mame.ini\n"
+							  "\n"
+							  "Please consult the documentation for more information.\n"
+							  "\n"
+							  "Would you like to open the documentation now?"
+							  , build_version);
+		#endif
   #else
 		sprintf(message_text, APPLONGNAME " is a console application, you should launch it from a command prompt.\n"
 							  "\n"

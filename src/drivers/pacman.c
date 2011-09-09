@@ -8126,6 +8126,217 @@ ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66 ))
 ROM_END
 
 
+ROM_START( horizpac )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(7CC1979D) SHA1(557346859DCFCE806E83DCF0DA1FE60DA20FED81) )
+	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(14202B73) SHA1(136B860D6AC8EFB9C83B67F77FBB47C3014D4ADC) )
+	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821EE0B) SHA1(5EA4D907DBB2690698DB72C4E0B5BE4D3E9A7786) )
+	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(9A17E8DA) SHA1(2696643705878207952C4559C176D486BD0027C2) )
+	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8C3E6DE6) SHA1(FED6E9A2B210B07E7189A18574F6B8C4EC5BB49B) )
+	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368CB165) SHA1(387010A0C76319A1EAB61B54C9BCB5C66C4B67A1) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(0572335D) SHA1(F2D8BB3124970B298026E841E057FBCC7CDFC4B1) )
+
+	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(4198511D) SHA1(B3808062835AA0CC05FA19A678A5C8AB8FB646D7) )
+
+	ROM_REGION( 0x0120, REGION_PROMS, 0 )
+	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2FC650BD) SHA1(8D0268DEE78E47C712202B0EC4F1F51109B1F2A5) )
+	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3EB3A8E4) SHA1(19097B5F60D1030F8B82D9F1D3A241F93E5C75D6) )
+
+	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(A9CC86BF) SHA1(BBCEC0570AECEB582FF8238A4BC8546A23430081) )
+	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245B66) SHA1(0C4D0BEE858B97632411C440BEA6948A74759746) )	/* timing - not used */
+ROM_END
+
+
+ROM_START( at )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(0EC135BE) SHA1(F2BA6F8EE4256420E6149853A34A2B11A3545EEA) )
+	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1B95F321) SHA1(F9D76544CCE43CE779A1BF59A01AC00297BAA82C) )
+	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(5892650A) SHA1(7C63F42EA3F75FAA15C6F5864569CB6A8F8C7C79) )
+	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(8612016A) SHA1(4E144069F194D240E503B24DF9B10BCDE68B2C6C) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(EEB359BF) SHA1(36F153B5CE53475FD144AF50E4BD67B0E0B3A01F) )
+
+	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958FEDF9) SHA1(4A937AC02216EA8C96477D4A15522070507FB599) )
+
+	ROM_REGION( 0x0120, REGION_PROMS, 0 )
+	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2FC650BD) SHA1(8D0268DEE78E47C712202B0EC4F1F51109B1F2A5) )
+	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3EB3A8E4) SHA1(19097B5F60D1030F8B82D9F1D3A241F93E5C75D6) )
+
+	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(A9CC86BF) SHA1(BBCEC0570AECEB582FF8238A4BC8546A23430081) )
+	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245B66) SHA1(0C4D0BEE858B97632411C440BEA6948A74759746) )	/* timing - not used */
+ROM_END
+
+
+ROM_START( seq1 )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(7063B724) SHA1(3A291D26BDFBF5C895D5F6AA70FC164299E8D9F1) )
+	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(95DB4723) SHA1(A0C47EA05E14CEBC6493705CD2D46D1E3D12B23A) )
+	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(C71C0011) SHA1(1CEAF73DF40E531DF3BFB26B4FB7CD95FB7BFF1D) )
+	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(C71C0011) SHA1(1CEAF73DF40E531DF3BFB26B4FB7CD95FB7BFF1D) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(EEB359BF) SHA1(36F153B5CE53475FD144AF50E4BD67B0E0B3A01F) )
+
+	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958FEDF9) SHA1(4A937AC02216EA8C96477D4A15522070507FB599) )
+
+	ROM_REGION( 0x0120, REGION_PROMS, 0 )
+	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2FC650BD) SHA1(8D0268DEE78E47C712202B0EC4F1F51109B1F2A5) )
+	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3EB3A8E4) SHA1(19097B5F60D1030F8B82D9F1D3A241F93E5C75D6) )
+
+	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(A9CC86BF) SHA1(BBCEC0570AECEB582FF8238A4BC8546A23430081) )
+	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245B66) SHA1(0C4D0BEE858B97632411C440BEA6948A74759746) )	/* timing - not used */
+ROM_END
+
+
+ROM_START( pachello )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(A8227949) SHA1(793B7BA579C7E4771094D281C2589435A1BF2FDA) )
+	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(D5690D97) SHA1(51A4D63265F1D848359CA8C78BA111D72A3BC2CF) )
+	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(C71C0011) SHA1(1CEAF73DF40E531DF3BFB26B4FB7CD95FB7BFF1D) )
+	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(C71C0011) SHA1(1CEAF73DF40E531DF3BFB26B4FB7CD95FB7BFF1D) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(EEB359BF) SHA1(36F153B5CE53475FD144AF50E4BD67B0E0B3A01F) )
+
+	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958FEDF9) SHA1(4A937AC02216EA8C96477D4A15522070507FB599) )
+
+	ROM_REGION( 0x0120, REGION_PROMS, 0 )
+	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2FC650BD) SHA1(8D0268DEE78E47C712202B0EC4F1F51109B1F2A5) )
+	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3EB3A8E4) SHA1(19097B5F60D1030F8B82D9F1D3A241F93E5C75D6) )
+
+	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(A9CC86BF) SHA1(BBCEC0570AECEB582FF8238A4BC8546A23430081) )
+	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245B66) SHA1(0C4D0BEE858B97632411C440BEA6948A74759746) )	/* timing - not used */
+ROM_END
+
+
+ROM_START( pacmatri )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(29B0497E) SHA1(E45B225AABDF2F0549718885C02AE8A8EEF3BAEB) )
+	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(EAA7B145) SHA1(4C0ABF30F2C962B6EB2BDDA833236B9D58544A89) )
+	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(C71C0011) SHA1(1CEAF73DF40E531DF3BFB26B4FB7CD95FB7BFF1D) )
+	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(C71C0011) SHA1(1CEAF73DF40E531DF3BFB26B4FB7CD95FB7BFF1D) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(EEB359BF) SHA1(36F153B5CE53475FD144AF50E4BD67B0E0B3A01F) )
+
+	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958FEDF9) SHA1(4A937AC02216EA8C96477D4A15522070507FB599) )
+
+	ROM_REGION( 0x0120, REGION_PROMS, 0 )
+	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2FC650BD) SHA1(8D0268DEE78E47C712202B0EC4F1F51109B1F2A5) )
+	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3EB3A8E4) SHA1(19097B5F60D1030F8B82D9F1D3A241F93E5C75D6) )
+
+	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(A9CC86BF) SHA1(BBCEC0570AECEB582FF8238A4BC8546A23430081) )
+	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245B66) SHA1(0C4D0BEE858B97632411C440BEA6948A74759746) )	/* timing - not used */
+ROM_END
+
+
+ROM_START( alpaca7 )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(AF4AFCBF) SHA1(F11E2FE309818B41CB2A28408B06D18419879C09) )
+	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(C71C0011) SHA1(1CEAF73DF40E531DF3BFB26B4FB7CD95FB7BFF1D) )
+	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(C71C0011) SHA1(1CEAF73DF40E531DF3BFB26B4FB7CD95FB7BFF1D) )
+	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(C71C0011) SHA1(1CEAF73DF40E531DF3BFB26B4FB7CD95FB7BFF1D) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(3E879F02) SHA1(0B084DD449E57476231E59F15F85A209A919959C) )
+
+	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(A6103847) SHA1(4376996FF8C19AFD65F1757CE159B70071A4BD3B) )
+
+	ROM_REGION( 0x0120, REGION_PROMS, 0 )
+	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2FC650BD) SHA1(8D0268DEE78E47C712202B0EC4F1F51109B1F2A5) )
+	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3EB3A8E4) SHA1(19097B5F60D1030F8B82D9F1D3A241F93E5C75D6) )
+
+	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(A9CC86BF) SHA1(BBCEC0570AECEB582FF8238A4BC8546A23430081) )
+	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245B66) SHA1(0C4D0BEE858B97632411C440BEA6948A74759746) )	/* timing - not used */
+ROM_END
+
+
+ROM_START( alpaca8 )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(86027944) SHA1(C47FC62522A3BAE0D49F4B68C218F73C43ED19B5) )
+	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(C71C0011) SHA1(1CEAF73DF40E531DF3BFB26B4FB7CD95FB7BFF1D) )
+	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(C71C0011) SHA1(1CEAF73DF40E531DF3BFB26B4FB7CD95FB7BFF1D) )
+	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(C71C0011) SHA1(1CEAF73DF40E531DF3BFB26B4FB7CD95FB7BFF1D) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(3E879F02) SHA1(0B084DD449E57476231E59F15F85A209A919959C) )
+
+	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(856E53AE) SHA1(95460212107B3371600569DBD4DA482EC631ABDB) )
+
+	ROM_REGION( 0x0120, REGION_PROMS, 0 )
+	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2FC650BD) SHA1(8D0268DEE78E47C712202B0EC4F1F51109B1F2A5) )
+	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(2BC5D339) SHA1(446E234DF94D9EF34C3191877BB33DD775ACFDF5) )
+
+	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(A9CC86BF) SHA1(BBCEC0570AECEB582FF8238A4BC8546A23430081) )
+	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245B66) SHA1(0C4D0BEE858B97632411C440BEA6948A74759746) )	/* timing - not used */
+ROM_END
+
+
+ROM_START( pacsnoop )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(FA536307) SHA1(55742123DE6EF87E1DEEF31DC75744B98129AA9E) )
+	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(30EA615C) SHA1(AFB953167AA8060DC60173F3DE065C07FD933CC1) )
+	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(25DA6440) SHA1(93414E82442044324AC5475A45FB124DA70E5D6F) )
+	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(A9594951) SHA1(5C4FA744FDCC3B0EAD7900B079A13297D16A996F) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0C944964) SHA1(06EF227747A440831C9A3A613B76693D52A2F0A9) )
+
+	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958FEDF9) SHA1(4A937AC02216EA8C96477D4A15522070507FB599) )
+
+	ROM_REGION( 0x0120, REGION_PROMS, 0 )
+	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2FC650BD) SHA1(8D0268DEE78E47C712202B0EC4F1F51109B1F2A5) )
+	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3EB3A8E4) SHA1(19097B5F60D1030F8B82D9F1D3A241F93E5C75D6) )
+
+	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(A9CC86BF) SHA1(BBCEC0570AECEB582FF8238A4BC8546A23430081) )
+	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245B66) SHA1(0C4D0BEE858B97632411C440BEA6948A74759746) )	/* timing - not used */
+ROM_END
+
+
+ROM_START( ramsnoop )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(A08529FA) SHA1(E448E3A2BED42FA9A2C6435849426E6A2CCF5290) )
+	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(27B70DD6) SHA1(E52C724C7909C2B3B8EA44C2D3540BE9D23C5E03) )
+	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(812691A0) SHA1(8FF6D1C2697732C0466BCB37A7F36392980B4A99) )
+	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(9E7849E3) SHA1(8C574E42BFFC6B88D5B5DF3C6655F792B2FF5C5C) )
+	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8C3E6DE6) SHA1(FED6E9A2B210B07E7189A18574F6B8C4EC5BB49B) )
+	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368CB165) SHA1(387010A0C76319A1EAB61B54C9BCB5C66C4B67A1) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(5C281D01) SHA1(5E8B472B615F12EFCA3FE792410C23619F067845) )
+
+	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(615AF909) SHA1(FD6A1DDE780B39AEA76BF1C4BEFA5882573C2EF4) )
+
+	ROM_REGION( 0x0120, REGION_PROMS, 0 )
+	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2FC650BD) SHA1(8D0268DEE78E47C712202B0EC4F1F51109B1F2A5) )
+	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3EB3A8E4) SHA1(19097B5F60D1030F8B82D9F1D3A241F93E5C75D6) )
+
+	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(A9CC86BF) SHA1(BBCEC0570AECEB582FF8238A4BC8546A23430081) )
+	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245B66) SHA1(0C4D0BEE858B97632411C440BEA6948A74759746) )	/* timing - not used */
+ROM_END
+
+
 /*************************************
  *
  *	Driver initialization
@@ -8385,7 +8596,7 @@ GAME( 1984, drivfrcp, 0,        drivfrcp, drivfrcp, 0,        ROT90,  "Shinkai I
 GAMEX(1985, 8bpm,	  8ballact,	8bpm,	  8bpm,		8bpm,     ROT90,  "Seatongrove Ltd (Magic Eletronics USA licence)", "Eight Ball Action (Pac-Man conversion)", GAME_WRONG_COLORS )
 GAMEX(1985, porky,	  0,        porky,	  porky,	porky,    ROT90,  "Shinkai Inc. (Magic Eletronics Inc. licence)", "Porky", GAME_NO_SOUND )
 
-GAME( 2001, abortman, 0, pacman, pacman, 0, ROT90, "Paul Copeland", "Abortman" )
+GAME( 2001, abortman, puckman, pacman, pacman, 0, ROT90, "Paul Copeland", "Abortman" )
 GAME( 2000, baby2, puckman, pacman, pacman, 0, ROT90, "T-Bone", "Baby Pacman 2 (Alt)" )
 GAME( 2000, baby3, puckman, pacman, pacman, 0, ROT90, "T-Bone", "Baby Pacman 3 (Alt)" )
 GAME( 2000, baby4, puckman, pacman, pacman, 0, ROT90, "T-Bone", "Pacman (Baby Maze 4)" )
@@ -8481,8 +8692,8 @@ GAME( 2000, msultra,  mspacman, pacman,  mspacman, 0,        ROT90,  "PacFan", "
 GAME( 2000, msvctr6m, mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Vector Ms. Pacman (6 Mazes)" )
 GAME( 2000, msvectr,  mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Vector Ms. Pac-Man" )
 GAME( 2000, msyakman, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Yak Man" )
-GAME (1998, namcosil, pacman,   pacman,   pacman,   0,        ROT90,  "Sil hack", "Pac-Man (Namco) (Sil hack)")
-GAME (1998, newpuck2, pacman,   pacman,   pacman,   0,        ROT90,  "Scotty hack", "New Puck-2")
+GAME (1998, namcosil, puckman,   pacman,   pacman,   0,        ROT90,  "Sil hack", "Pac-Man (Namco) (Sil hack)")
+GAME (1998, newpuck2, puckman,   pacman,   pacman,   0,        ROT90,  "Scotty hack", "New Puck-2")
 GAME( 2000, pac2600,  puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac 2600" )
 GAME (2000, pacatk,   mspacman, mspacman, mspacman, 0,        ROT90,  "David Widel", "Ms. Pac-Man Plus (Fruit)" )
 GAME( 2000, pacbaby,  puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Baby Maze 1)" )
@@ -8511,10 +8722,10 @@ GAME( 2000, pacmsa1,  puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (
 GAME( 2000, pacmsa2,  puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Ms. Pacman Attack 2)" )
 GAME( 2000, pacmsa3,  puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Ms. Pacman Attack 3)" )
 GAME( 2000, pacmsa4,  puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Ms. Pacman Attack 4)" )
-GAME( 2000, pacmulti, pacman,   pacman,  pacman,   0,        ROT90,  "Sil", "PacMulti (Pacman)" )
-GAME( 2000, pacn255,  0,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man (Namco 255th Maze)" )
+GAME( 2000, pacmulti, puckman,   pacman,  pacman,   0,        ROT90,  "Sil", "PacMulti (Pacman)" )
+GAME( 2000, pacn255,  puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man (Namco 255th Maze)" )
 GAME( 2000, pacplusc, puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man Plus (Unencrypted)" )
-GAME (1998, pacpopey, pacman,   pacman,   pacman,   0,        ROT90,  "hack", "Pac-Man (Popeye)")
+GAME (1998, pacpopey, puckman,   pacman,   pacman,   0,        ROT90,  "hack", "Pac-Man (Popeye)")
 GAME( 2000, pacshuf,  puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Shuffle)" )
 GAME( 2000, pacspeed, puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Speedy)" )
 GAME( 2000, pacstrm,  puckman,   pacman,  pacman,   0,        ROT90,  "PacMAME", "Desert Storm Pac-Man" )
@@ -8526,13 +8737,13 @@ GAME (2002, piranha2, mspacman, pacman,   mspacman, 0,        ROT90,  "Hack", "P
 GAME (2001, pm1000,   puckman,  pacman,   pacman,   0,        ROT90,  "Blue Justice", "Pac Man 1000" )
 GAME (2001, pm2000,   puckman,  pacman,   pacman,   0,        ROT90,  "Blue Justice", "Pac Man 2000" )
 GAME (2001, pm3000,   puckman,  pacman,   pacman,   0,        ROT90,  "Blue Justice", "Pac Man 3000" )
-GAME( 2001, pm4000p,  0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man 4000 Plus" )
-GAME( 2001, pm5000p,  0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man 5000 Plus" )
-GAME( 2001, pm6000,   0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man 6000" )
-GAME( 2001, pm7000,   0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man 7000" )
-GAME( 2001, pm7000p,  0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man 7000 Plus" )
+GAME( 2001, pm4000p,  puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man 4000 Plus" )
+GAME( 2001, pm5000p,  puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man 5000 Plus" )
+GAME( 2001, pm6000,   puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man 6000" )
+GAME( 2001, pm7000,   puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man 7000" )
+GAME( 2001, pm7000p,  puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man 7000 Plus" )
 GAME( 2000, pmad,     puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man After Dark" )
-GAME (1998, pmad_a,   pacman,   pacman,   pacman,   0,        ROT90,  "SirScotty, Sil, Jerry Lawrence hack", "Pac-Man After Dark (version 2)")
+GAME (1998, pmad_a,   puckman,   pacman,   pacman,   0,        ROT90,  "SirScotty, Sil, Jerry Lawrence hack", "Pac-Man After Dark (version 2)")
 GAME( 2000, pmad00,   puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man After Dark 2000" )
 GAME( 2000, pmad6m,   puckman,   pacman,  pacman,   0,        ROT90,  "T-Bone", "Pacman 2000 After Dark" )
 GAME( 2000, pmada,    puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man After Dark (Alternate)" )
@@ -8540,18 +8751,18 @@ GAME( 2000, pmanalt,  puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (
 GAME( 2000, pmanaltm, puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man (Midway Vertical Tunnels)" )
 GAME (2001, pmba2000, puckman,  pacman,   pacman,   0,        ROT90,  "Blue Justice", "Pac Man Babies 2000" )
 GAME (2001, pmba3000, puckman,  pacman,   pacman,   0,        ROT90,  "Blue Justice", "Pac Man Babies 3000" )
-GAME( 2001, pmba4000, 0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Babies 4000" )
+GAME( 2001, pmba4000, puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Babies 4000" )
 GAME (2001, pmba6000, puckman,  pacman,   pacman,   0,        ROT90,  "Blue Justice", "Pac Man Babies 6000" )
-GAME( 2001, pmba8000, 0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Babies 8000" )
+GAME( 2001, pmba8000, puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Babies 8000" )
 GAME (2001, pmbamaz,  puckman,  pacman,   pacman,   0,        ROT90,  "Blue Justice", "Pac Man Babies Maze" )
-GAME( 2001, pmbaplus, 0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Babies Plus" )
-GAME( 2001, pmbluep,  0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Blue Plus" )
-GAME( 2001, pmdeluxe, 0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Deluxe" )
-GAME( 2001, pmextra,  0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Extra" )
-GAME( 2001, pmextrap, 0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Extra Plus" )
-GAME( 2001, pmfever,  0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Fever" )
-GAME( 2001, pmfeverp, 0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Fever Plus" )
-GAME( 2001, pmgrenp,  0,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Green Plus" )
+GAME( 2001, pmbaplus, puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Babies Plus" )
+GAME( 2001, pmbluep,  puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Blue Plus" )
+GAME( 2001, pmdeluxe, puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Deluxe" )
+GAME( 2001, pmextra,  puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Extra" )
+GAME( 2001, pmextrap, puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Extra Plus" )
+GAME( 2001, pmfever,  puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Fever" )
+GAME( 2001, pmfeverp, puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Fever Plus" )
+GAME( 2001, pmgrenp,  puckman,        pacman,   pacman,   pacplus,  ROT90,  "Blue Justice", "Pac Man Green Plus" )
 GAME( 2000, pplusad,  puckman,   pacman,  pacman,   pacplus,  ROT90,  "[Namco] (Midway license)", "Pac-Man Plus After Dark" )
 GAME( 2000, puckman2, puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Puck-Man II" )
 GAME( 2000, puckren,  puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Puckman Renaissance" )
@@ -8594,6 +8805,15 @@ GAME( 2000, xensrev,  puckman,   pacman,  pacman,   0,        ROT90,  "[Namco] (
 GAME( 1981, lazybug, mspacman, pacman,   mspacman, 0,        ROT90,  "bootleg", "Lazy Bug" )
 GAME( 1981, wavybug, mspacman, pacman,   mspacman, 0,        ROT90,  "bootleg", "Wavv Bug" )
 GAME( 2000, zolamaze, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pacman (Zola Mazes)" )
+GAME( 2004, horizpac, mspacman, pacman,   mspacman, 0,        ROT0,  "Jerronimo", "Horiz Pac" )
+GAME( 2003, at, puckman, pacman,   pacman, 0,        ROT90,  "Jerronimo", "Sequencer and Music Player" )
+GAME( 2003, seq1, puckman, pacman,   pacman, 0,        ROT90,  "Jerronimo", "16 Step Simple Sequencer" )
+GAME( 200?, pachello, puckman, pacman,   pacman, 0,        ROT90,  "Jerronimo", "Hello, World!" )
+GAME( 2001, pacmatri, puckman, pacman,   pacman, 0,        ROT90,  "Jerronimo", "Matrix Effect" )
+GAME( 2003, alpaca7, puckman, pacman,   pacman, 0,        ROT90,  "Jerronimo", "Alpaca v0.7 (Pacman Hardware)" )
+GAME( 2003, alpaca8, puckman, pacman,   pacman, 0,        ROT90,  "Jerronimo", "Alpaca v0.8 (Pacman Hardware)" )
+GAME( 2004, pacsnoop, puckman, pacman,   pacman, 0,        ROT90,  "Jerronimo", "Pac Snoop v1.3" )
+GAME( 2004, ramsnoop, mspacman, pacman,   mspacman, 0,        ROT90,  "Jerronimo", "Miss Snoop v1.3" )
 
 
 

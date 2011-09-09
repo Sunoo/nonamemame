@@ -378,9 +378,11 @@ enum { IKT_STD, IKT_IPT, IKT_IPT_EXT, IKT_OSD_KEY, IKT_OSD_JOY };
 
 #define MAX_INPUT_PORTS 30
 
+#if !defined( MSDOS )
 /*start MAME:analog+*/
 #define MAX_PLAYERS 8		// moved from update_input_ports() in inptport.c
 /*end MAME:analog+  */
+#endif
 
 int load_input_port_settings(void);
 void save_input_port_settings(void);

@@ -908,6 +908,7 @@ int return_os_joycode(InputCode code)
 	return 0;
 }
 
+#if !defined( MSDOS )
 int is_joycode(unsigned code)
 {
 	if (code == CODE_NOT || code ==	CODE_OR)
@@ -952,3 +953,4 @@ int isNegativeSemiAxis(InputSeq* seqCode)
 	return 0;
 }
 /*end MAME:analog+*/
+#endif

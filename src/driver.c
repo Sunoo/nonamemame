@@ -6030,6 +6030,38 @@ DRIVER( roulette )   /* (c) 1997 Playmark */
 	/* 006? Fatal Fury: Wild Ambition / Garou Densetsu: Wild Ambition */
 	DRIVER( buriki )	/* 007 (c) 1999 SNK */
 
+/* Added by Team Fetus (c) 1999 -  2004 */
+DRIVER( zupapa )
+DRIVER( sengoku3 )
+DRIVER( kof2001 )               /* 0261 (c) 1999 SNK */
+DRIVER( cthd2003 )              /* 0262 (c) 1999 SNK */
+DRIVER( kof2002 )               /* 0263 (c) 1999 SNK */
+DRIVER( mslug4 )                /* 0264 (c) 1999 SNK */
+DRIVER( mslug5nd )              /* 0265 (c) 1999 SNK */
+DRIVER( rotd )                  /* 0266 (c) 1999 SNK */
+DRIVER( svcplus )               /* 0267 (c) 1999 SNK */
+DRIVER( svcchaos )              /* 0268 (c) 1999 SNK */
+DRIVER( pim )                   /* 0269 (c) 1999 SNK */
+DRIVER( samsho5 )               /* 0270 (c) 1999 SNK */
+DRIVER( digerman )              /* 0273 (c) 1999 SNK */
+DRIVER( neonopn1 )              /* 0275 (c) 1999 SNK */
+DRIVER( neonopn2 )              /* 0276 (c) 1999 SNK */
+DRIVER( neonopn3 )              /* 0277 (c) 1999 SNK */
+DRIVER( kof2003 )               /* 0278 (c) 1999 SNK manipulated by GizM */
+DRIVER( pwrinst4 )              /* 0263 (c) 2002 Playmore */
+
+DRIVER( horizpac )
+DRIVER( at )
+DRIVER( seq1 )
+DRIVER( pachello )
+DRIVER( pacmatri )
+DRIVER( alpaca7 )
+DRIVER( alpaca8 )
+DRIVER( alpacap7 )
+DRIVER( alpacap8 )
+DRIVER( pacsnoop )
+DRIVER( ramsnoop )
+DRIVER( shtron )
 
 #endif	/* DRIVER_RECURSIVE */
 
