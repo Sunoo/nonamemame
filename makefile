@@ -48,7 +48,7 @@ endif
 # MAP = 1
 
 # uncomment next line to use Assembler 68000 engine
-ifdef ATLHON
+ifdef ATHLON
 X86_ASM_68000 = 1
 else
 # X86_ASM_68000 = 1
@@ -260,12 +260,6 @@ $(EMULATOR): $(OBJS) $(COREOBJS) $(OSOBJS) $(DRVLIBS)
 	$(CC) $(CDEFS) $(CFLAGSPEDANTIC) -c src/version.c -o $(OBJ)/version.o
 	@echo Linking $@...
 	$(LD) $(LDFLAGS) $(OBJS) $(COREOBJS) $(OSOBJS) $(LIBS) $(DRVLIBS) -o $@ $(MAPFLAGS)
-
-ifdef ATHLON
-ifndef DEBUG
-	upx -9 $(EMULATOR)
-endif
-endif
 
 romcmp$(EXE): $(OBJ)/romcmp.o $(OBJ)/unzip.o
 	@echo Linking $@...

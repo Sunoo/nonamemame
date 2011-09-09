@@ -238,8 +238,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,76,1,10
- PRODUCTVERSION 0,76,1,10
+ FILEVERSION 0,76,2,11
+ PRODUCTVERSION 0,76,2,11
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -258,14 +258,14 @@ BEGIN
             VALUE "Comments", "No Name M.A.M.E. for Win32\0"
             VALUE "CompanyName", "No Name Development\0"
             VALUE "FileDescription", "No Name M.A.M.E. for Win32\0"
-            VALUE "FileVersion", "0.76u1.10\0"
+            VALUE "FileVersion", "0.76u2.11\0"
             VALUE "InternalName", "No Name MAME32\0"
             VALUE "LegalCopyright", "MAME is Copyright 1997-2003 Nicola Salmoria and the MAME team\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "noname32.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "No Name MAME32\0"
-            VALUE "ProductVersion", "0.76u1.10\0"
+            VALUE "ProductVersion", "0.76u2.11\0"
             VALUE "SpecialBuild", "\0"
         END
     END

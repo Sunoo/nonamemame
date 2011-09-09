@@ -1167,7 +1167,7 @@ struct snd_interface sndintf[] =
 		0,
 		wave_sh_start,
 		0,
-		wave_sh_update,
+		0,
 		0
 	},
 #endif

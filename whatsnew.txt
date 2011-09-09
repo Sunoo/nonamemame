@@ -1,3 +1,11 @@
+0.76u2.11:
+ - Updated to MAME 0.76u2 source code
+ - Added sound to Armor Attack (from Tim's Cinematronics project)
+ - Fixed sound in Donkey Kong (thanks Steve J)
+ - Fixed a few typos in the makefile (only affects ATHLON versions)
+ - Added R. Belmont's Grand Cross Pinball driver sound fix
+ - Added turbo loading to Deco Cassette System games
+
 0.76u1.10:
  - Updated to MAME 0.76u1 source code
  - Changed vliner from TESTDRIVER to DRIVER to correspond with the removal of the TESTDRIVER system

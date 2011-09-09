@@ -1419,11 +1419,13 @@ static struct DACinterface dkong_dac_interface =
 
 static const char *dkong_sample_names[] =
 {
-	"*dkong",
-	"effect00.wav",
-	"effect01.wav",
-	"effect02.wav",
-	0	/* end of array */
+"*dkong",
+"run01.wav",
+"run02.wav",
+"run03.wav",
+"jump.wav",
+"dkstomp.wav",
+0 /* end of array */
 };
 
 static const char *dkongjr_sample_names[] =
@@ -1432,11 +1434,15 @@ static const char *dkongjr_sample_names[] =
 	"jump.wav",
 	"land.wav",
 	"roar.wav",
-	"climb.wav",   /* HC */
-	"death.wav",  /* HC */
-	"drop.wav",  /* HC */
-	"walk.wav", /* HC */
-	"snapjaw.wav",  /* HC */
+	"climb0.wav",
+	"climb1.wav",
+	"climb2.wav",
+	"death.wav",
+	"drop.wav",
+	"walk0.wav",
+	"walk1.wav",
+	"walk2.wav",
+	"snapjaw.wav",
 	0	/* end of array */
 };
 
@@ -2518,6 +2524,8 @@ ROM_START( 8ballat2 )
 	ROM_LOAD( "8b.2n",        0x0200, 0x0100, CRC(30586988) SHA1(a9c246fd01cb3ff371ad33b55d5b2fe4898c4d1b) )
 ROM_END
 
+
+
 ROM_START( drakton )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
 	ROM_LOAD( "2764.u2",      0x0000, 0x2000, NO_DUMP )
@@ -2662,12 +2670,12 @@ GAMEX(1984, dkong3b,  dkong3,	dkongjr,  dkong3b,  0,        ROT90, "bootleg", "D
 GAME( 1984, herbiedk, huncholy, herbiedk, herbiedk, 0,        ROT90, "CVS", "Herbie at the Olympics (DK conversion)")
 
 GAMEX(1983, hunchbkd, hunchbak, hunchbkd, hunchbkd, 0,        ROT90, "Century Electronics", "Hunchback (DK conversion)", GAME_WRONG_COLORS | GAME_NOT_WORKING )
-  
+
 GAME( 1984, sbdk,	  superbik,	hunchbkd, sbdk,		0,        ROT90, "Century Electronics", "Super Bike (DK conversion)" )
 
 GAME( 1984, herodk,   hero,     hunchbkd, herodk,   herodk,   ROT90, "Seatongrove Ltd (Crown license)", "Hero in the Castle of Doom (DK conversion)" )
 GAME( 1984, herodku,  hero,     hunchbkd, herodk,   0,        ROT90, "Seatongrove Ltd (Crown license)", "Hero in the Castle of Doom (DK conversion not encrypted)" )
-  
+
 GAME( 1984, 8ballact, 8ball,	eightact, 8ballact, 0,        ROT90, "Seatongrove Ltd (Magic Eletronics USA licence)", "Eight Ball Action (DK conversion)" )
 GAME( 1984, 8ballat2, 8ball,	eightact, 8ballact, 0,        ROT90, "Seatongrove Ltd (Magic Eletronics USA licence)", "Eight Ball Action (DKJr conversion)" )
 
