@@ -24,16 +24,16 @@ w\:* {behavior:url(#default#VML);}
   <o:Author>john4</o:Author>
   <o:Template>Normal</o:Template>
   <o:LastAuthor>john4</o:LastAuthor>
-  <o:Revision>54</o:Revision>
-  <o:TotalTime>58</o:TotalTime>
+  <o:Revision>65</o:Revision>
+  <o:TotalTime>68</o:TotalTime>
   <o:Created>2003-11-03T04:49:00Z</o:Created>
-  <o:LastSaved>2004-01-29T06:37:00Z</o:LastSaved>
+  <o:LastSaved>2004-03-30T17:26:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>3084</o:Words>
-  <o:Characters>17580</o:Characters>
-  <o:Lines>146</o:Lines>
-  <o:Paragraphs>41</o:Paragraphs>
-  <o:CharactersWithSpaces>20623</o:CharactersWithSpaces>
+  <o:Words>3154</o:Words>
+  <o:Characters>17980</o:Characters>
+  <o:Lines>149</o:Lines>
+  <o:Paragraphs>42</o:Paragraphs>
+  <o:CharactersWithSpaces>21092</o:CharactersWithSpaces>
   <o:Version>11.5703</o:Version>
  </o:DocumentProperties>
 </xml><![endif]--><!--[if gte mso 9]><xml>
@@ -897,7 +897,7 @@ ul
 	mso-bidi-language:#0400;}
 </style>
 <![endif]--><!--[if gte mso 9]><xml>
- <o:shapedefaults v:ext="edit" spidmax="20482"/>
+ <o:shapedefaults v:ext="edit" spidmax="23554"/>
 </xml><![endif]--><!--[if gte mso 9]><xml>
  <o:shapelayout v:ext="edit">
   <o:idmap v:ext="edit" data="1"/>
@@ -910,6 +910,27 @@ style='tab-interval:.5in'>
 <div class=Section1>
 
 <h1>Changes to Mame32</h1>
+
+<h2><span style='font-size:12.0pt'>v.81<o:p></o:p></span></h2>
+
+<ul type=square>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l8 level1 lfo1;tab-stops:list .5in'>Moved placement of
+     bkground.png to \bkground folder instead of \snap folder. [<b>René Single</b>]</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l8 level1 lfo1;tab-stops:list .5in'>Fixed erroneous behaviour for
+     Imperfect folder view. [<b>René Single</b>]</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l8 level1 lfo1;tab-stops:list .5in'>Corrected audio latency
+     slider movement and setting past notch 4. [<b>René Single</b>]</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l8 level1 lfo1;tab-stops:list .5in'>Added customizable quit key
+     [default Alt-Q] for the mappable keyboard solution option. [<b>René Single</b>]</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l8 level1 lfo1;tab-stops:list .5in'>Added new History.dat option
+     to allow display under any or all of the art views in Options • Interface
+     Options. [<b>René Single</b>]</li>
+</ul>
 
 <h2><span style='font-size:12.0pt'>v.79</span></h2>
 
@@ -940,9 +961,9 @@ style='tab-interval:.5in'>
      style='mso-bidi-font-weight:normal'>Jarek Burczynski / Chris Kirmse</b>]<span
      style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-     mso-list:l8 level1 lfo1;tab-stops:list .5in'>Added support for the new
-     core switches for lightgun modifications; reload to allow mapping reload
-     to keys, and dual gun setups. [<b style='mso-bidi-font-weight:normal'>Chris
+     mso-list:l8 level1 lfo1;tab-stops:list .5in'>Added support for the new core
+     switches for lightgun modifications; reload to allow mapping reload to
+     keys, and dual gun setups. [<b style='mso-bidi-font-weight:normal'>Chris
      Kirmse</b>]<span style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l8 level1 lfo1;tab-stops:list .5in'>Added accelerator key for
@@ -965,8 +986,8 @@ style='tab-interval:.5in'>
      style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l8 level1 lfo1;tab-stops:list .5in'><span style='mso-bidi-font-weight:
-     bold'>Added support for the core’s new keyboard LED choices, USB or PS/2. [<b>René
-     Single</b>]</span><span style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
+     bold'>Added support for the core’s new keyboard LED choices, USB or PS/2.
+     [<b>René Single</b>]</span><span style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
 </ul>
 
 <h2><span style='font-size:12.0pt'>v.78</span></h2>
@@ -1031,17 +1052,17 @@ style='tab-interval:.5in'>
      in the folder pane to set options for that group of games.&nbsp; To alter
      global settings for game families, drill down into the source folder in
      the folder pane, and secondary click on a driver's properties i.e.
-     1942.c.&nbsp; This will change options for all games based on that
-     driver.&nbsp; The different levels of alteration are color coded,
-     vector.ini changes are red, driver.ini changes are green, and individual
-     game settings are blue.&nbsp; Thus there is the possibility to have four
-     color/levels of alterations when a game's individual properties are viewed
-     in All Games or any folder.&nbsp; The changes can be backed out of
-     hierarchically with reset to default on each respective properties, the
-     reset to default global option, or by deleting the .ini files in the \ini
-     directory.<span style='mso-spacerun:yes'>  </span><b style='mso-bidi-font-weight:
-     normal'>Note</b>: Currently the color alterations do not display properly
-     with XP in themed mode, but the functionality works [bug 462].<span
+     1942.c.&nbsp; This will change options for all games based on that driver.&nbsp;
+     The different levels of alteration are color coded, vector.ini changes are
+     red, driver.ini changes are green, and individual game settings are
+     blue.&nbsp; Thus there is the possibility to have four color/levels of
+     alterations when a game's individual properties are viewed in All Games or
+     any folder.&nbsp; The changes can be backed out of hierarchically with
+     reset to default on each respective properties, the reset to default
+     global option, or by deleting the .ini files in the \ini directory.<span
+     style='mso-spacerun:yes'>  </span><b style='mso-bidi-font-weight:normal'>Note</b>:
+     Currently the color alterations do not display properly with XP in themed
+     mode, but the functionality works [bug 462].<span
      style='mso-spacerun:yes'>  </span>Coded solutions to this issue via DIFF
      are welcomed. [<b>René Single / Chris Kirmse / John IV</b>]<span
      style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
@@ -1051,8 +1072,8 @@ style='tab-interval:.5in'>
 
 <ul type=square>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-     mso-list:l7 level1 lfo2;tab-stops:list .5in'>Added programmatically
-     populated lightgun and multi-monitor folders. [<b>René Single</b>]<span
+     mso-list:l7 level1 lfo2;tab-stops:list .5in'>Added programmatically populated
+     lightgun and multi-monitor folders. [<b>René Single</b>]<span
      style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l7 level1 lfo2;tab-stops:list .5in'>Added reset play count and
@@ -1060,10 +1081,9 @@ style='tab-interval:.5in'>
      &amp; Options • Interface Options. [<b>René Single</b>]<span
      style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-     mso-list:l7 level1 lfo2;tab-stops:list .5in'>Allowed filter propagation
-     downward from parent folders, toggle this feature in Options • Interface
-     Options. [<b>René Single</b>]<span style='font-size:12.0pt;font-family:
-     "Times New Roman"'><o:p></o:p></span></li>
+     mso-list:l7 level1 lfo2;tab-stops:list .5in'>Allowed filter propagation downward
+     from parent folders, toggle this feature in Options • Interface Options. [<b>René
+     Single</b>]<span style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l7 level1 lfo2;tab-stops:list .5in'>Changed behavior of vertical
      scrollbar in history pane, will not show if there is less text than
@@ -1163,8 +1183,8 @@ style='tab-interval:.5in'>
      mso-list:l3 level1 lfo6;tab-stops:list .5in'>Added art tab with only
      history.dat.&nbsp; If this tab is enabled and history.dat is present
      history text will no longer appear beneath the screenshot. [<span
-     class=SpellE><b>Tor</b></span><b> Arne <span class=SpellE>Vestbø</span> /
-     Chris Kirmse</b>]<span style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
+     class=SpellE><b>Tor</b></span><b> Arne <span class=SpellE>Vestbø</span> / Chris
+     Kirmse</b>]<span style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l3 level1 lfo6;tab-stops:list .5in'>Added option to hide the
      mouse cursor on launch in full screen on Options • Interface Options. [<span
@@ -1185,8 +1205,8 @@ style='tab-interval:.5in'>
      mso-list:l3 level1 lfo6;tab-stops:list .5in'>Created new Berzerk homage
      about.bmp. [<b>John IV</b>]<span style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-     mso-list:l3 level1 lfo6;tab-stops:list .5in'>Reworked drop down for D3D prescale
-     effect, now allowing various levels of sharpness to be used. [<b>Chris
+     mso-list:l3 level1 lfo6;tab-stops:list .5in'>Reworked drop down for D3D
+     prescale effect, now allowing various levels of sharpness to be used. [<b>Chris
      Kirmse</b>]<span style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l3 level1 lfo6;tab-stops:list .5in'>Updated win32ui.c to pull
@@ -1247,9 +1267,10 @@ class=SpellE>Vestbø</span></b>]</p>
 <ul type=square>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l11 level1 lfo7;tab-stops:list .5in'>Added support for the new
-     D3D filter and effects options in Options • Default Game Options • Direct3D,
-     see help menu contents for further descriptions of the new features. [<b>John
-     IV / Chris Kirmse</b>]<span style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
+     D3D filter and effects options in Options • Default Game Options •
+     Direct3D, see help menu contents for further descriptions of the new
+     features. [<b>John IV / Chris Kirmse</b>]<span style='font-size:12.0pt;
+     font-family:"Times New Roman"'><o:p></o:p></span></li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l11 level1 lfo7;tab-stops:list .5in'>Added support for the new
      core toggle -bios to allow selection of the various supported Neo Geo
@@ -1285,8 +1306,8 @@ class=SpellE>Vestbø</span></b>]</p>
 
 <ul type=square>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
-     mso-list:l14 level1 lfo9;tab-stops:list .5in'>Re-worked the rotation
-     options to a drop down, and included the new switches for auto-clockwise /
+     mso-list:l14 level1 lfo9;tab-stops:list .5in'>Re-worked the rotation options
+     to a drop down, and included the new switches for auto-clockwise /
      auto-anti-clockwise for pivot monitors. [<b>Chris Kirmse</b>]<span
      style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
 </ul>
@@ -1306,8 +1327,8 @@ class=SpellE>Vestbø</span></b>]</p>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l4 level1 lfo10;tab-stops:list .5in'>Provided an additional
      'migration' version of Mame32 which will copy the contents of the registry
-     key and write it out to the new *.ini scheme when exiting.&nbsp; Useful for
-     people who have a large number of individual game customizations. [<b>John
+     key and write it out to the new *.ini scheme when exiting.&nbsp; Useful
+     for people who have a large number of individual game customizations. [<b>John
      IV / Chris Kirmse</b>]<span style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l4 level1 lfo10;tab-stops:list .5in'>Added toggle for high thread
@@ -1401,9 +1422,9 @@ class=SpellE>Vestbø</span></b>]</p>
      mso-list:l16 level1 lfo13;tab-stops:list .5in'>The default
      \folders\Favorites.ini has been cleaned out.&nbsp; Now that it is easy to
      drag and drop or secondary click to add games from the main list to the
-     custom folders, it no longer needs to serve as an example using personal
-     favorites. Be sure to backup existing \folders\Favorites.ini if using the
-     built in installer version of the Mame32 distribution. [<b>John IV</b>]<span
+     custom folders, it no longer needs to serve as an example using personal favorites.
+     Be sure to backup existing \folders\Favorites.ini if using the built in
+     installer version of the Mame32 distribution. [<b>John IV</b>]<span
      style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l16 level1 lfo13;tab-stops:list .5in'>Tweaked code for drag &amp;
@@ -1492,10 +1513,10 @@ class=SpellE>Vestbø</span></b>]</p>
 <ul type=square>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l6 level1 lfo14;tab-stops:list .5in'>Internalized the code for
-     rotate.exe, Mame32 can now choose its background images from Options • Background
-     Image, and choose a random one on startup.&nbsp; Options • Startup Options
-     • Select Random Background Image. [<b>K&amp;K</b>]<span style='font-size:
-     12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
+     rotate.exe, Mame32 can now choose its background images from Options •
+     Background Image, and choose a random one on startup.&nbsp; Options •
+     Startup Options • Select Random Background Image. [<b>K&amp;K</b>]<span
+     style='font-size:12.0pt;font-family:"Times New Roman"'><o:p></o:p></span></li>
  <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
      mso-list:l6 level1 lfo14;tab-stops:list .5in'>Added tabs for the
      screenshot art area, toggle with Alt-b. [<b>K&amp;K</b>]<span

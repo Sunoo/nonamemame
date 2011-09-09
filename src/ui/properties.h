@@ -46,10 +46,7 @@ void    InitDefaultPropertyPage(HINSTANCE hInst, HWND hWnd);
 DWORD   GetHelpIDs(void);
 
 /* Get Game status text string */
-const char *GameInfoStatus(int driver_index);
-
-/* Get Game status bar text string */
-const char *GameInfoStatusBar(int driver_index);
+const char *GameInfoStatus(int driver_index, BOOL bRomStatus);
 
 /* Property sheet info for layout.c */
 typedef struct

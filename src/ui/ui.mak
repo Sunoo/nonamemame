@@ -2,7 +2,7 @@
 # make SUFFIX=32
 
 # don't create gamelist.txt
-# TEXTS = gamelist.txt
+#TEXTS = gamelist.txt
 
 # remove pedantic
 $(OBJ)/ui/%.o: src/ui/%.c
@@ -45,6 +45,7 @@ OSOBJS += $(OBJ)/ui/mame32.res
 #
 # Preprocessor Definitions
 #
+
 DEFS += -DDIRECTSOUND_VERSION=0x0300 \
         -DDIRECTINPUT_VERSION=0x0500 \
         -DDIRECTDRAW_VERSION=0x0300 \
@@ -54,13 +55,13 @@ DEFS += -DDIRECTSOUND_VERSION=0x0300 \
         -UWINNT \
 	-DCLIB_DECL=__cdecl \
 	-DDECL_SPEC= \
-        -DZEXTERN=extern
+        -DZEXTERN=extern \
+	-DSHOW_UNAVAILABLE_FOLDER
 ifdef WINXPANANLOG
 DEFS += -D_WIN32_WINNT=0x0501
 else
 DEFS += -D_WIN32_WINNT=0x0400
 endif
-#	-DSHOW_UNAVAILABLE_FOLDER
 
 
 #####################################################################

@@ -28,8 +28,6 @@
 #include "history.h"
 
 extern int load_driver_history(const struct GameDriver *drv, char *buffer, int bufsize);
-extern int load_driver_mameinfo(const struct GameDriver *drv, char *buffer, int bufsize);
-extern int load_driver_drivinfo(const struct GameDriver *drv, char *buffer, int bufsize);
 
 /**************************************************************
  * functions
@@ -38,24 +36,11 @@ extern int load_driver_drivinfo(const struct GameDriver *drv, char *buffer, int 
 // Load indexes from history.dat if found
 char * GetGameHistory(int driver_index)
 {
-	static char dataBuf[46080];
-	static char buffer[40960];
+	static char buffer[32768];
 	buffer[0] = '\0';
-	dataBuf[0] = '\0';
 
-        if (load_driver_history(drivers[driver_index],buffer,sizeof(buffer)) == 0)
-		strcat(dataBuf, buffer);
+	if (load_driver_history(drivers[driver_index],buffer,sizeof(buffer)) != 0)
+		return buffer;
 
-        if (load_driver_mameinfo(drivers[driver_index],buffer,sizeof(buffer)) == 0)
-	{
-		strcat(dataBuf, "\n\n");
-		strcat(dataBuf, buffer);
-	}
-
-        if (load_driver_drivinfo(drivers[driver_index],buffer,sizeof(buffer)) == 0)
-	{
-        strcat(dataBuf, "\n\n");
-		strcat(dataBuf, buffer);
-	}
-	return ConvertToWindowsNewlines(dataBuf);
+	return ConvertToWindowsNewlines(buffer);
 }

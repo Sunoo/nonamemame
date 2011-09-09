@@ -3524,15 +3524,15 @@ static int crosshair_enable=1;
 
 void drawgfx_toggle_crosshair(void)
 {
-	crosshair_enable^=1;
+   crosshair_enable^=1;
 }
 
 void draw_crosshair(struct mame_bitmap *bitmap,int x,int y,const struct rectangle *clip)
 {
-	unsigned short black,white;
-	int i;
+   unsigned short black,white;
+   int i;
 
-	if (!crosshair_enable)
+   if (!crosshair_enable)
 		return;
 
 	black = Machine->uifont->colortable[0];
@@ -3546,7 +3546,6 @@ void draw_crosshair(struct mame_bitmap *bitmap,int x,int y,const struct rectangl
 		plotclip(bitmap,x,y-i,white,clip);
 	}
 }
-
 
 #else /* DECLARE */
 

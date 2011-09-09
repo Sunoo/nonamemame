@@ -89,7 +89,44 @@ WRITE_HANDLER( gyruss_sharedram_w )
 	gyruss_sharedram[offset] = data;
 }
 
+WRITE_HANDLER( speedy_metal_gyruss_music ){
+	switch (data)
+		{
+		case 0: /* STOP */
+		StopFile(0);
+		break;
 
+		case 36: /* STOP */
+		StopFile(0);
+		break;
+		
+		case 37: /* All 2532954*/
+		PlayFile(0, "songs/smgyruss/gyruss36.ogg",1, 521285,1211386);
+		return;
+		break;
+
+		case 38:
+		PlayFile(0, "songs/smgyruss/gyruss40.ogg",1,0,0);
+		return;
+		break;
+		
+		case 39:
+		PlayFile(0, "songs/smgyruss/gyruss39.ogg",1,0,0);
+		return;
+		break;
+		
+		case 40:
+		PlayFile(0, "songs/smgyruss/gyruss40.ogg",1,58538,2072600);
+		return;
+		break;
+
+		case 41:
+		PlayFile(0, "songs/smgyruss/gyruss41.ogg",1,235934,2250700);
+		return;
+		break;
+	}
+	soundlatch_w( 0,data&0xff );
+}
 
 static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
 	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM)
@@ -112,7 +149,11 @@ static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
 	AM_RANGE(0xa000, 0xa7ff) AM_WRITE(gyruss_sharedram_w) AM_BASE(&gyruss_sharedram)
 	AM_RANGE(0xc000, 0xc000) AM_WRITE(MWA8_NOP)	/* watchdog reset */
 	AM_RANGE(0xc080, 0xc080) AM_WRITE(gyruss_sh_irqtrigger_w)
+if(Machine->gamedrv->name == "metbeast"){
+	AM_RANGE(0xc100, 0xc100) AM_WRITE(speedy_metal_gyruss_music)
+} else {
 	AM_RANGE(0xc100, 0xc100) AM_WRITE(soundlatch_w)         /* command to soundb  */
+}
 	AM_RANGE(0xc180, 0xc180) AM_WRITE(interrupt_enable_w)      /* NMI enable         */
 	AM_RANGE(0xc185, 0xc185) AM_WRITE(gyruss_flipscreen_w)
 ADDRESS_MAP_END
@@ -585,6 +626,39 @@ ROM_START( venus )
 	ROM_LOAD( "gyrussk.pr2",  0x0120, 0x0100, CRC(de823a81) SHA1(1af94b2a6a319a89b238a5076a2867f1cfd279b0) )	/* character lookup table */
 ROM_END
 
+ROM_START( smgyruss )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+	ROM_LOAD( "gyrussk.1",    0x0000, 0x2000, CRC(c673b43d) SHA1(7c464fb154bac35dd6e2f547e157addeb8798194) )
+	ROM_LOAD( "gyrussk.2",    0x2000, 0x2000, CRC(a4ec03e4) SHA1(08c33ad7fcc2ad5e5787a1050284e3f8164f4618) )
+	ROM_LOAD( "gyrussk.3",    0x4000, 0x2000, CRC(27454a98) SHA1(030c7df225652ee20d5ef64d005eb011dc89a27d) )
+	/* the diagnostics ROM would go here */
+
+	ROM_REGION( 2*0x10000, REGION_CPU2, 0 )	/* 64k for code + 64k for the decrypted opcodes */
+	ROM_LOAD( "gyrussk.9",    0xe000, 0x2000, CRC(822bf27e) SHA1(36d5bea2392a7d3476dd797dc05602705cfa23ef) )
+
+	ROM_REGION( 0x10000, REGION_CPU3, 0 )	/* 64k for the audio CPU */
+	ROM_LOAD( "gyrussk.1a",   0x0000, 0x2000, CRC(f4ae1c17) SHA1(ae568c96a31d910afe30d2b7eeb9ed1ed07290e3) )
+	ROM_LOAD( "gyrussk.2a",   0x2000, 0x2000, CRC(ba498115) SHA1(9cd1f42898cc590f39ba7cb3c975b0b3d3062eba) )
+	/* the diagnostics ROM would go here */
+
+	ROM_REGION( 0x1000, REGION_CPU4, 0 )	/* 8039 */
+	ROM_LOAD( "gyrussk.3a",   0x0000, 0x1000, CRC(3f9b5dea) SHA1(6e807da02c2885b18e8cc2199f12f6be9040bf75) )
+
+	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "gyrussk.4",    0x0000, 0x2000, CRC(27d8329b) SHA1(564ff945465a23d93a93137ad277298770dfa06a) )
+
+	ROM_REGION( 0x8000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "gyrussk.6",    0x0000, 0x2000, CRC(c949db10) SHA1(fcb8bcbd2bdd751fecb322a33c8a92fb6f07a7ab) )
+	ROM_LOAD( "gyrussk.5",    0x2000, 0x2000, CRC(4f22411a) SHA1(763bcd039f8c1838a0d7da7d4dadc14a26e25596) )
+	ROM_LOAD( "gyrussk.8",    0x4000, 0x2000, CRC(47cd1fbc) SHA1(8203c4ff0b1cd7b4dbc708e300bfeac1e7366e09) )
+	ROM_LOAD( "gyrussk.7",    0x6000, 0x2000, CRC(8e8d388c) SHA1(8f2928d71c02aba977d67575d6e34d69bda2b9d4) )
+
+	ROM_REGION( 0x0220, REGION_PROMS, 0 )
+	ROM_LOAD( "gyrussk.pr3",  0x0000, 0x0020, CRC(98782db3) SHA1(b891e43b25187faca8002919ccb44d744daa3594) )	/* palette */
+	ROM_LOAD( "gyrussk.pr1",  0x0020, 0x0100, CRC(7ed057de) SHA1(c04069ae1e2c62f9b3048844cd8cf5e1b03b7d3c) )	/* sprite lookup table */
+	ROM_LOAD( "gyrussk.pr2",  0x0120, 0x0100, CRC(de823a81) SHA1(1af94b2a6a319a89b238a5076a2867f1cfd279b0) )	/* character lookup table */
+ROM_END
+
 
 static DRIVER_INIT( gyruss )
 {
@@ -595,3 +669,5 @@ static DRIVER_INIT( gyruss )
 GAME( 1983, gyruss,   0,      gyruss, gyruss,   gyruss, ROT90, "Konami", "Gyruss (Konami)" )
 GAME( 1983, gyrussce, gyruss, gyruss, gyrussce, gyruss, ROT90, "Konami (Centuri license)", "Gyruss (Centuri)" )
 GAME( 1983, venus,    gyruss, gyruss, gyrussce, gyruss, ROT90, "bootleg", "Venus" )
+
+GAME( 2004, smgyruss, gyruss, gyruss, gyruss,   gyruss, ROT90, "Megadriver", "Speed Metal Gyruss" )

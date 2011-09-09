@@ -75,6 +75,7 @@ struct _mame_file
 	UINT8 eof;
 	UINT8 type;
 	char hash[HASH_BUF_SIZE];
+	int back_char; /* Buffered char for unget. EOF for empty. */
 };
 
 
@@ -231,7 +232,11 @@ mame_file *mame_fopen(const char *gamename, const char *filename, int filetype, 
 
 		/* history files */
 		case FILETYPE_HISTORY:
+#ifndef MESS
 			return generic_fopen(filetype, NULL, filename, 0, FILEFLAG_OPENREAD);
+#else
+			return generic_fopen(filetype, NULL, filename, 0, FILEFLAG_ALLOW_ABSOLUTE | FILEFLAG_OPENREAD);
+#endif
 
 		/* cheat file */
 		case FILETYPE_CHEAT:
@@ -372,6 +377,9 @@ int mame_faccess(const char *filename, int filetype)
 
 UINT32 mame_fread(mame_file *file, void *buffer, UINT32 length)
 {
+	/* flush any buffered char */
+	file->back_char = EOF;
+
 	/* switch off the file type */
 	switch (file->type)
 	{
@@ -405,6 +413,9 @@ UINT32 mame_fread(mame_file *file, void *buffer, UINT32 length)
 
 UINT32 mame_fwrite(mame_file *file, const void *buffer, UINT32 length)
 {
+	/* flush any buffered char */
+	file->back_char = EOF;
+
 	/* switch off the file type */
 	switch (file->type)
 	{
@@ -424,6 +435,9 @@ UINT32 mame_fwrite(mame_file *file, const void *buffer, UINT32 length)
 int mame_fseek(mame_file *file, INT64 offset, int whence)
 {
 	int err = 0;
+
+	/* flush any buffered char */
+	file->back_char = EOF;
 
 	/* switch off the file type */
 	switch (file->type)
@@ -527,6 +541,12 @@ int mame_fgetc(mame_file *file)
 {
 	unsigned char buffer;
 
+	if (file->back_char != EOF) {
+		buffer = file->back_char;
+		file->back_char = EOF;
+		return buffer;
+	}
+
 	/* switch off the file type */
 	switch (file->type)
 	{
@@ -554,34 +574,9 @@ int mame_fgetc(mame_file *file)
 
 int mame_ungetc(int c, mame_file *file)
 {
-	/* switch off the file type */
-	switch (file->type)
-	{
-		case PLAIN_FILE:
-			if (osd_feof(file->file))
-			{
-				if (osd_fseek(file->file, 0, SEEK_CUR))
-					return c;
-			}
-			else
-			{
-				if (osd_fseek(file->file, -1, SEEK_CUR))
-					return c;
-			}
-			return EOF;
-
-		case RAM_FILE:
-		case ZIPPED_FILE:
-			if (file->eof)
-				file->eof = 0;
-			else if (file->offset > 0)
-			{
-				file->offset--;
-				return c;
-			}
-			return EOF;
-	}
-	return EOF;
+	file->back_char = c;
+  
+	return c;
 }
 
 
@@ -643,6 +638,10 @@ char *mame_fgets(char *s, int n, mame_file *file)
 
 int mame_feof(mame_file *file)
 {
+	/* check for buffered chars */
+	if (file->back_char != EOF)
+		return 0;
+
 	/* switch off the file type */
 	switch (file->type)
 	{
@@ -899,6 +898,8 @@ static mame_file *generic_fopen(int pathtype, const char *gamename, const char *
 
 	/* reset the file handle */
 	memset(&file, 0, sizeof(file));
+
+	file.back_char = EOF;
 
 	/* check for incompatible flags */
 	if ((flags & FILEFLAG_OPENWRITE) && (flags & FILEFLAG_HASH))

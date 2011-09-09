@@ -76,6 +76,10 @@ void CreateCPUFolders(int parent_index);
 void CreateSoundFolders(int parent_index);
 void CreateOrientationFolders(int parent_index);
 void CreateDeficiencyFolders(int parent_index);
+void CreateBiosFolders(int parent_index);
+void CreateScreenFolders(int parent_index);
+void CreateColorsFolders(int parent_index);
+void CreateRefreshFolders(int parent_index);
 
 /***************************************************************************/
 
@@ -91,6 +95,9 @@ enum
 #ifdef SHOW_UNAVAILABLE_FOLDER
 	FOLDER_UNAVAILABLE,
 #endif
+	FOLDER_WORKING,
+	FOLDER_NONWORKING,
+	FOLDER_DEFICIENCY,
 #ifdef MESS
 	FOLDER_CONSOLE,
 	FOLDER_COMPUTER,
@@ -102,17 +109,21 @@ enum
 	FOLDER_CPU,
 	FOLDER_SND,
 	FOLDER_ORIENTATION,
-	FOLDER_DEFICIENCY,
-	FOLDER_WORKING,
-	FOLDER_NONWORKING,
+	FOLDER_BIOS,
+	FOLDER_SCREEN,
+	FOLDER_COLORS,
+	FOLDER_REFRESH,
 	FOLDER_ORIGINAL,
 	FOLDER_CLONES,
+	FOLDER_LOCKED,
+	FOLDER_UNLOCKED,
 	FOLDER_RASTER,
 	FOLDER_VECTOR,
+ 	FOLDER_MULTIMON,
 	FOLDER_TRACKBALL,
 	FOLDER_LIGHTGUN,
 	FOLDER_STEREO,
- 	FOLDER_MULTIMON,
+	FOLDER_SAMPLES,
 	FOLDER_HARDDISK,
 	MAX_FOLDERS,
 };

@@ -36,6 +36,7 @@ void GetRealColumnOrder(int order[]);
 HICON LoadIconFromFile(const char *iconname);
 void UpdateScreenShot(void);
 void ResizePickerControls(HWND hWnd);
+void PaintBackgroundImage(HWND hWnd, HRGN hRgn, int x, int y);
 
 void UpdateListView(void);
 
@@ -62,5 +63,7 @@ int Mame32Main(HINSTANCE    hInstance,
                    int          nCmdShow);
 
 BOOL MouseHasBeenMoved(void);
+
+BOOL GameIsLocked(int game);
 
 #endif

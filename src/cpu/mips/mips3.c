@@ -353,10 +353,10 @@ INLINE void generate_exception(int exception, int backup)
 
 /*
 	useful for tracking interrupts
-*/
 
 	if ((CAUSE & 0x7f) == 0)
 		logerror("Took interrupt -- Cause = %08X, PC =  %08X\n", (UINT32)CAUSE, mips3.pc);
+*/
 
 	/* swap to the new space */
 	change_pc(mips3.pc);
@@ -592,7 +592,15 @@ INLINE void set_cop0_reg(int idx, UINT64 val)
 		case COP0_Cause:
 			CAUSE = (CAUSE & 0xfc00) | (val & ~0xfc00);
 			if (CAUSE & 0x300)
+			{
+				/* if we're in a delay slot, propogate the target PC before generating the exception */
+				if (mips3.nextpc != ~0)
+				{
+					mips3.pc = mips3.nextpc;
+					mips3.nextpc = ~0;
+				}
 				generate_exception(EXCEPTION_INTERRUPT, 0);
+			}
 			break;
 
 		case COP0_Status:

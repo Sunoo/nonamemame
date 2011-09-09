@@ -1,3 +1,13 @@
+0.82u1.11:
+ - Updated to MAME 0.82u1 source
+ - Replaced MAME32 code with MadeInMame32 0.81 source
+ - No longer pretending to have a DOS version
+ - Added CPU overclock delay (ianpatt)
+ - Fixed Metal Beast and Metal Contra to match Metal MAME (Nino)
+ - Added Speed Metal Gyruss support (Nino)
+ - Preliminary Metal Beast support (Nino)
+
+
 0.81u5.10:
  - Updated to MAME 0.81u5 source
  - Fixed the parent roms in jrpacman.c and pacland.c

@@ -76,81 +76,81 @@ system(str);
 	
 	case 77: /* Intro */
 	logerror("SONG: Intro %d\n", data);
-	PlayFile(0, "SONGS\\metlcnta\\intro.ogg", 0, 0, 0);
+	PlayFile(0, "songs/metlcnta/intro.ogg", 0, 0, 0);
 	return;
 	break;
 	
 	
 	case 64: /* First Stage */
 	logerror("SONG: 1st Stage %d\n", data);
-	PlayFile(0, "SONGS\\metlcnta\\stage1.ogg", 1, 72619, 2320000);
+	PlayFile(0, "songs/metlcnta/stage1.ogg", 1, 72619, 2320000);
 	return;
 	break;
 
 	case 68: /* Corridors */
 	logerror("SONG: Corridors %d\n", data);
-	PlayFile(0, "SONGS\\metlcnta\\stage1a.ogg", 1, 0, 0);
+	PlayFile(0, "songs/metlcnta/stage1a.ogg", 1, 0, 0);
 	return;
 	break;
 	
 	case 66: /* Second Stage */
 	logerror("SONG: 2nd Stage %d\n", data);
-	PlayFile(0, "SONGS\\metlcnta\\stage2.ogg", 1, 447367, 1938000);
+	PlayFile(0, "songs/metlcnta/stage2.ogg", 1, 447367, 1938000);
 	return;
 	break;
 
 	case 71: /* BOSS */
 	logerror("SONG: BOSS %d\n", data);
-	PlayFile(0, "SONGS\\metlcnta\\boss.ogg", 1, 447367, 1938000);
+	PlayFile(0, "songs/metlcnta/boss.ogg", 1, 447367, 1938000);
 	return;
 	break;
 
 	case 70: /* Third Stage */
 	logerror("SONG: 3rd Stage %d\n", data);
-	PlayFile(0, "SONGS\\metlcnta\\stage3.ogg", 1, 161777, 1673000);
+	PlayFile(0, "songs/metlcnta/stage3.ogg", 1, 161777, 1673000);
 	return;
 	break;
 	
 	case 67: /* Third Stage */
 	logerror("SONG: 3rd Stage A %d\n", data);
-	PlayFile(0, "SONGS\\metlcnta\\stage3a.ogg", 1, 0, 0);
+	PlayFile(0, "songs/metlcnta/stage3a.ogg", 1, 0, 0);
 	return;
 	break;
 	
 	case 72: /* Alien's nast */
 	logerror("SONG: Alien's nast %d\n", data);
-	PlayFile(0, "SONGS\\metlcnta\\stage3b.ogg", 1, 480544, 1473000);
+	PlayFile(0, "songs/metlcnta/stage3b.ogg", 1, 480544, 1473000);
 	return;
 	break;
 	
 	case 76: /* Conclusion */
 	logerror("SONG: Conclusion %d\n", data);
-	PlayFile(0, "SONGS\\metlcnta\\cnclsion.ogg", 0, 0, 0);
+	PlayFile(0, "songs/metlcnta/cnclsion.oggg", 0, 0, 0);
 	return;
 	break;
 
 	case 73: /* Ending */
 	logerror("SONG: Ending %d\n", data);
-	PlayFile(0, "SONGS\\metlcnta\\ending.ogg", 1, 0, 0);
+	PlayFile(0, "songs/metlcnta/ending.ogg", 1, 0, 0);
 	return;
 	break;
 	
 	case 69: /* High Score */
 	logerror("SONG: High Score %d\n", data);
-	PlayFile(0, "SONGS\\metlcnta\\complete.ogg", 0, 0, 0);
+	PlayFile(0, "songs/metlcnta/complete.ogg", 0, 0, 0);
 	return;
 	break;
 	
 	
 	case 74: /* Game Over */
 	logerror("SONG: Game Over %d\n", data);
-	PlayFile(0, "SONGS\\metlcnta\\gameover.ogg", 0, 0, 0);
+	PlayFile(0, "songs/metlcnta/gameover.ogg", 0, 0, 0);
 	return;
 	break;
 	
 	case 75: /* Mission Complete */
 	logerror("SONG: Mission Complete %d\n", data);
-	PlayFile(0, "SONGS\\metlcnta\\complete.ogg", 0, 0, 0);
+	PlayFile(0, "songs/metlcnta/complete.ogg", 0, 0, 0);
 	return;
 	break;	
 

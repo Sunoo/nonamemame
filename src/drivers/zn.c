@@ -134,7 +134,14 @@ INLINE void verboselog( int n_level, const char *s_fmt, ... )
 		va_start( v, s_fmt );
 		vsprintf( buf, s_fmt, v );
 		va_end( v );
-		logerror( "%08x: %s", activecpu_get_pc(), buf );
+		if( cpu_getactivecpu() != -1 )
+		{
+			logerror( "%08x: %s", activecpu_get_pc(), buf );
+		}
+		else
+		{
+			logerror( "(timer) : %s", buf );
+		}
 	}
 }
 
@@ -148,8 +155,8 @@ static const unsigned char at01[ 8 ] = { NODUMP };
 static const unsigned char at02[ 8 ] = { NODUMP };
 static const unsigned char cp01[ 8 ] = { 0xf0, 0x81, 0xc1, 0x20, 0xe2, 0xfe, 0x04, 0xf8 };
 static const unsigned char cp02[ 8 ] = { NODUMP };
-static const unsigned char cp03[ 8 ] = { NODUMP };
-static const unsigned char cp04[ 8 ] = { NODUMP };
+static const unsigned char cp03[ 8 ] = { 0xc0, 0x10, 0x60, 0x7c, 0x04, 0xfa, 0x03, 0x01 };
+static const unsigned char cp04[ 8 ] = { 0xf8, 0xe2, 0xe1, 0x81, 0x7c, 0x0c, 0x30, 0xc0 };
 static const unsigned char cp05[ 8 ] = { 0x80, 0x08, 0x30, 0xc2, 0xfe, 0xfd, 0xe1, 0xe0 };
 static const unsigned char cp06[ 8 ] = { 0xf0, 0x20, 0x3c, 0xfd, 0x81, 0x78, 0xfa, 0x02 };
 static const unsigned char cp07[ 8 ] = { NODUMP };
@@ -158,10 +165,11 @@ static const unsigned char cp09[ 8 ] = { NODUMP };
 static const unsigned char cp10[ 8 ] = { 0xe0, 0x40, 0x38, 0x08, 0xf1, 0x03, 0xfe, 0xfc };
 static const unsigned char cp11[ 8 ] = { NODUMP };
 static const unsigned char cp12[ 8 ] = { NODUMP };
-static const unsigned char cp13[ 8 ] = { NODUMP };
+static const unsigned char cp13[ 8 ] = { 0x02, 0x70, 0x08, 0x04, 0x3c, 0x20, 0xe1, 0x01 };
 static const unsigned char cp14[ 8 ] = { NODUMP };
 static const unsigned char et01[ 8 ] = { 0x02, 0x08, 0x18, 0x1c, 0xfd, 0xc1, 0x40, 0x80 };
 static const unsigned char et02[ 8 ] = { 0xc0, 0xe1, 0xe2, 0xfe, 0x7c, 0x70, 0x08, 0xf8 };
+static const unsigned char et03[ 8 ] = { 0xc0, 0x08, 0xfa, 0xe2, 0xe1, 0xfd, 0x7c, 0x80 };
 static const unsigned char mg01[ 8 ] = { 0x80, 0xf2, 0x30, 0x38, 0xf9, 0xfd, 0x1c, 0xe0 };
 static const unsigned char mg02[ 8 ] = { 0xe0, 0x7c, 0x40, 0xc1, 0xf9, 0xfa, 0xf2, 0xf0 };
 static const unsigned char mg03[ 8 ] = { 0xc0, 0x04, 0x78, 0x82, 0x03, 0xf1, 0x10, 0xe0 };
@@ -189,38 +197,39 @@ static struct
 } zn_config_table[] =
 {
 	{ "nbajamex", ac01, ac02 }, /* black screen */
-	{ "jdredd",   ac01, ac02 }, /* missing controls */
-	{ "jdreddb",  ac01, ac02 }, /* missing controls */
+	{ "jdredd",   ac01, ac02 }, /* OK ( missing guns ) */
+	{ "jdreddb",  ac01, ac02 }, /* OK ( missing guns ) */
 	{ "primrag2", tw01, tw02 }, /* boots */
 /*	{ "hvnsgate", at01, at02 }, */
 	{ "ts2",      cp01, cp02 }, /* system error C930 */
 	{ "ts2j",     cp01, cp02 }, /* system error C930 */
-	{ "starglad", cp01, cp03 }, /* system error C930 */
-	{ "sfex",     cp01, cp04 }, /* system error C930 */
-	{ "sfexa",    cp01, cp04 }, /* system error C930 */
-	{ "sfexj",    cp01, cp04 }, /* system error C930 */
+	{ "starglad", cp01, cp03 }, /* OK */
+	{ "sfex",     cp01, cp04 }, /* OK */
+	{ "sfexa",    cp01, cp04 }, /* OK */
+	{ "sfexj",    cp01, cp04 }, /* OK */
 	{ "glpracr",  cp01, cp05 }, /* OK */
 	{ "rvschool", cp10, cp06 }, /* OK */
 	{ "jgakuen",  cp10, cp06 }, /* OK */
 	{ "plsmaswd", cp10, cp07 }, /* system error D094 */
 	{ "stargld2", cp10, cp07 }, /* system error D094 */
-	{ "sfex2",    cp10, cp08 }, /* OK ( locks up when drawing HAYATE ) */
+	{ "sfex2",    cp10, cp08 }, /* OK ( random crashes on garuda ) */
 	{ "techromn", cp10, cp09 }, /* system error D094 */
 	{ "kikaioh",  cp10, cp09 }, /* system error D094 */
 	{ "tgmj",     cp10, cp11 }, /* system error D094 */ /* ? */
 	{ "sfexp",    cp10, cp12 }, /* system error C094 */
 	{ "sfexpj",   cp10, cp12 }, /* system error C094 */
-	{ "strider2", cp10, cp13 }, /* system error D094 */
-	{ "shiryu2",  cp10, cp13 }, /* system error D094 */
+	{ "strider2", cp10, cp13 }, /* OK ( random crashes on bosses ) */
+	{ "shiryu2",  cp10, cp13 }, /* OK ( random crashes on bosses ) */
 	{ "sfex2p",   cp10, cp14 }, /* system error D094 */ /* ? */
 	{ "sfex2pj",  cp10, cp14 }, /* system error D094 */ /* ? */
 	{ "beastrzr", et01, et02 }, /* OK */
-	{ "beastrzb", et01, et02 }, /* black screen */ /* ? */
-/*	{ "bldyror2", et01, et03 }, */
+	{ "beastrza", et01, et02 }, /* OK */
+	{ "beastrzb", et01, et02 }, /* OK */
+	{ "bldyror2", et01, et03 }, /* BAD DUMP */
 	{ "glpracr2", mg01, mg02 }, /* locks up when starting a game/entering test mode */
 	{ "glprac2j", mg01, mg02 }, /* locks up when starting a game/entering test mode */
 	{ "glprac2l", mg01, mg02 }, /* locks up when starting a game/entering test mode */
-	{ "cbaj",     mg01, mg03 }, /* OK, ( rendering glitches ) */
+	{ "cbaj",     mg01, mg03 }, /* OK */
 	{ "shngmtkb", mg01, mg04 }, /* OK */
 	{ "doapp",    mg01, mg05 }, /* system error D094 */
 	{ "tondemo",  mg01, mg09 }, /* system error D094 */
@@ -239,69 +248,107 @@ static struct
 	{ NULL, NULL, NULL }
 };
 
-static int m_b_znsecport = 0;
-static UINT32 m_n_znsecsel = 0;
+static UINT32 m_n_znsecsel;
+static UINT32 m_b_znsecport;
+static int m_n_dip_bit;
+static int m_b_lastclock;
 
 static READ32_HANDLER( znsecsel_r )
 {
-	verboselog( 1, "znsecsel_r( %08x, %08x )\n", offset, mem_mask );
+	verboselog( 2, "znsecsel_r( %08x, %08x )\n", offset, mem_mask );
 	return m_n_znsecsel;
+}
+
+static void sio_znsec0_handler( int n_data )
+{
+	if( ( n_data & PSX_SIO_OUT_CLOCK ) == 0 )
+	{
+		if( m_b_lastclock )
+		{
+			psx_sio_input( 0, PSX_SIO_IN_DATA, ( znsec_step( 0, ( n_data & PSX_SIO_OUT_DATA ) / PSX_SIO_OUT_DATA ) & 1 ) * PSX_SIO_IN_DATA );
+		}
+		m_b_lastclock = 0;
+	}
+	else
+	{
+		m_b_lastclock = 1;
+	}
+}
+
+static void sio_znsec1_handler( int n_data )
+{
+	if( ( n_data & PSX_SIO_OUT_CLOCK ) == 0 )
+	{
+		if( m_b_lastclock )
+		{
+			psx_sio_input( 0, PSX_SIO_IN_DATA, ( znsec_step( 1, ( n_data & PSX_SIO_OUT_DATA ) / PSX_SIO_OUT_DATA ) & 1 ) * PSX_SIO_IN_DATA );
+		}
+		m_b_lastclock = 0;
+	}
+	else
+	{
+		m_b_lastclock = 1;
+	}
+}
+
+static void sio_pad_handler( int n_data )
+{
+	if( ( n_data & PSX_SIO_OUT_DTR ) != 0 )
+	{
+		m_b_znsecport = 1;
+	}
+	else
+	{
+		m_b_znsecport = 0;
+	}
+
+	verboselog( 2, "read pad %04x %04x %02x\n", m_n_znsecsel, m_b_znsecport, n_data );
+	psx_sio_input( 0, PSX_SIO_IN_DATA | PSX_SIO_IN_DSR, PSX_SIO_IN_DATA | PSX_SIO_IN_DSR );
+}
+
+static void sio_dip_handler( int n_data )
+{
+	if( ( n_data & PSX_SIO_OUT_CLOCK ) == 0 )
+	{
+		if( m_b_lastclock )
+		{
+			verboselog( 2, "read dip %02x -> %02x\n", n_data, ( ( readinputport( 7 ) >> m_n_dip_bit ) & 1 ) * PSX_SIO_IN_DATA );
+			psx_sio_input( 0, PSX_SIO_IN_DATA, ( ( readinputport( 7 ) >> m_n_dip_bit ) & 1 ) * PSX_SIO_IN_DATA );
+			m_n_dip_bit++;
+			m_n_dip_bit &= 7;
+		}
+		m_b_lastclock = 0;
+	}
+	else
+	{
+		m_b_lastclock = 1;
+	}
 }
 
 static WRITE32_HANDLER( znsecsel_w )
 {
 	COMBINE_DATA( &m_n_znsecsel );
-	if(m_n_znsecsel & 4)
-		znsec_start( 0 );
-	if(m_n_znsecsel & 8)
-		znsec_start( 1 );
 
-	verboselog( 1, "znsecsel_w( %08x, %08x, %08x )\n", offset, data, mem_mask );
-}
-
-static void znsec_write( int n_chip, int n_data )
-{
-	int n_output;
-	char s_output[ 20 ];
-
-	n_output = znsec_step( n_chip, n_data );
-	psx_sio_send( 0, n_output );
-	if( n_data >= 0x20 && n_data <= 0x7f )
+	if( ( m_n_znsecsel & 0x80 ) == 0 )
 	{
-		sprintf( s_output, " '%c'", n_data );
+		psx_sio_install_handler( 0, sio_pad_handler );
+	}
+	else if( ( m_n_znsecsel & 0x08 ) == 0 )
+	{
+		znsec_start( 1 );
+		psx_sio_install_handler( 0, sio_znsec1_handler );
+	}
+	else if( ( m_n_znsecsel & 0x04 ) == 0 )
+	{
+		znsec_start( 0 );
+		psx_sio_install_handler( 0, sio_znsec0_handler );
 	}
 	else
 	{
-		sprintf( s_output, " $%02x", n_data );
+		psx_sio_install_handler( 0, sio_dip_handler );
 	}
-	verboselog( 1, "sio0_w( %04x, %08x )%s -> %02x (%04x)\n", n_chip, n_data, s_output, n_output, m_b_znsecport );
-}
 
-static void znsec_sio_write( int n_method, int n_data )
-{
-	switch( n_method )
-	{
-	case PSX_SIO_SEL:
-		m_b_znsecport = n_data;
-		break;
-	case PSX_SIO_DATA:
-		if(!(m_n_znsecsel & 0x80)) {
-			psx_sio_dsr( 0, 1 );
-			psx_sio_send( 0, 0xff );
-			psx_sio_dsr( 0, 0 );
-			verboselog( 1, "read pad %04x %04x %02x -> %02x\n", m_n_znsecsel, m_b_znsecport, n_data, n_data );
-		} else if(!(m_n_znsecsel & 0x08))
-			znsec_write( 1, n_data );
-		else if(!(m_n_znsecsel & 0x04))
-			znsec_write( 0, n_data );
-		else {
-			psx_sio_dsr( 0, 1 );
-			psx_sio_send( 0, readinputport( 7 ) );
-			psx_sio_dsr( 0, 0 );
-			verboselog( 1, "read dip %04x %04x %02x -> %02x\n", m_n_znsecsel, m_b_znsecport, n_data, readinputport( 7 ) );
-		}
-		break;
-	}
+	verboselog( 2, "znsecsel_w( %08x, %08x, %08x )\n", offset, data, mem_mask );
 }
 
 static WRITE_HANDLER( qsound_bankswitch_w )
@@ -467,7 +514,7 @@ static void init_znsec( void )
 		{
 			znsec_init( 0, zn_config_table[ n_game ].p_n_mainsec );
 			znsec_init( 1, zn_config_table[ n_game ].p_n_gamesec );
-			psx_sio_install_write_handler( 0, znsec_sio_write );
+			psx_sio_install_handler( 0, sio_pad_handler );
 			break;
 		}
 		n_game++;
@@ -704,6 +751,20 @@ static struct YM2610interface ym2610_interface =
 	{ YM3012_VOL(100,MIXER_PAN_LEFT,100,MIXER_PAN_RIGHT) }
 };
 
+static void zn_machine_init( void )
+{
+	m_n_dip_bit = 0;
+	m_b_lastclock = 1;
+	psx_machine_init();
+}
+
+static READ32_HANDLER( capcom_kickharness_r )
+{
+	/* required for buttons 4,5&6 */
+	verboselog( 2, "capcom_kickharness_r( %08x, %08x )\n", offset, mem_mask );
+	return 0xffffffff;
+}
+
 static WRITE32_HANDLER( bank_coh1000c_w )
 {
 	cpu_setbank( 2, memory_region( REGION_USER2 ) + 0x400000 + ( data * 0x400000 ) );
@@ -711,10 +772,12 @@ static WRITE32_HANDLER( bank_coh1000c_w )
 
 DRIVER_INIT( coh1000c )
 {
-	install_mem_read32_handler( 0, 0x1f000000, 0x1f3fffff, MRA32_BANK1 );     /* fixed game rom */
-	install_mem_read32_handler( 0, 0x1f400000, 0x1f7fffff, MRA32_BANK2 );     /* banked game rom */
+	install_mem_read32_handler ( 0, 0x1f000000, 0x1f3fffff, MRA32_BANK1 );     /* fixed game rom */
+	install_mem_read32_handler ( 0, 0x1f400000, 0x1f7fffff, MRA32_BANK2 );     /* banked game rom */
 	install_mem_write32_handler( 0, 0x1fb00000, 0x1fb00003, bank_coh1000c_w ); /* bankswitch */
-	install_mem_read32_handler( 0, 0x1fb80000, 0x1fbfffff, MRA32_BANK3 );     /* country rom */
+	install_mem_read32_handler ( 0, 0x1fb40010, 0x1fb40013, capcom_kickharness_r );
+	install_mem_read32_handler ( 0, 0x1fb40020, 0x1fb40023, capcom_kickharness_r );
+	install_mem_read32_handler ( 0, 0x1fb80000, 0x1fbfffff, MRA32_BANK3 );     /* country rom */
 	install_mem_write32_handler( 0, 0x1fb60000, 0x1fb60003, zn_qsound_w );
 
 	init_znsec();
@@ -725,7 +788,7 @@ MACHINE_INIT( coh1000c )
 	cpu_setbank( 1, memory_region( REGION_USER2 ) ); /* fixed game rom */
 	cpu_setbank( 2, memory_region( REGION_USER2 ) + 0x400000 ); /* banked game rom */
 	cpu_setbank( 3, memory_region( REGION_USER3 ) ); /* country rom */
-	psx_machine_init();
+	zn_machine_init();
 	player_init();
 }
 
@@ -857,7 +920,7 @@ MACHINE_INIT( coh1000t )
 {
 	cpu_setbank( 1, memory_region( REGION_USER2 ) ); /* banked game rom */
 	cpu_setbank( 2, taitofx1_eeprom );
-	psx_machine_init();
+	zn_machine_init();
 	player_init();
 }
 
@@ -968,22 +1031,15 @@ static WRITE32_HANDLER( bank_coh3002c_w )
 	cpu_setbank( 2, memory_region( REGION_USER2 ) + 0x400000 + ( data * 0x400000 ) );
 }
 
-static READ32_HANDLER( kick_unknown_r )
-{
-	/* required for buttons 4,5&6 */
-	verboselog( 0, "kick_unknown_r( %08x, %08x )\n", offset, mem_mask );
-	return 0xffffffff;
-}
-
 DRIVER_INIT( coh3002c )
 {
-	install_mem_read32_handler( 0, 0x1f000000, 0x1f3fffff, MRA32_BANK1 );     /* fixed game rom */
-	install_mem_read32_handler( 0, 0x1f400000, 0x1f7fffff, MRA32_BANK2 );     /* banked game rom */
+	install_mem_read32_handler ( 0, 0x1f000000, 0x1f3fffff, MRA32_BANK1 );     /* fixed game rom */
+	install_mem_read32_handler ( 0, 0x1f400000, 0x1f7fffff, MRA32_BANK2 );     /* banked game rom */
 	install_mem_read32_handler ( 0, 0x1fa60000, 0x1fa60003, MRA32_NOP );
-	install_mem_read32_handler( 0,  0x1fb40010, 0x1fb40013, kick_unknown_r );
-	install_mem_read32_handler( 0,  0x1fb40020, 0x1fb40023, kick_unknown_r );
+	install_mem_read32_handler ( 0, 0x1fb40010, 0x1fb40013, capcom_kickharness_r );
+	install_mem_read32_handler ( 0, 0x1fb40020, 0x1fb40023, capcom_kickharness_r );
 	install_mem_write32_handler( 0, 0x1fb00000, 0x1fb00003, bank_coh3002c_w ); /* bankswitch */
-	install_mem_read32_handler( 0, 0x1fb80000, 0x1fbfffff, MRA32_BANK3 );     /* country rom */
+	install_mem_read32_handler ( 0, 0x1fb80000, 0x1fbfffff, MRA32_BANK3 );     /* country rom */
 	install_mem_write32_handler( 0, 0x1fb60000, 0x1fb60003, zn_qsound_w );
 
 	init_znsec();
@@ -994,7 +1050,7 @@ MACHINE_INIT( coh3002c )
 	cpu_setbank( 1, memory_region( REGION_USER2 ) ); /* fixed game rom */
 	cpu_setbank( 2, memory_region( REGION_USER2 ) + 0x400000 ); /* banked game rom */
 	cpu_setbank( 3, memory_region( REGION_USER3 ) ); /* country rom */
-	psx_machine_init();
+	zn_machine_init();
 	player_init();
 }
 
@@ -1038,7 +1094,7 @@ static MACHINE_DRIVER_START( coh3002c )
 	MDRV_SOUND_ADD( QSOUND, qsound_interface )
 MACHINE_DRIVER_END
 
-static void ide_interrupt(int state)
+static void atpsx_interrupt(int state)
 {
 	if (state)
 	{
@@ -1046,9 +1102,9 @@ static void ide_interrupt(int state)
 	}
 }
 
-static struct ide_interface ide_intf =
+static struct ide_interface atpsx_intf =
 {
-	ide_interrupt
+	atpsx_interrupt
 };
 
 INLINE void psxwritebyte( UINT32 n_address, UINT8 n_data )
@@ -1056,28 +1112,28 @@ INLINE void psxwritebyte( UINT32 n_address, UINT8 n_data )
 	*( (UINT8 *)g_p_n_psxram + BYTE_XOR_LE( n_address ) ) = n_data;
 }
 
-static void ide_dma_read( UINT32 n_address, INT32 n_size )
+static void atpsx_dma_read( UINT32 n_address, INT32 n_size )
 {
-	int rb, ofs;
-
 	logerror("DMA read: %d bytes (%d words) to %08x\n", n_size<<2, n_size, n_address);
 
-	if (n_address < 0xe0000) return;	// protect kernel+program space (what should we really do here?)
+	if (n_address < 0xe0000)
+	{
+		// protect kernel+program space (what should we really do here?)
+		logerror( "skip read to low memory\n" );
+		return;
+	}
 
 	/* dma size is in 32-bit words, convert to bytes */
 	n_size <<= 2;
-	ofs = 0;
-
-	while (n_size > 0)
+	while( n_size > 0 )
 	{
-		rb = ide_controller32_0_r(0x1f0/4, 0xffffff00);
-		psxwritebyte(n_address + ofs, rb);
-		ofs++;
+		psxwritebyte( n_address, ide_controller32_0_r( 0x1f0 / 4, 0xffffff00 ) );
+		n_address++;
 		n_size--;
 	}
 }
 
-static void ide_dma_write( UINT32 n_address, INT32 n_size )
+static void atpsx_dma_write( UINT32 n_address, INT32 n_size )
 {
 	logerror("DMA write from %08x for %d bytes\n", n_address, n_size<<2);
 }
@@ -1098,7 +1154,7 @@ DRIVER_INIT( coh1000w )
 	install_mem_write32_handler( 0, 0x1f7f4000, 0x1f7f4fff, ide_controller32_0_w );
 
 	// init hard disk
-	ide_controller_init(0, &ide_intf);
+	ide_controller_init(0, &atpsx_intf);
 
 	init_znsec();
 }
@@ -1106,12 +1162,11 @@ DRIVER_INIT( coh1000w )
 MACHINE_INIT( coh1000w )
 {
 	cpu_setbank( 1, memory_region( REGION_USER2 ) ); /* fixed game rom */
-	ide_controller_reset(0);
-	psx_machine_init();
+	zn_machine_init();
 
-	// hook up DMA 5
-	psx_dma_install_read_handler(5, ide_dma_read);
-	psx_dma_install_write_handler(5, ide_dma_write);
+	ide_controller_reset(0);
+	psx_dma_install_read_handler(5, atpsx_dma_read);
+	psx_dma_install_write_handler(5, atpsx_dma_write);
 }
 
 static MACHINE_DRIVER_START( coh1000w )
@@ -1151,7 +1206,7 @@ static WRITE32_HANDLER( coh1002e_bank_w )
 {
 	znsecsel_w( offset, data, mem_mask );
 
-	cpu_setbank( 1, memory_region( REGION_USER2 ) + ( ( data & 1 ) * 0x400000 ) );
+	cpu_setbank( 1, memory_region( REGION_USER2 ) + ( ( data & 3 ) * 0x800000 ) );
 }
 
 static WRITE32_HANDLER( coh1002e_latch_w )
@@ -1168,8 +1223,7 @@ static WRITE32_HANDLER( coh1002e_latch_w )
 
 DRIVER_INIT( coh1002e )
 {
-	install_mem_read32_handler( 0, 0x1f000000, 0x1f3fffff, MRA32_BANK1 );
-	install_mem_read32_handler( 0, 0x1f400000, 0x1f7fffff, MRA32_BANK2 );
+	install_mem_read32_handler( 0, 0x1f000000, 0x1f7fffff, MRA32_BANK1 );
 	install_mem_write32_handler( 0, 0x1fa10300, 0x1fa10303, coh1002e_bank_w );
 	install_mem_write32_handler( 0, 0x1fb00000, 0x1fb00007, coh1002e_latch_w );
 
@@ -1179,8 +1233,7 @@ DRIVER_INIT( coh1002e )
 MACHINE_INIT( coh1002e )
 {
 	cpu_setbank( 1, memory_region( REGION_USER2 ) ); /* banked game rom */
-	cpu_setbank( 2, memory_region( REGION_USER2 ) + 0x800000 ); /* fixed game rom */
-	psx_machine_init();
+	zn_machine_init();
 }
 
 static READ16_HANDLER( psarc_ymf_r )
@@ -1220,7 +1273,7 @@ static MACHINE_DRIVER_START( coh1002e )
 	MDRV_CPU_PROGRAM_MAP( zn_map, 0 )
 	MDRV_CPU_VBLANK_INT( psx_vblank, 1 )
 
-	MDRV_CPU_ADD( M68000, 8000000 )
+	MDRV_CPU_ADD( M68000, 12000000 )
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_PROGRAM_MAP( psarc_snd_map, 0 )
 
@@ -1252,7 +1305,7 @@ static MACHINE_DRIVER_START( coh1002e )
 	MDRV_SOUND_ADD( YMF271, ymf271_interface )
 MACHINE_DRIVER_END
 
-static void acpsx_ide_interrupt(int state)
+static void jdredd_ide_interrupt(int state)
 {
 	if (state)
 	{
@@ -1260,27 +1313,27 @@ static void acpsx_ide_interrupt(int state)
 	}
 }
 
-static struct ide_interface acpsx_ide_intf =
+static struct ide_interface jdredd_ide_intf =
 {
-	acpsx_ide_interrupt
+	jdredd_ide_interrupt
 };
 
-static READ32_HANDLER( acpsx_idestat_r )
+static READ32_HANDLER( jdredd_idestat_r )
 {
 	return ide_controller_0_r(0x1f7);
 }
 
-static READ32_HANDLER( acpsx_unknown_r )
+static READ32_HANDLER( jdredd_unknown_r )
 {
 	return 0xffffffff;
 }
 
-static READ32_HANDLER( acpsx_ideunknown_r )
+static READ32_HANDLER( jdredd_ideunknown_r )
 {
 	return 0xffffffff-2;
 }
 
-static READ32_HANDLER( acpsx_ide_r)
+static READ32_HANDLER( jdredd_ide_r)
 {
 	int reg = offset*2;
 	int shift = 0;
@@ -1295,7 +1348,7 @@ static READ32_HANDLER( acpsx_ide_r)
 	{
 		if (reg != 0)
 		{
-			logerror("ACPSX IDE: read 16-bit from non-DATA register %d!\n", reg);
+			logerror("JDREDD IDE: read 16-bit from non-DATA register %d!\n", reg);
 		}
 
 		return (ide_controller_0_r(0x1f0) | (ide_controller_0_r(0x1f0)<<8));
@@ -1306,7 +1359,7 @@ static READ32_HANDLER( acpsx_ide_r)
 	return ret;
 }
 
-static WRITE32_HANDLER( acpsx_ide_w )
+static WRITE32_HANDLER( jdredd_ide_w )
 {
 	int reg = offset*2;
 
@@ -1319,20 +1372,69 @@ static WRITE32_HANDLER( acpsx_ide_w )
 	ide_controller_0_w(0x1f0 + reg, data);
 }
 
+static size_t nbajamex_eeprom_size;
+static data8_t *nbajamex_eeprom;
+
+static WRITE32_HANDLER( acpsx_00_w )
+{
+	verboselog( 0, "acpsx_00_w( %08x, %08x, %08x )\n", offset, data, mem_mask );
+}
+
+static WRITE32_HANDLER( acpsx_10_w )
+{
+	verboselog( 0, "acpsx_10_w( %08x, %08x, %08x )\n", offset, data, mem_mask );
+}
+
+static WRITE32_HANDLER( nbajamex_80_w )
+{
+	verboselog( 0, "nbajamex_80_w( %08x, %08x, %08x )\n", offset, data, mem_mask );
+	psx_irq_set(0x400);
+}
+
+static READ32_HANDLER( nbajamex_08_r )
+{
+	data32_t data = 0xffffffff;
+	verboselog( 0, "nbajamex_08_r( %08x, %08x, %08x )\n", offset, data, mem_mask );
+	return data;
+}
+
+static READ32_HANDLER( nbajamex_80_r )
+{
+	data32_t data = 0xffffffff;
+	verboselog( 0, "nbajamex_80_r( %08x, %08x, %08x )\n", offset, data, mem_mask );
+	return data;
+}
+
 DRIVER_INIT( coh1000a )
 {
-	install_mem_read32_handler( 0, 0x1f000000, 0x1f7fffff, MRA32_BANK1 );
+	install_mem_read32_handler( 0, 0x1f000000, 0x1f1fffff, MRA32_BANK1 );
+	install_mem_write32_handler( 0, 0x1fbfff00, 0x1fbfff03, acpsx_00_w );
+	install_mem_write32_handler( 0, 0x1fbfff10, 0x1fbfff13, acpsx_10_w );
+
+	if( strcmp( Machine->gamedrv->name, "nbajamex" ) == 0 )
+	{
+		nbajamex_eeprom_size = 0x8000; nbajamex_eeprom = auto_malloc( nbajamex_eeprom_size );
+
+		install_mem_read32_handler ( 0, 0x1f200000, 0x1f200000 + ( nbajamex_eeprom_size - 1 ), MRA32_BANK2 );
+		install_mem_write32_handler( 0, 0x1f200000, 0x1f200000 + ( nbajamex_eeprom_size - 1 ), MWA32_BANK2 );
+		install_mem_write32_handler( 0, 0x1fbfff80, 0x1fbfff83, nbajamex_80_w );
+		install_mem_read32_handler ( 0, 0x1fbfff08, 0x1fbfff0b, nbajamex_08_r );
+		install_mem_read32_handler ( 0, 0x1fbfff80, 0x1fbfff83, nbajamex_80_r );
+
+		cpu_setbank( 2, nbajamex_eeprom ); /* ram/eeprom/?? */
+	}
 
 	if( ( !strcmp( Machine->gamedrv->name, "jdredd" ) ) ||
 		( !strcmp( Machine->gamedrv->name, "jdreddb" ) ) )
 	{
-		install_mem_read32_handler ( 0, 0x1fa30000, 0x1fa30003, acpsx_unknown_r );
-		install_mem_read32_handler ( 0, 0x1fa40000, 0x1fa40003, acpsx_ideunknown_r );
-		install_mem_read32_handler ( 0, 0x1fbfff8c, 0x1fbfff8f, acpsx_idestat_r );
-		install_mem_read32_handler ( 0, 0x1fbfff90, 0x1fbfff9f, acpsx_ide_r );
-		install_mem_write32_handler( 0, 0x1fbfff90, 0x1fbfff9f, acpsx_ide_w );
+		install_mem_read32_handler ( 0, 0x1fa30000, 0x1fa30003, jdredd_unknown_r );
+		install_mem_read32_handler ( 0, 0x1fa40000, 0x1fa40003, jdredd_ideunknown_r );
+		install_mem_read32_handler ( 0, 0x1fbfff8c, 0x1fbfff8f, jdredd_idestat_r );
+		install_mem_write32_handler( 0, 0x1fbfff8c, 0x1fbfff8f, MWA32_NOP );
+		install_mem_read32_handler ( 0, 0x1fbfff90, 0x1fbfff9f, jdredd_ide_r );
+		install_mem_write32_handler( 0, 0x1fbfff90, 0x1fbfff9f, jdredd_ide_w );
 
-		ide_controller_init( 0, &acpsx_ide_intf );
+		ide_controller_init( 0, &jdredd_ide_intf );
 	}
 
 	init_znsec();
@@ -1340,13 +1442,13 @@ DRIVER_INIT( coh1000a )
 
 MACHINE_INIT( coh1000a )
 {
+	cpu_setbank( 1, memory_region( REGION_USER2 ) ); /* fixed game rom */
+	zn_machine_init();
 	if( ( !strcmp( Machine->gamedrv->name, "jdredd" ) ) ||
 		( !strcmp( Machine->gamedrv->name, "jdreddb" ) ) )
 	{
 		ide_controller_reset( 0 );
 	}
-	cpu_setbank( 1, memory_region( REGION_USER2 ) ); /* fixed game rom */
-	psx_machine_init();
 }
 
 static MACHINE_DRIVER_START( coh1000a )
@@ -1392,7 +1494,7 @@ DRIVER_INIT( coh1002v )
 MACHINE_INIT( coh1002v )
 {
 	cpu_setbank( 1, memory_region( REGION_USER2 ) ); /* fixed game rom */
-	psx_machine_init();
+	zn_machine_init();
 }
 
 static MACHINE_DRIVER_START( coh1002v )
@@ -1438,7 +1540,7 @@ DRIVER_INIT( coh3002t )
 MACHINE_INIT( coh3002t )
 {
 	cpu_setbank( 1, memory_region( REGION_USER2 ) ); /* fixed game rom */
-	psx_machine_init();
+	zn_machine_init();
 }
 
 static MACHINE_DRIVER_START( coh3002t )
@@ -1476,6 +1578,7 @@ MACHINE_DRIVER_END
 
 static WRITE32_HANDLER( coh1002m_bank_w )
 {
+	verboselog( 1, "coh1002m_bank_w( %08x, %08x, %08x )\n", offset, data, mem_mask );
 	cpu_setbank( 1, memory_region( REGION_USER2 ) + ((data>>16) * 0x800000));
 }
 
@@ -1515,7 +1618,7 @@ DRIVER_INIT( coh1002m )
 MACHINE_INIT( coh1002m )
 {
 	cpu_setbank( 1, memory_region( REGION_USER2 ) );
-	psx_machine_init();
+	zn_machine_init();
 }
 
 static READ_HANDLER( cbaj_z80_latch_r )
@@ -2575,45 +2678,49 @@ ROM_END
 ROM_START( beastrzr )
 	PSARC95_BIOS
 
-	ROM_REGION32_LE( 0x0c00000, REGION_USER2, 0 )
-	ROM_LOAD16_BYTE( "broar_u0.213", 0x000001, 0x080000, CRC(2c586534) SHA1(a38dfc3a45446d24a1caac89b0f560989d46ded5) )
-	ROM_LOAD16_BYTE( "broar_u0.212", 0x000000, 0x080000, CRC(1c85d7fb) SHA1(aa406a42c424cc16a9e5330c68dda9acf8760088) )
-	ROM_LOAD16_BYTE( "broar_u0.215", 0x100001, 0x080000, CRC(31c8e055) SHA1(2811789ab6221b972d1e3ffe98916587990f7564) )
-	ROM_LOAD16_BYTE( "broar_u0.214", 0x100000, 0x080000, CRC(911e6c90) SHA1(724e4cae49bb124200e188a0288516b3a7d5ab53) )
-	ROM_LOAD( "rabroar2.216", 0x400000, 0x400000, CRC(d46d46b7) SHA1(1c42cb5dcda4b26c08c4ecf95efeadaf3a1d1dd2) )
-	ROM_LOAD( "rabroar1.217", 0x800000, 0x400000, CRC(11f1ba36) SHA1(d41ae686c2c607640cbadf906215c89134758050) )
+	ROM_REGION32_LE( 0x1000000, REGION_USER2, 0 )
+	ROM_LOAD16_BYTE( "broar.213",    0x000001, 0x080000, CRC(2c586534) SHA1(a38dfc3a45446d24a1caac89b0f560989d46ded5) )
+	ROM_LOAD16_BYTE( "broar.212",    0x000000, 0x080000, CRC(1c85d7fb) SHA1(aa406a42c424cc16a9e5330c68dda9acf8760088) )
+	ROM_LOAD16_BYTE( "broar.215",    0x100001, 0x080000, CRC(31c8e055) SHA1(2811789ab6221b972d1e3ffe98916587990f7564) )
+	ROM_LOAD16_BYTE( "broar.214",    0x100000, 0x080000, CRC(1cdc450a) SHA1(9215e5fec52f7c5c0070feb621eb9c77f98e2362) )
+	ROM_LOAD( "rabroar1.217",        0x400000, 0x400000, CRC(11f1ba36) SHA1(d41ae686c2c607640cbadf906215c89134758050) )
+	ROM_LOAD( "rabroar2.216",        0x800000, 0x400000, CRC(d46d46b7) SHA1(1c42cb5dcda4b26c08c4ecf95efeadaf3a1d1dd2) )
 
 	ROM_REGION( 0x080000, REGION_CPU2, 0 )
-	ROM_LOAD16_BYTE( "broar_u.046",  0x000001, 0x040000, CRC(d4bb261a) SHA1(9a295b1354ef15f37ea09bb209cf0cb98437c462) )
-	ROM_LOAD16_BYTE( "broar_u.042",  0x000000, 0x040000, CRC(4d537f88) SHA1(1760367d70a81606e29885ea315185d2c2a9409b) )
+	ROM_LOAD16_BYTE( "broar.046",    0x000001, 0x040000, CRC(d4bb261a) SHA1(9a295b1354ef15f37ea09bb209cf0cb98437c462) )
+	ROM_LOAD16_BYTE( "broar.042",    0x000000, 0x040000, CRC(4d537f88) SHA1(1760367d70a81606e29885ea315185d2c2a9409b) )
 
 	ROM_REGION( 0x400000, REGION_SOUND1, ROMREGION_SOUNDONLY )
-	ROM_LOAD( "rabroar3.snd", 0x000000, 0x400000, CRC(b74cc4d1) SHA1(eb5485582a12959ae06927a2f1d8a7e63e0f956f) )
+	ROM_LOAD( "rabroar3.snd",        0x000000, 0x400000, CRC(b74cc4d1) SHA1(eb5485582a12959ae06927a2f1d8a7e63e0f956f) )
 ROM_END
 
 ROM_START( beastrzb )
 	PSARC95_BIOS
 
-	ROM_REGION32_LE( 0x0c00000, REGION_USER2, 0 )
-	ROM_LOAD( "27c160.1",     0x0000000, 0x200000, CRC(820855e2) SHA1(18bdd4d0b4a92ae4fde457e1f37c813be6eece71) )
-	ROM_LOAD( "27c160.2",     0x0200000, 0x200000, CRC(1712af34) SHA1(3a78997a2ad0fec1b09828b47150a4be611cd9ad) )
-	ROM_LOAD( "4",            0x0400000, 0x200000, CRC(bff21f44) SHA1(2dffc518c069f0692a3b75e10091658d9c10ecb5) )
-	ROM_LOAD( "27c160.5",     0x0600000, 0x200000, CRC(10fe6f4d) SHA1(9faee2faa6d741e1caf25edd093644be5723aa5c) )
-	ROM_LOAD( "27c800.3",     0x0800000, 0x100000, CRC(7192eb4e) SHA1(bb276a38261099d91080d8613dc7500322f6fcab) )
+	ROM_REGION32_LE( 0x1000000, REGION_USER2, 0 )
+	ROM_LOAD( "27c160.1",     0x000000, 0x200000, CRC(820855e2) SHA1(18bdd4d0b4a92ae4fde457e1f37c813be6eece71) )
+	ROM_LOAD( "27c160.4",     0x400000, 0x200000, CRC(2d2b25f4) SHA1(77d8ad94602e71f16b47de47bc2e0a97957c530b) )
+	ROM_LOAD( "27c160.5",     0x600000, 0x200000, CRC(10fe6f4d) SHA1(9faee2faa6d741e1caf25edd093644be5723aa5c) )
+	ROM_LOAD( "27c160.2",     0x800000, 0x200000, CRC(1712af34) SHA1(3a78997a2ad0fec1b09828b47150a4be611cd9ad) )
+	ROM_LOAD( "27c800.3",     0xb00000, 0x100000, CRC(7192eb4e) SHA1(bb276a38261099d91080d8613dc7500322f6fcab) )
 
-	ROM_REGION( 0x180000, REGION_CPU2, 0 )
-	ROM_LOAD( "27c4096.1",    0x0000000, 0x080000, CRC(217734a1) SHA1(de4f519215123c09b3b5f27509b4d74604b5e03d) )
-	ROM_LOAD( "27c4096.2",    0x0080000, 0x080000, CRC(d1f2a9b2) SHA1(d1475a453ce4e3b9f2ff59abedf0f57ba3c408fe) )
-	ROM_LOAD( "27c240.3",     0x0100000, 0x080000, CRC(509cdc8b) SHA1(8b92b79be09de56e7d40c2d02fcbeca92bb60226) )
+	ROM_REGION( 0x080000, REGION_CPU2, 0 )
+/*	http://www.atmel.com/dyn/products/product_card.asp?family_id=604&family_name=8051+Architecture&part_id=1939 */
+	ROM_LOAD( "at89c4051",    0x000000, 0x001000, NO_DUMP ) /* cat 702 replacement or sound cpu? */
+
+	ROM_REGION( 0x400000, REGION_SOUND1, ROMREGION_SOUNDONLY )
+	ROM_LOAD( "27c4096.1",    0x000000, 0x080000, CRC(217734a1) SHA1(de4f519215123c09b3b5f27509b4d74604b5e03d) )
+	ROM_LOAD( "27c4096.2",    0x080000, 0x080000, CRC(d1f2a9b2) SHA1(d1475a453ce4e3b9f2ff59abedf0f57ba3c408fe) )
+	ROM_LOAD( "27c240.3",     0x100000, 0x080000, CRC(509cdc8b) SHA1(8b92b79be09de56e7d40c2d02fcbeca92bb60226) ) /* bad dump? (only contains 8k of data) */
 ROM_END
 
 ROM_START( brvblade )
 	TPS_BIOS
 
-	ROM_REGION32_LE( 0x0c00000, REGION_USER2, 0 )
+	ROM_REGION32_LE( 0x1000000, REGION_USER2, 0 )
 	ROM_LOAD( "flash0.021",      0x0000000, 0x200000, CRC(97e12c63) SHA1(382970617a363f6c98ee741f26be6a75c9752bdb) )
 	ROM_LOAD( "flash1.024",      0x0200000, 0x200000, CRC(d9d40a34) SHA1(c91dbc6f85404e9397fa79a4bac28e8c3c1a5228) )
-	ROM_LOAD( "ra-bbl_rom1.028", 0x0400000, 0x400000, CRC(418535e0) SHA1(7c443e651704f2cd552565c35f4a93f2dc250558) )
+	ROM_LOAD( "ra-bbl_rom1.028", 0x0800000, 0x400000, CRC(418535e0) SHA1(7c443e651704f2cd552565c35f4a93f2dc250558) )
 
 	ROM_REGION( 0x100000, REGION_CPU2, 0 )
 	ROM_LOAD16_BYTE( "spu0u049.bin", 0x0000000, 0x080000, CRC(c9df8ed9) SHA1(00a58522189091c48d781b6703e4378e04343c33) )
@@ -2621,6 +2728,27 @@ ROM_START( brvblade )
 
 	ROM_REGION( 0x400000, REGION_SOUND1, ROMREGION_SOUNDONLY )
 	ROM_LOAD( "ra-bbl_rom2.336", 0x000000, 0x400000, CRC(cd052c02) SHA1(d955a70a89b3b1a0b505a05c0887c399fe7a2c68) )
+ROM_END
+
+ROM_START( bldyror2 )
+	PSARC95_BIOS
+
+	ROM_REGION32_LE( 0x1800000, REGION_USER2, 0 )
+	ROM_LOAD( "flash0.021",      0x0000000, 0x200000, CRC(fa7602e1) SHA1(6fb6af09656fbb86d2abda35804b2ed4a4cd7461) )
+	ROM_LOAD( "flash1.024",      0x0200000, 0x200000, BAD_DUMP CRC(4866dce3) SHA1(484e659a8f0ca40b29d7f5e57788e8a9f6957cbc) )
+	ROM_LOAD( "rom-1a.028",      0x0800000, 0x400000, CRC(0e711461) SHA1(1d0bd80e6885432ef0623babde28e5760b714bfa) )
+	ROM_LOAD( "rom-1b.29",       0x0c00000, 0x400000, CRC(0cf153f9) SHA1(53bb9f8642079f56d8e925792b069362df666819) )
+	ROM_LOAD( "rom-2a.026",      0x1000000, 0x400000, CRC(b71d955d) SHA1(49fce452c70ceafc8a149fa9ff073589b7261882) )
+	ROM_LOAD( "rom-2b.210",      0x1400000, 0x400000, CRC(89959dde) SHA1(99d54b9876f38f5e625334bbd1439618cdf01d56) )
+
+	ROM_REGION32_LE( 0x0400000, REGION_USER3, 0 )
+
+	ROM_REGION( 0x100000, REGION_CPU2, 0 )
+	ROM_LOAD16_BYTE( "br2_u049.049",  0x000000, 0x080000, CRC(10dc855b) SHA1(4e6e3a71911c8976ae07c2b6cac5a36f98193def) )
+	ROM_LOAD16_BYTE( "br2_u0412.412", 0x000001, 0x080000, CRC(e254dd8a) SHA1(5b8fcafcf2176e0b55efcf37799d7c0d97e01bdc) )
+
+	ROM_REGION( 0x400000, REGION_SOUND1, ROMREGION_SOUNDONLY )
+	ROM_LOAD( "rom-3.336",       0x000000, 0x400000, CRC(b74cc4d1) SHA1(eb5485582a12959ae06927a2f1d8a7e63e0f956f) )
 ROM_END
 
 /* Atari PSX */
@@ -2717,10 +2845,10 @@ GAMEX( 1995, cpzn1,    0,        coh1000c, zn, coh1000c, ROT0, "Sony/Capcom", "Z
 
 GAMEX( 1995, ts2,      cpzn1,    coh1000c, zn, coh1000c, ROT0, "Capcom/Takara", "Battle Arena Toshinden 2 (USA 951124)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
 GAMEX( 1995, ts2j,     ts2,      coh1000c, zn, coh1000c, ROT0, "Capcom/Takara", "Battle Arena Toshinden 2 (JAPAN 951124)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
-GAMEX( 1996, starglad, cpzn1,    coh1000c, zn, coh1000c, ROT0, "Capcom", "Star Gladiator (USA 960627)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
-GAMEX( 1996, sfex,     cpzn1,    coh1002c, zn, coh1000c, ROT0, "Capcom/Arika", "Street Fighter EX (USA 961219)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
-GAMEX( 1996, sfexa,    sfex,     coh1002c, zn, coh1000c, ROT0, "Capcom/Arika", "Street Fighter EX (ASIA 961219)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
-GAMEX( 1996, sfexj,    sfex,     coh1002c, zn, coh1000c, ROT0, "Capcom/Arika", "Street Fighter EX (JAPAN 961130)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
+GAMEX( 1996, starglad, cpzn1,    coh1000c, zn, coh1000c, ROT0, "Capcom", "Star Gladiator (USA 960627)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
+GAMEX( 1996, sfex,     cpzn1,    coh1002c, zn, coh1000c, ROT0, "Capcom/Arika", "Street Fighter EX (USA 961219)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
+GAMEX( 1996, sfexa,    sfex,     coh1002c, zn, coh1000c, ROT0, "Capcom/Arika", "Street Fighter EX (ASIA 961219)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
+GAMEX( 1996, sfexj,    sfex,     coh1002c, zn, coh1000c, ROT0, "Capcom/Arika", "Street Fighter EX (JAPAN 961130)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
 GAMEX( 1996, glpracr,  cpzn1,    coh1000c, zn, coh1000c, ROT0, "Tecmo", "Gallop Racer (JAPAN Ver 9.01.12)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
 
 /* Capcom ZN2 */
@@ -2734,7 +2862,7 @@ GAMEX( 1997, sfexp,    cpzn2,    coh3002c, zn, coh3002c, ROT0, "Capcom/Arika", "
 GAMEX( 1997, sfexpj,   sfexp,    coh3002c, zn, coh3002c, ROT0, "Capcom/Arika", "Street Fighter EX Plus (JAPAN 970311)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
 GAMEX( 1997, rvschool, cpzn2,    coh3002c, zn, coh3002c, ROT0, "Capcom", "Rival Schools (ASIA 971117)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
 GAMEX( 1997, jgakuen,  rvschool, coh3002c, zn, coh3002c, ROT0, "Capcom", "Justice Gakuen (JAPAN 971117)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
-GAMEX( 1998, sfex2,    cpzn2,    coh3002c, zn, coh3002c, ROT0, "Capcom/Arika", "Street Fighter EX 2 (JAPAN 980312)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
+GAMEX( 1998, sfex2,    cpzn2,    coh3002c, zn, coh3002c, ROT0, "Capcom/Arika", "Street Fighter EX 2 (JAPAN 980312)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
 GAMEX( 1998, plsmaswd, cpzn2,    coh3002c, zn, coh3002c, ROT0, "Capcom", "Plasma Sword (USA 980316)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
 GAMEX( 1998, stargld2, plsmaswd, coh3002c, zn, coh3002c, ROT0, "Capcom", "Star Gladiator 2 (JAPAN 980316)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
 GAMEX( 1998, tgmj,     cpzn2,    coh3002c, zn, coh3002c, ROT0, "Capcom/Akira", "Tetris The Grand Master (JAPAN 980710)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
@@ -2742,8 +2870,8 @@ GAMEX( 1998, techromn, cpzn2,    coh3002c, zn, coh3002c, ROT0, "Capcom", "Tech R
 GAMEX( 1998, kikaioh,  techromn, coh3002c, zn, coh3002c, ROT0, "Capcom", "Kikaioh (JAPAN 980914)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
 GAMEX( 1999, sfex2p,   cpzn2,    coh3002c, zn, coh3002c, ROT0, "Capcom/Arika", "Street Fighter EX 2 Plus (USA 990611)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
 GAMEX( 1999, sfex2pj,  sfex2p,   coh3002c, zn, coh3002c, ROT0, "Capcom/Arika", "Street Fighter EX 2 Plus (JAPAN 990611)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
-GAMEX( 1999, strider2, cpzn2,    coh3002c, zn, coh3002c, ROT0, "Capcom", "Strider 2 (ASIA 991213)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
-GAMEX( 1999, shiryu2,  strider2, coh3002c, zn, coh3002c, ROT0, "Capcom", "Strider Hiryu 2 (JAPAN 991213)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
+GAMEX( 1999, strider2, cpzn2,    coh3002c, zn, coh3002c, ROT0, "Capcom", "Strider 2 (ASIA 991213)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_NOT_WORKING )
+GAMEX( 1999, shiryu2,  strider2, coh3002c, zn, coh3002c, ROT0, "Capcom", "Strider Hiryu 2 (JAPAN 991213)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND | GAME_NOT_WORKING )
 
 /* Atari */
 
@@ -2814,6 +2942,7 @@ GAMEX( 1997, taitogn,  0,        coh3002t, zn, coh3002t, ROT0, "Sony/Taito", "Ta
 /* it in every zip file */
 GAMEX( 1997, psarc95,  0,        coh1002e, zn, coh1002e, ROT0, "Sony/Eighting/Raizing", "PS Arcade 95", NOT_A_DRIVER )
 
-GAMEX( 1997, beastrzr, psarc95,  coh1002e, zn, coh1002e, ROT0, "Eighting/Raizing", "Beastorizer", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
-GAMEX( 1997, beastrzb, psarc95,  coh1002e, zn, coh1002e, ROT0, "Eighting/Raizing", "Beastorizer (bootleg)", GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )
+GAMEX( 1997, beastrzr, psarc95,  coh1002e, zn, coh1002e, ROT0, "Eighting/Raizing", "Beastorizer (USA)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
+GAMEX( 1997, beastrzb, psarc95,  coh1002e, zn, coh1002e, ROT0, "Eighting/Raizing", "Beastorizer (USA Bootleg)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
+GAMEX( 1998, bldyror2, psarc95,  coh1002e, zn, coh1002e, ROT0, "Eighting/Raizing", "Bloody Roar 2 (JAPAN)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )
 GAMEX( 2000, brvblade, tps,      coh1002e, zn, coh1002e, ROT270, "Eighting/Raizing", "Brave Blade (JAPAN)", GAME_IMPERFECT_GRAPHICS | GAME_IMPERFECT_SOUND )

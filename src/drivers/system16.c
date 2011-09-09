@@ -388,85 +388,113 @@ static ADDRESS_MAP_START( sound_writeport_7759, ADDRESS_SPACE_IO, 8 )
 	AM_RANGE(0x80, 0x80) AM_WRITE(UPD7759_0_port_w)
 ADDRESS_MAP_END
 
+//extern char *sndlang;
+//extern char *newsoundfx;
+int nextchannel = 2;
 
 static WRITE16_HANDLER( sound_command_w ){
-	logerror("SOUNDCMD: %s %d\n",Machine->gamedrv->name, data);
-	if(Machine->gamedrv->name == "metalbst"){
-	switch (data)
-		{
-		case 0: /* STOP */
-		StopFile(0);
-		break;
-
-		case 144: /* BOSS */
-		logerror("SONG: BOSS %d\n", data);
-		PlayFile(0, "SONGS\\metalbst\\boss.ogg", 1, 0, 0);
-		return;
-		break;
-
-		case 145: /* METAMORPHOSED */
-		logerror("SONG: METAMORPHOSED %d\n", data);
-		PlayFile(0, "SONGS\\metalbst\\beast.ogg", 1, 0, 0);
-		return;
-		break;
-
-		case 146: /* GAME OVER */
-		logerror("SONG: GAME OVER %d\n", data);
-		PlayFile(0, "SONGS\\metalbst\\gameover.ogg", 1, 0, 0);
-		return;
-		break;
-
-		case 147: /* INTERMISSION */
-		logerror("SONG: INTERMISSION %d\n", data);
-		PlayFile(0, "SONGS\\metalbst\\dialog.ogg", 1, 0, 0);
-		return;
-		break;
-
-		case 148: /* FIRST STAGE */
-		logerror("SONG: FIRST STAGE %d\n", data);
-		PlayFile(0, "SONGS\\metalbst\\stage1.ogg", 1, 0, 0);
-		return;
-		break;
-
-		case 149: /* SECOND STAGE */
-		logerror("SONG: SECOND STAGE %d\n", data);
-		PlayFile(0, "SONGS\\metalbst\\stage2.ogg", 1, 0, 0);
-		return;
-		break;
-
-		case 150: /* INTRO */
-		logerror("SONG: BOSS %d\n", data);
-		PlayFile(0, "SONGS\\metalbst\\intro.ogg", 1, 0, 0);
-		return;
-		break;
-
-		case 151: /* ENDING */
-		logerror("SONG: ENDING %d\n", data);
-		PlayFile(0, "SONGS\\metalbst\\ending.ogg", 1, 0, 0);
-		return;
-		break;
-	}
+	if(Machine->gamedrv->name == "metbeast"){
 /*
  Altered Beast Songs
- 144 - Boss
+ 144 - BOSS
  145 - Metamorphosed
  146 - Game Over
  147 - Intermission
- 148 - First Stage
- 149 - Second Stage
+ 148 - 1St Stage
+ 149 - 2nd Stage
  150 - Intro
  151 - Ending
 */	
-}
+
+	switch(data){
+	 case 0:
+		StopFile(0);
+		if( ACCESSING_LSB ){
+		soundlatch_w( 0,data&0xff );
+		cpu_set_irq_line( 1, 0, HOLD_LINE );
+		}
+	 return;
+		break;
+
+	 case 144:
+	 PlayFile(0, "songs/metbeast/ab-boss.ogg",1,0,0);
+		return;
+		break;
+
+	 case 145:
+	 StopFile(-3);
+	 PlayFile(0, "songs/metbeast/ab-beas.ogg",1,36070,3423000);
+		return;
+		break;
+
+	 case 146:
+	 StopFile(-3);
+	 PlayFile(0, "songs/metbeast/ab-go.ogg",0,0,0);	 
+		return;
+		break;
+
+	 case 147:
+	 PlayFile(0, "songs/metbeast/ab-pre.ogg",0,0,0);	 
+		return;
+		break;
+
+	 case 148:
+	 PlayFile(0, "songs/metbeast/ab-st1.ogg",1,987691,5595500);
+		return;
+		break;
+
+	 case 149:
+	 StopFile(-3);
+	 PlayFile(0, "songs/metbeast/ab-ruin.ogg",1,442904,3131800);
+		return;
+		break;
+
+	 case 150:
+	 StopFile(-3);
+	 PlayFile(0, "songs/metbeast/ab-int.ogg",1,532837,1944500);
+		return;
+		break;
+
+	 case 151:
+	 StopFile(-3);
+	 PlayFile(0, "songs/metbeast/ab-end.ogg",0,0,0);
+		return;
+		break;
+	}
+
+	/* Voices/FX ... */
+//	if(strcmp(newsoundfx,"yes") == 0){
+	char sfxsnd[100];
+	FILE *f;
+	if(nextchannel > 10){nextchannel = 2;}
+//	sprintf(sfxsnd, "songs/metbeast/ab-%d%s.ogg", data, sndlang);
+	sprintf(sfxsnd, "songs/metbeast/ab-%d.ogg", data);
+	f = fopen(sfxsnd, "r");
+	if(!f){
+	   sprintf(sfxsnd, "songs/metbeast/ab-%d.ogg", data);
+	   f = fopen(sfxsnd, "r");
+	   if(f){
+	   		 fclose(f);
+			 nextchannel++;
+	   		 PlayFile(nextchannel, sfxsnd,0,0,0);
+	   		 return;
+	   }
+	}else{
+	   fclose(f);
+	   nextchannel++;
+	   PlayFile(nextchannel, sfxsnd,0,0,0);
+	   return;
+	}
+//	}
 	
 	if( ACCESSING_LSB ){
 		soundlatch_w( 0,data&0xff );
 		cpu_set_irq_line( 1, 0, HOLD_LINE );
 	}
+	}
 }
 
 static WRITE16_HANDLER( sound_command_nmi_w ){
-	logerror("NINO - WRITE16_HANDLER( sound_command_nmi_w )\n");
 	if( ACCESSING_LSB ){
 		soundlatch_w( 0,data&0xff );
 		cpu_set_nmi_line(1, PULSE_LINE);
@@ -3141,79 +3169,79 @@ logerror("SOUND CMD: %d\n", data);
 
 		case 49152: /* 1 - BATTLE FIELD */
 		logerror("SONG: BATTLE FIELD %d\n", data);
-		PlayFile(0, "SONGS\\metalaxe\\btlfield.ogg", 1, 0, 0);
+		PlayFile(0, "songs/metalaxe/btlfield.ogg", 1, 0, 0);
 		return;
 		break;
 		
 		case 49408: /* 2 - WILDERNESS */
 		logerror("SONG: WILDERNESS %d\n", data);
-		PlayFile(0, "SONGS\\metalaxe\\wild.ogg", 1, 0, 0);
+		PlayFile(0, "songs/metalaxe/wild.ogg", 1, 0, 0);
 		return;
 		break;
 
 		case 49664: /* 3 - DEAD ADDER */
 		logerror("SONG: DEAD ADDER %d\n", data);
-		PlayFile(0, "SONGS\\metalaxe\\deadaddr.ogg", 1, 183742, 3628718);
+		PlayFile(0, "songs/metalaxe/deadaddr.ogg", 1, 183742, 3628718);
 		return;
 		break;
 		
 		case 49920: /* 4 - TURTLE VILLAGE 1 */
 		logerror("SONG: TURTLE VILLAGE 1 %d\n", data);
-		PlayFile(0, "SONGS\\metalaxe\\turtle1.ogg", 1, 0, 0);
+		PlayFile(0, "songs/metalaxe/turtle1.ogg", 1, 0, 0);
 		return;
 		break;
 		
 		case 50176: /* 5 - GAME OVER */
 		logerror("SONG: GAME OVER %d\n", data);
-		PlayFile(0, "SONGS\\metalaxe\\gameover.ogg", 0, 0, 0);
+		PlayFile(0, "songs/metalaxe/gameover.ogg", 0, 0, 0);
 		return;
 		break;		
 
 		case 50432: /* 6 - THE BATTLE */
 		logerror("SONG: THE BATTLE %d\n", data);
-		PlayFile(0, "SONGS\\metalaxe\\battle.ogg", 1, 0, 0);
+		PlayFile(0, "songs/metalaxe/battle.ogg", 1, 0, 0);
 		return;
 		break;				
 
 		case 50688: /* 7 - THIEF'S THEME */
 		logerror("SONG: THIEF'S THEME %d\n", data);
-		PlayFile(0, "SONGS\\metalaxe\\thief.ogg", 1, 0, 0);
+		PlayFile(0, "songs/metalaxe/thief.ogg", 1, 0, 0);
 		return;
 		break;		
 		
 		case 50944: /* 8 - OLD MAP */
 		logerror("SONG: OLD MAP %d\n", data);
-		PlayFile(0, "SONGS\\metalaxe\\map.ogg", 0, 0, 0);
+		PlayFile(0, "songs/metalaxe/map.ogg", 0, 0, 0);
 		return;
 		break;		
 		
 		case 51200: /* 9 - PATH OF FRIEND */
 		logerror("SONG: PATH OF FRIEND %d\n", data);
-		PlayFile(0, "SONGS\\metalaxe\\friend.ogg", 1, 0, 0);
+		PlayFile(0, "songs/metalaxe/friend.ogg", 1, 0, 0);
 		return;
 		break;		
 		
 		case 51456: /* 10 - CONCLUSION */
 		logerror("SONG: CONCLUSION %d\n", data);
-		PlayFile(0, "SONGS\\metalaxe\\cnclsion.ogg", 0, 0, 0);
+		PlayFile(0, "songs/metalaxe/cnclsion.ogg", 0, 0, 0);
 		return;
 		break;		
 		
 		case 51712: /* 11 - HI SCORE */
 		logerror("SONG: HI SCORE %d\n", data);
-		PlayFile(0, "SONGS\\metalaxe\\cnclsion.ogg", 0, 0, 0);
+		PlayFile(0, "songs/metalaxe/cnclsion.ogg", 0, 0, 0);
 		return;
 		break;
 		
 		case 51968: /* 12 - TURTLE VILLAGE 2 */
 		logerror("SONG: TURTLE VILLAGE 2 %d\n", data);
-		PlayFile(0, "SONGS\\metalaxe\\turtle2.ogg", 1, 0, 0);
+		PlayFile(0, "songs/metalaxe/turtle2.ogg", 1, 0, 0);
 		return;
 		break;		
 		
 		case 52224: /* 13 - SUTAROKA, SASSA! */
 		logerror("SONG: SUTAROKA, SASSA! %d\n", data);
-		PlayFile(0, "SONGS\\metalaxe\\sassa.ogg", 1, 0, 0);
+		PlayFile(0, "songs/metalaxe/sassa.ogg", 1, 0, 0);
 		return;
 		break;		
     }
@@ -7172,7 +7200,7 @@ ROM_START( metalaxe )
 	ROM_LOAD( "mpr12384.a11", 0x10000, 0x20000, CRC(6218d8e7) SHA1(5a745c750efb4a61716f99befb7ed14cc84e9973) )
 ROM_END
 
-ROM_START( metalbst )
+ROM_START( metbeast )
 	ROM_REGION( 0x040000, REGION_CPU1, 0 ) /* 68000 code */
 	ROM_LOAD16_BYTE( "11705", 0x000000, 0x20000, CRC(57dc5c7a) SHA1(a5cc9b10a00778f5163fc915b956fa5d0d7a37ce) )
 	ROM_LOAD16_BYTE( "11704", 0x000001, 0x20000, CRC(33bbcf07) SHA1(534e5426580dbf72509dceb762b8b99766d3a739) )
@@ -7290,4 +7318,4 @@ GAME( 1988, wb3bl,    wb3,      wb3bl,    wb3,      wb3bl,    ROT0,   "bootleg",
 GAME( 1989, wrestwar, 0,        wrestwar, wrestwar, wrestwar, ROT270, "Sega",    "Wrestle War" )
 
 GAME( 2004, metalaxe, goldnaxe, goldnaxe, goldnaxe, goldnaxe, ROT0,   "Megadriver",    "Metal Axe" )
-GAME( 2004, metalbst, altbeast, altbeast, altbeast, altbeast, ROT0,   "Megadriver",    "Metal Beast" )
+GAME( 2004, metbeast, altbeast, altbeast, altbeast, altbeast, ROT0,   "Megadriver",    "Metal Beast" )

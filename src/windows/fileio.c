@@ -518,7 +518,7 @@ osd_file *osd_fopen(int pathtype, int pathindex, const char *filename, const cha
 			goto error;
 
 		s = temp_file;
-		flags |= FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE; 
+		flags |= FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE;
 	}
 	else
 	{
@@ -694,9 +694,9 @@ UINT32 osd_fwrite(osd_file *file, const void *buffer, UINT32 length)
 	if (result == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR)
 		return 0;
 
-	// do the write
-	WriteFile(file->handle, buffer, length, &result, NULL);
-	file->filepos += result;
+    // do the write
+    WriteFile(file->handle, buffer, length, &result, NULL);
+    file->filepos = file->offset + result;
 
 	// adjust the pointers
 	file->offset += result;

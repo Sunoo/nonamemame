@@ -1164,6 +1164,7 @@ static void		BuildSearchRegions(SearchInfo * info);
 
 static int		ConvertOldCode(int code, int cpu, int * data, int * extendData);
 static int		MatchCommandCheatLine(char * buf);
+static void		HandleOverclock(int Param);
 static void		HandleLocalCommandCheat(UINT32 type, UINT32 address, UINT32 data, UINT32 extendData, char * name, char * description);
 
 static void		LoadCheatFile(char * fileName);
@@ -8393,6 +8394,14 @@ static int MatchCommandCheatLine(char * buf)
 	return 0;
 }
 
+static void HandleOverclock(int param)
+{
+	UINT32   overclock = param & 0xFFFFFF00;
+	UINT8   cpu = param & 0xFF;
+
+	timer_set_overclock(cpu, ((double)overclock) / 65536.0);
+}
+
 static void HandleLocalCommandCheat(UINT32 type, UINT32 address, UINT32 data, UINT32 extendData, char * name, char * description)
 {
 	switch(EXTRACT_FIELD(type, LocationType))
@@ -8425,13 +8434,16 @@ static void HandleLocalCommandCheat(UINT32 type, UINT32 address, UINT32 data, UI
 
 				case kCustomLocation_Overclock:
 				{
-					if(address < cpu_gettotalcpu())
+					UINT8   cpu = address & 0xFF;
+               
+					if(cpu < cpu_gettotalcpu())
 					{
-						double	overclock = data;
+						UINT32   delay = address >> 8;
 
-						overclock /= 65536.0;
-
-						timer_set_overclock(address, overclock);
+						if(delay)
+							timer_set(TIME_IN_MSEC(delay), (data & 0xFFFFFF00) | cpu, HandleOverclock);
+						else
+							HandleOverclock((data & 0xFFFFFF00) | cpu);
 					}
 				}
 				break;

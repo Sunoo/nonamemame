@@ -25,6 +25,9 @@
 #define INTERNAL_BUFFER_SIZE (1 << 15)
 #define INTERNAL_SAMPLE_RATE (chip->master_clock * 2.0)
 
+#define INTERNAL_BUFFER_SIZE 	(1 << 15)
+#define INTERNAL_SAMPLE_RATE 	(chip->master_clock * 2.0)
+
 #if MAKE_WAVS
 #include "wavwrite.h"
 #endif
@@ -106,6 +109,9 @@ static int diff_lookup[16];
 /* timer callback */
 static void update_irq_state_timer(int param);
 
+/* timer callback */
+static void update_irq_state_timer(int param);
+
 
 
 INLINE void update_irq_state(struct YMZ280BChip *chip)
@@ -122,14 +128,14 @@ INLINE void update_irq_state(struct YMZ280BChip *chip)
 		chip->irq_state = 1;
 		if (chip->irq_callback)
 			(*chip->irq_callback)(1);
-else logerror("ymz280 irq_callback = 0");
+		else logerror("YMZ280B: IRQ generated, but no callback specified!");
 	}
 	else if (!irq_bits && chip->irq_state)
 	{
 		chip->irq_state = 0;
 		if (chip->irq_callback)
 			(*chip->irq_callback)(0);
-else logerror("ymz280 irq_callback = 0");
+		else logerror("YMZ280B: IRQ generated, but no callback specified!");
 	}
 }
 

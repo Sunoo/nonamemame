@@ -62,7 +62,6 @@ static void LoadFolderFilter(int folder_index,int filters);
 static REG_OPTION * GetOption(REG_OPTION *option_array, const char *key);
 static void LoadOption(REG_OPTION *option,const char *value_str);
 static BOOL LoadGameVariableOrFolderFilter(char *key,const char *value);
-static void ParseKeyValueStrings(char *buffer,char **key,char **value);
 static void LoadOptionsAndSettings(void);
 static BOOL LoadOptions(const char *filename,options_type *o,BOOL load_global_game_options);
 
@@ -112,6 +111,9 @@ static void FolderFlagsDecodeString(const char *str,void *data);
 static void TabFlagsEncodeString(void *data,char *str);
 static void TabFlagsDecodeString(const char *str,void *data);
 
+static void PasswordEncodeString(void *data,char *str);
+
+
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
@@ -122,6 +124,7 @@ static void TabFlagsDecodeString(const char *str,void *data);
 
 #define UI_INI_FILENAME MAME32NAME "ui.ini"
 #define DEFAULT_OPTIONS_INI_FILENAME MAME32NAME ".ini"
+#define DEFAULT_PASSWORD "*MAME32"
 
 /***************************************************************************
     Internal structures
@@ -156,16 +159,21 @@ static REG_OPTION regSettings[] =
 	{ "show_tool_bar",              RO_BOOL,    &settings.show_toolbar,              "1" },
 	{ "show_status_bar",            RO_BOOL,    &settings.show_statusbar,            "1" },
 	{ "show_folder_section",        RO_BOOL,    &settings.show_folderlist,           "1" },
+	{ "show_unavailable",           RO_INT,     &settings.show_unavailable,          "0" },
+	{ "show_recent",                RO_INT,     &settings.show_recent,               "0" },
+	{ "sort_folders",               RO_BOOL,    &settings.sort_folders,              "0" },
 	{ "hide_folders",               RO_ENCODE,  &settings.show_folder_flags,         NULL, FALSE, FolderFlagsEncodeString, FolderFlagsDecodeString },
 
 	{ "show_tabs",                  RO_BOOL,    &settings.show_tabctrl,              "1" },
-	{ "hide_tabs",                  RO_ENCODE,  &settings.show_tab_flags,            "snapshot,flyer,cabinet,marquee,title", FALSE, TabFlagsEncodeString, TabFlagsDecodeString },
+	{ "hide_tabs",                  RO_ENCODE,  &settings.show_tab_flags,            "marquee, title, cpanel, history", FALSE, TabFlagsEncodeString, TabFlagsDecodeString },
+	{ "history_tab",				RO_INT,		&settings.history_tab,				 0, 0},
 
 	{ "check_game",                 RO_BOOL,    &settings.game_check,                "1" },
 	{ "joystick_in_interface",      RO_BOOL,    &settings.use_joygui,                "0" },
 	{ "keyboard_in_interface",      RO_BOOL,    &settings.use_keygui,                "0" },
 	{ "broadcast_game_name",        RO_BOOL,    &settings.broadcast,                 "0" },
 	{ "random_background",          RO_BOOL,    &settings.random_bg,                 "0" },
+	{ "background",                 RO_INT,     &settings.background,                "187" },
 
 	{ "sort_column",                RO_INT,     &settings.sort_column,               "0" },
 	{ "sort_reversed",              RO_BOOL,    &settings.sort_reverse,              "0" },
@@ -218,6 +226,7 @@ static REG_OPTION regSettings[] =
     { "ui_key_view_tab_marquee",    RO_ENCODE,  &settings.ui_key_view_tab_marquee,    "KEYCODE_LALT KEYCODE_4", FALSE, KeySeqEncodeString,  KeySeqDecodeString},
     { "ui_key_view_tab_screenshot", RO_ENCODE,  &settings.ui_key_view_tab_screenshot, "KEYCODE_LALT KEYCODE_1", FALSE, KeySeqEncodeString,  KeySeqDecodeString},
     { "ui_key_view_tab_title",      RO_ENCODE,  &settings.ui_key_view_tab_title,      "KEYCODE_LALT KEYCODE_5", FALSE, KeySeqEncodeString,  KeySeqDecodeString},
+    { "ui_key_quit",			    RO_ENCODE,  &settings.ui_key_quit,				  "KEYCODE_LALT KEYCODE_Q", FALSE, KeySeqEncodeString,  KeySeqDecodeString},
 
 	{ "ui_joy_up",                  RO_ENCODE,  &settings.ui_joy_up,                  NULL, FALSE, JoyInfoEncodeString,  JoyInfoDecodeString},
 	{ "ui_joy_down",                RO_ENCODE,  &settings.ui_joy_down,                NULL, FALSE, JoyInfoEncodeString,  JoyInfoDecodeString},
@@ -240,6 +249,7 @@ static REG_OPTION regSettings[] =
 	{ "stretch_screenshot_larger",  RO_BOOL,    &settings.stretch_screenshot_larger,  "1" },
 	{ "inherit_filter",             RO_BOOL,    &settings.inherit_filter,             "0" },
 	{ "offset_clones",              RO_BOOL,    &settings.offset_clones,              "0" },
+	{ "password",                   RO_ENCODE,  &settings.password,                   DEFAULT_PASSWORD, FALSE, PasswordEncodeString, PasswordDecodeString },
 
 	{ "language",                   RO_STRING,  &settings.language,         "english" },
 	{ "flyer_directory",            RO_STRING,  &settings.flyerdir,         "flyers" },
@@ -375,6 +385,7 @@ static REG_OPTION global_game_options[] =
 	{ "history_file",           RO_STRING,  &settings.history_filename, "history.dat" },
 	{ "mameinfo_file",          RO_STRING,  &settings.mameinfo_filename,"mameinfo.dat" },
 	{ "ctrlr_directory",        RO_STRING,  &settings.ctrlrdir,         "ctrlr" },
+	{ "pcbinfos_directory",     RO_STRING,  &settings.pcbinfosdir,      "pcb" },
 	{ "" }
 
 };
@@ -404,13 +415,13 @@ static GAMEVARIABLE_OPTION gamevariable_options[] =
 // (TAB_...)
 const char* image_tabs_long_name[MAX_TAB_TYPES] =
 {
-	"Snapshot",
-	"Flyer",
-	"Cabinet",
+	"Snapshot ",
+	"Flyer ",
+	"Cabinet ",
 	"Marquee",
 	"Title",
 	"Control Panel",
-	"History",
+	"History ",
 };
 
 const char* image_tabs_short_name[MAX_TAB_TYPES] =
@@ -556,6 +567,8 @@ BOOL OptionsInit()
 {
 	int i;
 
+	extern FOLDERDATA g_folderData[];
+
 #ifdef MAME_DEBUG
 	if (!CheckOptions(regSettings, FALSE))
 		return FALSE;
@@ -577,6 +590,8 @@ BOOL OptionsInit()
 	settings.view            = VIEW_GROUPED;
 	settings.show_folder_flags = NewBits(MAX_FOLDERS);
 	SetAllBits(settings.show_folder_flags,TRUE);
+
+	settings.history_tab = TAB_HISTORY;
 
 	settings.ui_joy_up[0] = 1;
 	settings.ui_joy_up[1] = JOYCODE_STICK_AXIS;
@@ -658,6 +673,18 @@ BOOL OptionsInit()
 		return FALSE;
 
 	LoadOptionsAndSettings();
+
+	if (! GetShowUnavailableFolder())
+	{
+		// Hide 'unavailable' folder if not available
+		ClearBit(settings.show_folder_flags,g_folderData[FOLDER_UNAVAILABLE-1].m_nFolderId);
+
+		// Hide 'available' filter if not available
+		for (i = num_folder_filters - 1; i >= 0; i--)
+		{
+			folder_filters[i].filters &= ~F_AVAILABLE;
+		}
+	}
 
 	// have our mame core (file code) know about our rom path
 	// this leaks a little, but the win32 file core writes to this string
@@ -1127,6 +1154,17 @@ BOOL GetRandomBackground(void)
 	return settings.random_bg;
 }
 
+void SetBackground(int bkgnd)
+{
+
+	settings.background = bkgnd;
+}
+
+int GetBackground(void)
+{
+	return settings.background;
+}
+
 void SetSavedFolderID(UINT val)
 {
 	settings.folder_id = val;
@@ -1155,6 +1193,22 @@ void SetShowFolderList(BOOL val)
 BOOL GetShowFolderList(void)
 {
 	return settings.show_folderlist;
+}
+
+BOOL GetShowUnavailableFolder(void)
+{
+	if (settings.show_unavailable == 0x1971)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+BOOL GetShowRecent(void)
+{
+	if (settings.show_recent == 0x1971)
+		return TRUE;
+	else
+		return FALSE;
 }
 
 BOOL GetShowFolder(int folder)
@@ -1188,6 +1242,16 @@ void SetShowTabCtrl (BOOL val)
 BOOL GetShowTabCtrl (void)
 {
 	return settings.show_tabctrl;
+}
+
+void SetSortTree (BOOL val)
+{
+	settings.sort_folders = val;
+}
+
+BOOL GetSortTree (void)
+{
+	return settings.sort_folders;
 }
 
 void SetShowToolBar(BOOL val)
@@ -1309,6 +1373,19 @@ BOOL AllowedToSetShowTab(int tab,BOOL show)
 
 	show_tab_flags &= ~(1 << tab);
 	return show_tab_flags != 0;
+}
+
+int GetHistoryTab()
+{
+	return settings.history_tab;
+}
+
+void SetHistoryTab(int tab, BOOL show)
+{
+	if (show)
+		settings.history_tab = tab;
+	else
+		settings.history_tab = TAB_NONE;
 }
 
 void SetColumnWidths(int width[])
@@ -1691,6 +1768,19 @@ void SetFolderDir(const char* path)
 		settings.folderdir = strdup(path);
 }
 
+const char* GetPcbInfosDir(void)
+{
+	return settings.pcbinfosdir;
+}
+
+void SetPcbInfosDir(const char* path)
+{
+	FreeIfAllocated(&settings.pcbinfosdir);
+
+	if (path != NULL)
+		settings.pcbinfosdir = strdup(path);
+}
+
 const char* GetCheatFileName(void)
 {
 	return settings.cheat_filename;
@@ -1767,11 +1857,19 @@ void ResetAllGameOptions(void)
 	//Reset the Folder Options, can be done in one step
 	for (i=0;i<(MAX_FOLDERS + (MAX_EXTRA_FOLDERS *MAX_EXTRA_SUBFOLDERS));i++)
 	{
-		if( (i == FOLDER_VECTOR) || (ExtraFolderData[i] &&
-									 (ExtraFolderData[i]->m_nParent == FOLDER_SOURCE) ) )
+		if( i == FOLDER_VECTOR)
+ 		{
+ 			CopyGameOptions(GetDefaultOptions(-1, FALSE),&folder_options[i]);
+ 			SaveFolderOptions(i, 0);
+ 		}
+
+		if( i>= MAX_FOLDERS )
 		{
-			CopyGameOptions(GetDefaultOptions(-1, FALSE),&folder_options[i]);
-			SaveFolderOptions(i, 0);
+			if( ExtraFolderData[i-MAX_FOLDERS] && (ExtraFolderData[i-MAX_FOLDERS]->m_nParent == FOLDER_SOURCE) )
+			{
+				CopyGameOptions(GetDefaultOptions(-1, FALSE),&folder_options[i]);
+				SaveFolderOptions(i, 0);
+			}
 		}
 	}
 }
@@ -2016,6 +2114,10 @@ InputSeq* Get_ui_key_view_tab_title(void)
 {
 	return &settings.ui_key_view_tab_title.is;
 }
+InputSeq* Get_ui_key_quit(void)
+{
+	return &settings.ui_key_quit.is;
+}
 
 
 
@@ -2240,6 +2342,38 @@ void SetRunFullScreen(BOOL fullScreen)
 {
 	settings.full_screen = fullScreen;
 }
+
+BOOL GetPassword(char *pwd)
+{
+	if ( pwd != NULL )
+	{
+		strcpy(pwd, &settings.password[1]);
+	}
+	
+	return (*settings.password != ' ');
+}
+
+void SetPassword(char *pwd, BOOL enabled)
+{
+	if ( pwd != NULL )
+	{
+		FreeIfAllocated(&settings.password);
+		
+		settings.password = (char *)malloc(strlen(pwd)+2);
+		
+		strcpy(&settings.password[1], pwd);
+	}
+	
+	if ( enabled )
+	{
+		*settings.password = '*';
+	}
+	else
+	{
+		*settings.password = ' ';
+	}
+}
+
 
 /***************************************************************************
     Internal functions
@@ -2555,7 +2689,7 @@ static void FolderFlagsEncodeString(void *data,char *str)
 	// and upgraders will see them
 	for (i=0;i<MAX_FOLDERS;i++)
 	{
-		if (TestBit(*(LPBITS *)data,i) == FALSE)
+		if ((TestBit(*(LPBITS *)data,i) == FALSE) || ((i == FOLDER_UNAVAILABLE) && (!GetShowUnavailableFolder())))
 		{
 			int j;
 
@@ -2601,6 +2735,10 @@ static void FolderFlagsDecodeString(const char *str,void *data)
 		}
 		token = strtok(NULL,", \t");
 	}
+	
+	// Hide unavailable folder if not available
+	if (! GetShowUnavailableFolder())
+		ClearBit(*(LPBITS *)data,g_folderData[FOLDER_UNAVAILABLE-1].m_nFolderId);
 }
 
 static void TabFlagsEncodeString(void *data,char *str)
@@ -2656,6 +2794,95 @@ static void TabFlagsDecodeString(const char *str,void *data)
 	{
 		// not allowed to hide all tabs, because then why even show the area?
 		*(int *)data = (1 << TAB_SCREENSHOT);
+	}
+}
+
+static void PasswordEncodeString(void *data, char *str)
+{
+	unsigned char car;
+	unsigned char chk = 0x69;
+	char *p;
+	int i;
+	
+	p = *(char **)data;
+	
+	// compute string checksum
+	for (i=0; i<strlen(p); i++ )
+	{
+		chk += (unsigned char)p[i];
+	}
+
+	// If password is null, keep corruption
+	car = chk ^ (p[1]=='\0' ? *(char *)data : 0x96);
+
+	// Convert car to BCD
+	for ( i=strlen(p); i>=0; i-- )
+	{
+		chk = car;
+		str[3*i +0] = '0' + chk/100;
+		chk -= (str[3*i +0] - '0')*100;
+		str[3*i +1] = '0' + chk/10;
+		chk -= (str[3*i +1] - '0')*10;
+		str[3*i +2] = '0' + chk;
+
+		car ^= p[i-1] ^ i;
+	}
+	
+	str[3*(strlen(p)+1)] = '\0';		
+}
+
+void PasswordDecodeString(const char *str, void *data)
+{
+	unsigned char car;
+	unsigned char chk;
+	char *p;
+	int i;
+
+	FreeIfAllocated(data);
+
+	// default password
+	if ( strcmp(str, DEFAULT_PASSWORD) == 0 )
+	{
+		*(char **)data = strdup(str);
+		return;
+	}
+
+	*(char **)data = (char *)malloc(strlen(str)/3);
+	p = *(char **)data;
+
+	// Convert BCD to car
+	for ( i=0; i<strlen(str); i+=3 )
+	{
+		car  = (str[i+0] - '0')*100;
+		car += (str[i+1] - '0')*10;
+		car += (str[i+2] - '0');
+
+		p[i/3] = car;
+	}
+
+	chk = p[i/3-1];
+	p[i/3-1] = '\0';
+
+	// decode string
+	for ( i=0; i<(strlen(p)-1); i++ )
+	{
+		p[i] ^= p[i+1] ^ (i+1);
+	}
+	
+	p[i] ^= chk ^ strlen(p);
+	chk ^= 0x96;
+
+	// compute checksum
+	car = 0x69;
+	for (i=0; i<strlen(p); i++ )
+	{
+		car += (unsigned char)p[i];
+	}
+
+	// wrong checksum, password enabled and un-verifiable
+	if ( car != chk )
+	{
+		strcpy(p, "*");
 	}
 }
 
@@ -2779,7 +3006,7 @@ static BOOL LoadGameVariableOrFolderFilter(char *key,const char *value)
 
 // out of a string, parse two substrings (non-blanks, or quoted).
 // we modify buffer, and return key and value to point to the substrings, or NULL
-static void ParseKeyValueStrings(char *buffer,char **key,char **value)
+void ParseKeyValueStrings(char *buffer,char **key,char **value)
 {
 	char *ptr;
 	BOOL quoted;
@@ -3530,7 +3757,10 @@ static BOOL IsOptionEqual(int option_index,options_type *o1,options_type *o2)
 		a = *(char **)regGameOpts[option_index].m_vpData;
 		gOpts = *o2;
 		b = *(char **)regGameOpts[option_index].m_vpData;
-		return strcmp(a,b) == 0;
+		if( a != NULL && b != NULL )
+			return strcmp(a,b) == 0;
+		else 
+			return FALSE;
 	}
 	case RO_BOOL:
 	{
@@ -3557,7 +3787,10 @@ static BOOL IsOptionEqual(int option_index,options_type *o1,options_type *o2)
 		regGameOpts[option_index].encode(regGameOpts[option_index].m_vpData,a);
 		gOpts = *o2;
 		regGameOpts[option_index].encode(regGameOpts[option_index].m_vpData,b);
-		return strcmp(a,b) == 0;
+		if( a != NULL && b != NULL )
+			return strcmp(a,b) == 0;
+		else 
+			return FALSE;
 	}
 
 	default:

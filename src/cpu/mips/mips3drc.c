@@ -66,7 +66,8 @@
 #define RECOMPILE_MAY_CAUSE_EXCEPTION	0x0002
 #define RECOMPILE_END_OF_STRING			0x0004
 #define RECOMPILE_CHECK_INTERRUPTS		0x0008
-#define RECOMPILE_ADD_DISPATCH			0x0010
+#define RECOMPILE_CHECK_SW_INTERRUPTS	0x0010
+#define RECOMPILE_ADD_DISPATCH			0x0020
 
 /* COP0 registers */
 #define COP0_Index			0
@@ -232,6 +233,7 @@ static UINT32 compile_one(struct drccore *drc, UINT32 pc);
 static void append_generate_exception(struct drccore *drc, UINT8 exception);
 static void append_update_cycle_counting(struct drccore *drc);
 static void append_check_interrupts(struct drccore *drc, int inline_generate);
+static void append_check_sw_interrupts(struct drccore *drc, int inline_generate);
 
 static UINT32 recompile_instruction(struct drccore *drc, UINT32 pc);
 static UINT32 recompile_special(struct drccore *drc, UINT32 pc, UINT32 op);
@@ -683,7 +685,7 @@ static UINT32 compile_one(struct drccore *drc, UINT32 pc)
 	/* absorb any NOPs following */
 	#if (STRIP_NOPS)
 	{
-		if (!(result & (RECOMPILE_END_OF_STRING | RECOMPILE_CHECK_INTERRUPTS)))
+		if (!(result & (RECOMPILE_END_OF_STRING | RECOMPILE_CHECK_INTERRUPTS | RECOMPILE_CHECK_SW_INTERRUPTS)))
 			while (pcdelta < 120 && opptr[pcdelta/4] == 0)
 			{
 				pcdelta += 4;
@@ -698,6 +700,8 @@ static UINT32 compile_one(struct drccore *drc, UINT32 pc)
 	/* check interrupts */
 	if (result & RECOMPILE_CHECK_INTERRUPTS)
 		append_check_interrupts(drc, 0);
+	if (result & RECOMPILE_CHECK_SW_INTERRUPTS)
+		append_check_sw_interrupts(drc, 0);
 	if (result & RECOMPILE_ADD_DISPATCH)
 		drc_append_dispatcher(drc);
 	
@@ -785,6 +789,17 @@ static void append_check_interrupts(struct drccore *drc, int inline_generate)
 	}
 	_resolve_link(&link1);												// skip:
 	_resolve_link(&link2);
+}
+
+
+/*------------------------------------------------------------------
+	append_check_sw_interrupts
+------------------------------------------------------------------*/
+
+static void append_check_sw_interrupts(struct drccore *drc, int inline_generate)
+{
+	_test_m32abs_imm(&mips3.cpr[0][COP0_Cause], 0x300);					// test	[mips3.cpr[0][COP0_Cause]],0x300
+	_jcc(COND_NZ, mips3.generate_interrupt_exception);					// jnz	generate_interrupt_exception
 }
 
 
@@ -4086,12 +4101,7 @@ static UINT32 recompile_set_cop0_reg(struct drccore *drc, UINT8 reg)
 			_or_r32_r32(REG_EAX, REG_EBX);											// or	eax,ebx
 			_mov_m32abs_r32(&mips3.cpr[0][COP0_Cause], REG_EAX);					// mov	[mips3.cpr[0][COP0_Cause]],eax
 			_and_r32_m32abs(REG_EAX, &mips3.cpr[0][COP0_Status]);					// and	eax,[mips3.cpr[0][COP0_Status]]
-			_test_r32_imm(REG_EAX, 0x300);											// test	eax,0x300
-			_jcc_short_link(COND_Z, &link1);										// jz	skip
-			drc_append_standard_epilogue(drc, 1, 4, 1);								// <epilogue>
-			_jmp(mips3.generate_interrupt_exception);								// jmp	generate_interrupt_exception
-			_resolve_link(&link1);													// skip:
-			return RECOMPILE_SUCCESSFUL_CP(1,4) | RECOMPILE_CHECK_INTERRUPTS;
+			return RECOMPILE_SUCCESSFUL_CP(1,4) | RECOMPILE_CHECK_SW_INTERRUPTS;
 		
 		case COP0_Status:
 			_mov_r32_m32abs(REG_EBX, &mips3.cpr[0][COP0_Status]);					// mov	ebx,[mips3.cpr[0][COP0_Status]]

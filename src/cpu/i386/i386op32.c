@@ -1,6 +1,5 @@
 static UINT32 I386OP(shift_rotate32)(UINT8 modrm, UINT32 value, UINT8 shift)
 {
-	int i;
 	UINT32 dst, src;
 	dst = value;
 	src = value;
@@ -19,28 +18,27 @@ static UINT32 I386OP(shift_rotate32)(UINT8 modrm, UINT32 value, UINT8 shift)
 				break;
 			case 1:			/* ROR rm32, 1 */
 				I.CF = (src & 0x1) ? 1 : 0;
-				dst = ((I.CF << 31) + src) >> 1;
+				dst = (I.CF << 31) | (src >> 1);
 				I.OF = ((src ^ dst) & 0x80000000) ? 1 : 0;
 				CYCLES_RM(modrm, 3, 7);
 				break;
 			case 2:			/* RCL rm32, 1 */
 				dst = (src << 1) + I.CF;
-				SetCF32(dst);
+				I.CF = (src & 0x80000000) ? 1 : 0;
 				I.OF = ((src ^ dst) & 0x80000000) ? 1 : 0;
 				CYCLES_RM(modrm, 9, 10);
 				break;
 			case 3:			/* RCR rm32, 1 */
-				dst = ((I.CF << 31) + src) >> 1;
+				dst = (I.CF << 31) | (src >> 1);
 				I.CF = src & 0x1;
 				I.OF = ((src ^ dst) & 0x80000000) ? 1 : 0;
 				CYCLES_RM(modrm, 9, 10);
 				break;
 			case 4:			/* SHL/SAL rm32, 1 */
-			case 7:
+			case 6:
 				dst = src << 1;
-				SetCF32(dst);
-				I.OF = ((src ^ dst) & 0x80000000) ? 1 : 0;
-				I.AF = 1;
+				I.CF = (src & 0x80000000) ? 1 : 0;
+				I.OF = (((I.CF << 31) ^ dst) & 0x80000000) ? 1 : 0;
 				SetSZPF32(dst);
 				CYCLES_RM(modrm, 3, 7);
 				break;
@@ -48,15 +46,13 @@ static UINT32 I386OP(shift_rotate32)(UINT8 modrm, UINT32 value, UINT8 shift)
 				dst = src >> 1;
 				I.CF = src & 0x1;
 				I.OF = (src & 0x80000000) ? 1 : 0;
-				I.AF = 1;
 				SetSZPF32(dst);
 				CYCLES_RM(modrm, 3, 7);
 				break;
-			case 6:			/* SAR rm32, 1 */
+			case 7:			/* SAR rm32, 1 */
 				dst = (INT32)(src) >> 1;
 				I.CF = src & 0x1;
 				I.OF = 0;
-				I.AF = 1;
 				SetSZPF32(dst);
 				CYCLES_RM(modrm, 3, 7);
 				break;
@@ -67,55 +63,47 @@ static UINT32 I386OP(shift_rotate32)(UINT8 modrm, UINT32 value, UINT8 shift)
 		switch( (modrm >> 3) & 0x7 )
 		{
 			case 0:			/* ROL rm32, i8 */
-				for( i=0; i < shift; i++ ) {
-					I.CF = (dst & 0x80000000) ? 1 : 0;
-					dst = (dst << 1) + I.CF;
-				}
+				dst = ((src & ((UINT32)0xffffffff >> shift)) << shift) |
+					  ((src & ((UINT32)0xffffffff << (32-shift))) >> (32-shift));
+				I.CF = (src >> (32-shift)) & 0x1;
 				CYCLES_RM(modrm, 3, 7);
 				break;
 			case 1:			/* ROR rm32, i8 */
-				for( i=0; i < shift; i++ ) {
-					I.CF = dst & 0x1;
-					dst = (dst >> 1) + (I.CF << 31);
-				}
+				dst = ((src & ((UINT32)0xffffffff << shift)) >> shift) |
+					  ((src & ((UINT32)0xffffffff >> (32-shift))) << (32-shift));
+				I.CF = (src >> (shift-1)) & 0x1;
 				CYCLES_RM(modrm, 3, 7);
 				break;
 			case 2:			/* RCL rm32, i8 */
-				for( i=0; i < shift; i++ ) {
-					dst = (dst << 1) + I.CF;
-					SetCF32(dst);
-				}
+				dst = ((src & ((UINT32)0xffffffff >> shift)) << shift) |
+					  ((src & ((UINT32)0xffffffff << (33-shift))) >> (33-shift)) |
+					  (I.CF << (shift-1));
+				I.CF = (src >> (32-shift)) & 0x1;
 				CYCLES_RM(modrm, 9, 10);
 				break;
 			case 3:			/* RCR rm32, i8 */
-				for( i=0; i < shift; i++ ) {
-					dst = dst + ((UINT64)I.CF << 32);
-					I.CF = dst & 0x1;
-					dst >>= 1;
-				}
+				dst = ((src & ((UINT32)0xffffffff << shift)) >> shift) |
+					  ((src & ((UINT32)0xffffffff >> (32-shift))) << (33-shift)) |
+					  (I.CF << (32-shift));
+				I.CF = (src >> (shift-1)) & 0x1;
 				CYCLES_RM(modrm, 9, 10);
 				break;
 			case 4:			/* SHL/SAL rm32, i8 */
-			case 7:
-				dst <<= shift;
-				SetCF32(dst);
-				I.AF = 1;
+			case 6:
+				dst = src << shift;
+				I.CF = (src & (1 << (32-shift))) ? 1 : 0;
 				SetSZPF32(dst);
 				CYCLES_RM(modrm, 3, 7);
 				break;
 			case 5:			/* SHR rm32, i8 */
-				dst >>= shift - 1;
-				I.CF = dst & 0x1;
-				dst >>= 1;
-				I.AF = 1;
+				dst = src >> shift;
+				I.CF = (src & (1 << (shift-1))) ? 1 : 0;
 				SetSZPF32(dst);
 				CYCLES_RM(modrm, 3, 7);
 				break;
-			case 6:			/* SAR rm32, i8 */
-				dst = (INT32)(dst) >> (shift - 1);
-				I.CF = dst & 0x1;
-				dst = (INT32)(dst) >> 1;
-				I.AF = 1;
+			case 7:			/* SAR rm32, i8 */
+				dst = (INT32)src >> shift;
+				I.CF = (src & (1 << (shift-1))) ? 1 : 0;
 				SetSZPF32(dst);
 				CYCLES_RM(modrm, 3, 7);
 				break;
@@ -600,6 +588,28 @@ static void I386OP(imul_r32_rm32)(void)		// Opcode 0x0f af
 	}
 
 	dst = (INT64)(INT32)LOAD_REG32(modrm);
+	result = src * dst;
+
+	STORE_REG32(modrm, (UINT32)result);
+
+	I.CF = I.OF = !(result == (INT64)(INT32)result);
+}
+
+static void I386OP(imul_r32_rm32_i32)(void)	// Opcode 0x69
+{
+	UINT8 modrm = FETCH();
+	INT64 result;
+	INT64 src, dst;
+	if( modrm >= 0xc0 ) {
+		dst = (INT64)(INT32)LOAD_RM32(modrm);
+		CYCLES(12);		/* TODO: Correct multiply timing */
+	} else {
+		UINT32 ea = GetEA(modrm);
+		dst = (INT64)(INT32)READ32(ea);
+		CYCLES(15);		/* TODO: Correct multiply timing */
+	}
+
+	src = (INT64)(INT32)FETCH32();
 	result = src * dst;
 
 	STORE_REG32(modrm, (UINT32)result);
@@ -1618,11 +1628,11 @@ static void I386OP(shld32_i8)(void)			// Opcode 0x0f a4
 		UINT32 dst = LOAD_RM32(modrm);
 		UINT32 upper = LOAD_REG32(modrm);
 		UINT8 shift = FETCH();
-		if( shift > 31 ) {
+		if( shift > 31 || shift == 0 ) {
 
 		} else {
-			I.CF = (dst & (1 << (shift - 1))) ? 1 : 0;
-			dst = (dst << shift) | (upper >> shift);
+			I.CF = (dst & (1 << (32-shift))) ? 1 : 0;
+			dst = (dst << shift) | (upper >> (32-shift));
 			SetSZPF32(dst);
 		}
 		STORE_RM32(modrm, dst);
@@ -1632,11 +1642,11 @@ static void I386OP(shld32_i8)(void)			// Opcode 0x0f a4
 		UINT32 dst = READ32(ea);
 		UINT32 upper = LOAD_REG32(modrm);
 		UINT8 shift = FETCH();
-		if( shift > 31 ) {
+		if( shift > 31 || shift == 0 ) {
 
 		} else {
-			I.CF = (dst & (1 << (shift - 1))) ? 1 : 0;
-			dst = (dst << shift) | (upper >> shift);
+			I.CF = (dst & (1 << (32-shift))) ? 1 : 0;
+			dst = (dst << shift) | (upper >> (32-shift));
 			SetSZPF32(dst);
 		}
 		WRITE32(ea, dst);
@@ -1652,11 +1662,11 @@ static void I386OP(shrd32_i8)(void)			// Opcode 0x0f ac
 		UINT32 dst = LOAD_RM32(modrm);
 		UINT32 upper = LOAD_REG32(modrm);
 		UINT8 shift = FETCH();
-		if( shift > 31 ) {
+		if( shift > 31 || shift == 0 ) {
 
 		} else {
-			I.CF = (dst & (1 << (31 - shift - 1))) ? 1 : 0;
-			dst = (dst >> shift) | (upper << shift);
+			I.CF = (dst & (1 << (shift-1))) ? 1 : 0;
+			dst = (dst >> shift) | (upper << (32-shift));
 			SetSZPF32(dst);
 		}
 		STORE_RM32(modrm, dst);
@@ -1666,11 +1676,11 @@ static void I386OP(shrd32_i8)(void)			// Opcode 0x0f ac
 		UINT32 dst = READ32(ea);
 		UINT32 upper = LOAD_REG32(modrm);
 		UINT8 shift = FETCH();
-		if( shift > 31 ) {
+		if( shift > 31 || shift == 0 ) {
 
 		} else {
-			I.CF = (dst & (1 << (31 - shift - 1))) ? 1 : 0;
-			dst = (dst >> shift) | (upper << shift);
+			I.CF = (dst & (1 << (shift-1))) ? 1 : 0;
+			dst = (dst >> shift) | (upper << (32-shift));
 			SetSZPF32(dst);
 		}
 		WRITE32(ea, dst);
@@ -2482,13 +2492,18 @@ static void I386OP(groupFF_32)(void)		// Opcode 0xff
 static void I386OP(group0F01_32)(void)		// Opcode 0x0f 01
 {
 	UINT8 modrm = FETCH();
+	UINT32 address, ea;
 
 	switch( (modrm >> 3) & 0x7 )
 	{
 		case 0:			/* SGDT */
 			{
-				UINT32 address = FETCH32();
-				UINT32 ea = i386_translate( CS, address );
+				if( modrm >= 0xc0 ) {
+					address = LOAD_RM32(modrm);
+					ea = i386_translate( CS, address );
+				} else {
+					ea = GetEA(modrm);
+				}
 				WRITE16(ea, I.gdtr.limit);
 				WRITE32(ea + 2, I.gdtr.base);
 				CYCLES(9);
@@ -2496,8 +2511,12 @@ static void I386OP(group0F01_32)(void)		// Opcode 0x0f 01
 			}
 		case 2:			/* LGDT */
 			{
-				UINT32 address = FETCH32();
-				UINT32 ea = i386_translate( CS, address );
+				if( modrm >= 0xc0 ) {
+					address = LOAD_RM32(modrm);
+					ea = i386_translate( CS, address );
+				} else {
+					ea = GetEA(modrm);
+				}
 				I.gdtr.limit = READ16(ea);
 				I.gdtr.base = READ32(ea + 2);
 				CYCLES(11);
@@ -2505,8 +2524,12 @@ static void I386OP(group0F01_32)(void)		// Opcode 0x0f 01
 			}
 		case 3:			/* LIDT */
 			{
-				UINT32 address = FETCH32();
-				UINT32 ea = i386_translate( CS, address );
+				if( modrm >= 0xc0 ) {
+					address = LOAD_RM32(modrm);
+					ea = i386_translate( CS, address );
+				} else {
+					ea = GetEA(modrm);
+				}
 				I.idtr.limit = READ16(ea);
 				I.idtr.base = READ32(ea + 2);
 				CYCLES(11);
@@ -2636,4 +2659,63 @@ static void I386OP(group0FBA_32)(void)		// Opcode 0x0f ba
 			osd_die("i386: group0FBA_32 /%d unknown\n", (modrm >> 3) & 0x7);
 			break;
 	}
+}
+
+static void I386OP(bound_r32_m32_m32)(void)	// Opcode 0x62
+{
+	UINT8 modrm;
+	INT32 val, low, high;
+
+	modrm = FETCH();
+
+	if (modrm >= 0xc0)
+	{
+		low = high = LOAD_RM32(modrm);
+	}
+	else
+	{
+		UINT32 ea = GetEA(modrm);
+		low = READ32(ea + 0);
+		high = READ32(ea + 4);
+	}
+	val = LOAD_REG32(modrm);
+
+	if ((val < low) || (val > high))
+		i386_trap(5);
+
+	CYCLES(1);	// TODO: Find out correct cycle count
+}
+
+static void I386OP(retf32)(void)			// Opcode 0xcb
+{
+	I.eip = POP32();
+	I.sreg[CS].selector = POP16();
+	CHANGE_PC(I.eip);
+	i386_load_segment_descriptor( CS );
+
+	CYCLES(1);	// TODO: deduct proper cycle count
+}
+
+static void I386OP(retf_i32)(void)			// Opcode 0xca
+{
+	UINT16 count = FETCH16();
+
+	I.eip = POP32();
+	I.sreg[CS].selector = POP16();
+	CHANGE_PC(I.eip);
+	i386_load_segment_descriptor( CS );
+
+	REG32(ESP) += count;
+	CYCLES(1);	// TODO: deduct proper cycle count
+}
+
+static void I386OP(xlat32)(void)			// Opcode 0xd7
+{
+	UINT32 ea;
+	if( I.segment_prefix ) {
+		ea = i386_translate( I.segment_override, REG32(EBX) + REG8(AL) );
+	} else {
+		ea = i386_translate( DS, REG32(EBX) + REG8(AL) );
+	}
+	REG8(AL) = READ8(ea);
 }

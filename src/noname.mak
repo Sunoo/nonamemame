@@ -93,6 +93,7 @@ CPUS+=G65816@
 CPUS+=SPC700@
 CPUS+=E132XS@
 CPUS+=I386@
+CPUS+=I960@
 
 # uncomment the following lines to include a sound core
 SOUNDS+=CUSTOM@
@@ -166,6 +167,7 @@ SOUNDS+=YMF271@
 SOUNDS+=PSXSPU@
 SOUNDS+=CDDA@
 SOUNDS+=ICS2115@
+SOUNDS+=ST0016@
 
 DRVLIBS = \
 	$(OBJ)/pacman.a $(OBJ)/epos.a $(OBJ)/nichibut.a \
@@ -251,6 +253,7 @@ $(OBJ)/namco.a: \
 	$(OBJ)/vidhrdw/tceptor.o $(OBJ)/drivers/tceptor.o \
 	$(OBJ)/machine/namcos1.o $(OBJ)/vidhrdw/namcos1.o $(OBJ)/drivers/namcos1.o \
 	$(OBJ)/machine/namcos2.o $(OBJ)/vidhrdw/namcos2.o $(OBJ)/drivers/namcos2.o \
+	$(OBJ)/vidhrdw/namcofl.o $(OBJ)/drivers/namcofl.o \
 	$(OBJ)/drivers/namcoic.o \
 	$(OBJ)/vidhrdw/namcona1.o $(OBJ)/drivers/namcona1.o \
 	$(OBJ)/vidhrdw/namconb1.o $(OBJ)/drivers/namconb1.o \
@@ -650,6 +653,7 @@ $(OBJ)/atari.a: \
 	$(OBJ)/drivers/quantum.o \
 	$(OBJ)/vidhrdw/copsnrob.o $(OBJ)/machine/copsnrob.o $(OBJ)/drivers/copsnrob.o \
 	$(OBJ)/vidhrdw/flyball.o $(OBJ)/drivers/flyball.o \
+	$(OBJ)/drivers/mgolf.o \
 	$(OBJ)/vidhrdw/sprint2.o $(OBJ)/drivers/sprint2.o \
 	$(OBJ)/vidhrdw/sprint4.o $(OBJ)/drivers/sprint4.o \
 	$(OBJ)/vidhrdw/sprint8.o $(OBJ)/drivers/sprint8.o \
@@ -822,6 +826,8 @@ $(OBJ)/seibu.a: \
 	$(OBJ)/vidhrdw/sengokmj.o $(OBJ)/drivers/sengokmj.o \
 	$(OBJ)/vidhrdw/mustache.o $(OBJ)/drivers/mustache.o \
 	$(OBJ)/vidhrdw/seibuspi.o $(OBJ)/machine/seibuspi.o $(OBJ)/drivers/seibuspi.o \
+	$(OBJ)/machine/ds2404.o $(OBJ)/machine/spisprit.o \
+	$(OBJ)/machine/spistab1.o $(OBJ)/machine/spistab2.o $(OBJ)/machine/spistab3.o \
 
 $(OBJ)/tad.a: \
 	$(OBJ)/vidhrdw/cabal.o $(OBJ)/drivers/cabal.o \
@@ -911,6 +917,7 @@ $(OBJ)/seta.a: \
 	$(OBJ)/vidhrdw/seta.o $(OBJ)/drivers/seta.o \
 	$(OBJ)/vidhrdw/seta2.o $(OBJ)/drivers/seta2.o \
 	$(OBJ)/vidhrdw/ssv.o $(OBJ)/drivers/ssv.o \
+	$(OBJ)/vidhrdw/st0016.o $(OBJ)/drivers/st0016.o \
 
 $(OBJ)/atlus.a: \
 	$(OBJ)/vidhrdw/powerins.o $(OBJ)/drivers/powerins.o \
@@ -1136,6 +1143,9 @@ $(OBJ)/other.a: \
 	$(OBJ)/drivers/dynadice.o \
 	$(OBJ)/drivers/ssingles.o \
 	$(OBJ)/drivers/tcl.o \
+	$(OBJ)/drivers/macs.o \
+	$(OBJ)/drivers/onetwo.o \
+	$(OBJ)/drivers/1945kiii.o \
 
 
 COREOBJS += $(OBJ)/driver.o $(OBJ)/cheat.o

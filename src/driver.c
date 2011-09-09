@@ -26,6 +26,9 @@
 #include <stdio.h>
 #include <math.h>
 
+int fsountinit;
+int fsoundvolume;
+
 /*
 Play a sample file using the FMOD lib ... mp2 mp3 wav ogg wma asf
 PlayFile(filename, looping, start point, end point);
@@ -34,13 +37,14 @@ void PlayFile(int channel, char file[500], int looping, int start, int stop){
 FSOUND_STREAM *stream;
 
 
-    if (!FSOUND_Init(44100, 16, 0))
-    {
-        printf("Error!\n");
-        printf("%s\n", FMOD_ErrorString(FSOUND_GetError()));
-        FSOUND_Close();
-        return;
-    }
+// if(!fsountinit){
+// fsountinit = FSOUND_Init(44100, 16, 0);
+// }
+
+if(!fsountinit){
+FMODInit();
+}
+
 	if(looping){
 	stream = FSOUND_Stream_Open(file, FSOUND_LOOP_NORMAL , 0, 0);
 	FSOUND_Stream_SetLoopPoints(stream, start, stop);
@@ -52,13 +56,22 @@ FSOUND_Stream_Play(channel, stream);
   char gname[6];
   sprintf(gname, "%s", Machine->gamedrv->name);
 
+  FSOUND_SetVolume(channel,fsoundvolume);
+  
+}
+
+void FMODInit(void){
+fsountinit = FSOUND_Init(44100, 16, 0);
   /* Volume adjustments */
   if(strcmp(Machine->gamedrv->name,"contra") == 0){
-  FSOUND_SetVolume(channel,110);
+  fsoundvolume = 110;
   }else{
-  FSOUND_SetVolume(channel,160);
+  fsoundvolume = 170;
   }
+  FSOUND_SetVolume(-3,fsoundvolume);
 }
+
+
 
 /*
   StopFile(channel to be stopped);
@@ -71,7 +84,17 @@ signed char PauseFile(int channel, signed char paused){
 return FSOUND_SetPaused(channel,  paused );
 }
 
+signed char FMODReset(void){
+return FSOUND_Init(44100, 16, 0);
+}
 
+signed char FMODVolume(int channel, int vol){
+return FSOUND_SetVolume(channel,vol);
+}
+
+int FMODGetVolume(int channel){
+return FSOUND_GetVolume(channel);
+}
 
 /* END NINO FMOD IMPLEMENTATION */
 
@@ -329,6 +352,7 @@ const struct GameDriver *drivers[] =
 	DRIVER( tazmani2 )	/* (c) 1982 Stern */
 	DRIVER( calipso )	/* (c) 1982 Tago */
 	DRIVER( anteater )	/* (c) 1982 Tago */
+	DRIVER( anteatg )	/* (c) ? */
 	DRIVER( rescue )	/* (c) 1982 Stern */
 	DRIVER( aponow )	/* bootleg */
 	DRIVER( minefld )	/* (c) 1983 Stern */
@@ -723,11 +747,16 @@ const struct GameDriver *drivers[] =
 	DRIVER( suzuka8h )
 	DRIVER( suzuk8hj )
 	/* 92.8  Bubble Trouble */
+	DRIVER( sws )		/* (c) 1992 (Japan) */
 	DRIVER( sws92 )		/* (c) 1992 (Japan) */
 	DRIVER( sws92g )	/* (c) 1992 (Japan) */
 	DRIVER( suzuk8h2 )
 	DRIVER( sws93 )		/* (c) 1993 (Japan) */
 	/* 93.6  Super World Stadium '93 */
+
+	/* Namco FL games */
+	DRIVER( speedrcr )
+	DRIVER( finalapr )
 
 	/* Namco NA-1 / NA-2 System games */
 	DRIVER( bkrtmaq )	/* (c) 1992 (Japan) */
@@ -1222,6 +1251,7 @@ const struct GameDriver *drivers[] =
 	DRIVER( skychut )	/* Irem [1980] */
 	DRIVER( spacbeam )	/* M15 no copyright notice */
 	DRIVER( greenber )	/* Irem */
+	DRIVER( headoni )	/* Irem no copyright notice */
 
 	DRIVER( redalert )	/* (c) 1981 + "GDI presents" */
 	DRIVER( demoneye )	/* (c) 1981 */
@@ -1349,6 +1379,7 @@ const struct GameDriver *drivers[] =
 	DRIVER( myqbert )	/* GV-103?(c) 1982 Gottlieb */
 	DRIVER( qberttst )	/* GV-103 (c) 1982 Gottlieb */
 	DRIVER( insector )	/* GV-??? (c) 1982 Gottlieb - never released */
+	DRIVER( tylz )		/* GV-??? (c) 1982 Gottlieb - never released */
 	DRIVER( krull )		/* GV-105 (c) 1983 Gottlieb */
 	DRIVER( sqbert )	/* GV-??? (c) 1983 Mylstar - never released */
 	DRIVER( mach3 )		/* GV-109 (c) 1983 Mylstar */
@@ -1627,6 +1658,7 @@ const struct GameDriver *drivers[] =
 	/* Taito Z-System games */
 	DRIVER( contcirc )	/* B33 (c) 1989 Taito Corporation Japan (World) */
 	DRIVER( contcrcu )	/* B33 (c) 1987 Taito America Corporation (US) */
+	DRIVER( contcrua )	/* B33 (c) 1987 Taito America Corporation (US) */
 	DRIVER( chasehq )	/* B52 (c) 1988 Taito Corporation Japan (World) */
 	DRIVER( chasehqj )	/* B52 (c) 1988 Taito Corporation (Japan) */
 	DRIVER( enforce )	/* B58 (c) 1988 Taito Corporation (Japan) */
@@ -1641,6 +1673,7 @@ const struct GameDriver *drivers[] =
 	DRIVER( spacegun )	/* C57 (c) 1990 Taito Corporation Japan (World) */
 	DRIVER( dblaxle )	/* C78 (c) 1991 Taito America Corporation (US) */
 	DRIVER( pwheelsj )	/* C78 (c) 1991 Taito Corporation (Japan) */
+	DRIVER( racingb )	/* C84 (c) 1991 Taito Coropration .. */
 
 	/* Taito Air System games */
 	DRIVER( topland )	/* B62 (c) 1988 Taito Coporation Japan (World) */
@@ -2419,8 +2452,10 @@ V-V                           TP-027
 	DRIVER( tondemo )	/* Tondemo Crisis (JAPAN) */
 
 	/* PS Arcade 95 */
-	DRIVER( brvblade )	/* Brave Blade */
-	DRIVER( beastrzr )	/* Beastorizer */
+	DRIVER( beastrzr )	/* Beastorizer (USA) */
+	DRIVER( beastrzb )	/* Beastorizer (USA Bootleg) */
+	DRIVER( bldyror2 )	/* Bloody Roar 2 (JAPAN) */
+	DRIVER( brvblade )	/* Brave Blade (JAPAN) */
 
 	/* Atari PSX */
 	DRIVER( primrag2 )	/* Primal Rage 2 */
@@ -2445,7 +2480,6 @@ V-V                           TP-027
 	DRIVER( ftimpcta )	/* Fighter's Impact Ace (JAPAN) */
 	DRIVER( gdarius )	/* G-Darius (JAPAN) */
 	DRIVER( gdarius2 )	/* G-Darius Ver.2 (JAPAN) */
-	DRIVER( beastrzb )	/* Beastorizer (bootleg)*/
 
 	/* Namco System 11 */
 	DRIVER( tekken )	/* Tekken (TE4/VER.C) */
@@ -2507,6 +2541,7 @@ V-V                           TP-027
 	DRIVER( cworld )	/* 11/1989 (QUIZ 1) (c) 1989 Capcom */
 	DRIVER( hatena )	/* 28/02/1990 (QUIZ 2) (c) 1990 Capcom (Japan) */
 	DRIVER( spang )		/* 14/09/1990 (c) 1990 Mitchell (World) */
+	DRIVER( spangj )	/* --/--/1990 (c) 1990 Mitchell (Japan) */
 	DRIVER( sbbros )	/* 01/10/1990 (c) 1990 Mitchell + Capcom (US) not listed on Capcom's site */
 	DRIVER( marukin )	/* 17/10/1990 (c) 1990 Yuga (Japan) */
 	DRIVER( qtono1 )	/* 25/12/1990 (QUIZ 3) (c) 1991 Capcom (Japan) */
@@ -2660,6 +2695,7 @@ V-V                           TP-027
 	DRIVER( astrob1 )	/* (c) 1981 */
 	DRIVER( 005 )		/* (c) 1981 */
 	DRIVER( monsterb )	/* (c) 1982 */
+	DRIVER( monster2 )	/* (c) 1982 */
 	DRIVER( spaceod )	/* (c) 1981 */
 	DRIVER( pignewt )	/* (c) 1983 */
 	DRIVER( pignewta )	/* (c) 1983 */
@@ -2702,6 +2738,7 @@ V-V                           TP-027
 	DRIVER( pitfallu )	/* 834-5627 [1985?] reprogrammed, (c) 1984 Activision (S1) */
 	DRIVER( seganinj )	/* 834-5677 (c) 1985 (S1) */
 	DRIVER( seganinu )	/* 834-5677 (c) 1985 (S1) */
+	DRIVER( ninja )		/* 834-5677 (c) 1985 (S1) */
 	DRIVER( nprinces )	/* 834-5677 (c) 1985 (S1) */
 	DRIVER( nprincso )	/* 834-5677 (c) 1985 (S1) */
 	DRIVER( nprincsu )	/* 834-5677 (c) 1985 (S1) */
@@ -3095,12 +3132,12 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 						/* 33 */
 						/* 34 */
 	DRIVER( mt_tlbba )	/* 35 */
-						/* 36 */
+	DRIVER( mt_cols )	/* 36 */
 						/* 37 */
 	DRIVER( mt_eswat )	/* 38 */
 	DRIVER( mt_smgp )	/* 39 */
 	DRIVER( mt_mwalk )	/* 40 */
-						/* 41 */
+	DRIVER( mt_crack )	/* 41 */
 						/* 42 */
 						/* 43 */
 						/* 44 */
@@ -3112,14 +3149,17 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 						/* 50 */
 						/* 51 */
 	DRIVER( mt_sonic )	/* 52 */
+	DRIVER( mt_sonia )	/* ^^ */
 	DRIVER( mt_fshrk )	/* 53 */
 						/* 54 */
 						/* 55 */
 						/* 56 */
 	DRIVER( mt_gaxe2 )	/* 57 */
-						/* 58 */
+	DRIVER( mt_stf )	/* 58 */
 						/* 59 */
 	DRIVER( mt_kcham )	/* 60 */
+						/* 61 */
+	DRIVER( mt_soni2 )	/* 62 */
 
 	/* Sega MegaPlay */
 	DRIVER( mp_sonic )	/* 01 */
@@ -3730,11 +3770,13 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	/* GX Type 1 */
 	DRIVER( racinfrc )	/* GX250 */
 	DRIVER( opengolf )	/* ? */
+	DRIVER( opengol2 )	/* ? */
 	DRIVER( ggreats2 )	/* GX218 */
 
 	/* GX Type 2 */
 	DRIVER( le2 )		/* GX312 (c) 1994 */
 	DRIVER( le2u )		/* GX312 (c) 1994 */
+	DRIVER( le2j )		/* GX312 (c) 1994 */
 	DRIVER( puzldama )	/* GX315 (c) 1994 (Japan) */
 	DRIVER( gokuparo )	/* GX321 (c) 1994 (Japan) */
 	DRIVER( fantjour )	/* GX321 */
@@ -3847,6 +3889,7 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	DRIVER( orbit )		/* 033689-033702	1978/11 [6800] */
 	DRIVER( boxer )		/* ?????? prototype 1978    [6502] */
 	DRIVER( wolfpack )	/* ?????? prototype         [6502] */
+	DRIVER( mgolf )		/* ?????? prototype 1978	[6502] */
 	DRIVER( videopin )	/* 034253-034267	1979/02 [6502] */
 	DRIVER( atarifb4 )	/* 034754			1979/04 [6502] */
 	DRIVER( subs )		/* 033714			1979/05 [6502] */
@@ -4200,7 +4243,8 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	DRIVER( tmekprot )	/* 136100			(c) 1994 */
 	DRIVER( primrage )	/* 136102			(c) 1994 */
 	DRIVER( primraga )	/* 136102			(c) 1994 */
-	DRIVER( area51 )	/* 136105			(c) 1995 */
+	DRIVER( area51 )	/*     ??			(c) 1995 */
+	DRIVER( area51t )	/* 136105			(c) 1995 */
 	DRIVER( area51a )	/* 136105			(c) 1995 */
 	DRIVER( area51mx )	/* 136105			(c) 1998 */
 	DRIVER( a51mxr3k )	/*     ??           (c) 1998 */
@@ -4373,6 +4417,7 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	DRIVER( blockout )	/* TA-0029 (c) 1989 + California Dreams */
 	DRIVER( blckout2 )	/* TA-0029 (c) 1989 + California Dreams */
 	DRIVER( blckoutj )	/* TA-0029 (c) 1989 + California Dreams (Japan) */
+	DRIVER( agress )	/* TA-0029 (c) 1991 Palco */
 	DRIVER( ddragon3 )	/* TA-0030 (c) 1990 */
 	DRIVER( ddrago3b )	/* bootleg */
 	DRIVER( wwfwfest )	/* TA-0031 (c) 1991 (US) */
@@ -4677,6 +4722,7 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 */
 	DRIVER( senkyu )
 	DRIVER( batlball )
+	DRIVER( batlbala )
 	DRIVER( viperp1 )
 	DRIVER( viperp1o )
 	DRIVER( ejanhs )
@@ -5058,6 +5104,7 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	DRIVER( twineag2 )	/* (c) 1994 Seta */
 	DRIVER( srmp7 )		/* (c) 1997 Seta */
 	DRIVER( survarts )	/* (c) 1993 Sammy (American) */
+	DRIVER( dynagear )	/* (c) 1993 Sammy */
 	DRIVER( eaglshot )
 	DRIVER( eaglshta )
 	DRIVER( hypreact )	/* (c) 1995 Sammy */
@@ -5076,6 +5123,18 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 
 	DRIVER( ultrax )	/* (c) 1995 Banpresto */
 	DRIVER( jsk )		/* (c) 1997 Visco */
+
+	/* ST-0016 based games (ST-0016 is a z80 / gfx / sound all in one) */
+	/* plain ST-0016 */
+	DRIVER( renju )
+	DRIVER( nratechu )
+	/* R3000 + ST-0016 */
+	DRIVER( srmp5 )
+	DRIVER( speglsht )
+	DRIVER( speglsha )
+	/* V810 + ST-0016 */
+	DRIVER( mayjinsn )
+	DRIVER( mayjisn2 )
 
 	/* Atlus games */
 	DRIVER( powerins )	/* (c) 1993 Atlus (Japan) */
@@ -5250,7 +5309,8 @@ Other Sun games
 
 	/* Yun Sung games */
 	DRIVER( paradise )	/* (c) >1994 Yun Sung */
-	DRIVER( tgtball )	/* (c) 199? Yun Sung */
+	DRIVER( tgtball )	/* (c) 1995 Yun Sung */
+	DRIVER( tgtballa )	/* (c) 1995 Yun Sung */
 	DRIVER( cannball )	/* (c) 1995 Yun Sung / Soft Visio */
 	DRIVER( magix )		/* (c) 1995 Yun Sung */
 	DRIVER( magicbub )	/* (c) Yun Sung */
@@ -5282,6 +5342,7 @@ Other Sun games
 	DRIVER( redhawk )	/* (c) 1997 */
 	DRIVER( grdnstrm )	/* (c) 1998 */
 	DRIVER( bubl2000 )	/* (c) 1998 Tuning */
+	DRIVER( firehawk )	/* (c) 2001 ESD */
 
 	/* ESD games */
 	/* http://www.esdgame.co.kr/english/ */
@@ -5308,6 +5369,7 @@ Other Sun games
 	DRIVER( mjifb )		/* "29" 1990 Dynax */
 	DRIVER( sprtmtch )	/* "31" (c) 1989 Dynax + Fabtek license */
 	DRIVER( maya )		/* (c) 1994 Promat */
+	DRIVER( inca )		/* (c) 199? ???? */
 	DRIVER( mcnpshnt )	/* "33" Mahjong Campus Hunting 1990 Dynax */
 	DRIVER( 7jigen )	/* "37" 7jigen no Youseitachi 1990 Dynax */
 	DRIVER( neruton )	/* "45" Neruton Haikujiradan 1990 Dynax */
@@ -5327,6 +5389,9 @@ Other Sun games
 						/* "510" Hana Kagerou 1996 Nakanihon */
 	DRIVER( realbrk )	/* "523" Billiard Academy Real Break 1998 */
 						/* "526" Mahjong Reach Ippatsu 1998 Nihon System/Dynax */
+
+	DRIVER( pkgnsh )	/* "???" Pachinko Gindama Shoubu */
+	DRIVER( pkgnshdx )	/* "???" Pachinko Gindama Shoubu DX */
 
 	DRIVER( mjelctrn )	/* "???" Mahjong Electron Base parts 2 & 4 */
 	DRIVER( mjelct3 )	/* "???" Mahjong Electron Base parts 2 & 3 */
@@ -5574,6 +5639,7 @@ Other Sun games
 	DRIVER( landbrk )	/* Eolith */
 	DRIVER( racoon )	/* Eolith */
 	DRIVER( xfiles )	/* DfPix */
+	DRIVER( misncrft )	/* (c) 2000 Sun */
 	DRIVER( strvmstr )	/* (c) 1986 Enerdyne Technologies Inc */
 	DRIVER( dorachan )	/* (c) 1980 Craul Denshi */
 	DRIVER( ladyfrog )	/* (c) 1990 Mondial Games */
@@ -5590,6 +5656,13 @@ Other Sun games
 	DRIVER( dynadice )	/* ? */
 	DRIVER( ssingles )	/* Yachiyo? */
 	DRIVER( tcl )		/* (c) 1995 Uniwang */
+	DRIVER( kisekaem )	/* (c) 1995 I'Max */
+	DRIVER( kisekaeh )	/* (c) 1995 I'Max */
+	DRIVER( cultname )	/* (c) 1995 I'Max */
+	DRIVER( yuka )		/* (c) 1999 Yubis */
+	DRIVER( yujan )		/* (C) 1999 Yubis */
+	DRIVER( onetwo )	/* (c) 1997 Barko */
+	DRIVER( 1945kiii )	/* (c) 2000 Oriental */
 
 	/* Neo Geo games */
 	/* the four digits number is the game ID stored at address 0x0108 of the program ROM */
@@ -6211,8 +6284,9 @@ DRIVER( ramsnoop )
 DRIVER( shtron )
 
 DRIVER( metalaxe )
-DRIVER( metalbst )
+DRIVER( metbeast )
 DRIVER( metlcnta )
+DRIVER( smgyruss )
 
 #endif	/* DRIVER_RECURSIVE */
 
