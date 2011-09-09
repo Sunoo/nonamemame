@@ -546,7 +546,30 @@ ROM_START( masao )
 ROM_END
 
 
+ROM_START( cenmario )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "mario.7f",     0x0000, 0x2000, CRC(c0c6e014 ))
+ROM_LOAD( "mario.7e",     0x2000, 0x2000, CRC(116b3856 ))
+ROM_LOAD( "mario.7d",     0x4000, 0x2000, CRC(dcceb6c1 ))
+ROM_LOAD( "mario.7c",     0xf000, 0x1000, CRC(4a63d96b ))
+ROM_REGION( 0x1000, REGION_CPU2, 0 )	/* sound */
+ROM_LOAD( "tma1c-a.6k",   0x0000, 0x1000, CRC(06b9ff85 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "mario.3f",     0x0000, 0x1000, CRC(27bcd321 ))
+ROM_LOAD( "mario.3j",     0x1000, 0x1000, CRC(de1c6962 ))
+ROM_REGION( 0x6000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "mario.7m",     0x0000, 0x1000, CRC(41c78d70 ))
+ROM_LOAD( "mario.7n",     0x1000, 0x1000, CRC(659341a4 ))
+ROM_LOAD( "mario.7p",     0x2000, 0x1000, CRC(b9e32b12 ))
+ROM_LOAD( "mario.7s",     0x3000, 0x1000, CRC(a5cc7370 ))
+ROM_LOAD( "mario.7t",     0x4000, 0x1000, CRC(e416cbea ))
+ROM_LOAD( "mario.7u",     0x5000, 0x1000, CRC(19eef39f ))
+ROM_REGION( 0x0200, REGION_PROMS, 0 )
+ROM_LOAD( "mario.4p",     0x0000, 0x0200, CRC(afc9bd41 ))
+ROM_END
+
 
 GAME( 1983, mario,   0,     mario, mario,   0, ROT180, "Nintendo of America", "Mario Bros. (US)" )
 GAME( 1983, mariojp, mario, mario, mariojp, 0, ROT180, "Nintendo", "Mario Bros. (Japan)" )
 GAME( 1983, masao,   mario, masao, mario,   0, ROT180, "bootleg", "Masao" )
+GAME( 2002, cenmario, mario, mario, mariojp, 0, ROT180, "Hack", "Censored Mario Bros." )

@@ -2800,6 +2800,236 @@ ROM_START( sxevious )
 ROM_END
 
 
+ROM_START( battlesh )
+ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for the first CPU */
+ROM_LOAD( "b_1.bin", 0x0000, 0x2000, CRC(b6e4f4f3 ))
+ROM_LOAD( "b_2.bin", 0x2000, 0x2000, CRC(47017bc8 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* 64k for the second CPU */
+ROM_LOAD( "b_3.bin", 0x0000, 0x2000, CRC(0ede5706 ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 ) /* 64k for the audio CPU */
+ROM_LOAD( "xvi_7.2c", 0x0000, 0x1000, CRC(dd35cf1c ))
+ROM_REGION( 0x10000, REGION_CPU4, 0 ) /* 64k for the CUSTOM I/O Emulation CPU */
+ROM_LOAD( "b_5.bin", 0x0000, 0x1000, CRC(23107dfb ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "b_9.bin", 0x0000, 0x1000, CRC(5bd6e9ae )) /* foreground characters */
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "b_10.bin", 0x0000, 0x1000, CRC(b43ea55d )) /* bg pattern B0 */
+ROM_LOAD( "b_11.bin", 0x1000, 0x1000, CRC(73603931 )) /* bg pattern B1 */
+ROM_REGION( 0x8000, REGION_GFX3, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_15.4m", 0x0000, 0x2000, CRC(308c5bad )) /* sprite set #1, planes 0/1 */
+ROM_LOAD( "xvi_18.4r", 0x2000, 0x2000, CRC(f56c3697 )) /* sprite set #1, plane 2, set #2, plane 0 */
+ROM_LOAD( "xvi_17.4p", 0x4000, 0x2000, CRC(b06b9ccb )) /* sprite set #2, planes 1/2 */
+ROM_LOAD( "xvi_16.4n", 0x6000, 0x1000, CRC(1cbbddce )) /* sprite set #3, planes 0/1 */
+/* 0xa000-0xafff empty space to decode sprite set #3 as 3 bits per pixel */
+ROM_REGION( 0x4000, REGION_GFX4, 0 ) /* background tilemaps */
+ROM_LOAD( "xvi_9.2a", 0x0000, 0x1000, CRC(57ed9879 ))
+ROM_LOAD( "xvi_10.2b", 0x1000, 0x2000, CRC(ae3ba9e5 ))
+ROM_LOAD( "xvi_11.2c", 0x3000, 0x1000, CRC(31e244dd ))
+ROM_REGION( 0x1400, REGION_PROMS, 0 )
+ROM_LOAD( "xvi_8bpr.6a", 0x0000, 0x0100, CRC(5cc2727f )) /* palette red component */
+ROM_LOAD( "xvi_9bpr.6d", 0x0100, 0x0100, CRC(5c8796cc )) /* palette green component */
+ROM_LOAD( "xvi10bpr.6e", 0x0200, 0x0100, CRC(3cb60975 )) /* palette blue component */
+ROM_LOAD( "b_-bpr.bin", 0x0300, 0x0400, CRC(d2d208b1 )) /* bg tiles lookup table low bits */
+ROM_LOAD( "b_6bpr.bin", 0x0700, 0x0400, CRC(0260c041 )) /* bg tiles lookup table high bits */
+ROM_LOAD( "b_4bpr.bin", 0x0b00, 0x0400, CRC(33764974 )) /* sprite lookup table low bits */
+ROM_LOAD( "b_5bpr.bin", 0x0f00, 0x0400, CRC(43674c7e )) /* sprite lookup table high bits */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 ) /* sound PROMs */
+ROM_LOAD( "xvi_2bpr.7n", 0x0000, 0x0100, CRC(550f06bc ))
+ROM_LOAD( "xvi_1bpr.5n", 0x0100, 0x0100, CRC(77245b66 )) /* timing - not used */
+ROM_END
+
+ROM_START( sxvioush )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for the first CPU */
+ROM_LOAD( "cpu_3p.rom",   0x0000, 0x1000, CRC(1c8d27d5 ))
+ROM_LOAD( "cpu_3m.rom",   0x1000, 0x1000, CRC(fd04e615 ))
+ROM_LOAD( "cpu_2m.rom",   0x2000, 0x1000, CRC(294d5404 ))
+ROM_LOAD( "cpu_2l.rom",   0x3000, 0x1000, CRC(6a44bf92 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the second CPU */
+ROM_LOAD( "cpu_3f.rom",   0x0000, 0x1000, CRC(d4bd3d81 ))
+ROM_LOAD( "cpu_3j.rom",   0x1000, 0x1000, CRC(af06be5f ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "xvi_7.2c",     0x0000, 0x1000, CRC(dd35cf1c ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_12.3b",    0x0000, 0x1000, CRC(9b8f4deb ))	/* foreground characters */
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_13.3c",    0x0000, 0x1000, CRC(de60ba25 ))	/* bg pattern B0 */
+ROM_LOAD( "xvi_14.3d",    0x1000, 0x1000, CRC(535cdbbc ))	/* bg pattern B1 */
+ROM_REGION( 0x8000, REGION_GFX3, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_15.4m",    0x0000, 0x2000, CRC(308c5bad ))	/* sprite set #1, planes 0/1 */
+ROM_LOAD( "xvi_18.4r",    0x2000, 0x2000, CRC(f56c3697 ))	/* sprite set #1, plane 2, set #2, plane 0 */
+ROM_LOAD( "xvi_17.4p",    0x4000, 0x2000, CRC(b06b9ccb ))	/* sprite set #2, planes 1/2 */
+ROM_LOAD( "xvi_16.4n",    0x6000, 0x1000, CRC(1cbbddce ))	/* sprite set #3, planes 0/1 */
+/* 0xa000-0xafff empty space to decode sprite set #3 as 3 bits per pixel */
+ROM_REGION( 0x4000, REGION_GFX4, 0 )	/* background tilemaps */
+ROM_LOAD( "xvi_9.2a",     0x0000, 0x1000, CRC(57ed9879 ))
+ROM_LOAD( "xvi_10.2b",    0x1000, 0x2000, CRC(ae3ba9e5 ))
+ROM_LOAD( "xvi_11.2c",    0x3000, 0x1000, CRC(31e244dd ))
+ROM_REGION( 0x0b00, REGION_PROMS, 0 )
+ROM_LOAD( "xvi_8bpr.6a",  0x0000, 0x0100, CRC(5cc2727f )) /* palette red component */
+ROM_LOAD( "xvi_9bpr.6d",  0x0100, 0x0100, CRC(5c8796cc )) /* palette green component */
+ROM_LOAD( "xvi10bpr.6e",  0x0200, 0x0100, CRC(3cb60975 )) /* palette blue component */
+ROM_LOAD( "xvi_7bpr.4h",  0x0300, 0x0200, CRC(22d98032 )) /* bg tiles lookup table low bits */
+ROM_LOAD( "xvi_6bpr.4f",  0x0500, 0x0200, CRC(3a7599f0 )) /* bg tiles lookup table high bits */
+ROM_LOAD( "xvi_4bpr.3l",  0x0700, 0x0200, CRC(fd8b9d91 )) /* sprite lookup table low bits */
+ROM_LOAD( "xvi_5bpr.3m",  0x0900, 0x0200, CRC(bf906d82 )) /* sprite lookup table high bits */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+ROM_LOAD( "xvi_2bpr.7n",  0x0000, 0x0100, CRC(550f06bc ))
+ROM_LOAD( "xvi_1bpr.5n",  0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( xevioush )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for the first CPU */
+ROM_LOAD( "xvi_1.3p",     0x0000, 0x1000, CRC(09964dda ))
+ROM_LOAD( "xvi_2.3m",     0x1000, 0x1000, CRC(60ecce84 ))
+ROM_LOAD( "xvi_3.2m",     0x2000, 0x1000, CRC(79754b7d ))
+ROM_LOAD( "xvi_4.2l",     0x3000, 0x1000, CRC(c7d4bbf0 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the second CPU */
+ROM_LOAD( "xvi_5.3f",     0x0000, 0x1000, CRC(c85b703f ))
+ROM_LOAD( "xvi_6.3j",     0x1000, 0x1000, CRC(e18cdaad ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "xvi_7.2c",     0x0000, 0x1000, CRC(dd35cf1c ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_12.3b",    0x0000, 0x1000, CRC(9b8f4deb ))	/* foreground characters */
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_13.3c",    0x0000, 0x1000, CRC(de60ba25 ))	/* bg pattern B0 */
+ROM_LOAD( "xvi_14.3d",    0x1000, 0x1000, CRC(535cdbbc ))	/* bg pattern B1 */
+ROM_REGION( 0x8000, REGION_GFX3, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_15.4m",    0x0000, 0x2000, CRC(308c5bad ))	/* sprite set #1, planes 0/1 */
+ROM_LOAD( "xvi_18.4r",    0x2000, 0x2000, CRC(f56c3697 ))	/* sprite set #1, plane 2, set #2, plane 0 */
+ROM_LOAD( "xvi_17.4p",    0x4000, 0x2000, CRC(b06b9ccb ))	/* sprite set #2, planes 1/2 */
+ROM_LOAD( "xvi_16.4n",    0x6000, 0x1000, CRC(1cbbddce ))	/* sprite set #3, planes 0/1 */
+/* 0xa000-0xafff empty space to decode sprite set #3 as 3 bits per pixel */
+ROM_REGION( 0x4000, REGION_GFX4, 0 )	/* background tilemaps */
+ROM_LOAD( "xvi_9.2a",     0x0000, 0x1000, CRC(57ed9879 ))
+ROM_LOAD( "xvi_10.2b",    0x1000, 0x2000, CRC(ae3ba9e5 ))
+ROM_LOAD( "xvi_11.2c",    0x3000, 0x1000, CRC(31e244dd ))
+ROM_REGION( 0x0b00, REGION_PROMS, 0 )
+ROM_LOAD( "xvi_8bpr.6a",  0x0000, 0x0100, CRC(5cc2727f )) /* palette red component */
+ROM_LOAD( "xvi_9bpr.6d",  0x0100, 0x0100, CRC(5c8796cc )) /* palette green component */
+ROM_LOAD( "xvi10bpr.6e",  0x0200, 0x0100, CRC(3cb60975 )) /* palette blue component */
+ROM_LOAD( "xvi_7bpr.4h",  0x0300, 0x0200, CRC(22d98032 )) /* bg tiles lookup table low bits */
+ROM_LOAD( "xvi_6bpr.4f",  0x0500, 0x0200, CRC(3a7599f0 )) /* bg tiles lookup table high bits */
+ROM_LOAD( "xvi_4bpr.3l",  0x0700, 0x0200, CRC(fd8b9d91 )) /* sprite lookup table low bits */
+ROM_LOAD( "xvi_5bpr.3m",  0x0900, 0x0200, CRC(bf906d82 )) /* sprite lookup table high bits */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+ROM_LOAD( "xvi_2bpr.7n",  0x0000, 0x0100, CRC(550f06bc ))
+ROM_LOAD( "xvi_1bpr.5n",  0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( xviousah )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for the first CPU */
+ROM_LOAD( "xea-1m-a.bin", 0x0000, 0x2000, CRC(8c2b50ec ))
+ROM_LOAD( "xea-1l-a.bin", 0x2000, 0x2000, CRC(0821642b ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the second CPU */
+ROM_LOAD( "xea-4c-a.bin", 0x0000, 0x2000, CRC(14d8fa03 ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "xvi_7.2c",     0x0000, 0x1000, CRC(dd35cf1c ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_12.3b",    0x0000, 0x1000, CRC(9b8f4deb ))	/* foreground characters */
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_13.3c",    0x0000, 0x1000, CRC(de60ba25 ))	/* bg pattern B0 */
+ROM_LOAD( "xvi_14.3d",    0x1000, 0x1000, CRC(535cdbbc ))	/* bg pattern B1 */
+ROM_REGION( 0x8000, REGION_GFX3, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_15.4m",    0x0000, 0x2000, CRC(308c5bad ))	/* sprite set #1, planes 0/1 */
+ROM_LOAD( "xvi_18.4r",    0x2000, 0x2000, CRC(f56c3697 ))	/* sprite set #1, plane 2, set #2, plane 0 */
+ROM_LOAD( "xvi_17.4p",    0x4000, 0x2000, CRC(b06b9ccb ))	/* sprite set #2, planes 1/2 */
+ROM_LOAD( "xvi_16.4n",    0x6000, 0x1000, CRC(1cbbddce ))	/* sprite set #3, planes 0/1 */
+/* 0xa000-0xafff empty space to decode sprite set #3 as 3 bits per pixel */
+ROM_REGION( 0x4000, REGION_GFX4, 0 )	/* background tilemaps */
+ROM_LOAD( "xvi_9.2a",     0x0000, 0x1000, CRC(57ed9879 ))
+ROM_LOAD( "xvi_10.2b",    0x1000, 0x2000, CRC(ae3ba9e5 ))
+ROM_LOAD( "xvi_11.2c",    0x3000, 0x1000, CRC(31e244dd ))
+ROM_REGION( 0x0b00, REGION_PROMS, 0 )
+ROM_LOAD( "xvi_8bpr.6a",  0x0000, 0x0100, CRC(5cc2727f )) /* palette red component */
+ROM_LOAD( "xvi_9bpr.6d",  0x0100, 0x0100, CRC(5c8796cc )) /* palette green component */
+ROM_LOAD( "xvi10bpr.6e",  0x0200, 0x0100, CRC(3cb60975 )) /* palette blue component */
+ROM_LOAD( "xvi_7bpr.4h",  0x0300, 0x0200, CRC(22d98032 )) /* bg tiles lookup table low bits */
+ROM_LOAD( "xvi_6bpr.4f",  0x0500, 0x0200, CRC(3a7599f0 )) /* bg tiles lookup table high bits */
+ROM_LOAD( "xvi_4bpr.3l",  0x0700, 0x0200, CRC(fd8b9d91 )) /* sprite lookup table low bits */
+ROM_LOAD( "xvi_5bpr.3m",  0x0900, 0x0200, CRC(bf906d82 )) /* sprite lookup table high bits */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+ROM_LOAD( "xvi_2bpr.7n",  0x0000, 0x0100, CRC(550f06bc ))
+ROM_LOAD( "xvi_1bpr.5n",  0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( xeviousp )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for the first CPU */
+ROM_LOAD( "xvip_1.3p",    0x0000, 0x1000, CRC(09c5fef9 ))
+ROM_LOAD( "xvip_2.3m",    0x1000, 0x1000, CRC(a2cf842d ))
+ROM_LOAD( "xvip_3.2m",    0x2000, 0x1000, CRC(7ab657cd ))
+ROM_LOAD( "xvip_4.2l",    0x3000, 0x1000, CRC(884837bd ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the second CPU */
+ROM_LOAD( "xvip_5.3f",    0x0000, 0x1000, CRC(68c5268b ))
+ROM_LOAD( "xvip_6.3j",    0x1000, 0x1000, CRC(cafc97e6 ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "xvi_7.2c",     0x0000, 0x1000, CRC(dd35cf1c ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "xvip_12.3b",   0x0000, 0x1000, CRC(08f184f1 ))	/* foreground characters */
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_13.3c",    0x0000, 0x1000, CRC(de60ba25 ))	/* bg pattern B0 */
+ROM_LOAD( "xvi_14.3d",    0x1000, 0x1000, CRC(535cdbbc ))	/* bg pattern B1 */
+ROM_REGION( 0x8000, REGION_GFX3, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_15.4m",    0x0000, 0x2000, CRC(dc2c0ecb ))	/* sprite set #1, planes 0/1 */
+ROM_LOAD( "xvi_18.4r",    0x2000, 0x2000, CRC(02417d19 ))	/* sprite set #1, plane 2, set #2, plane 0 */
+ROM_LOAD( "xvi_17.4p",    0x4000, 0x2000, CRC(dfb587ce ))	/* sprite set #2, planes 1/2 */
+ROM_LOAD( "xvip_16.4n",   0x6000, 0x1000, CRC(00babaa1 ))	/* sprite set #3, planes 0/1 */
+/* 0xa000-0xafff empty space to decode sprite set #3 as 3 bits per pixel */
+ROM_REGION( 0x4000, REGION_GFX4, 0 )	/* background tilemaps */
+ROM_LOAD( "xvip_9.2a",    0x0000, 0x1000, CRC(529aecf0 ))
+ROM_LOAD( "xvip_10.2b",   0x1000, 0x2000, CRC(f09eb6f9 ))
+ROM_LOAD( "xvi_11.2c",    0x3000, 0x1000, CRC(31e244dd ))
+ROM_REGION( 0x0b00, REGION_PROMS, 0 )
+ROM_LOAD( "xvi_8bpr.6a",  0x0000, 0x0100, CRC(5cc2727f )) /* palette red component */
+ROM_LOAD( "xvi_9bpr.6d",  0x0100, 0x0100, CRC(5c8796cc )) /* palette green component */
+ROM_LOAD( "xvi10bpr.6e",  0x0200, 0x0100, CRC(3cb60975 )) /* palette blue component */
+ROM_LOAD( "xvi_7bpr.4h",  0x0300, 0x0200, CRC(22d98032 )) /* bg tiles lookup table low bits */
+ROM_LOAD( "xvi_6bpr.4f",  0x0500, 0x0200, CRC(3a7599f0 )) /* bg tiles lookup table high bits */
+ROM_LOAD( "xvi_4bpr.3l",  0x0700, 0x0200, CRC(fd8b9d91 )) /* sprite lookup table low bits */
+ROM_LOAD( "xvi_5bpr.3m",  0x0900, 0x0200, CRC(bf906d82 )) /* sprite lookup table high bits */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+ROM_LOAD( "xvi_2bpr.7n",  0x0000, 0x0100, CRC(550f06bc ))
+ROM_LOAD( "xvi_1bpr.5n",  0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( xevious3 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for the first CPU */
+ROM_LOAD( "xvi_1.3p",     0x0000, 0x1000, CRC(09964dda ))
+ROM_LOAD( "xvi_2.3m",     0x1000, 0x1000, CRC(60ecce84 ))
+ROM_LOAD( "xvi_3.2m",     0x2000, 0x1000, CRC(79754b7d ))
+ROM_LOAD( "xvi_4.2l",     0x3000, 0x1000, CRC(c7d4bbf0 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the second CPU */
+ROM_LOAD( "xvi_5.3f",     0x0000, 0x1000, CRC(c85b703f ))
+ROM_LOAD( "xvi_6.3j",     0x1000, 0x1000, CRC(e18cdaad ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "xvi_7.2c",     0x0000, 0x1000, CRC(dd35cf1c ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_12.3b",    0x0000, 0x1000, CRC(34f7940e ))	/* foreground characters */
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_13.3c",    0x0000, 0x1000, CRC(6eab56b5 ))	/* bg pattern B0 */
+ROM_LOAD( "xvi_14.3d",    0x1000, 0x1000, CRC(790b2f6c ))	/* bg pattern B1 */
+ROM_REGION( 0x8000, REGION_GFX3, ROMREGION_DISPOSE )
+ROM_LOAD( "xvi_15.4m",    0x0000, 0x2000, CRC(4dfaf4e1 ))	/* sprite set #1, planes 0/1 */
+ROM_LOAD( "xvi_18.4r",    0x2000, 0x2000, CRC(d5378335 ))	/* sprite set #1, plane 2, set #2, plane 0 */
+ROM_LOAD( "xvi_17.4p",    0x4000, 0x2000, CRC(9a135fe7 ))	/* sprite set #2, planes 1/2 */
+ROM_LOAD( "xvi_16.4n",    0x6000, 0x1000, CRC(dd6f34c8 ))	/* sprite set #3, planes 0/1 */
+/* 0xa000-0xafff empty space to decode sprite set #3 as 3 bits per pixel */
+ROM_REGION( 0x4000, REGION_GFX4, 0 )	/* background tilemaps */
+ROM_LOAD( "xvi_9.2a",     0x0000, 0x1000, CRC(57ed9879 ))
+ROM_LOAD( "xvi_10.2b",    0x1000, 0x2000, CRC(ae3ba9e5 ))
+ROM_LOAD( "xvi_11.2c",    0x3000, 0x1000, CRC(31e244dd ))
+ROM_REGION( 0x0b00, REGION_PROMS, 0 )
+ROM_LOAD( "xvi_8bpr.6a",  0x0000, 0x0100, CRC(5cc2727f )) /* palette red component */
+ROM_LOAD( "xvi_9bpr.6d",  0x0100, 0x0100, CRC(5c8796cc )) /* palette green component */
+ROM_LOAD( "xvi10bpr.6e",  0x0200, 0x0100, CRC(3cb60975 )) /* palette blue component */
+ROM_LOAD( "xvi_7bpr.4h",  0x0300, 0x0200, CRC(22d98032 )) /* bg tiles lookup table low bits */
+ROM_LOAD( "xvi_6bpr.4f",  0x0500, 0x0200, CRC(3a7599f0 )) /* bg tiles lookup table high bits */
+ROM_LOAD( "xvi_4bpr.3l",  0x0700, 0x0200, CRC(fd8b9d91 )) /* sprite lookup table low bits */
+ROM_LOAD( "xvi_5bpr.3m",  0x0900, 0x0200, CRC(bf906d82 )) /* sprite lookup table high bits */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+ROM_LOAD( "xvi_2bpr.7n",  0x0000, 0x0100, CRC(550f06bc ))
+ROM_LOAD( "xvi_1bpr.5n",  0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
 
 ROM_START( digdug )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code for the first CPU  */
@@ -2998,6 +3228,222 @@ ROM_START( dzigzag )
 	ROM_LOAD( "136007.109",   0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )	/* timing - not used */
 ROM_END
 
+ROM_START( galaga99 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code for the first CPU  */
+ROM_LOAD( "04m_g01.bin",  0x0000, 0x1000, CRC(a3a0f743 ))
+ROM_LOAD( "04k_g02.bin",  0x1000, 0x1000, CRC(ab0df3ac ))
+ROM_LOAD( "04j_g03.bin",  0x2000, 0x1000, CRC(753ce503 ))
+ROM_LOAD( "04h_g04.bin",  0x3000, 0x1000, CRC(b9a315fb ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for the second CPU */
+ROM_LOAD( "04e_g05.bin",  0x0000, 0x1000, CRC(3102fccd ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )     /* 64k for the third CPU  */
+ROM_LOAD( "04d_g06.bin",  0x0000, 0x1000, CRC(8995088d ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "07m_g08.bin",  0x0000, 0x1000, CRC(cc091e8b ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "07e_g10.bin",  0x0000, 0x1000, CRC(2b493359 ))
+ROM_LOAD( "07h_g09.bin",  0x1000, 0x1000, CRC(cdbb428d ))
+ROM_REGION( 0x0320, REGION_PROMS, 0 )
+ROM_LOAD( "5n.bin",       0x0000, 0x0020, CRC(54603c6b ))	/* palette */
+ROM_LOAD( "2n.bin",       0x0020, 0x0100, CRC(a547d33b ))	/* char lookup table */
+ROM_LOAD( "1c.bin",       0x0120, 0x0100, CRC(b6f585fb ))	/* sprite lookup table */
+ROM_LOAD( "5c.bin",       0x0220, 0x0100, CRC(8bd565f6 ))	/* unknown */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "1d.bin",       0x0000, 0x0100, CRC(86d92b24 ))
+ROM_END
+
+ROM_START( galaped )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code for the first CPU  */
+ROM_LOAD( "3200a.bin",    0x0000, 0x1000, CRC(3ef0b053 ))
+ROM_LOAD( "3300b.bin",    0x1000, 0x1000, CRC(1b280831 ))
+ROM_LOAD( "3400c.bin",    0x2000, 0x1000, CRC(16233d33 ))
+ROM_LOAD( "3500d.bin",    0x3000, 0x1000, CRC(0aaf5c23 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for the second CPU */
+ROM_LOAD( "3600fast.bin", 0x0000, 0x1000, CRC(23d586e5 ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )     /* 64k for the third CPU  */
+ROM_LOAD( "3700g.bin",    0x0000, 0x1000, CRC(b07f0aa4 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "07m_g08.bin",  0x0000, 0x1000, CRC(d4fda6a5 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "07e_g10.bin",  0x0000, 0x1000, CRC(1d0a2438 ))
+ROM_LOAD( "07h_g09.bin",  0x1000, 0x1000, CRC(11d9b093 ))
+ROM_REGION( 0x0320, REGION_PROMS, 0 )
+ROM_LOAD( "5n.bin",       0x0000, 0x0020, CRC(54603c6b ))	/* palette */
+ROM_LOAD( "2n.bin",       0x0020, 0x0100, CRC(a547d33b ))	/* char lookup table */
+ROM_LOAD( "1c.bin",       0x0120, 0x0100, CRC(b6f585fb ))	/* sprite lookup table */
+ROM_LOAD( "5c.bin",       0x0220, 0x0100, CRC(8bd565f6 ))	/* unknown */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "1d.bin",       0x0000, 0x0100, CRC(86d92b24 ))
+ROM_END
+
+ROM_START( galgaxin )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code for the first CPU  */
+ROM_LOAD( "3200a.bin",    0x0000, 0x1000, CRC(3ef0b053 ))
+ROM_LOAD( "3300b.bin",    0x1000, 0x1000, CRC(1b280831 ))
+ROM_LOAD( "3400c.bin",    0x2000, 0x1000, CRC(16233d33 ))
+ROM_LOAD( "3500d.bin",    0x3000, 0x1000, CRC(0aaf5c23 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for the second CPU */
+ROM_LOAD( "3600e.bin",    0x0000, 0x1000, CRC(bc556e76 ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )     /* 64k for the third CPU  */
+ROM_LOAD( "3700g.bin",    0x0000, 0x1000, CRC(b07f0aa4 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "2600j_4l.bin",  0x0000, 0x1000, CRC(10fa1481 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "2800l_4d.bin",  0x0000, 0x1000, CRC(bf803b06 ))
+ROM_LOAD( "2700k.bin",  	0x1000, 0x1000, CRC(020906a3 ))
+ROM_REGION( 0x0320, REGION_PROMS, 0 )
+ROM_LOAD( "5n.bin",       0x0000, 0x0020, CRC(54603c6b ))	/* palette */
+ROM_LOAD( "2n.bin",       0x0020, 0x0100, CRC(a547d33b ))	/* char lookup table */
+ROM_LOAD( "1c.bin",       0x0120, 0x0100, CRC(b6f585fb ))	/* sprite lookup table */
+ROM_LOAD( "5c.bin",       0x0220, 0x0100, CRC(8bd565f6 ))	/* unknown */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "1d.bin",       0x0000, 0x0100, CRC(86d92b24 ))
+ROM_END
+
+ROM_START( galagost )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code for the first CPU  */
+ROM_LOAD( "3200a.bin",    0x0000, 0x1000, CRC(3ef0b053 ))
+ROM_LOAD( "3300b.bin",    0x1000, 0x1000, CRC(1b280831 ))
+ROM_LOAD( "3400c.bin",    0x2000, 0x1000, CRC(16233d33 ))
+ROM_LOAD( "3500d.bin",    0x3000, 0x1000, CRC(0aaf5c23 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for the second CPU */
+ROM_LOAD( "3600fast.bin", 0x0000, 0x1000, CRC(23d586e5 ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )     /* 64k for the third CPU  */
+ROM_LOAD( "3700g.bin",    0x0000, 0x1000, CRC(b07f0aa4 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "07m_g08.bin",  0x0000, 0x1000, CRC(c7588555 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "07e_g10.bin",  0x0000, 0x1000, CRC(0758b90f ))
+ROM_LOAD( "07h_g09.bin",  0x1000, 0x1000, CRC(53f1332b ))
+ROM_REGION( 0x0320, REGION_PROMS, 0 )
+ROM_LOAD( "5n.bin",       0x0000, 0x0020, CRC(54603c6b ))	/* palette */
+ROM_LOAD( "2n.bin",       0x0020, 0x0100, CRC(a547d33b ))	/* char lookup table */
+ROM_LOAD( "1c.bin",       0x0120, 0x0100, CRC(b6f585fb ))	/* sprite lookup table */
+ROM_LOAD( "5c.bin",       0x0220, 0x0100, CRC(8bd565f6 ))	/* unknown */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "1d.bin",       0x0000, 0x0100, CRC(86d92b24 ))
+ROM_END
+
+ROM_START( terror )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code for the first CPU  */
+ROM_LOAD( "04m_g01.bin",  0x0000, 0x1000, CRC(a3a0f743 ))
+ROM_LOAD( "04k_g02.bin",  0x1000, 0x1000, CRC(43bb0d5c ))
+ROM_LOAD( "04j_g03.bin",  0x2000, 0x1000, CRC(753ce503 ))
+ROM_LOAD( "04h_g04.bin",  0x3000, 0x1000, CRC(83874442 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for the second CPU */
+ROM_LOAD( "04e_g05.bin",  0x0000, 0x1000, CRC(3102fccd ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )     /* 64k for the third CPU  */
+ROM_LOAD( "04d_g06.bin",  0x0000, 0x1000, CRC(8995088d ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "07m_g08.bin",  0x0000, 0x1000, CRC(58b2f47c ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "07e_g10.bin",  0x0000, 0x1000, CRC(1b629f80 ))
+ROM_LOAD( "07h_g09.bin",  0x1000, 0x1000, CRC(dd6f1afc ))
+ROM_REGION( 0x0320, REGION_PROMS, 0 )
+ROM_LOAD( "5n.bin",       0x0000, 0x0020, CRC(54603c6b ))	/* palette */
+ROM_LOAD( "2n.bin",       0x0020, 0x0100, CRC(a547d33b ))	/* char lookup table */
+ROM_LOAD( "1c.bin",       0x0120, 0x0100, CRC(b6f585fb ))	/* sprite lookup table */
+ROM_LOAD( "5c.bin",       0x0220, 0x0100, CRC(8bd565f6 ))	/* unknown */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "1d.bin",       0x0000, 0x0100, CRC(86d92b24 ))
+ROM_END
+
+ROM_START( vgalaga)
+ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code for the first CPU  */
+ROM_LOAD( "3200a.bin",    0x0000, 0x1000, CRC(3ef0b053 ))
+ROM_LOAD( "3300b.bin",    0x1000, 0x1000, CRC(1b280831 ))
+ROM_LOAD( "3400c.bin",    0x2000, 0x1000, CRC(16233d33 ))
+ROM_LOAD( "3500d.bin",    0x3000, 0x1000, CRC(0aaf5c23 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for the second CPU */
+ROM_LOAD( "3600e.bin",    0x0000, 0x1000, CRC(bc556e76 ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )     /* 64k for the third CPU  */
+ROM_LOAD( "3700g.bin",    0x0000, 0x1000, CRC(b07f0aa4 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "07m_g08.bin",  0x0000, 0x1000, CRC(bf59992f ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "07e_g10.bin",  0x0000, 0x1000, CRC(3cf64d44 ))
+ROM_LOAD( "07h_g09.bin",  0x1000, 0x1000, CRC(206bf7fc ))
+ROM_REGION( 0x0320, REGION_PROMS, 0 )
+ROM_LOAD( "5n.bin",       0x0000, 0x0020, CRC(54603c6b ))	/* palette */
+ROM_LOAD( "2n.bin",       0x0020, 0x0100, CRC(a547d33b ))	/* char lookup table */
+ROM_LOAD( "1c.bin",       0x0120, 0x0100, CRC(b6f585fb ))	/* sprite lookup table */
+ROM_LOAD( "5c.bin",       0x0220, 0x0100, CRC(8bd565f6 ))	/* unknown */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "1d.bin",       0x0000, 0x0100, CRC(86d92b24 ))
+ROM_END
+
+ROM_START( vgalagam )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code for the first CPU  */
+ROM_LOAD( "3200a.bin",    0x0000, 0x1000, CRC(3ef0b053 ))
+ROM_LOAD( "3300b.bin",    0x1000, 0x1000, CRC(1b280831 ))
+ROM_LOAD( "3400c.bin",    0x2000, 0x1000, CRC(16233d33 ))
+ROM_LOAD( "3500d.bin",    0x3000, 0x1000, CRC(0aaf5c23 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for the second CPU */
+ROM_LOAD( "3600e.bin",    0x0000, 0x1000, CRC(bc556e76 ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )     /* 64k for the third CPU  */
+ROM_LOAD( "3700g.bin",    0x0000, 0x1000, CRC(b07f0aa4 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "07m_g08.bin",  0x0000, 0x1000, CRC(c1bdeb1c ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "07e_g10.bin",  0x0000, 0x1000, CRC(99367e04 ))
+ROM_LOAD( "07h_g09.bin",  0x1000, 0x1000, CRC(683585c4 ))
+ROM_REGION( 0x0320, REGION_PROMS, 0 )
+ROM_LOAD( "5n.bin",       0x0000, 0x0020, CRC(54603c6b ))	/* palette */
+ROM_LOAD( "2n.bin",       0x0020, 0x0100, CRC(a547d33b ))	/* char lookup table */
+ROM_LOAD( "1c.bin",       0x0120, 0x0100, CRC(b6f585fb ))	/* sprite lookup table */
+ROM_LOAD( "5c.bin",       0x0220, 0x0100, CRC(8bd565f6 ))	/* unknown */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "1d.bin",       0x0000, 0x0100, CRC(86d92b24 ))
+ROM_END
+
+ROM_START( vgalagaf )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code for the first CPU  */
+ROM_LOAD( "3200a.bin",    0x0000, 0x1000, CRC(3ef0b053 ))
+ROM_LOAD( "3300b.bin",    0x1000, 0x1000, CRC(1b280831 ))
+ROM_LOAD( "3400c.bin",    0x2000, 0x1000, CRC(16233d33 ))
+ROM_LOAD( "3500d.bin",    0x3000, 0x1000, CRC(0aaf5c23 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for the second CPU */
+ROM_LOAD( "3600fast.bin",    0x0000, 0x1000, CRC(23d586e5 ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )     /* 64k for the third CPU  */
+ROM_LOAD( "3700g.bin",    0x0000, 0x1000, CRC(b07f0aa4 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "07m_g08.bin",  0x0000, 0x1000, CRC(c1bdeb1c ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "07e_g10.bin",  0x0000, 0x1000, CRC(99367e04 ))
+ROM_LOAD( "07h_g09.bin",  0x1000, 0x1000, CRC(683585c4 ))
+ROM_REGION( 0x0320, REGION_PROMS, 0 )
+ROM_LOAD( "5n.bin",       0x0000, 0x0020, CRC(54603c6b ))	/* palette */
+ROM_LOAD( "2n.bin",       0x0020, 0x0100, CRC(a547d33b ))	/* char lookup table */
+ROM_LOAD( "1c.bin",       0x0120, 0x0100, CRC(b6f585fb ))	/* sprite lookup table */
+ROM_LOAD( "5c.bin",       0x0220, 0x0100, CRC(8bd565f6 ))	/* unknown */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "1d.bin",       0x0000, 0x0100, CRC(86d92b24 ))
+ROM_END
+
+ROM_START( galagix )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code for the first CPU  */
+ROM_LOAD( "04m_g01.bin",  0x0000, 0x1000, CRC(a3a0f743) SHA1(6907773db7c002ecde5e41853603d53387c5c7cd) )
+ROM_LOAD( "04k_g02.bin",  0x1000, 0x1000, CRC(43bb0d5c) SHA1(666975aed5ce84f09794c54b550d64d95ab311f0) )
+ROM_LOAD( "04j_g03.bin",  0x2000, 0x1000, CRC(753ce503) SHA1(481f443aea3ed3504ec2f3a6bfcf3cd47e2f8f81) )
+ROM_LOAD( "04h_g04.bin",  0x3000, 0x1000, CRC(83874442) SHA1(366cb0dbd31b787e64f88d182108b670d03b393e) )
+ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for the second CPU */
+ROM_LOAD( "04e_g05.bin",  0x0000, 0x1000, CRC(3102fccd) SHA1(d29b68d6aab3217fa2106b3507b9273ff3f927bf) )
+ROM_REGION( 0x10000, REGION_CPU3, 0 )     /* 64k for the third CPU  */
+ROM_LOAD( "04d_g06.bin",  0x0000, 0x1000, CRC(8995088d) SHA1(d6cb439de0718826d1a0363c9d77de8740b18ecf) )
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "07m_g08.bin",  0x0000, 0x1000, CRC(58b2f47c) SHA1(62f1279a784ab2f8218c4137c7accda00e6a3490) )
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "07e_g10.bin",  0x0000, 0x1000, CRC(ad447c80) SHA1(e697c180178cabd1d32483c5d8889a40633f7857) )
+ROM_LOAD( "07h_g09.bin",  0x1000, 0x1000, CRC(dd6f1afc) SHA1(c340ed8c25e0979629a9a1730edc762bd72d0cff) )
+ROM_REGION( 0x0320, REGION_PROMS, 0 )
+ROM_LOAD( "5n.bin",       0x0000, 0x0020, CRC(54603c6b) SHA1(1a6dea13b4af155d9cb5b999a75d4f1eb9c71346) )	/* palette */
+ROM_LOAD( "2n.bin",       0x0020, 0x0100, CRC(a547d33b) SHA1(7323084320bb61ae1530d916f5edd8835d4d2461) )	/* char lookup table */
+ROM_LOAD( "1c.bin",       0x0120, 0x0100, CRC(b6f585fb) SHA1(dd10147c4f05fede7ae6e7a760681700a660e87e) )/* sprite lookup table */
+ROM_LOAD( "5c.bin",       0x0220, 0x0100, CRC(8bd565f6) SHA1(bedba65816abfc2ebeacac6ee335ca6f136e3e3d) )/* unknown */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "1d.bin",       0x0000, 0x0100, CRC(86d92b24) SHA1(6bef9102b97c83025a2cf84e89d95f2d44c3d2ed) )
+ROM_END
+
 
 
 static DRIVER_INIT (galaga)
@@ -3100,3 +3546,18 @@ GAME( 1982, digdugb,  digdug,  digdug,  digdug,   0,       ROT90, "Namco", "Dig 
 GAME( 1982, digdugat, digdug,  digdug,  digdug,   0,       ROT90, "[Namco] (Atari license)", "Dig Dug (Atari, rev 2)" )
 GAME( 1982, digduga1, digdug,  digdug,  digdug,   0,       ROT90, "[Namco] (Atari license)", "Dig Dug (Atari, rev 1)" )
 GAME( 1982, dzigzag,  digdug,  dzigzag, digdug,   0,       ROT90, "bootleg", "Zig Zag (Dig Dug hardware)" )
+//GAME( 2002, battlesh, xevious, battles, battles, 0, ROT90, "bootleg", "Battles 2002" )
+GAME( 2002, sxvioush, xevious, xevious, sxevious, 0,      ROT90, "Namco", "Super Xevious 2002" )
+GAME( 2002, xevioush, xevious, xevious, xevious,  0,      ROT90, "Namco", "Xevious 2002 (Namco)" )
+GAME( 2002, xviousah, xevious, xevious, xeviousa, 0,      ROT90, "Namco (Atari license)", "Xevious 2002 (Atari set 1)" )
+GAME( 2001, xeviousp, xevious, xevious, sxevious, 0,      ROT90, "bootleg", "Xevious Plus!" )
+GAME( 2002, xevious3, xevious, xevious, xevious,  0,      ROT90, "Namco", "Xevious 2003 (Namco)" )
+GAME (1999, galaga99, galaga, galaga, galaga, 0, ROT90, "Jerky and Sil hack", "Galaga '99")
+GAME( 1998, galaped,  galaga, galaga, galaga, 0, ROT90, "Cary Barnhard hack", "Galapede (Fast Shoot)")
+GAME( 1998, galgaxin, galaga, galaga, galaga, 0, ROT90, "T-Bone hack", "Galagalaxian")
+GAME( 2002, galagost, galaga, galaga, galaga, 0, ROT90, "[Twisty Hack]", "Galaga Ghost" )
+GAME( 2000, terror,   galaga, galaga, galaga, 0, ROT90, "Hack", "Terrorist" )
+GAME( 2000, vgalaga,  galaga, galaga, galaga, 0, ROT90, "Hack", "Vector Galaga" )
+GAME( 2000, vgalagam, galaga, galaga, galaga, 0, ROT90, "Hack", "Vector Galaga Midway" )
+GAME( 2000, vgalagaf, galaga, galaga, galaga, 0, ROT90, "Hack", "Vector Galaga Fast Shoot" )
+//GAMEX( 1981, galagix,   galaga,      galaga, galaganm, 0, ROT90, "Namco", "Galagix", GAME_IMPERFECT_GRAPHICS )

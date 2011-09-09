@@ -548,6 +548,68 @@ ROM_START( sinvasnb )
 	ROM_LOAD( "06e_vtb6.bin", 0x0500, 0x0100, CRC(0eaf5158) SHA1(bafd4108708f66cd7b280e47152b108f3e254fc9) )	/* video timing (not used) */
 ROM_END
 
+ROM_START( comdelux )
+ROM_REGION( 2*0x10000, REGION_CPU1, 0 )	/* 64k for code + 64k for decrypted opcodes */
+ROM_LOAD( "m09_cm04.bin", 0x0000, 0x8000, CRC(8438b694 ))
+ROM_LOAD( "m08_cm03.bin", 0x8000, 0x4000, CRC(35486542 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "f09_cm02.bin", 0x0000, 0x4000, CRC(f9cc4a74 ))
+ROM_REGION( 0x04000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "d05_vt01.bin", 0x00000, 0x4000, CRC(505726e0 ))	/* characters */
+ROM_REGION( 0x18000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "a05_vt11.bin", 0x00000, 0x4000, CRC(7b2e1b48 ))	/* tiles */
+ROM_LOAD( "a06_vt12.bin", 0x04000, 0x4000, CRC(81b417d3 ))
+ROM_LOAD( "a07_vt13.bin", 0x08000, 0x4000, CRC(5612dbd2 ))
+ROM_LOAD( "a08_vt14.bin", 0x0c000, 0x4000, CRC(2b2dee36 ))
+ROM_LOAD( "a09_vt15.bin", 0x10000, 0x4000, CRC(de70babf ))
+ROM_LOAD( "a10_vt16.bin", 0x14000, 0x4000, CRC(14178237 ))
+ROM_REGION( 0x18000, REGION_GFX3, ROMREGION_DISPOSE )
+ROM_LOAD( "e07_vt05.bin", 0x00000, 0x4000, CRC(b1839dd4 ))	/* sprites */
+ROM_LOAD( "e08_vt06.bin", 0x04000, 0x4000, CRC(26fee521 ))
+ROM_LOAD( "e09_vt07.bin", 0x08000, 0x4000, CRC(4cb1cd67 ))
+ROM_LOAD( "h07_vt08.bin", 0x0c000, 0x4000, CRC(42ff8a11 ))
+ROM_LOAD( "h08_vt09.bin", 0x10000, 0x4000, CRC(98703982 ))
+ROM_LOAD( "h09_vt10.bin", 0x14000, 0x4000, CRC(7650a262 ))
+ROM_REGION( 0x0600, REGION_PROMS, 0 )
+ROM_LOAD( "01d_vtb1.bin", 0x0000, 0x0100, CRC(3aba15a1 ))	/* red */
+ROM_LOAD( "02d_vtb2.bin", 0x0100, 0x0100, CRC(88865754 ))	/* green */
+ROM_LOAD( "03d_vtb3.bin", 0x0200, 0x0100, CRC(4c14c3f6 ))	/* blue */
+ROM_LOAD( "01h_vtb4.bin", 0x0300, 0x0100, CRC(b388c246 ))	/* palette selector (not used) */
+ROM_LOAD( "06l_vtb5.bin", 0x0400, 0x0100, CRC(712ac508 ))	/* interrupt timing (not used) */
+ROM_LOAD( "06e_vtb6.bin", 0x0500, 0x0100, CRC(0eaf5158 ))	/* video timing (not used) */
+ROM_END
+
+ROM_START( comdlux1 )
+ROM_REGION( 2*0x10000, REGION_CPU1, 0 )	/* 64k for code + 64k for decrypted opcodes */
+ROM_LOAD( "m09_cm04.bin", 0x0000, 0x8000, CRC(8438b694 ))
+ROM_LOAD( "m08_cm03.bin", 0x8000, 0x4000, CRC(35486542 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "f09_cm02.bin", 0x0000, 0x4000, CRC(f9cc4a74 ))
+ROM_REGION( 0x04000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "d05_vt01.bin", 0x00000, 0x4000, CRC(505726e0 ))	/* characters */
+ROM_REGION( 0x18000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "a05_vt11.bin", 0x00000, 0x4000, CRC(7b2e1b48 ))	/* tiles */
+ROM_LOAD( "a06_vt12.bin", 0x04000, 0x4000, CRC(81b417d3 ))
+ROM_LOAD( "a07_vt13.bin", 0x08000, 0x4000, CRC(5612dbd2 ))
+ROM_LOAD( "a08_vt14.bin", 0x0c000, 0x4000, CRC(2b2dee36 ))
+ROM_LOAD( "a09_vt15.bin", 0x10000, 0x4000, CRC(de70babf ))
+ROM_LOAD( "a10_vt16.bin", 0x14000, 0x4000, CRC(14178237 ))
+ROM_REGION( 0x18000, REGION_GFX3, ROMREGION_DISPOSE )
+ROM_LOAD( "e07_vt05.bin", 0x00000, 0x4000, CRC(91865879 ))	/* sprites */
+ROM_LOAD( "e08_vt06.bin", 0x04000, 0x4000, CRC(26fee521 ))
+ROM_LOAD( "e09_vt07.bin", 0x08000, 0x4000, CRC(4cb1cd67 ))
+ROM_LOAD( "h07_vt08.bin", 0x0c000, 0x4000, CRC(ba3a06f7 ))
+ROM_LOAD( "h08_vt09.bin", 0x10000, 0x4000, CRC(98703982 ))
+ROM_LOAD( "h09_vt10.bin", 0x14000, 0x4000, CRC(7650a262 ))
+ROM_REGION( 0x0600, REGION_PROMS, 0 )
+ROM_LOAD( "01d_vtb1.bin", 0x0000, 0x0100, CRC(3aba15a1 ))	/* red */
+ROM_LOAD( "02d_vtb2.bin", 0x0100, 0x0100, CRC(88865754 ))	/* green */
+ROM_LOAD( "03d_vtb3.bin", 0x0200, 0x0100, CRC(4c14c3f6 ))	/* blue */
+ROM_LOAD( "01h_vtb4.bin", 0x0300, 0x0100, CRC(b388c246 ))	/* palette selector (not used) */
+ROM_LOAD( "06l_vtb5.bin", 0x0400, 0x0100, CRC(712ac508 ))	/* interrupt timing (not used) */
+ROM_LOAD( "06e_vtb6.bin", 0x0500, 0x0100, CRC(0eaf5158 ))	/* video timing (not used) */
+ROM_END
+
 
 static DRIVER_INIT( commando )
 {
@@ -595,3 +657,5 @@ GAME( 1985, commandu, commando, commando, commandu, commando, ROT90, "Capcom (Da
 GAME( 1985, commandj, commando, commando, commando, commando, ROT90, "Capcom", "Senjou no Ookami" )
 GAME( 1985, sinvasn,  commando, commando, commando, commando, ROT90, "Capcom", "Space Invasion (Europe)" )
 GAME( 1985, sinvasnb, commando, commando, commando, spaceinv, ROT90, "bootleg", "Space Invasion (bootleg)" )
+GAME( 2002, comdelux, commando, commando, commandu, commando, ROT90, "Twisted Hack", "Commando Deluxe" )
+GAME( 1985, comdlux1, commando, commando, commandu, commando, ROT90, "Twisted Hack", "Commando Deluxe Again" )

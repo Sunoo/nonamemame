@@ -2746,6 +2746,17 @@ ROM_START( iceclmrj )
 	ROM_LOAD( "ic4-48aa.bin",  0x2000, 0x2000, CRC(4ec44fb3) SHA1(676e0ab574dec08df562c6f278e8a9cc7c8afa41) )
 ROM_END
 
+ROM_START( mrio2002 )
+ROM_REGION( 0x10000,REGION_CPU1, 0 ) /* 6502 memory */
+ROM_LOAD( "1d",  0x8000, 0x2000, CRC(be4d5436 ))
+ROM_LOAD( "1c",  0xa000, 0x2000, CRC(0011fc5a ))
+ROM_LOAD( "1b",  0xc000, 0x2000, CRC(b1b87893 ))
+ROM_LOAD( "1a",  0xe000, 0x2000, CRC(1abf053c ))
+ROM_REGION( 0x4000,REGION_GFX1, 0  ) /* PPU memory */
+ROM_LOAD( "2b",  0x0000, 0x2000, CRC(1feda640 ))
+ROM_LOAD( "2a",  0x2000, 0x2000, CRC(15506b86 ))
+ROM_END
+
 /******************************************************************************/
 
 /*    YEAR  NAME      PARENT    MACHINE  INPUT     INIT  	   MONITOR  */
@@ -2802,3 +2813,5 @@ GAME( 1986, vsgshoe,  0,        vsnes,   vsgshoe,  vsgshoe,  ROT0, "Nintendo",  
 /* Not Working */
 GAMEX(1985, smgolfb,  smgolf,   vsnes,   golf,     machridr, ROT0, "Nintendo",	"Vs. Stroke and Match Golf (Men set 2)", GAME_NOT_WORKING )
 GAMEX(1984, vsbbaljb, vsbball,  vsdual,  vsbballj, vsbball,  ROT0, "Nintendo of America",  "Vs. BaseBall (Japan set 3)", GAME_NOT_WORKING )
+
+GAME( 2002, mrio2002, suprmrio, vsnes,   suprmrio, suprmrio, ROT0, "Nintendo",  "Vs. Super Mario Bros 2002" )

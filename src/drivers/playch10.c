@@ -1660,6 +1660,83 @@ ROM_START( pc_moglf )	/* Mario Open Golf */
     ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(633766d5) SHA1(3a2564f3a2daf3a789e4c4056822f12243c89619) )
 ROM_END
 
+	/* MiSFit Games */
+
+ROM_START( pc_bb2 ) /* Bubble Bobble Part 2 */
+BIOS_CPU
+ROM_LOAD( "bb2-u3", 0x0c000, 0x2000, CRC(edcc21c6 ) ) /* extra bios code for this game */
+BIOS_GFX
+ROM_REGION( 0x50000, REGION_CPU2, 0 ) /* 64k for code */
+ROM_LOAD( "bb2-u5", 0x10000, 0x20000, CRC(5f7c1d17 ) ) /* banked */
+ROM_RELOAD( 0x30000, 0x20000 )
+ROM_REGION( 0x020000, REGION_GFX2, 0 ) /* cart gfx */
+ROM_LOAD( "bb2-u1", 0x00000, 0x20000, CRC(5e59afae ) )
+ROM_REGION( 0x0100, REGION_USER1, 0 ) /* rp5h01 data */
+ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(31a05a48 ) )
+ROM_END
+
+ROM_START( pc_ctfrc ) /* Contra Force */
+BIOS_CPU
+ROM_LOAD( "ctfrc-u3", 0x0c000, 0x2000, CRC(edcc21c6 ) ) /* extra bios code for this game */
+BIOS_GFX
+ROM_REGION( 0x50000, REGION_CPU2, 0 ) /* 64k for code */
+ROM_LOAD( "ctfrc-u5", 0x10000, 0x20000, CRC(1ff7fc0d ) ) /* banked */
+ROM_RELOAD( 0x30000, 0x20000 )
+ROM_REGION( 0x020000, REGION_GFX2, 0 ) /* cart gfx */
+ROM_LOAD( "ctfrc-u1", 0x00000, 0x20000, CRC(7ff2a7f8 ) )
+ROM_REGION( 0x0100, REGION_USER1, 0 ) /* rp5h01 data */
+ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(31a05a48 ) )
+ROM_END
+
+ROM_START( pc_digdg )		/* Dig Dug */
+BIOS_CPU
+ROM_LOAD( "u3sm",    0x0c000, 0x2000, CRC(4b5f717d ) ) /* extra bios code for this game */
+BIOS_GFX
+ROM_REGION( 0x10000, REGION_CPU2, 0 )  /* 64k for code */
+ROM_LOAD( "u1sm",    0x08000, 0x8000, CRC(a26ae22e ) )
+ROM_REGION( 0x02000, REGION_GFX2, 0 )	/* cart gfx */
+ROM_LOAD( "u2sm",    0x00000, 0x2000, CRC(2dabc198 ) )
+ROM_REGION( 0x0100,  REGION_USER1, 0 )	/* rp5h01 data */
+ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(bd82d775 ) )
+ROM_END
+
+ROM_START( pc_krsty )	/* Krusty's Funhouse */
+BIOS_CPU
+ROM_LOAD( "xu-u3",   0x0c000, 0x2000, CRC(c3984e09 ) ) /* extra bios code for this game */
+BIOS_GFX
+ROM_REGION( 0x50000, REGION_CPU2, 0 )  /* 64k for code */
+ROM_LOAD( "xu-u4",   0x10000, 0x20000, CRC(1f4103e5 ) )	/* banked */
+ROM_LOAD( "xu-u5",   0x30000, 0x20000, CRC(778c4115 ) )	/* banked */
+ROM_REGION( 0x020000, REGION_GFX2, 0 )	/* cart gfx */
+ROM_LOAD( "xu-u1",    0x00000, 0x20000, CRC(fce8e0ea ) )
+ROM_REGION( 0x0100,  REGION_USER1, 0 )	/* rp5h01 data */
+ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(0fe6e900 ) )
+ROM_END
+
+ROM_START( pc_mman5 )	/* Megaman 5 */
+BIOS_CPU
+ROM_LOAD( "2n-u3",    0x0c000, 0x2000, CRC(65298370 ) ) /* extra bios code for this game */
+BIOS_GFX
+ROM_REGION( 0x50000, REGION_CPU2, 0 )  /* 64k for code */
+ROM_LOAD( "2n-u5",    0x10000, 0x40000, CRC(f3c743aa ) )	/* banked */
+ROM_REGION( 0x040000, REGION_GFX2, 0 )	/* cart gfx */
+ROM_LOAD( "2n-u1",    0x00000, 0x40000, CRC(25e0ae72 ) )
+ROM_REGION( 0x0100,  REGION_USER1, 0 )	/* rp5h01 data */
+ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(237e8519 ) )
+ROM_END
+
+ROM_START( pc_parsl ) /* Parasol Stars - The Story of Bubble Bobble 3 */
+BIOS_CPU
+ROM_LOAD( "parsl-u2", 0x0c000, 0x2000, CRC(7505de96 ) ) /* extra bios code for this game */
+BIOS_GFX
+ROM_REGION( 0x30000, REGION_CPU2, 0 ) /* 64k for code */
+ROM_LOAD( "parsl-u4", 0x10000, 0x20000, CRC(15382139 ) ) /* banked */
+ROM_REGION( 0x020000, REGION_GFX2, 0 ) /* cart gfx */
+ROM_LOAD( "parsl-u1", 0x00000, 0x20000, CRC(af5400dc ) ) /* banked */
+ROM_REGION( 0x0100, REGION_USER1, 0 ) /* rp5h01 data */
+ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(ec5641d6 ) )
+ROM_END
+
 /***************************************************************************
 
   BIOS driver(s)
@@ -1760,3 +1837,11 @@ GAME( 1990, pc_sjetm,playch10, playch10, playch10, pciboard, ROT0, "Rare", "Play
 
 /* K-Board Games */
 GAME( 1991, pc_moglf,playch10, playch10, playch10, pckboard, ROT0, "Nintendo", "PlayChoice-10: Mario's Open Golf" )
+
+/* MiSFiT Games */
+GAME( 2002, pc_digdg, playch10,  playch10, playch10, playch10, ROT0, "NES->PC-10", "PlayChoice-10: Dig Dug" )
+GAME( 2002, pc_bb2,   playch10,  playch10, playch10, playch10, ROT0, "NES->PC-10", "PlayChoice-10: Bubble Bobble 2" )
+GAME( 2002, pc_ctfrc, playch10,  playch10, playch10, playch10, ROT0, "NES->PC-10", "PlayChoice-10: Contra Force" )
+GAME( 2002, pc_krsty, playch10,  playch10, playch10, playch10, ROT0, "NES->PC-10", "PlayChoice-10: Krusty's Funhouse" )
+GAME( 2002, pc_mman5, playch10,  playch10, playch10, playch10, ROT0, "NES->PC-10", "PlayChoice-10: Megaman 5" )
+GAME( 2002, pc_parsl, playch10,  playch10, playch10, playch10, ROT0, "NES->PC-10", "PlayChoice-10: Parasol Stars-The Story of Bubble Bobble 3" )

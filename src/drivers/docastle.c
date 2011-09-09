@@ -1040,6 +1040,27 @@ ROM_START( idsoccer )
 	ROM_LOAD( "id_3d.clr",   0x0000, 0x0200, CRC(a433ff62) SHA1(db9afe5fc917d25aafa21576cb1cecec7481d4cb) )
 ROM_END
 
+ROM_START( sdreturn )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )
+ROM_LOAD( "2764.p1",      0x0000, 0x2000, CRC(95c86f8e ))
+ROM_LOAD( "2764.l1",      0x4000, 0x2000, CRC(e9a65ba7 ))
+ROM_LOAD( "2764.k1",      0x6000, 0x2000, CRC(b1195d3d ))
+ROM_LOAD( "2764.n1",      0x8000, 0x2000, CRC(6a8160d1 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )
+ROM_LOAD( "27128.p7",     0x0000, 0x4000, CRC(8b06d461 ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )
+ROM_LOAD( "bprom2.bin",   0x0200, 0x0200, CRC(2747ca77 ))
+ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "27128.a3",     0x0000, 0x4000, CRC(4be96dcf ))
+ROM_REGION( 0x8000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "2764.m4",      0x0000, 0x2000, CRC(e8779d04 ))
+ROM_LOAD( "2764.l4",      0x2000, 0x2000, CRC(bc217d6c ))
+ROM_LOAD( "2764.j4",      0x4000, 0x2000, CRC(04824549 ))
+ROM_LOAD( "2764.h4",      0x6000, 0x2000, CRC(c23c36c2 ))
+ROM_REGION( 0x0100, REGION_PROMS, 0 )
+ROM_LOAD( "dorunrun.clr", 0x0000, 0x0100, CRC(d5bab5d5 ))
+ROM_END
+
 /* Game Drivers */
 
 GAMEX(1983, docastle, 0,        docastle, docastle, 0, ROT270, "Universal", "Mr. Do's Castle (set 1)", GAME_NO_COCKTAIL )
@@ -1054,3 +1075,4 @@ GAME( 1984, dowild,   0,        dorunrun, dowild,   0, ROT0,   "Universal", "Mr.
 GAME( 1984, jjack,    0,        dorunrun, jjack,    0, ROT270, "Universal", "Jumping Jack" )
 GAME( 1984, kickridr, 0,        dorunrun, kickridr, 0, ROT0,   "Universal", "Kick Rider" )
 GAMEX(1985, idsoccer, 0,        idsoccer, idsoccer, 0, ROT0,   "Universal", "Indoor Soccer", GAME_NO_COCKTAIL )
+GAME( 2002, sdreturn, dorunrun, dorunrun, dorunrun, 0, ROT0,   "Hack", "Sticky Do Returns" )

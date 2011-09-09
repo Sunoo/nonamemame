@@ -678,6 +678,49 @@ ROM_START( arkangc )
 ROM_END
 
 
+ROM_START( akblc2dx )
+ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
+/* I changed the CRC to 0x00000000 so I can run patched ROMS 8) */
+ROM_LOAD( "akblc2dx.bin", 0x0000, 0x10000, CRC(00000000 ))
+ROM_REGION( 0x18000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "a75_03.rom", 0x00000, 0x8000, CRC(038b74ba ))
+ROM_LOAD( "a75_04.rom", 0x08000, 0x8000, CRC(71fae199 ))
+ROM_LOAD( "a75_05.rom", 0x10000, 0x8000, CRC(c76374e2 ))
+ROM_REGION( 0x0600, REGION_PROMS, 0 )
+ROM_LOAD( "07.bpr", 0x0000, 0x0200, CRC(0af8b289 )) /* red component */
+ROM_LOAD( "08.bpr", 0x0200, 0x0200, CRC(abb002fb )) /* green component */
+ROM_LOAD( "09.bpr", 0x0400, 0x0200, CRC(a7c6c277 )) /* blue component */
+ROM_END
+
+ROM_START( akgcdx )
+ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
+/* I changed the CRC to 0x00000000 so I can run patched ROMS 8) */
+ROM_LOAD( "akgcdx.bin", 0x0000, 0x10000, CRC(00000000 ))
+ROM_REGION( 0x18000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "a75_03.rom", 0x00000, 0x8000, CRC(038b74ba ))
+ROM_LOAD( "a75_04.rom", 0x08000, 0x8000, CRC(71fae199 ))
+ROM_LOAD( "a75_05.rom", 0x10000, 0x8000, CRC(c76374e2 ))
+ROM_REGION( 0x0600, REGION_PROMS, 0 )
+ROM_LOAD( "07.bpr", 0x0000, 0x0200, CRC(0af8b289 )) /* red component */
+ROM_LOAD( "08.bpr", 0x0200, 0x0200, CRC(abb002fb )) /* green component */
+ROM_LOAD( "09.bpr", 0x0400, 0x0200, CRC(a7c6c277 )) /* blue component */
+ROM_END
+
+ROM_START( aktaytdx )
+ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
+/* I changed the CRC to 0x00000000 so I can run patched ROMS 8) */
+ROM_LOAD( "aktaytdx.bin", 0x0000, 0x10000, CRC(00000000 ))
+ROM_REGION( 0x18000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "a75_03.rom", 0x00000, 0x8000, CRC(038b74ba ))
+ROM_LOAD( "a75_04.rom", 0x08000, 0x8000, CRC(71fae199 ))
+ROM_LOAD( "a75_05.rom", 0x10000, 0x8000, CRC(c76374e2 ))
+ROM_REGION( 0x0600, REGION_PROMS, 0 )
+ROM_LOAD( "07.bpr", 0x0000, 0x0200, CRC(0af8b289 )) /* red component */
+ROM_LOAD( "08.bpr", 0x0200, 0x0200, CRC(abb002fb )) /* green component */
+ROM_LOAD( "09.bpr", 0x0400, 0x0200, CRC(a7c6c277 )) /* blue component */
+ROM_END
+
+
 
 static DRIVER_INIT( paddle2 )
 {
@@ -699,3 +742,6 @@ GAMEX(1986, arkblock, arkanoid, bootleg,  arknoidj, 0,       ROT90, "bootleg", "
 GAME( 1986, arkbloc2, arkanoid, bootleg,  arknoidj, 0,       ROT90, "bootleg", "Block (Game Corporation bootleg)" )
 GAME( 1986, arkangc,  arkanoid, bootleg,  arknoidj, 0,       ROT90, "bootleg", "Arkanoid (Game Corporation bootleg)" )
 GAME( 1987, arkatour, arkanoid, arkanoid, arkanoid, 0,       ROT90, "Taito America Corporation (Romstar license)", "Tournament Arkanoid (US)" )
+GAME( 20??, akblc2dx, arkanoid, bootleg, arkatayt, 0, ROT90, "[Hack]", "Block Deluxe (Game Corporation)" )
+GAME( 20??, akgcdx, arkanoid, bootleg, arkatayt, 0, ROT90, "[Hack]", "Arkanoid Deluxe (Game Corporation)" )
+GAME( 20??, aktaytdx, arkanoid, bootleg, arkatayt, 0, ROT90, "[Hack]", "Arkanoid Deluxe (Japan, Tayto)" )

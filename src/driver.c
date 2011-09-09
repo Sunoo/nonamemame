@@ -67,8 +67,376 @@ const struct GameDriver *drivers[] =
 
 #else	/* DRIVER_RECURSIVE */
 
+DRIVER( sderby )
+DRIVER( tongypac )
+DRIVER( pbert )
+DRIVER( vbert )
+DRIVER( ballonwc )
+DRIVER( tehkangc )
+DRIVER( tankwc )
+DRIVER( bagturbo )
+DRIVER( twincbu2 )
+DRIVER( twintwst )
+DRIVER( trukker )      /* Grimlick hack of Frogger */
+DRIVER( kazzy )
+DRIVER( tempall )
+DRIVER( temptwst )
+DRIVER( tmptwst2 )
+DRIVER( tmptwst3 )
+DRIVER( tmptwst4 )
+DRIVER( temped )       /* Tempest  TempEd Hack */
+DRIVER( tempestm )
+DRIVER( stapper )       /* Tapper Simpsons Hack */
+DRIVER( stapper1 )      /* Tapper Simpsons Hack ver .81 */
+DRIVER( sdreturn )
+DRIVER( rxtron )       /* Jerky and Sil hack of Rally-X */
+DRIVER( rastandh )
+DRIVER( rastaneh )
+DRIVER( rastand2 )
+DRIVER( rastane2 )
+DRIVER( rastwack )
+DRIVER( vantris )	/* (c) 1998 Norbert Kehrer */
+DRIVER( phoenixr )     /* CYBERYOGI =CO= Windler hack of Phoenix */
+DRIVER( pengopop )
+DRIVER( vecpengo )     /* T-Bone hack of Pengo */
+DRIVER( pc_digdg )
+DRIVER( pc_bb2 )
+DRIVER( pc_ctfrc )
+DRIVER( pc_krsty )
+DRIVER( pc_mman5 )
+DRIVER( pc_parsl )
+DRIVER( mrio2002 )
+DRIVER( mrdigdo )      /* Justin Clark hack of Mr. Do! */
+DRIVER( mrpac )
+DRIVER( newdigdo )     /* Vic 20 George and Jerky hack of... */
+DRIVER( stickydo )
+DRIVER( mranger )	     /* Moon Ranger */
+DRIVER( mariopac )
+DRIVER( paclandb )
+DRIVER( paclandd )
+DRIVER( kong2600 )     /* Vic Twenty George hack of Donkey Kong */
+DRIVER( kfjohnny )	/* hack by Smitdogg*/
+DRIVER( handiman )     /* Bobby Tribble hack of Tron */
+DRIVER( geminit )
+DRIVER( gaunt2s )
+DRIVER( galagax )      /* Jerky - Chris Moore hack of 1942 */
+DRIVER( galaga99 )     /* Jerky and Sil hack of Galaga */
+DRIVER( galaped )      /* Cary Barnhard hack of Galaga */
+DRIVER( galgaxin )     /* T-Bone hack of Galaga */
+DRIVER( galagost )
+DRIVER( terror )	     /* Galaga Terrorist Hack */
+DRIVER( vgalaga )      /* Galaga Vector Hack */
+DRIVER( vgalagam )
+DRIVER( vgalagaf )
+//DRIVER( galagix )
+DRIVER( froggrs )		/* bootleg */
+DRIVER( offender )     /* Chris Henry hack of scramble */
+DRIVER( superdog )     /* Jerky Hack Hack of scramble */
+DRIVER( fastjr )
+DRIVER( jr1000 )
+DRIVER( jr2000 )
+DRIVER( jr2001 )
+DRIVER( jr2001p )
+DRIVER( jr2002 )
+DRIVER( jr2002p )
+DRIVER( jr2003 )
+DRIVER( jr2003p )
+DRIVER( jr2004 )
+DRIVER( jr2004p )
+DRIVER( jr2005 )
+DRIVER( jr2005p )
+DRIVER( jr3000p )
+DRIVER( jr4000p )
+DRIVER( jr5000p )
+DRIVER( jr6000 )
+DRIVER( jr7000 )
+DRIVER( jr7000p )
+DRIVER( jr8000 )
+DRIVER( jr8000p )
+DRIVER( jr9000p )
+DRIVER( jrdeluxe )
+DRIVER( jrhearts )
+DRIVER( jrpacad )
+DRIVER( jrpacjr )
+DRIVER( jrpacjrp)
+DRIVER( jrpacp )
+DRIVER( jrvectr )      /* T-Bone hack of Jr. Pac-Man */
+DRIVER( dinoh )
+DRIVER( hwofa )
+DRIVER( knightsh )
+DRIVER( kouryu )        /* hack */
+DRIVER( sfzch )		/* CPS Changer */
+DRIVER( sfach )		/* 10/20/1995 CPS Changer */
+DRIVER( pnicku )	/*  6/ 8/1994 (c) 1994 + Compile license (Japan) not listed on Capcom's site */
+
+DRIVER( diggermn )
+DRIVER( neonopon )
+DRIVER( neonopnd )
+DRIVER( comdelux )
+DRIVER( comdlux1 )
+DRIVER( cenmario ) 
+DRIVER( bnjr ) /* Bump N Jump Reverse Mod */
+DRIVER( pnc )
+DRIVER( stictime )
+DRIVER( vecbtime )	    /* T-Bone hack of Burgertime */
+DRIVER( bb2bmh ) /* Overclocked Bubblebobble Memories Hack */
+DRIVER( bbhackv1 ) /* OVerclocked Level Hack */    
+//DRIVER( battlesh )
+DRIVER( sxvioush )
+DRIVER( xevioush )
+DRIVER( xviousah )
+DRIVER( xeviousp )
+DRIVER( xevious3 )
+DRIVER( andromd ) /* hack ??? - Renamed in order to avoid confusion with andromed in TestDrivers */
+DRIVER( buglaxn )      /* The Dog hack of Galaxian */
+DRIVER( galaxkyo )     /* unknown hack of Galaxian Part X */
+DRIVER( galinvad )     /* T-Bone hack of Galaxian */
+DRIVER( gaylaxn )      /* The Dog hack of Galaxian Part X */
+DRIVER( gmunch )
+DRIVER( gmunch2 ) /*B9*/
+DRIVER( luctoday )
+DRIVER( vectrgal )     /* T-Bone hack of Galaxian */
+DRIVER( mooncrea )
+DRIVER( astroped )
+DRIVER( cemescry )     /* NoSync hack of Centipede */
+DRIVER( centidux )
+DRIVER( killiped )     /* The Dog hack of Centipede */
+DRIVER( pacipede )     /* Jeff Coleburn hack of Centiped */
+DRIVER( astropd2 )
+DRIVER( silliped )     /* Andy hack of Millipede */
+DRIVER( vectiped )     /* The Dog hack of Centipede */
+DRIVER( vectrped )     /* T-Bone hack of Centipede */
+DRIVER( astrob2h ) /* Unknown Astro Blaster HAck */
+DRIVER( akblc2dx ) /* hack */
+DRIVER( akgcdx ) /* hack */
+DRIVER( aktaytdx ) /* hack */
+DRIVER( crackhea ) /* Cary Barnhard hack of Mappy */
+DRIVER( housepty ) /* Jerky hack of Mappy */
+DRIVER( marpy )
+DRIVER( superpcp )     /* Blue Justice */
+DRIVER( vectrsup )     /* T-Bone hack of Super Pac-Man */
+DRIVER( abortman ) /* Paul C Copeland hack of Puckman */
+DRIVER( baby2 )
+DRIVER( baby3 )
+DRIVER( baby4 )
+DRIVER( brakman )      /* Jerry Lawrence hack of Pac-Man (Midway) */
+DRIVER( bucaneer )
+DRIVER( caterpil )
+DRIVER( chtmsatk )
+DRIVER( chtmspa )
+DRIVER( chtpac )
+DRIVER( chtpman2 )
+DRIVER( chtpop )
+DRIVER( chtpuck )
+DRIVER( cookiem )
+DRIVER( crashh )
+DRIVER( crazypac )
+DRIVER( dizzy )
+DRIVER( eltonpac )     /* Sil hack of Pac-Man (Midway) */
+DRIVER( europac )      /* Stefano 'Jojo' Priore hack of Pac-Man (Midway) */
+DRIVER( fasthear )
+DRIVER( fastmspa )
+DRIVER( fastplus )
+DRIVER( faststrm )
+DRIVER( fpnleash )
+DRIVER( fstmsatk )
+DRIVER( hanglyad )
+DRIVER( hanglyb ) /* hack */
+DRIVER( heartbn2 )
+DRIVER( heartbrn )     /* unknown hack of Ms. Pac-Man */
+DRIVER( hearts )
+DRIVER( hm1000 )
+DRIVER( hm2000 )
+DRIVER( hmba5000 )
+DRIVER( hmba7000 )
+DRIVER( hmbabymz )
+DRIVER( hmbluep )
+DRIVER( hmgrenp )
+DRIVER( hmplus )
+DRIVER( jacman )
+DRIVER( mazeman )      /* Sil hack of Pac-Man */
+DRIVER( mrpacman )
+DRIVER( ms1000 )       /* Blue Justice */
+DRIVER( ms2000 )       /* Blue Justice */
+DRIVER( ms2600 )       /* T-Bone hack of Ms. Pac-Man */
+DRIVER( ms3000 )       /* Blue Justice */
+DRIVER( ms4000p )
+DRIVER( ms5000 )
+DRIVER( ms5000p )
+DRIVER( msatk2ad )
+DRIVER( msatkad )
+DRIVER( msbaby )
+DRIVER( msbaby1 )
+DRIVER( msberzk )      /* Bobby Tribble hack of Ms. Pac-Man */
+DRIVER( mscrzyma )
+DRIVER( mscrzymp )
+DRIVER( msdroid )
+DRIVER( msdstorm )     /* Mike Naylor hack of Ms. Pac-Man */
+DRIVER( mselton )      /* Sil hack of Ms. Pac-Man */
+DRIVER( msextra )
+DRIVER( msextrap )
+DRIVER( msf1pac )         /* Sil hack of Ms. Pac-Man */
+DRIVER( msgrkatk )       /* Grendal74 */
+DRIVER( msgrkb )       /* Grendal74 */
+DRIVER( mshangly )
+DRIVER( mshearts )
+DRIVER( msindy )       /* Sil hack of Ms. Pac-Man */
+DRIVER( msmini )
+DRIVER( msminia )
+DRIVER( msmspac )
+DRIVER( msmulti )
+DRIVER( msnes4a )
+DRIVER( msnes62 )
+DRIVER( msnes63 )
+DRIVER( msnes6m )
+DRIVER( msnes6m2 )
+DRIVER( msnes6m3 )
+DRIVER( msnes6m4 )
+DRIVER( mspac6m )      /* Sil hack of Ms. Pac-Man */
+DRIVER( mspacad )      /* Sil hack of Ms. Pac-Man */
+DRIVER( mspacat2 )     /* Sil hack of Miss Pac Plus */
+DRIVER( mspacatb )
+DRIVER( mspacdel )
+DRIVER( mspacnes )     /* T-Bone hack of Ms. Pac-Man */
+DRIVER( mspacp )
+DRIVER( mspacren )     /* T-Bone hack of Ms. Pac-Man */
+DRIVER( mspacrip )     /* R3mer hack of Ms. Pac-Man */
+DRIVER( mspamsba )
+DRIVER( mspc6mad )
+DRIVER( msplus )
+DRIVER( msrumble )
+DRIVER( mssilad )
+DRIVER( msstrmaz )
+DRIVER( msultra )
+DRIVER( msvctr6m )
+DRIVER( msvectr )
+DRIVER( msyakman )
+DRIVER( namcosil )     /* Sil hack of Pac-Man (Namco) */
+DRIVER( newpuck2 )     /* Scotty hack of Pac-Man */
+DRIVER( pac2600 )      /* Bobby Tribble hack of Pac-Man (Midway) */
+DRIVER( pacatk )
+DRIVER( pacbaby )
+DRIVER( pacbaby2 )
+DRIVER( pacbaby3 )
+DRIVER( pacbell )
+DRIVER( pacelec )
+DRIVER( pacinvis )
+DRIVER( pacjail )
+DRIVER( pacjr1 )
+DRIVER( pacjr2 )
+DRIVER( pacjr3 )
+DRIVER( pacjr4 )
+DRIVER( pacm255 )
+DRIVER( pacman3d )     /* Sil hack of Pac-Man (Midway) */
+DRIVER( pacman6 )
+DRIVER( pacmar )
+DRIVER( pacmini )      /* Bobby Tribble hack of Pac-Man (Midway) */
+DRIVER( pacmini2 )     /* Bobby Tribble hack of Pac-Man (Midway) */
+DRIVER( pacmn6m2 )
+DRIVER( pacms1 )
+DRIVER( pacms2 )
+DRIVER( pacms3 )
+DRIVER( pacms4 )
+DRIVER( pacmsa1 )
+DRIVER( pacmsa2 )
+DRIVER( pacmsa3 )
+DRIVER( pacmsa4 )
+DRIVER( pacmulti )
+DRIVER( pacn255 )
+DRIVER( pacplusc )
+DRIVER( pacpopey )     /* unknown hack of Pac-Man (Namco) */
+DRIVER( pacshuf )
+DRIVER( pacspeed )
+DRIVER( pacstrm )
+DRIVER( pacweird )
+DRIVER( pcrunchy )
+DRIVER( pengman )      /* Jerry Lawrence hack of Pac-Man (Midway) */
+DRIVER( petshop )
+DRIVER( piranha2 )
+DRIVER( pm1000 )
+DRIVER( pm2000 )
+DRIVER( pm3000 )
+DRIVER( pm4000p )
+DRIVER( pm5000p )
+DRIVER( pm6000 )
+DRIVER( pm7000 )
+DRIVER( pm7000p )
+DRIVER( pmad )         /* SirScotty and Sil hack of Pac-Man (Midway) */
+DRIVER( pmad_a )       /* SirScotty, Sil, Jerry hack of Pac-Man (Midway) */
+DRIVER( pmad00 )
+DRIVER( pmad6m )
+DRIVER( pmada )
+DRIVER( pmanalt )
+DRIVER( pmanaltm )
+DRIVER( pmba2000 )
+DRIVER( pmba3000 )
+DRIVER( pmba4000 )
+DRIVER( pmba6000 )
+DRIVER( pmba8000 )
+DRIVER( pmbamaz )
+DRIVER( pmbaplus )
+DRIVER( pmbluep )
+DRIVER( pmdeluxe )
+DRIVER( pmextra )
+DRIVER( pmextrap )
+DRIVER( pmfever )
+DRIVER( pmfeverp )
+DRIVER( pmgrenp )
+DRIVER( pplusad )
+DRIVER( puckman2 )
+DRIVER( puckren )
+DRIVER( puckrenc )
+DRIVER( punleash )
+DRIVER( roboman )
+DRIVER( snakeyes )
+DRIVER( snowpac )
+DRIVER( sueworld )
+DRIVER( tbone )
+DRIVER( ultra2 )
+DRIVER( ultrapac )
+DRIVER( vcrunchy )
+DRIVER( vecbaby )
+DRIVER( vecbaby2 )
+DRIVER( vecbaby3 )
+DRIVER( vectplus )
+DRIVER( vectr6m )
+DRIVER( vectr6tb )
+DRIVER( vectratk )
+DRIVER( vectrpac )
+DRIVER( vectxens )
+DRIVER( vhangly )
+DRIVER( vpacbell )
+DRIVER( vpacelec )
+DRIVER( vpacjail )
+DRIVER( vpacms1 )
+DRIVER( vpacms2 )
+DRIVER( vpacms3 )
+DRIVER( vpacms4 )
+DRIVER( vpacmsa1 )
+DRIVER( vpacmsa2 )
+DRIVER( vpacmsa3 )
+DRIVER( vpacmsa4 )
+DRIVER( vpacshuf )
+DRIVER( vpspeed )
+DRIVER( xensad )
+DRIVER( xensrev )
+DRIVER( sumelton )
+DRIVER( lazybug )
+DRIVER( wavybug )
+DRIVER( zolamaze )
+DRIVER( mspacii )
+DRIVER( newpir )
+DRIVER( newpirb )
+DRIVER( nwpuc2b )
+
+	DRIVER( vliner )	/* (c) 2001 Dyna / BrezzaSoft */
+	DRIVER( jockeygp )	/* (c) 2001 Sun Amusement / BrezzaSoft */
+	DRIVER( jckeygpd )	/* 0008 (c) 2001 Sun Amusement / BrezzaSoft */
+	DRIVER( mineswp )	/* (c) 1998 J-Rom */
 
 	/* "Pacman hardware" games */
+	DRIVER( dderby )	/* (c) 2003 David Widel */
+	DRIVER( bace )		/* (c) 2003 David Widel */
 	DRIVER( puckman )	/* (c) 1980 Namco */
 	DRIVER( puckmana )	/* (c) 1980 Namco */
 	DRIVER( pacman )	/* (c) 1980 Midway */
@@ -5632,12 +6000,12 @@ Other Sun games
 	DRIVER( bangbead )	/* 0259 (c) 2000 Visco */
 	DRIVER( nitd )		/* 0260 (c) 2000 Eleven / Gavaking */
 	DRIVER( pong )
-    DRIVER( csk227it )  /* (c) [1993] IGS */
-    DRIVER( csk234it )  /* (c) [1993] IGS - Clone of csk227it*/
-    DRIVER( goldstbl )  /* IGS - Clone of goldstar*/
-    DRIVER( goldstar )  /* IGS */
-    DRIVER( monaco ) 	/* (c) ooh, a sim */
-    DRIVER( pontoon )   /* 6011 - (c) 1985 Tehkan */
+	DRIVER( csk227it )	/* (c) [1993] IGS */
+	DRIVER( csk234it )	/* (c) [1993] IGS - Clone of csk227it*/
+	DRIVER( goldstbl )	/* IGS - Clone of goldstar*/
+	DRIVER( goldstar )	/* IGS */
+	DRIVER( monaco )	/* (c) ooh, a sim */
+	DRIVER( pontoon )	/* 6011 - (c) 1985 Tehkan */
 
 
 #endif	/* DRIVER_RECURSIVE */

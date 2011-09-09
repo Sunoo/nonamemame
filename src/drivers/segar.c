@@ -1590,6 +1590,37 @@ ROM_START( sindbadm )
 ROM_END
 
 
+ROM_START( astrob2h )
+ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
+ROM_LOAD( "829b", 0x0000, 0x0800, CRC(14ae953c )) /* U25 */
+ROM_LOAD( "888", 0x0800, 0x0800, CRC(42601744 )) /* U1 */
+ROM_LOAD( "889b", 0x1000, 0x0800, CRC(9fcdc62f )) /* U2 */
+ROM_LOAD( "890", 0x1800, 0x0800, CRC(26f5b4cf )) /* U3 */
+ROM_LOAD( "891b", 0x2000, 0x0800, CRC(74f906dc )) /* U4 */
+ROM_LOAD( "892", 0x2800, 0x0800, CRC(2d3c949b )) /* U5 */
+ROM_LOAD( "893", 0x3000, 0x0800, CRC(ccdb1a76 )) /* U6 */
+ROM_LOAD( "894", 0x3800, 0x0800, CRC(66ae5ced )) /* U7 */
+ROM_LOAD( "895", 0x4000, 0x0800, CRC(202cf3a3 )) /* U8 */
+ROM_LOAD( "896", 0x4800, 0x0800, CRC(b603fe23 )) /* U9 */
+ROM_LOAD( "897", 0x5000, 0x0800, CRC(989198c6 )) /* U10 */
+ROM_LOAD( "898", 0x5800, 0x0800, CRC(ef2bab04 )) /* U11 */
+ROM_LOAD( "899", 0x6000, 0x0800, CRC(e0d189ee )) /* U12 */
+ROM_LOAD( "900", 0x6800, 0x0800, CRC(682d4604 )) /* U13 */
+ROM_LOAD( "901", 0x7000, 0x0800, CRC(9ed11c61 )) /* U14 */
+ROM_LOAD( "902", 0x7800, 0x0800, CRC(b4d6c330 )) /* U15 */
+ROM_LOAD( "903", 0x8000, 0x0800, CRC(84acc38c )) /* U16 */
+ROM_LOAD( "904", 0x8800, 0x0800, CRC(5eba3097 )) /* U17 */
+ROM_LOAD( "905", 0x9000, 0x0800, CRC(4f08f9f4 )) /* U18 */
+ROM_LOAD( "906", 0x9800, 0x0800, CRC(58149df1 )) /* U19 */
+ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* 64k for speech code */
+ROM_LOAD( "808b", 0x0000, 0x0800, CRC(5988c767 )) /* U7 */
+ROM_LOAD( "809a", 0x0800, 0x0800, CRC(893f228d )) /* U6 */
+ROM_LOAD( "810", 0x1000, 0x0800, CRC(ff0163c5 )) /* U5 */
+ROM_LOAD( "811", 0x1800, 0x0800, CRC(219f3978 )) /* U4 */
+ROM_LOAD( "812a", 0x2000, 0x0800, CRC(410ad0d2 )) /* U3 */
+ROM_END
+
+
 
 /*************************************
  *
@@ -1672,3 +1703,4 @@ GAME( 1981, spaceod,  0,       spaceod,  spaceod,  spaceod,  ROT270, "Sega", "Sp
 GAMEX(1983, pignewt,  0,       pignewt,  pignewt,  pignewt,  ROT270, "Sega", "Pig Newton (version C)", GAME_NO_SOUND )
 GAMEX(1983, pignewta, pignewt, pignewt,  pignewta, pignewt,  ROT270, "Sega", "Pig Newton (version A)", GAME_NO_SOUND )
 GAME( 1983, sindbadm, 0,       sindbadm, sindbadm, sindbadm, ROT270, "Sega", "Sindbad Mystery" )
+GAME( 1981, astrob2h, astrob, astrob, astrob2, astrob, ROT270, "Sega", "Astro Blaster (ver 2 Hack)" )

@@ -1037,6 +1037,7 @@ $(OBJ)/taiyo.a: \
 	$(OBJ)/vidhrdw/shangkid.o $(OBJ)/drivers/shangkid.o \
 
 $(OBJ)/other.a: \
+	$(OBJ)/vidhrdw/sderby.o $(OBJ)/drivers/sderby.o \
  	$(OBJ)/vidhrdw/pong.o $(OBJ)/sndhrdw/pong.o $(OBJ)/drivers/pong.o \
 	$(OBJ)/vidhrdw/csk.o $(OBJ)/drivers/csk.o \
 	$(OBJ)/vidhrdw/goldstar.o $(OBJ)/drivers/goldstar.o \

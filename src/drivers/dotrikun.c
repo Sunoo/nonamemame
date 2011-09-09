@@ -64,6 +64,12 @@ INPUT_PORTS_START( dotrikun )
 INPUT_PORTS_END
 
 
+ROM_START( mineswp )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
+	ROM_LOAD( "14479a.mpr", 0x0000, 0x4000, CRC(1cece483) )
+ROM_END
+
+
 static MACHINE_DRIVER_START( dotrikun )
 
 	/* basic machine hardware */
@@ -107,3 +113,4 @@ ROM_END
 
 GAMEX( 1990, dotrikun, 0,        dotrikun, dotrikun, 0, ROT0, "Sega", "Dottori Kun (new version)", GAME_NO_SOUND )
 GAMEX( 1990, dotriku2, dotrikun, dotrikun, dotrikun, 0, ROT0, "Sega", "Dottori Kun (old version)", GAME_NO_SOUND )
+GAME( 1998, mineswp, 0, dotrikun, dotrikun, 0, ROT0, "J-Rom", "Mine Sweeper (Dottori Kun hardware)" )

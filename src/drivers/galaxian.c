@@ -3032,6 +3032,47 @@ INPUT_PORTS_START( ozon1 )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 INPUT_PORTS_END
 
+INPUT_PORTS_START( luctoday )
+	PORT_START      /* IN0 */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_2WAY )
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_2WAY )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 )
+	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Cabinet ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Cocktail ) )
+	PORT_SERVICE( 0x40, IP_ACTIVE_HIGH )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SERVICE1 )
+
+	PORT_START      /* IN1 */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_START1 )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_2WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_2WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNUSED )
+	PORT_DIPNAME( 0xc0, 0x40, DEF_STR( Coinage ) )
+	PORT_DIPSETTING(    0x40, "A 1C/1C 2C/2C  B 1C/2C " )
+	PORT_DIPSETTING(    0xc0, "A 1C/1C 2C/3C  B 1C/3C " )
+	PORT_DIPSETTING(    0x00, "A 1C/2C 2C/4C  B 1C/4C " )
+	PORT_DIPSETTING(    0x80, "A 1C/2C 2C/5C  B 1C/5C " )
+
+	PORT_START      /* DSW0 */
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Bonus_Life ) )
+	PORT_DIPSETTING(    0x03, "6000" )
+	PORT_DIPSETTING(    0x02, "7000" )
+	PORT_DIPSETTING(    0x01, "9000" )
+	PORT_DIPSETTING(    0x00, "None" )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Lives ) )
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x04, "5" )
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Difficulty ) )	/* player's bullet speed */
+	PORT_DIPSETTING(    0x00, "Easy" )				/* gap of 6 pixels */
+	PORT_DIPSETTING(    0x08, "Hard" )				/* gap of 8 pixels */
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_UNUSED )
+INPUT_PORTS_END
+
 INPUT_PORTS_START( ladybugg )
 	PORT_START /* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
@@ -5472,6 +5513,152 @@ ROM_START( drivfrcg )
 	ROM_LOAD( "dfg.clr",	  0x0000, 0x0020, NO_DUMP )
 ROM_END
 
+/* Misfited */
+ROM_START( andromd ) /* rinominato per evitare confusione con andromed nei TestDrivers */
+ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
+ROM_LOAD( "and01", 0x0000, 0x0400, CRC(a0059ddd ))
+ROM_LOAD( "and02", 0x0400, 0x0400, CRC(da6421b8 ))
+ROM_LOAD( "and03", 0x0800, 0x0400, CRC(30e28016 ))
+ROM_LOAD( "and04", 0x0c00, 0x0400, CRC(de7e7770 ))
+ROM_LOAD( "and05", 0x1000, 0x0400, CRC(a916c919 ))
+ROM_LOAD( "and06", 0x1400, 0x0400, CRC(9175882b ))
+ROM_LOAD( "and07", 0x1800, 0x0400, CRC(1237b9da ))
+ROM_LOAD( "and08", 0x1c00, 0x0400, CRC(8b181929 ))
+ROM_LOAD( "and09", 0x2000, 0x0400, CRC(17fd5357 ))
+ROM_LOAD( "and10", 0x2400, 0x0400, CRC(3032821c ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "1h.bin", 0x0000, 0x0800, CRC(39fb43a4 ))
+ROM_LOAD( "1k.bin", 0x0800, 0x0800, CRC(7e3f56a2 ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "6l.bpr", 0x0000, 0x0020, CRC(c3ac9467 ))
+ROM_END
+
+ROM_START( buglaxn )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "galaxian.u",    0x0000, 0x0800, CRC(745e2d61 ))
+ROM_LOAD( "galaxian.v",    0x0800, 0x0800, CRC(9c999a40 ))
+ROM_LOAD( "galaxian.w",    0x1000, 0x0800, CRC(b5894925 ))
+ROM_LOAD( "galaxian.y",    0x1800, 0x0800, CRC(6b3ca10b ))
+ROM_LOAD( "galmidw.z",    0x2000, 0x0800, CRC(cb24f797 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "galaxian.1j",   0x0000, 0x0800, CRC(b8d46e4b ))
+ROM_LOAD( "galaxian.1k",   0x0800, 0x0800, CRC(a00bde50 ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "galaxian.clr", 0x0000, 0x0020, CRC(c3ac9467 ))
+ROM_END
+
+ROM_START( galaxkyo )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "galx.u",       0x0000, 0x0800, CRC(acfde501 ))
+ROM_LOAD( "galx.v",       0x0800, 0x0800, CRC(65cf3c77 ))
+ROM_LOAD( "galx.w",       0x1000, 0x0800, CRC(9eef9ae6 ))
+ROM_LOAD( "galx.y",       0x1800, 0x0800, CRC(56a5ddd1 ))
+ROM_LOAD( "galx.z",       0x2000, 0x0800, CRC(f4bc7262 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "galx.1h",      0x0000, 0x0800, CRC(66a4335d ))
+ROM_LOAD( "galx.1k",      0x0800, 0x0800, CRC(2160265b ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "galaxian.clr", 0x0000, 0x0020, CRC(c3ac9467 ))
+ROM_END
+
+ROM_START( galinvad )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "7f",           0x0000, 0x1000, CRC(b10533fd ))
+ROM_LOAD( "7j",           0x1000, 0x1000, CRC(9163454d ))
+ROM_LOAD( "7l",           0x2000, 0x1000, CRC(952c6135 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "1h",           0x0000, 0x0800, CRC(d3d42377 ))
+ROM_LOAD( "1k",           0x0800, 0x0800, CRC(7e515c84 ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "galaxian.clr", 0x0000, 0x0020, CRC(c3ac9467 ))
+ROM_END
+
+ROM_START( gaylaxn )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "galx.u",       0x0000, 0x0800, CRC(79e4007d ))
+ROM_LOAD( "galx.v",       0x0800, 0x0800, CRC(bc16064e ))
+ROM_LOAD( "galx.w",       0x1000, 0x0800, CRC(72d2d3ee ))
+ROM_LOAD( "galx.y",       0x1800, 0x0800, CRC(afe397f3 ))
+ROM_LOAD( "galx.z",       0x2000, 0x0800, CRC(778c0d3c ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "galx.1h",      0x0000, 0x0800, CRC(ce77d89b ))
+ROM_LOAD( "galx.1k",      0x0800, 0x0800, CRC(08008d2c ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "galaxian.clr", 0x0000, 0x0020, CRC(c3ac9467 ))
+ROM_END
+
+ROM_START( gmunch )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "pac1.bin",     0x0000, 0x1000, CRC(19338c70 ))
+ROM_LOAD( "pac2.bin",     0x1000, 0x1000, CRC(18db074d ))
+ROM_LOAD( "pac3.bin",     0x2000, 0x1000, CRC(abb98b1d ))
+ROM_LOAD( "pac4.bin",     0x3000, 0x1000, CRC(2403c78e ))
+ROM_LOAD( "pac7.bin",     0x5000, 0x1000, CRC(6566c07b ))
+ROM_REGION( 0x3000, REGION_GFX1 , ROMREGION_DISPOSE )
+ROM_LOAD( "pac5.bin",     0x0000, 0x1000, CRC(a5965fa6 ))
+ROM_LOAD( "pac8.bin",     0x1000, 0x1000, CRC(0491a967 ))
+ROM_LOAD( "pac6.bin",     0x2000, 0x1000, CRC(2145e7ea ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "sk.bpr",       0x0000, 0x0020, CRC(bce79607 ))
+ROM_END
+
+ROM_START( gmunch2 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "pac1.bin",     0x0000, 0x1000, CRC(19338c70 ))
+ROM_LOAD( "pac2.bin",     0x1000, 0x1000, CRC(18db074d ))
+ROM_LOAD( "pac3.bin",     0x2000, 0x1000, CRC(abb98b1d ))
+ROM_LOAD( "pac4.bin",     0x3000, 0x1000, CRC(2403c78e ))
+ROM_LOAD( "pac7.bin",     0x5000, 0x1000, CRC(6566c07b ))
+ROM_REGION( 0x3000, REGION_GFX1 , ROMREGION_DISPOSE )
+ROM_LOAD( "pac5.bin",     0x0000, 0x1000, CRC(a5965fa6 ))
+ROM_LOAD( "pac8.bin",     0x1000, 0x1000, CRC(0491a967 ))
+ROM_LOAD( "pac6.bin",     0x2000, 0x1000, CRC(2145e7ea ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "galaxian.clr", 0x0000, 0x0020, CRC(c3ac9467 ))
+ROM_END
+
+ROM_START( luctoday )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "ltprog1.bin",    0x0000, 0x0800, CRC(59c389b9) )
+ROM_LOAD( "ltprog2.bin",    0x2000, 0x0800, CRC(ac3893b1) )
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "ltchar2.bin",    0x0000, 0x0800, CRC(8cd73bdc) )
+ROM_LOAD( "ltchar1.bin",    0x0800, 0x0800, CRC(b5ba9946) )
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "6l.bpr",       0x0000, 0x0020, CRC(c3ac9467) )
+ROM_END
+
+ROM_START( vectrgal )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "7f",           0x0000, 0x1000, CRC(b10533fd ))
+ROM_LOAD( "7j",           0x1000, 0x1000, CRC(9163454d ))
+ROM_LOAD( "7l",           0x2000, 0x1000, CRC(952c6135 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "1h",           0x0000, 0x0800, CRC(02815aec ))
+ROM_LOAD( "1k",           0x0800, 0x0800, CRC(11c9898c ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "galaxian.clr", 0x0000, 0x0020, CRC(c3ac9467 ))
+ROM_END
+
+ROM_START( mooncrea )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "mc1",          0x0000, 0x0800, CRC(7d954a7a) SHA1(a93ee403cfd7887538ad12d33f6dd6c71bea2a32) )
+ROM_LOAD( "mc2",          0x0800, 0x0800, CRC(44bb7cfa) SHA1(349c2e23a9fce73f95bb8168d369082fa129fe3d) )
+ROM_LOAD( "mc3",          0x1000, 0x0800, CRC(9c412104) SHA1(1b40054ebb1ace965a8522119bb23f09797bc5f6) )
+ROM_LOAD( "mc4",          0x1800, 0x0800, CRC(7e9b1ab5) SHA1(435f603c0c3e788a509dd144a7916a34e791ae44) )
+ROM_LOAD( "mc5.7r",       0x2000, 0x0800, CRC(16c759af) SHA1(3b48050411f65f9d3fb41ff22901e22d82bf1cf6) )
+ROM_LOAD( "mc6.8d",       0x2800, 0x0800, CRC(69bcafdb) SHA1(939c8c6ed1cd4660a3d99b8f17ed99cbd7e1352a) )
+ROM_LOAD( "mc7.8e",       0x3000, 0x0800, CRC(b50dbc46) SHA1(4fa084fd1ba5f78e7703e684c57af15ca7a844e4) )
+ROM_LOAD( "mc8",          0x3800, 0x0800, CRC(18ca312b) SHA1(39219059003b949e38305553fea2d33071062c64) )
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "mcs_b",        0x0000, 0x0800, CRC(fb0f1f81) SHA1(38a6679a8b69bc1870a0e67e692131c42f9535c8) )
+ROM_LOAD( "mcs_d",        0x0800, 0x0800, CRC(13932a15) SHA1(b8885c555c6ad7021be55c6925a0a0872c1b6abd) )
+ROM_LOAD( "mcs_a",        0x1000, 0x0800, CRC(631ebb5a) SHA1(5bc9493afa76c55858b8c8849524cbc77dc838fc) )
+ROM_LOAD( "mcs_c",        0x1800, 0x0800, CRC(24cfd145) SHA1(08c6599db170dd6ee364c44f70a0f5c0f881b6ef) )
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "l06_prom.bin", 0x0000, 0x0020, CRC(6a0c7d87) SHA1(140335d85c67c75b65689d4e76d29863c209cf32) )
+ROM_END
+
 ROM_START( bongo )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
 	ROM_LOAD( "bg1.bin",    0x0000, 0x1000, CRC(de9a8ec6) SHA1(b5ee99b26d1a39e31b643ad0f5723ee8e364023e) )
@@ -5583,3 +5770,13 @@ GAME( 1980, vpool,    hustler,  mooncrst, vpool,    0,        ROT90,  "bootleg",
 GAMEX(1984, drivfrcg, drivfrcp, drivfrcg, drivfrcg, 0,		  ROT90,  "Shinkai Inc. (Magic Eletronics USA licence)", "Driving Force (Galaxian conversion)", GAME_WRONG_COLORS )
 GAME( 1983, bongo,    0,		bongo,    bongo,	0,		  ROT90,  "Jetsoft", "Bongo" )
 GAME( 1983, hunchbkg, hunchbak,	hunchbkg, hunchbkg, 0,		  ROT90,  "Century Electronics", "Hunchback (Galaxian hardware)" )
+GAME( 1979, andromd, galaxian, galaxian, galaxian, 0, ROT90, "hack", "Andromeda - MisfitMame"  /* Rinominato per evitare confusione con andromed nei TestDrivers - E' necessario rinominare anche la rom */)
+GAME( 1998, buglaxn,  galaxian, galaxian, galaxian, 0,        ROT90,  "The Dog hack", "Galaxian (Bug sprites)" )
+GAME( 1979, galaxkyo, galaxian, galaxian, superg,   0,        ROT90,  "hack", "Galaxian (Kyoko)" )
+GAME( 1998, galinvad, galaxian, galaxian, galaxian, 0,        ROT90,  "T-Bone hack", "Galaxian (Space Invaders sprites)" )
+GAME( 1998, gaylaxn,  galaxian, galaxian, superg,   0,        ROT90,  "The Dog hack", "Gaylaxian" )
+GAME( 1981, gmunch,   puckman,  pacmanbl, streakng, 0,        ROT90,  "bootleg", "Ghost Muncher (bootleg on Galaxian hardware)" )
+GAME( 1981, gmunch2,  puckman,  pacmanbl, streakng, 0,        ROT90,  "bootleg", "Ghost Muncher Set 2 (bootleg on Galaxian hardware)" )
+GAME( 1980, luctoday, 0,        galaxian, luctoday, 0,        ROT270,  "Sigma", "Lucky Today" )
+GAME( 1998, vectrgal, galaxian, galaxian, galaxian, 0,        ROT90,  "T-Bone hack", "Galaxian (Vector Sim)" )
+GAME( 1980, mooncrea, mooncrst,        mooncrst, mooncrst, mooncrst, ROT90,  "Nichibutsu", "Moon Cresta (mooncreamsta)" )

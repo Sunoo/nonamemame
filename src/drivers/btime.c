@@ -1798,6 +1798,89 @@ ROM_START( sdtennis )
 	ROM_LOAD( "ao_04.10f",   0x1000, 0x1000, CRC(921952af) SHA1(4e9248f3493a5f4651278f27c11f507571242317) )
 ROM_END
 
+ROM_START( bnjr )
+ROM_REGION( 2*0x10000, REGION_CPU1, 0 ) /* 64k for code + 64k for decrypted opcodes */
+ROM_LOAD( "bnj12b.bin", 0xa000, 0x2000, CRC(ba3e3801 ))
+ROM_LOAD( "bnj12c.bin", 0xc000, 0x2000, CRC(fb3a2cdd ))
+ROM_LOAD( "bnj12d.bin", 0xe000, 0x2000, CRC(b88bc99e ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* 64k for the audio CPU */
+ROM_LOAD( "bnj6c.bin", 0xf000, 0x1000, CRC(8c02f662 ))
+ROM_REGION( 0x6000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "bnj4e.bin", 0x0000, 0x2000, CRC(876cc672 ))
+ROM_LOAD( "bnj4f.bin", 0x2000, 0x2000, CRC(e5e95e3f ))
+ROM_LOAD( "bnj4h.bin", 0x4000, 0x2000, CRC(570ffa46 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "bnj10e.bin", 0x0000, 0x1000, CRC(9e523e4c ))
+ROM_LOAD( "bnj10f.bin", 0x1000, 0x1000, CRC(5cf10f28 ))
+ROM_END
+
+ROM_START( pnc )
+ROM_REGION( 2*0x10000, REGION_CPU1, 0 )	/* 64k for code + 64k for decrypted opcodes */
+ROM_LOAD( "s3-3d",        0xc000, 0x1000, CRC(1ab4f2c2 ))
+ROM_LOAD( "s2-3c",        0xd000, 0x1000, CRC(5e46b789 ))
+ROM_LOAD( "s1-3b",        0xe000, 0x1000, CRC(1308a32e ))
+ROM_LOAD( "s0-3a",        0xf000, 0x1000, CRC(beb4b1fc ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for the audio CPU */
+ROM_LOAD( "sa-1h",        0xf000, 0x1000, CRC(379387ec ))
+ROM_REGION( 0x6000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "s4-11l",       0x0000, 0x1000, CRC(38a40f50 ))
+ROM_LOAD( "s5-11m",       0x1000, 0x1000, CRC(c6c7236a ))
+ROM_LOAD( "s6-13l",       0x2000, 0x1000, CRC(20779144 ))
+ROM_LOAD( "s7-13m",       0x3000, 0x1000, CRC(8911a546 ))
+ROM_LOAD( "s8-15l",       0x4000, 0x1000, CRC(1c8f5112 ))
+ROM_LOAD( "s9-15m",       0x5000, 0x1000, CRC(b919e43b ))
+ROM_REGION( 0x0040, REGION_PROMS, 0 )
+ROM_LOAD( "sc-5m",        0x0000, 0x0020, CRC(2a976ebe ))	/* palette */
+ROM_LOAD( "sb-4c",        0x0020, 0x0020, CRC(a29b4204 ))	/* RAS/CAS logic - not used */
+ROM_END
+
+ROM_START( stictime )
+ROM_REGION( 2*0x10000, REGION_CPU1, 0 )	/* 64k for code + 64k for decrypted opcodes */
+ROM_LOAD( "aa04.9b",      0xc000, 0x1000, CRC(368a25b5 ))
+ROM_LOAD( "aa06.13b",     0xd000, 0x1000, CRC(b4ba400d ))
+ROM_LOAD( "aa05.10b",     0xe000, 0x1000, CRC(8005bffa ))
+ROM_LOAD( "aa07.15b",     0xf000, 0x1000, CRC(086440ad ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for the audio CPU */
+ROM_LOAD( "ab14.12h",     0xf000, 0x1000, CRC(f55e5211 ))
+ROM_REGION( 0x6000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "aa12.7k",      0x0000, 0x1000, CRC(0550e118 ))    /* charset #1 */
+ROM_LOAD( "ab13.9k",      0x1000, 0x1000, CRC(ac01042f ))
+ROM_LOAD( "ab10.10k",     0x2000, 0x1000, CRC(ba774d51 ))
+ROM_LOAD( "ab11.12k",     0x3000, 0x1000, CRC(d4848014 ))
+ROM_LOAD( "aa8.13k",      0x4000, 0x1000, CRC(00a15086 ))
+ROM_LOAD( "ab9.15k",      0x5000, 0x1000, CRC(8dec15e6 ))
+ROM_REGION( 0x1800, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "ab00.1b",      0x0000, 0x0800, CRC(4010c652 ))    /* charset #2 */
+ROM_LOAD( "ab01.3b",      0x0800, 0x0800, CRC(25b49078 ))
+ROM_LOAD( "ab02.4b",      0x1000, 0x0800, CRC(1def5b40 ))
+ROM_REGION( 0x0800, REGION_GFX3, 0 )	/* background tilemaps */
+ROM_LOAD( "ab03.6b",      0x0000, 0x0800, CRC(d26bc1f3 ))
+ROM_END
+
+ROM_START( vecbtime )
+ROM_REGION( 2*0x10000, REGION_CPU1, 0 )	/* 64k for code + 64k for decrypted opcodes */
+ROM_LOAD( "ab05a1.12b",   0xb000, 0x1000, CRC(0a98b230 ))
+ROM_LOAD( "ab04.9b",      0xc000, 0x1000, CRC(797e5f75 ))
+ROM_LOAD( "ab06.13b",     0xd000, 0x1000, CRC(c77f3f64 ))
+ROM_LOAD( "ab05.10b",     0xe000, 0x1000, CRC(b0d3640f ))
+ROM_LOAD( "ab07.15b",     0xf000, 0x1000, CRC(a142f862 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for the audio CPU */
+ROM_LOAD( "ab14.12h",     0xf000, 0x1000, CRC(f55e5211 ))
+ROM_REGION( 0x6000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "ab12.7k",      0x0000, 0x1000, CRC(b02d859c ))    /* charset #1 */
+ROM_LOAD( "ab13.9k",      0x1000, 0x1000, CRC(d9757010 ))
+ROM_LOAD( "ab10.10k",     0x2000, 0x1000, CRC(2b71a1db ))
+ROM_LOAD( "ab11.12k",     0x3000, 0x1000, CRC(a98fea41 ))
+ROM_LOAD( "ab8.13k",      0x4000, 0x1000, CRC(0ca7828f ))
+ROM_LOAD( "ab9.15k",      0x5000, 0x1000, CRC(1e460ff7 ))
+ROM_REGION( 0x1800, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "ab00.1b",      0x0000, 0x0800, CRC(03dbe9b6 ))    /* charset #2 */
+ROM_LOAD( "ab01.3b",      0x0800, 0x0800, CRC(698089da ))
+ROM_LOAD( "ab02.4b",      0x1000, 0x0800, CRC(4464ccef ))
+ROM_REGION( 0x0800, REGION_GFX3, 0 )	/* background tilemaps */
+ROM_LOAD( "ab03.6b",      0x0000, 0x0800, CRC(d26bc1f3 ))
+ROM_END
+
 static void decrypt_C10707_cpu(int cpu, int region)
 {
 	int A;
@@ -1883,3 +1966,7 @@ GAME( 1982, zoar,     0,       zoar,     zoar,     zoar,    ROT270, "Data East U
 GAME( 1982, disco,    0,       disco,    disco,    btime,   ROT270, "Data East", "Disco No.1" )
 GAME( 1982, discof,   disco,   disco,    disco,    btime,   ROT270, "Data East", "Disco No.1 (Rev.F)" )
 GAME( 1983, sdtennis, 0,       bnj,      sdtennis, sdtennis,ROT270, "Data East Corporation", "Super Doubles Tennis" )
+GAME( 2002, bnjr, brubber, bnj, bnj, lnc, ROT270, "DaveC Hack", "Bump 'n' Jump Reverse Mod" )
+GAME( 1981, pnc,      0,       lnc,      lnc,      lnc,     ROT270, "Data East Corporation", "Pac'n'Chase" )
+GAME( 2002, stictime, btime,   btime,    btime,    btime,   ROT270, "Marks Hack", "Burger Time (Mr Sticky)" )
+GAME( 2000, vecbtime, btime,   btime,    btime,    btime,   ROT270, "T-Bone hack", "Burgertime (Vector sim)")

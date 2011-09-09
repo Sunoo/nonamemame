@@ -1151,6 +1151,32 @@ ROM_START( nibblera )
 	ROM_LOAD( "g959-45.53",   0x1000, 0x0800, CRC(33189917) SHA1(01a1b1693db0172609780daeb60430fa0c8bcec2) )
 ROM_END
 
+ROM_START( vantris )
+ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
+ROM_LOAD( "sk4_ic07.bin", 0x4000, 0x1000, CRC(6a29e354 ))
+ROM_LOAD( "sk4_ic08.bin", 0x5000, 0x1000, CRC(302bba54 ))
+ROM_LOAD( "sk4_ic09.bin", 0x6000, 0x1000, CRC(424755f6 ))
+ROM_LOAD( "sk4_ic10.bin", 0x7000, 0x1000, CRC(54603274 ))
+ROM_LOAD( "sk4_ic13.bin", 0x8000, 0x1000, CRC(f9f367a5 ))
+ROM_RELOAD( 0xf000, 0x1000 ) /* for the reset and interrupt vectors */
+ROM_LOAD( "sk4_ic14.bin", 0x9000, 0x1000, CRC(0d5b47d0 ))
+ROM_LOAD( "sk4_ic15.bin", 0xa000, 0x1000, CRC(8549b8f8 ))
+ROM_LOAD( "sk4_ic16.bin", 0xb000, 0x1000, CRC(062e0be2 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "sk5_ic50.bin", 0x0000, 0x0800, CRC(e7d4315b ))
+ROM_LOAD( "sk5_ic51.bin", 0x0800, 0x0800, CRC(67bd31ed ))
+ROM_REGION( 0x0040, REGION_PROMS, 0 )
+ROM_LOAD( "sk5_ic7.bin", 0x0000, 0x0020, CRC(90f17fc1) ) /* foreground colors */
+ROM_LOAD( "sk5_ic6.bin", 0x0020, 0x0020, CRC(90f17fc1) ) /* background colors */
+ROM_REGION( 0x1000, REGION_SOUND1, 0 ) /* sound ROMs */
+ROM_LOAD( "sk4_ic51.bin", 0x0000, 0x0800, CRC(fd4d8bb0) ) /* sound ROM 1 */
+ROM_LOAD( "sk4_ic52.bin", 0x0800, 0x0800, CRC(cc4a0b6f) ) /* sound ROM 2 */
+ROM_REGION( 0x1800, REGION_SOUND2, 0 ) /* space for the speech ROMs (not supported) */
+ROM_LOAD( "sk6_ic07.bin", 0x0000, 0x0800, CRC(2b7cbae9) )
+ROM_LOAD( "sk6_ic08.bin", 0x0800, 0x0800, CRC(3b7e9d7c) )
+ROM_LOAD( "sk6_ic11.bin", 0x1000, 0x0800, CRC(c36df041) )
+ROM_END
+
 
 
 GAMEX( 1980, sasuke,   0,        sasuke,   sasuke,   0, ROT90, "SNK", "Sasuke vs. Commander", GAME_NO_SOUND )
@@ -1164,3 +1190,4 @@ GAMEX( 1981, fantasyj, fantasy,  fantasy,  fantasy,  0, ROT90, "SNK", "Fantasy (
 GAMEX( 1982, pballoon, 0,        pballoon, pballoon, 0, ROT90, "SNK", "Pioneer Balloon", GAME_IMPERFECT_SOUND )
 GAMEX( 1982, nibbler,  0,        fantasy,  nibbler,  0, ROT90, "Rock-ola", "Nibbler (set 1)", GAME_IMPERFECT_SOUND )
 GAMEX( 1982, nibblera, nibbler,  fantasy,  nibbler,  0, ROT90, "Rock-ola", "Nibbler (set 2)", GAME_IMPERFECT_SOUND )
+GAME ( 1998, vantris,  0,        vanguard, vanguard, 0, ROT90, "N.Kehrer", "Vantris (Vanguard hardware)" )

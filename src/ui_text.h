@@ -1,4 +1,4 @@
-/*********************************************************************
+/********************************************************************
 
   ui_text.h
 
@@ -50,6 +50,8 @@ enum
 	UI_vectorintensity,
 	UI_overclock,
 	UI_allcpus,
+	UI_mameinfomissing,
+	UI_drivinfomissing,
 	UI_historymissing,
 
 	/* special characters */
@@ -81,7 +83,10 @@ enum
 	UI_bookkeeping,
 	UI_inputspecific,
 	UI_gameinfo,
+	UI_mameinfo,
+	UI_drivinfo,
 	UI_history,
+	UI_statistics,
 	UI_resetgame,
 	UI_returntogame,
 	UI_cheat,

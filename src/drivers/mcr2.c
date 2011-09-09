@@ -960,6 +960,28 @@ ROM_START( journey )
 	ROM_LOAD( "82s123.12d",   0x0000, 0x0020, CRC(e1281ee9) SHA1(9ac9b01d24affc0ee9227a4364c4fd8f8290343a) )	/* from shollow, assuming it's the same */
 ROM_END
 
+ROM_START( handiman )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "scpu_pga.bin", 0x0000, 0x2000, CRC(5151770b ))
+ROM_LOAD( "scpu_pgb.bin", 0x2000, 0x2000, CRC(8ddf8717 ))
+ROM_LOAD( "scpu_pgc.bin", 0x4000, 0x2000, CRC(4241e3a0 ))
+ROM_LOAD( "scpu_pgd.bin", 0x6000, 0x2000, CRC(035d2fe7 ))
+ROM_LOAD( "scpu_pge.bin", 0x8000, 0x2000, CRC(24c185d8 ))
+ROM_LOAD( "scpu_pgf.bin", 0xA000, 0x2000, CRC(38c4bbaf ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "ssi_0a.bin",   0x0000, 0x1000, CRC(765e6eba ))
+ROM_LOAD( "ssi_0b.bin",   0x1000, 0x1000, CRC(1b90ccdd ))
+ROM_LOAD( "ssi_0c.bin",   0x2000, 0x1000, CRC(3a4bc629 ))
+ROM_REGION( 0x04000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "scpu_bgg.bin", 0x00000, 0x2000, CRC(1a9ed2f5 ))
+ROM_LOAD( "scpu_bgh.bin", 0x02000, 0x2000, CRC(3220f974 ))
+ROM_REGION( 0x10000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "vg_0.bin",     0x0c000, 0x2000, CRC(e17ec630 ))
+ROM_LOAD( "vg_1.bin",     0x08000, 0x2000, CRC(ee776741 ))
+ROM_LOAD( "vg_2.bin",     0x04000, 0x2000, CRC(c0b2b28e ))
+ROM_LOAD( "vg_3.bin",     0x00000, 0x2000, CRC(8fb79ed7 ))
+ROM_END
+
 
 
 /*************************************
@@ -975,6 +997,15 @@ static DRIVER_INIT( mcr2 )
 
 	mcr12_sprite_xoffs = 0;
 	mcr12_sprite_xoffs_flip = 0;
+}
+
+
+static DRIVER_INIT( tron )
+{
+MCR_CONFIGURE_SOUND(MCR_SSIO);
+install_port_write_handler(0, 0x00, 0x00, mcr_control_port_w);
+mcr12_sprite_xoffs = 0;
+mcr12_sprite_xoffs_flip = 0;
 }
 
 
@@ -1042,3 +1073,4 @@ GAME( 1982, wacko,    0,        mcr2,     wacko,    wacko,    ROT0,  "Bally Midw
 GAME( 1984, twotiger, 0,        mcr2,     twotiger, mcr2,     ROT0,  "Bally Midway", "Two Tigers" )
 GAME( 1984, twotigra, twotiger, twotigra, twotigra, twotigra, ROT0,  "Bally Midway", "Two Tigers (dedicated)" )
 GAMEX(1983, journey,  0,        journey,  journey,   mcr2,     ROT90, "Bally Midway", "Journey", GAME_IMPERFECT_SOUND )
+GAME (1998, handiman, 0,        mcr2,    tron,     tron,     ROT90, "Bobby Tribble hack", "Handi-Man in Cyberworld")

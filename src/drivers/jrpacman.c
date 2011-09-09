@@ -394,6 +394,586 @@ ROM_START( jrpacman )
 	ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )	/* timing - not used */
 ROM_END
 
+ROM_START( fastjr )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(0527ff9b ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(73477193 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr1000 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(8f93c273 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(eac97aec ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr2000 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(2784936b ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(a26f1a49 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr2001 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(9171f08f ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(3164b853 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr2001p)
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(d56cb9c5 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(1b534804 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr2002 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(e254096c ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(e3240bec ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr2002p )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(ad1d0360 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(160321a1 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr2003 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(ffe21f5 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(1fd35d7a ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr2003p )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(b24e9383 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(65ba2fb7 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr2004 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(3c20cf84 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(f08575ab ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr2004p )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(6e1db602 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(ab075ebe ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr2005 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(42eb8848 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(502d286c ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr2005p )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(4d03cd0a ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(51cbce81 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr3000p )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(8f93c273 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(a8f7b5c ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr4000p )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(c5f05f11 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(944add80 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr5000p )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(86979e1 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(a0fce81b ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr6000 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(44bd3c24 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(83c8ff32 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr7000 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(3dca34d5 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(202f2f37 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr7000p )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(3b3e60fe ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(89b17c92 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr8000 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(9653f563 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(b1791f8 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr8000p )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(913a0bea ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(aed01226 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jr9000p )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(b2653891 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(87f45bd7 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jrdeluxe )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(90517001 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(ef042965 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jrvectr )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(4876ad83 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(c0b35564 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jrpacad )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(1ecf940c ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(c0b35564 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jrhearts )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(0527ff9b ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(73477193 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jrpacjr)
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(54e6c297 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5b34dd98 ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jrpacjrp )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(54e6c297 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(1ee279ef ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
+ROM_START( jrpacp )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "jrp8d.bin",    0x0000, 0x2000, CRC(e3fa972e ))
+ROM_LOAD( "jrp8e.bin",    0x2000, 0x2000, CRC(ec889e94 ))
+ROM_LOAD( "jrp8h.bin",    0x8000, 0x2000, CRC(35f1fc6e ))
+ROM_LOAD( "jrp8j.bin",    0xa000, 0x2000, CRC(9737099e ))
+ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97 ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(4fe4238e ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5993c0fa ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4 )) /* palette low bits */
+ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79 )) /* palette high bits */
+ROM_LOAD( "jrprom.9p",    0x0200, 0x0100, CRC(9f6ea9d8 )) /* color lookup table */
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "jrprom.7p",    0x0000, 0x0100, CRC(a9cc86bf ))
+ROM_LOAD( "jrprom.5s",    0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
 
 
 /*************************************
@@ -464,3 +1044,32 @@ static DRIVER_INIT( jrpacman )
  *************************************/
 
 GAME( 1983, jrpacman, 0, jrpacman, jrpacman, jrpacman, ROT90, "Bally Midway", "Jr. Pac-Man" )
+GAME( 1983, fastjr,   0, jrpacman, jrpacman, jrpacman, ROT90, "Bally Midway", "Jr. Pac-Man (Fast)" )
+GAME( 2000, jr1000,   0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 1000" )
+GAME( 2000, jr2000,   0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 2000" )
+GAME( 2000, jr2001,   0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 2001" )
+GAME( 2000, jr2001p,  0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 2001 Plus" )
+GAME( 2000, jr2002,   0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 2002" )
+GAME( 2000, jr2002p,  0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 2002 Plus" )
+GAME( 2000, jr2003,   0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 2003" )
+GAME( 2000, jr2003p,  0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 2003 Plus" )
+GAME( 2000, jr2004,   0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 2004" )
+GAME( 2000, jr2004p,  0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 2004 Plus" )
+GAME( 2000, jr2005,   0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 2005" )
+GAME( 2000, jr2005p,  0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 2005 Plus" )
+GAME( 2000, jr3000p,  0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 3000 Plus" )
+GAME( 2000, jr4000p,  0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 4000 Plus" )
+GAME( 2000, jr5000p,  0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 5000 Plus" )
+GAME( 2000, jr6000,   0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 6000" )
+GAME( 2000, jr7000,   0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 7000" )
+GAME( 2000, jr7000p,  0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 7000 Plus" )
+GAME( 2000, jr8000,   0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 8000" )
+GAME( 2000, jr8000p,  0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 8000 Plus" )
+GAME( 2000, jr9000p,  0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man 9000 Plus" )
+GAME( 2000, jrdeluxe, 0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man Deluxe" )
+GAME( 1983, jrpacad,  0, jrpacman, jrpacman, jrpacman, ROT90, "Bally Midway", "Jr. Pac-Man After Dark" )
+GAME( 1983, jrvectr,  0, jrpacman, jrpacman, jrpacman, ROT90, "Bally Midway", "Jr. Pac-Man Vector" )
+GAME( 2000, jrhearts, 0, jrpacman, jrpacman, jrpacman, ROT90, "Bally Midway", "Jr. Pac-Man Hearts" )
+GAME( 2000, jrpacjr,  0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man Junior" )
+GAME( 2000, jrpacjrp, 0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man Junior Plus" )
+GAME( 2000, jrpacp,   0, jrpacman, jrpacman, jrpacman, ROT90, "Blue Justice", "Jr. Pac-Man Plus" )

@@ -540,9 +540,103 @@ ROM_START( paclandm )
 	ROM_LOAD( "pl1-4.bin",    0x1000, 0x0400, CRC(3a7be418) SHA1(475cdc68205e3acce83fe79b00b74c6a7e28dde4) )	/* background lookup table */
 ROM_END
 
+ROM_START( mariopac )
+ROM_REGION( 0x20000, REGION_CPU1, 0 )	/* 128k for code */
+ROM_LOAD( "pl5_01b.bin",  0x08000, 0x4000, CRC(b0ea7631 ))
+ROM_LOAD( "pl5_02.bin",   0x0C000, 0x4000, CRC(d903e84e ))
+/* all the following are banked at 0x4000-0x5fff */
+ROM_LOAD( "pl1-3",        0x10000, 0x4000, CRC(aa9fa739 ))
+ROM_LOAD( "pl1-4",        0x14000, 0x4000, CRC(2b895a90 ))
+ROM_LOAD( "pl1-5",        0x18000, 0x4000, CRC(7af66200 ))
+ROM_LOAD( "pl3_06.bin",   0x1c000, 0x4000, CRC(2ffe3319 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for code */
+ROM_LOAD( "pl1-7",        0x8000, 0x2000, CRC(8c5becae )) /* sub program for the mcu */
+ROM_LOAD( "pl1-mcu.bin",  0xf000, 0x1000, CRC(6ef08fb3 )) /* microcontroller */
+ROM_REGION( 0x02000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "pl2_12.bin",   0x00000, 0x2000, CRC(abba0923 ))	/* chars */
+ROM_REGION( 0x02000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "pl4_13.bin",   0x00000, 0x2000, CRC(3ae582fd ))
+ROM_REGION( 0x08000, REGION_GFX3, ROMREGION_DISPOSE )
+ROM_LOAD( "pl1-9",        0x00000, 0x4000, CRC(98439154 ))	/* sprites */
+ROM_LOAD( "pl1-10",       0x04000, 0x4000, CRC(6005b277 ))
+ROM_REGION( 0x08000, REGION_GFX4, ROMREGION_DISPOSE )
+ROM_LOAD( "pl1-8",        0x00000, 0x4000, CRC(d0c1f225 ))
+ROM_LOAD( "pl1-11",       0x04000, 0x4000, CRC(eeed9880 ))
+ROM_REGION( 0x1400, REGION_PROMS, 0 )
+ROM_LOAD( "pl1-2.bin",    0x0000, 0x0400, CRC(472885de ))	/* red and green component */
+ROM_LOAD( "pl1-1.bin",    0x0400, 0x0400, CRC(a78ebdaf ))	/* blue component */
+ROM_LOAD( "pl1-3.bin",    0x0800, 0x0400, CRC(80558da8 ))	/* sprites lookup table */
+ROM_LOAD( "pl1-5.bin",    0x0c00, 0x0400, CRC(4b7ee712 ))	/* foreground lookup table */
+ROM_LOAD( "pl1-4.bin",    0x1000, 0x0400, CRC(3a7be418 ))	/* background lookup table */
+ROM_END
+
+/*PacMAME*/
+ROM_START( paclandb )
+ROM_REGION( 0x20000, REGION_CPU1, 0 )	/* 128k for code */
+ROM_LOAD( "PL5_01B.BIN",        0x08000, 0x4000, CRC(b0ea7631 ))
+ROM_LOAD( "PL5_02.BIN",        0x0C000, 0x4000, CRC(d903e84e ))
+/* all the following are banked at 0x4000-0x5fff */
+ROM_LOAD( "pl1-3",        0x10000, 0x4000, CRC(aa9fa739 ))
+ROM_LOAD( "pl1-4",        0x14000, 0x4000, CRC(2b895a90 ))
+ROM_LOAD( "pl1-5",        0x18000, 0x4000, CRC(7af66200 ))
+ROM_LOAD( "PL3_06.BIN",        0x1c000, 0x4000, CRC(2ffe3319 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for code */
+ROM_LOAD( "pl1-7",        0x8000, 0x2000, CRC(8c5becae ) )/* sub program for the mcu */
+ROM_LOAD( "pl1-mcu.bin",  0xf000, 0x1000, CRC(6ef08fb3 )) /* microcontroller */
+ROM_REGION( 0x02000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "PL2_12.BIN",       0x00000, 0x2000, CRC(a63c8726 ))	/* chars */
+ROM_REGION( 0x02000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "PL4_13.BIN",       0x00000, 0x2000, CRC(3ae582fd ))
+ROM_REGION( 0x08000, REGION_GFX3, ROMREGION_DISPOSE )
+ROM_LOAD( "pl1-9",        0x00000, 0x4000, CRC(f5d5962b ))	/* sprites */
+ROM_LOAD( "pl1-10",       0x04000, 0x4000, CRC(c7cf1904 ))
+ROM_REGION( 0x08000, REGION_GFX4, ROMREGION_DISPOSE )
+ROM_LOAD( "pl1-8",        0x00000, 0x4000, CRC(a2ebfa4a ))
+ROM_LOAD( "pl1-11",       0x04000, 0x4000, CRC(6621361a ))
+ROM_REGION( 0x1400, REGION_PROMS, 0 )
+ROM_LOAD( "pl1-2.bin",    0x0000, 0x0400, CRC(472885de ))	/* red and green component */
+ROM_LOAD( "pl1-1.bin",    0x0400, 0x0400, CRC(a78ebdaf ))	/* blue component */
+ROM_LOAD( "pl1-3.bin",    0x0800, 0x0400, CRC(80558da8 ))	/* sprites lookup table */
+ROM_LOAD( "pl1-5.bin",    0x0c00, 0x0400, CRC(4b7ee712 ))	/* foreground lookup table */
+ROM_LOAD( "pl1-4.bin",    0x1000, 0x0400, CRC(3a7be418 ))	/* background lookup table */
+ROM_END
+
+ROM_START( paclandd )
+ROM_REGION( 0x20000, REGION_CPU1, 0 )	/* 128k for code */
+ROM_LOAD( "pl5_01b.bin",  0x08000, 0x4000, CRC(b0ea7631 ))
+ROM_LOAD( "pl5_02.bin",   0x0C000, 0x4000, CRC(d903e84e ))
+/* all the following are banked at 0x4000-0x5fff */
+ROM_LOAD( "pl1-3",        0x10000, 0x4000, CRC(aa9fa739 ))
+ROM_LOAD( "pl1-4",        0x14000, 0x4000, CRC(2b895a90 ))
+ROM_LOAD( "pl1-5",        0x18000, 0x4000, CRC(7af66200 ))
+ROM_LOAD( "pl3_06.bin",   0x1c000, 0x4000, CRC(2ffe3319 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for code */
+ROM_LOAD( "pl1-7",        0x8000, 0x2000, CRC(8c5becae )) /* sub program for the mcu */
+ROM_LOAD( "pl1-mcu.bin",  0xf000, 0x1000, CRC(6ef08fb3) ) /* microcontroller */
+ROM_REGION( 0x02000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "pl2_12.bin",   0x00000, 0x2000, CRC(a63c8726 ))	/* chars */
+ROM_REGION( 0x02000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "pl4_13.bin",   0x00000, 0x2000, CRC(3ae582fd ))
+ROM_REGION( 0x08000, REGION_GFX3, ROMREGION_DISPOSE )
+ROM_LOAD( "pl1-9",        0x00000, 0x4000, CRC(3dba9085 ))	/* sprites */
+ROM_LOAD( "pl1-10",       0x04000, 0x4000, CRC(3f4b4d81 ))
+ROM_REGION( 0x08000, REGION_GFX4, ROMREGION_DISPOSE )
+ROM_LOAD( "pl1-8",        0x00000, 0x4000, CRC(7f089223 ))
+ROM_LOAD( "pl1-11",       0x04000, 0x4000, CRC(52c2cb37 ))
+ROM_REGION( 0x1400, REGION_PROMS, 0 )
+ROM_LOAD( "pl1-2.bin",    0x0000, 0x0400, CRC(472885de ))	/* red and green component */
+ROM_LOAD( "pl1-1.bin",    0x0400, 0x0400, CRC(a78ebdaf ))	/* blue component */
+ROM_LOAD( "pl1-3.bin",    0x0800, 0x0400, CRC(80558da8 ))	/* sprites lookup table */
+ROM_LOAD( "pl1-5.bin",    0x0c00, 0x0400, CRC(4b7ee712 ))	/* foreground lookup table */
+ROM_LOAD( "pl1-4.bin",    0x1000, 0x0400, CRC(3a7be418 ))	/* background lookup table */
+ROM_END
+
 
 
 GAME( 1984, pacland,  0,       pacland, pacland, 0, ROT0, "Namco", "Pac-Land (set 1)" )
 GAME( 1984, pacland2, pacland, pacland, pacland, 0, ROT0, "Namco", "Pac-Land (set 2)" )
 GAME( 1984, pacland3, pacland, pacland, pacland, 0, ROT0, "Namco", "Pac-Land (set 3)" )
 GAME( 1984, paclandm, pacland, pacland, pacland, 0, ROT0, "[Namco] (Bally Midway license)", "Pac-Land (Midway)" )
+GAME( 2001, mariopac, 0, pacland, pacland, 0, ROT0, "Namco", "Mario in Pac-Land")
+GAME( 1984, paclandb, 0, pacland, pacland, 0, ROT0, "Namco", "Pac-Land (Benelux Edition)")
+GAME( 2000, paclandd, 0, pacland, pacland, 0, ROT0, "BlueJustice", "Pac-Land")

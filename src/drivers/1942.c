@@ -446,8 +446,41 @@ ROM_START( 1942b )
 	ROM_LOAD( "01m_sb-9.bin", 0x0900, 0x0100, CRC(4921635c) SHA1(aee37d6cdc36acf0f11ff5f93e7b16e4b12f6c39) )	/* video timing? (not used) */
 ROM_END
 
+ROM_START( galagax )
+ROM_REGION( 0x1c000, REGION_CPU1, 0 )	/* 64k for code + 3*16k for the banked ROMs images */
+ROM_LOAD( "1-n3.bin",     0x00000, 0x4000, CRC(c78cdc46 ))
+ROM_LOAD( "1-n4.bin",     0x04000, 0x4000, CRC(863f2f49 ))
+ROM_LOAD( "1-n5.bin",     0x10000, 0x4000, CRC(0da115f9 ))
+ROM_LOAD( "1-n6.bin",     0x14000, 0x2000, CRC(821c6481 ))
+ROM_LOAD( "1-n7.bin",     0x18000, 0x4000, CRC(5df525e1 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "1-c11.bin",    0x0000, 0x4000, CRC(bd87f06b ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "1-f2.bin",     0x00000, 0x2000, CRC(b3e1862b ))/* characters */
+ROM_REGION( 0xc000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "2-a1.bin",     0x00000, 0x2000, CRC(21f3fee2 ))	/* tiles */
+ROM_LOAD( "2-a2.bin",     0x02000, 0x2000, CRC(5542beae ))
+ROM_LOAD( "2-a3.bin",     0x04000, 0x2000, CRC(118e87ec ))
+ROM_LOAD( "2-a4.bin",     0x06000, 0x2000, CRC(fc3db895 ))
+ROM_LOAD( "2-a5.bin",     0x08000, 0x2000, CRC(4a336de1 ))
+ROM_LOAD( "2-a6.bin",     0x0a000, 0x2000, CRC(1d4a69c9 ))
+ROM_REGION( 0x10000, REGION_GFX3, ROMREGION_DISPOSE )
+ROM_LOAD( "2-l1.bin",     0x00000, 0x4000, CRC(8408b932 ))	/* sprites */
+ROM_LOAD( "2-l2.bin",     0x04000, 0x4000, CRC(2218cb80 ))
+ROM_LOAD( "2-n1.bin",     0x08000, 0x4000, CRC(4d5ed5e5 ))
+ROM_LOAD( "2-n2.bin",     0x0c000, 0x4000, CRC(8f4a1688 ))
+ROM_REGION( 0x0600, REGION_PROMS, 0 )
+ROM_LOAD( "08e_sb-5.bin", 0x0000, 0x0100, CRC(93ab8153 ))	/* red */
+ROM_LOAD( "09e_sb-6.bin", 0x0100, 0x0100, CRC(8ab44f7d ))	/* green*/
+ROM_LOAD( "10e_sb-7.bin", 0x0200, 0x0100, CRC(f4ade9a4 ))	/* blue*/
+ROM_LOAD( "f01_sb-0.bin", 0x0300, 0x0100, CRC(6047d91b ))	/* char lookup table */
+ROM_LOAD( "06d_sb-4.bin", 0x0400, 0x0100, CRC(4858968d ))	/* tile lookup table */
+ROM_LOAD( "03k_sb-8.bin", 0x0500, 0x0100, CRC(f6fad943 ))	/* sprite lookup table */
+ROM_END
+
 
 
 GAME( 1984, 1942,  0,    1942, 1942, 0, ROT270, "Capcom", "1942 (set 1)" )
 GAME( 1984, 1942a, 1942, 1942, 1942, 0, ROT270, "Capcom", "1942 (set 2)" )
 GAME( 1984, 1942b, 1942, 1942, 1942, 0, ROT270, "Capcom", "1942 (set 3)" )
+GAME( 1984, galagax, 1942, 1942, 1942, 0, ROT270, "Capcom - Jerky and Chris Moore hack", "Galaga X (1942 hack)" )

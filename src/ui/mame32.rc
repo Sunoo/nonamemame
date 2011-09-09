@@ -51,6 +51,9 @@ BEGIN
     BEGIN
         MENUITEM "&Play",                       ID_FILE_PLAY
         MENUITEM SEPARATOR
+        MENUITEM "&View PCB Info",              ID_VIEW_PCBINFO
+        MENUITEM "&View Source",                ID_VIEW_SOURCEDRV
+        MENUITEM SEPARATOR
         MENUITEM "Play and &Record Input...",   ID_FILE_PLAY_RECORD
         MENUITEM "P&layback Input...",          ID_FILE_PLAY_BACK
         MENUITEM SEPARATOR
@@ -247,8 +250,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,79,4,2
- PRODUCTVERSION 0,79,4,2
+ FILEVERSION 0,79,4,3
+ PRODUCTVERSION 0,79,4,3
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -267,13 +270,13 @@ BEGIN
             VALUE "Comments", "No Name M.A.M.E. for Win32\0"
             VALUE "CompanyName", "No Name Development\0"
             VALUE "FileDescription", "No Name M.A.M.E. for Win32\0"
-            VALUE "FileVersion", "0, 79, 4, 2\0"
+            VALUE "FileVersion", "0, 79, 4, 3\0"
             VALUE "InternalName", "No Name MAME32\0"
             VALUE "LegalCopyright", "MAME is Copyright 1997-2003 Nicola Salmoria and the MAME team\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "NONAME32.exe\0"
             VALUE "ProductName", "No Name MAME32\0"
-            VALUE "ProductVersion", "0, 79, 4, 2\0"
+            VALUE "ProductVersion", "0, 79, 4, 3\0"
         END
     END
     BLOCK "VarFileInfo"

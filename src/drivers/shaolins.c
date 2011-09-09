@@ -302,7 +302,27 @@ ROM_START( shaolins )
 	ROM_LOAD( "kicker.f16",   0x0400, 0x0100, CRC(80009cf5) SHA1(a367f3f55d75a9d5bf4d43f9d77272eb910a1344) ) /* sprite lookup table */
 ROM_END
 
+ROM_START( kfjohnny )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code */
+ROM_LOAD( "kikrd8.bin",   0x6000, 0x2000, CRC(2598dfdd ))
+ROM_LOAD( "kikrd9.bin",   0x8000, 0x4000, CRC(0cf0351a ))
+ROM_LOAD( "kikrd11.bin",  0xC000, 0x4000, CRC(654037f8 ))
+ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "kfjohnny.gf1", 0x0000, 0x2000, CRC(be0310d0 ))
+ROM_LOAD( "kfjohnny.gf2", 0x2000, 0x2000, CRC(fab8c880 ))
+ROM_REGION( 0x8000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "kfjohnny.gf4", 0x0000, 0x4000, CRC(f7fbbb9c ))
+ROM_LOAD( "kfjohnny.gf3", 0x4000, 0x4000, CRC(84bc0cfd ))
+ROM_REGION( 0x0500, REGION_PROMS, 0 )
+ROM_LOAD( "kicker.a12",   0x0000, 0x0100, CRC(b09db4b4 )) /* palette red component */
+ROM_LOAD( "kicker.a13",   0x0100, 0x0100, CRC(270a2bf3 )) /* palette green component */
+ROM_LOAD( "kicker.a14",   0x0200, 0x0100, CRC(83e95ea8 )) /* palette blue component */
+ROM_LOAD( "kicker.b8",    0x0300, 0x0100, CRC(aa900724 )) /* character lookup table */
+ROM_LOAD( "kicker.f16",   0x0400, 0x0100, CRC(80009cf5 )) /* sprite lookup table */
+ROM_END
+
 
 
 GAME( 1985, kicker,   0,      shaolins, shaolins, 0, ROT90, "Konami", "Kicker" )
 GAME( 1985, shaolins, kicker, shaolins, shaolins, 0, ROT90, "Konami", "Shao-Lin's Road" )
+GAME( 2002, kfjohnny, kicker, shaolins, shaolins, 0, ROT90, "hack", "Kung-Fu Johnny" ) /* hack by Smitdogg */

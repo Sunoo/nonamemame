@@ -539,6 +539,132 @@ ROM_START( temptube )
 	ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351) SHA1(a30a3662c740810c0f20e3712679606921b8ca06) )
 ROM_END
 
+ROM_START( temped )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(65d61fe7 ))
+ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375 ))
+ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a ))
+ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9 ))
+ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645 ))
+ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(4825ee42 ))
+ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(a4de050f ))
+ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648 ))
+ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(73d38e47 ))
+ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3 ))
+ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
+/* Mathbox ROMs */
+ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937 ))
+ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351 ))
+ROM_END
+
+ROM_START( tempestm )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(65d61fe7 ))
+ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375 ))
+ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a ))
+ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9 ))
+ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645 ))
+ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(b5e00840 ))
+ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(ed4f2132 ))
+ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648 ))
+ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(73d38e47 ))
+ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3 ))
+ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
+/* Mathbox ROMs */
+ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937 ))
+ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351 ))
+ROM_END
+
+ROM_START( tempall ) /* rev 3 */
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(a9000137 ))
+ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375 ))
+ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a ))
+ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9 ))
+ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645 ))
+ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(beb352ab ))
+ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(a4de050f ))
+ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648 ))
+ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(73d38e47 ))
+ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3 ))
+ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
+/* Mathbox ROMs */
+ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937 ))
+ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351 ))
+ROM_END
+
+ROM_START( temptwst ) /* rev 3 */
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(a9000137 ))
+ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375 ))
+ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a ))
+ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9 ))
+ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645 ))
+ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(f30afe2d ))
+ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(571b1799 ))
+ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648 ))
+ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(67619e6e ))
+ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3 ))
+ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
+/* Mathbox ROMs */
+ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937 ))
+ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351 ))
+ROM_END
+
+ROM_START( tmptwst2 ) /* rev 3 */
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(a9000137 ))
+ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375 ))
+ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a ))
+ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9 ))
+ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645 ))
+ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(1c6827cb ))
+ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(571b1799 ))
+ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648 ))
+ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(c1bc4a69 ))
+ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3 ))
+ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
+/* Mathbox ROMs */
+ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937 ))
+ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351 ))
+ROM_END
+
+ROM_START( tmptwst3 ) /* rev 3 */
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(a9000137 ))
+ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375 ))
+ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a ))
+ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9 ))
+ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645 ))
+ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(c8e7693f ))
+ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(571b1799 ))
+ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648 ))
+ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(194b34a9 ))
+ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3 ))
+ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
+/* Mathbox ROMs */
+ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937 ))
+ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351 ))
+ROM_END
+
+ROM_START( tmptwst4 ) /* rev 3 */
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(a9000137 ))
+ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375 ))
+ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a ))
+ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9 ))
+ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645 ))
+ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(2b6fcca4 ))
+ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(571b1799 ))
+ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648 ))
+ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(7fde0be4 ))
+ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3 ))
+ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
+/* Mathbox ROMs */
+ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937 ))
+ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351 ))
+ROM_END
+
 
 #if 0 /* identical to rom_tempest, only different rom sizes */
 ROM_START( tempest3 )
@@ -567,3 +693,10 @@ GAME( 1980, tempest1, tempest, tempest, tempest, 0, ROT270, "Atari", "Tempest (r
 GAME( 1980, tempest2, tempest, tempest, tempest, 0, ROT270, "Atari", "Tempest (rev 2)" )
 GAME( 1980, tempest3, tempest, tempest, tempest, 0, ROT270, "Atari", "Tempest (rev ?)" )
 GAME( 1980, temptube, tempest, tempest, tempest, 0, ROT270, "hack", "Tempest Tubes" )
+GAME( 2000, temped,   tempest, tempest, tempest, 0, ROT270, "hack", "TempEd" )
+GAME( 2000, tempall,  tempest, tempest, tempest, 0, ROT270, "hack", "Tempest All Levels" )
+GAME( 2000, temptwst, tempest, tempest, tempest, 0, ROT270, "hack", "Tempest Twisted" )
+GAME( 2000, tmptwst2, tempest, tempest, tempest, 0, ROT270, "hack", "Tempest Twisty's Revenge" )
+GAME( 2000, tmptwst3, tempest, tempest, tempest, 0, ROT270, "hack", "Tempest Psycho Twist" )
+GAME( 2000, tmptwst4, tempest, tempest, tempest, 0, ROT270, "hack", "Tempest Twisted Maniac" )
+GAME( 2000, tempestm, tempest, tempest, tempest, 0, ROT270, "hack", "Tempest Mark's Hacks" )

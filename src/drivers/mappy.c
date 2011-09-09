@@ -2160,6 +2160,103 @@ ROM_START( motos )
 ROM_END
 
 
+ROM_START( crackhea )
+ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code for the first CPU */
+ROM_LOAD( "mappy1d.64", 0xa000, 0x2000, CRC(52e6c708 ))
+ROM_LOAD( "mappy1c.64", 0xc000, 0x2000, CRC(a958a61c ))
+ROM_LOAD( "mappy1b.64", 0xe000, 0x2000, CRC(203766d4 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* 64k for the second CPU */
+ROM_LOAD( "mappy1k.64", 0xe000, 0x2000, CRC(8182dd5b ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "mappy3b.32", 0x0000, 0x1000, CRC(912ffa7e ))
+ROM_REGION( 0x4000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "mappy3m.64", 0x0000, 0x2000, CRC(a263d078 ))
+ROM_LOAD( "mappy3n.64", 0x2000, 0x2000, CRC(3758ceb2 ))
+ROM_REGION( 0x0220, REGION_PROMS, 0 )
+ROM_LOAD( "mappy.pr1", 0x0000, 0x0020, CRC(56531268 )) /* palette */
+ROM_LOAD( "mappy.pr2", 0x0020, 0x0100, CRC(50765082 )) /* characters */
+ROM_LOAD( "mappy.pr3", 0x0120, 0x0100, CRC(5396bd78 )) /* sprites */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 ) /* sound prom */
+ROM_LOAD( "mappy.spr", 0x0000, 0x0100, CRC(16a9166a ))
+ROM_END
+
+ROM_START( housepty )
+ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code for the first CPU */
+ROM_LOAD( "mappy1d.64", 0xa000, 0x2000, CRC(6f778a5d ))
+ROM_LOAD( "mappy1c.64", 0xc000, 0x2000, CRC(a958a61c ))
+ROM_LOAD( "mappy1b.64", 0xe000, 0x2000, CRC(41a0c5b4 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* 64k for the second CPU */
+ROM_LOAD( "mappy1k.64", 0xe000, 0x2000, CRC(8182dd5b ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "mappy3b.32", 0x0000, 0x1000, CRC(8d565a7e ))
+ROM_REGION( 0x4000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "mappy3m.64", 0x0000, 0x2000, CRC(23a3c108 ))
+ROM_LOAD( "mappy3n.64", 0x2000, 0x2000, CRC(c6822529 ))
+ROM_REGION( 0x0220, REGION_PROMS, 0 )
+ROM_LOAD( "mappy.pr1", 0x0000, 0x0020, CRC(56531268 )) /* palette */
+ROM_LOAD( "mappy.pr2", 0x0020, 0x0100, CRC(50765082 )) /* characters */
+ROM_LOAD( "mappy.pr3", 0x0120, 0x0100, CRC(5396bd78 )) /* sprites */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 ) /* sound prom */
+ROM_LOAD( "mappy.spr", 0x0000, 0x0100, CRC(16a9166a ))
+ROM_END
+
+ROM_START( marpy )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code for the first CPU  */
+ROM_LOAD( "mappy1d.64",   0xa000, 0x2000, CRC(52e6c708 ))
+ROM_LOAD( "mappy1c.64",   0xc000, 0x2000, CRC(a958a61c ))
+ROM_LOAD( "mappy1b.64",   0xe000, 0x2000, CRC(203766d4 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for the second CPU */
+ROM_LOAD( "mappy1k.64",   0xe000, 0x2000, CRC(8182dd5b ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "mappy3b.32",   0x0000, 0x1000, CRC(2aa99047 ))
+ROM_REGION( 0x4000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "mappy3m.64",   0x0000, 0x2000, CRC(ce61b84d ))
+ROM_LOAD( "mappy3n.64",   0x2000, 0x2000, CRC(5d0572a7 ))
+ROM_REGION( 0x0220, REGION_PROMS, 0 )
+ROM_LOAD( "mappy.pr1",    0x0000, 0x0020, CRC(56531268 )) /* palette */
+ROM_LOAD( "mappy.pr2",    0x0020, 0x0100, CRC(50765082 )) /* characters */
+ROM_LOAD( "mappy.pr3",    0x0120, 0x0100, CRC(5396bd78 )) /* sprites */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "mappy.spr",    0x0000, 0x0100, CRC(16a9166a ))
+ROM_END
+
+ROM_START( superpcp )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "spc-2.1c",     0xc000, 0x2000, CRC(1a38c30e ))
+ROM_LOAD( "spc-1.1b",     0xe000, 0x2000, CRC(730e95a9 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the second CPU */
+ROM_LOAD( "spc-3.1k",     0xf000, 0x1000, CRC(04445ddb ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "spv-1.3c",     0x0000, 0x1000, CRC(78337e74 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "spv-2.3f",     0x0000, 0x2000, CRC(d52ef4d ))
+ROM_REGION( 0x0220, REGION_PROMS, 0 )
+ROM_LOAD( "superpac.4c",  0x0000, 0x0020, CRC(9ce22c46 )) /* palette */
+ROM_LOAD( "superpac.4e",  0x0020, 0x0100, CRC(1253c5c1 )) /* chars */
+ROM_LOAD( "superpac.3l",  0x0120, 0x0100, CRC(d4d7026f )) /* sprites */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "superpac.3m",  0x0000, 0x0100, CRC(ad43688f ))
+ROM_END
+
+ROM_START( vectrsup )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "spc-2.1c",     0xc000, 0x2000, CRC(1a38c30e ))
+ROM_LOAD( "spc-1.1b",     0xe000, 0x2000, CRC(730e95a9 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the second CPU */
+ROM_LOAD( "spc-3.1k",     0xf000, 0x1000, CRC(04445ddb ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "spv-1.3c",     0x0000, 0x1000, CRC(618db633 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "spv-2.3f",     0x0000, 0x2000, CRC(62c09c6c ))
+ROM_REGION( 0x0220, REGION_PROMS, 0 )
+ROM_LOAD( "superpac.4c",  0x0000, 0x0020, CRC(9ce22c46 )) /* palette */
+ROM_LOAD( "superpac.4e",  0x0020, 0x0100, CRC(1253c5c1 )) /* chars */
+ROM_LOAD( "superpac.3l",  0x0120, 0x0100, CRC(d4d7026f )) /* sprites */
+ROM_REGION( 0x0100, REGION_SOUND1, 0 )	/* sound prom */
+ROM_LOAD( "superpac.3m",  0x0000, 0x0100, CRC(ad43688f ))
+ROM_END
+
+
 
 static WRITE8_HANDLER( grobda_DAC_w )
 {
@@ -2204,3 +2301,8 @@ GAME( 1984, todruago, todruaga, todruaga, todruaga, 58_56,    ROT90, "Namco", "T
 GAME( 1985, digdug2,  0,        mappy,    digdug2,  58_56,    ROT90, "Namco", "Dig Dug II (New Ver.)" )
 GAME( 1985, digdug2o, digdug2,  mappy,    digdug2,  58_56,    ROT90, "Namco", "Dig Dug II (Old Ver.)" )
 GAME( 1985, motos,    0,        mappy,    motos,    56out_56, ROT90, "Namco", "Motos" )
+GAME (1998, crackhea, 0, mappy, mappy, 0, ROT90, "Cary Barnhard hack", "Crackhead")
+GAME( 1998, housepty, 0, mappy, mappy, 0, ROT90, "Jerky Hack of Mappy", "House Party" )
+GAME (2001, marpy,    0, mappy, mappy, 0, ROT90, "Hack", "Marpy" )
+GAME( 2000, superpcp, 0,        superpac, superpac, 0, ROT90, "Blue Justice", "Super Pac-Man Plus" )
+GAMEX(2000, vectrsup, superpac, superpac, superpac, 0, ROT90, "T-Bone hack", "Super Pac-Man (Vector sim)", GAME_NO_COCKTAIL)

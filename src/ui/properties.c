@@ -1878,14 +1878,15 @@ static void SetPropEnabledControls(HWND hWnd)
 
 static void AssignSampleRate(HWND hWnd)
 {
-	switch (g_nSampleRateIndex)
-	{
-		case 0:  pGameOpts->samplerate = 11025; break;
-		case 1:  pGameOpts->samplerate = 22050; break;
-		case 2:  pGameOpts->samplerate = 44100; break;
-		case 3:  pGameOpts->samplerate = 48000; break;
-		default: pGameOpts->samplerate = 44100; break;
-	}
+   switch (g_nSampleRateIndex)
+   {
+      case 0: pGameOpts->samplerate = 11025; break;
+      case 1: pGameOpts->samplerate = 22050; break;
+      case 2: pGameOpts->samplerate = 24000; break;
+      case 3: pGameOpts->samplerate = 44100; break;
+      case 4: pGameOpts->samplerate = 48000; break;
+      default: pGameOpts->samplerate = 44100; break;
+   }
 }
 
 static void AssignVolume(HWND hWnd)
@@ -2034,9 +2035,10 @@ static void ResetDataMap(void)
 	{
 		case 11025:  g_nSampleRateIndex = 0; break;
 		case 22050:  g_nSampleRateIndex = 1; break;
-		case 48000:  g_nSampleRateIndex = 3; break;
+		case 24000:  g_nSampleRateIndex = 2; break;
+		case 48000:  g_nSampleRateIndex = 4; break;
 		default:
-		case 44100:  g_nSampleRateIndex = 2; break;
+		case 44100:  g_nSampleRateIndex = 3; break;
 	}
 
 	g_nEffectIndex = 0;
@@ -2875,9 +2877,10 @@ static void InitializeSoundUI(HWND hwnd)
 	{
 		ComboBox_AddString(hCtrl, "11025");
 		ComboBox_AddString(hCtrl, "22050");
+		ComboBox_AddString(hCtrl, "24000");
 		ComboBox_AddString(hCtrl, "44100");
 		ComboBox_AddString(hCtrl, "48000");
-		ComboBox_SetCurSel(hCtrl, 1);
+		ComboBox_SetCurSel(hCtrl, 3);
 	}
 }
 
@@ -3150,14 +3153,19 @@ static void InitializeBIOSUI(HWND hwnd)
 
 		if (g_nGame == -1)
 		{
-/*			ComboBox_AddString(hCtrl,"0");
-			ComboBox_AddString(hCtrl,"1");
-			ComboBox_AddString(hCtrl,"2");
-			ComboBox_AddString(hCtrl,"3");
-			ComboBox_AddString(hCtrl,"4");
-			ComboBox_AddString(hCtrl,"5");
-			ComboBox_AddString(hCtrl,"6");
-*/			ComboBox_AddString(hCtrl,"None");
+			ComboBox_AddString(hCtrl," 0 - Europa MVS (Ver. 2)");
+			ComboBox_AddString(hCtrl," 1 - Europa MVS (Ver. 1)");
+			ComboBox_AddString(hCtrl," 2 - Stati Uniti MVS (Ver. 2?)");
+			ComboBox_AddString(hCtrl," 3 - Stati Uniti MVS (Ver. 1)");
+			ComboBox_AddString(hCtrl," 4 - Asia MVS (Ver. 3)");
+			ComboBox_AddString(hCtrl," 5 - Giappone MVS (Ver. 3)");
+			ComboBox_AddString(hCtrl," 6 - Giappone MVS (Ver. 2)");
+			ComboBox_AddString(hCtrl," 7 - Unibios MVS (Hack, Ver. 1.2)");
+			ComboBox_AddString(hCtrl," 8 - Unibios MVS(Hack,Ver.1.1)"); 
+			ComboBox_AddString(hCtrl," 9 - Unibios MVS(Hack,Ver.1.0)"); 
+			ComboBox_AddString(hCtrl,"10 - Debug MVS (Hack?)"); 
+			ComboBox_AddString(hCtrl,"11 - Asia AES");
+			ComboBox_AddString(hCtrl,"None");
 
 			return;
 		}

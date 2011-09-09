@@ -4294,6 +4294,37 @@ static BOOL MameCommand(HWND hwnd,int id, HWND hwndCtl, UINT codeNotify)
 		TabCtrl_SetCurSel(hTabCtrl, CalculateCurrentTabIndex());
 		break;
 
+	case ID_VIEW_PCBINFO:
+		{
+			int  nGame;
+			char filename[MAX_PATH];
+
+			*filename = 0;
+
+			nGame = GetSelectedPickItem();
+			if (drivers[nGame]->clone_of && !(drivers[nGame]->clone_of->flags & NOT_A_DRIVER))
+				sprintf(filename, "pcb/%s.txt", drivers[nGame]->clone_of->name);
+			else
+				sprintf(filename, "pcb/%s.txt", drivers[nGame]->name);
+
+			DisplayTextFile(hMain, filename);
+		}
+		break;
+
+	case ID_VIEW_SOURCEDRV:
+		{
+			int  nGame;
+			char filename[MAX_PATH];
+
+			*filename = 0;
+
+			nGame = GetSelectedPickItem();
+			sprintf(filename, "%s", drivers[nGame]->source_file);
+
+			DisplayTextFile(hMain, filename);
+		}
+		break;
+
 		// toggle tab's existence
 	case ID_TOGGLE_TAB_SCREENSHOT :
 	case ID_TOGGLE_TAB_FLYER :

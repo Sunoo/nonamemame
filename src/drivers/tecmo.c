@@ -830,6 +830,33 @@ ROM_START( gemini )
 	ROM_LOAD( "gw01-6a.rom",  0x0000, 0x8000, CRC(d78afa05) SHA1(b02a739b045f5cddf943ce59226ef234463eeebe) )
 ROM_END
 
+ROM_START( geminit )
+ROM_REGION( 0x20000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "gw04-5s.rom",  0x00000, 0x10000, CRC(ff9de855 ))	/* c000-ffff is not used */
+ROM_LOAD( "gw05-6s.rom",  0x10000, 0x10000, CRC(5a6947a9 ))	/* banked at f000-f7ff */
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "gw03-5h.rom",  0x0000, 0x8000, CRC(9bc79596 ))
+ROM_REGION( 0x08000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "gw02-3h.rom",  0x00000, 0x08000, CRC(7acc8d35 ))	/* characters */
+ROM_REGION( 0x40000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "gw06-1c.rom",  0x00000, 0x10000, CRC(c47b1c97 ))	/* sprites */
+ROM_LOAD( "gw07-1d.rom",  0x10000, 0x10000, CRC(da42637e ))	/* sprites */
+ROM_LOAD( "gw08-1f.rom",  0x20000, 0x10000, CRC(0b4e8d70 ))	/* sprites */
+ROM_LOAD( "gw09-1h.rom",  0x30000, 0x10000, CRC(b65c5e4c ))	/* sprites */
+ROM_REGION( 0x40000, REGION_GFX3, ROMREGION_DISPOSE )
+ROM_LOAD( "gw10-1n.rom",  0x00000, 0x10000, CRC(5e84cd4f ))	/* tiles #1 */
+ROM_LOAD( "gw11-2na.rom", 0x10000, 0x10000, CRC(08b458e1 ))	/* tiles #1 */
+ROM_LOAD( "gw12-2nb.rom", 0x20000, 0x10000, CRC(229c9714 ))	/* tiles #1 */
+ROM_LOAD( "gw13-3n.rom",  0x30000, 0x10000, CRC(c5dfaf47 ))	/* tiles #1 */
+ROM_REGION( 0x40000, REGION_GFX4, ROMREGION_DISPOSE )
+ROM_LOAD( "gw14-1r.rom",  0x00000, 0x10000, CRC(9c10e5b5 ))	/* tiles #2 */
+ROM_LOAD( "gw15-2ra.rom", 0x10000, 0x10000, CRC(4cd18cfa ))	/* tiles #2 */
+ROM_LOAD( "gw16-2rb.rom", 0x20000, 0x10000, CRC(f911c7be ))	/* tiles #2 */
+ROM_LOAD( "gw17-3r.rom",  0x30000, 0x10000, CRC(79a9ce25 ))	/* tiles #2 */
+ROM_REGION( 0x8000, REGION_SOUND1, 0 )	/* ADPCM samples */
+ROM_LOAD( "gw01-6a.rom",  0x0000, 0x8000, CRC(d78afa05 ))
+ROM_END
+
 
 
 /*
@@ -848,3 +875,4 @@ GAME( 1986, rygarj,   rygar,    rygar,    rygar,    rygar,    ROT0,  "Tecmo", "A
 GAME( 1987, gemini,   0,        gemini,   gemini,   gemini,   ROT90, "Tecmo", "Gemini Wing" )
 GAME( 1988, silkworm, 0,        silkworm, silkworm, silkworm, ROT0,  "Tecmo", "Silk Worm (set 1)" )
 GAME( 1988, silkwrm2, silkworm, silkworm, silkworm, silkworm, ROT0,  "Tecmo", "Silk Worm (set 2)" )
+GAME( 2002, geminit,  gemini,   gemini,   gemini,   gemini,   ROT90, "Twisty", "Gemini Wing Hack" )

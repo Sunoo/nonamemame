@@ -201,8 +201,43 @@ ROM_START( frogseg2 )
 	ROM_LOAD( "pr-91.6l",     0x0000, 0x0020, CRC(413703bf) SHA1(66648b2b28d3dcbda5bdb2605d1977428939dd3c) )
 ROM_END
 
+ROM_START( trukker )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "frogger.ic5",  0x0000, 0x1000, CRC(efab0c79 ))
+ROM_LOAD( "frogger.ic6",  0x1000, 0x1000, CRC(aeca9c13 ))
+ROM_LOAD( "frogger.ic7",  0x2000, 0x1000, CRC(dd251066 ))
+ROM_LOAD( "frogger.ic8",  0x3000, 0x1000, CRC(bf293a02 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "frogger.608",  0x0000, 0x0800, CRC(e8ab0256 ))
+ROM_LOAD( "frogger.609",  0x0800, 0x0800, CRC(7380a48f ))
+ROM_LOAD( "frogger.610",  0x1000, 0x0800, CRC(31d7eb27 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "frogger.606",  0x0000, 0x0800, CRC(f0c49466 ))
+ROM_LOAD( "frogger.607",  0x0800, 0x0800, CRC(6ab5c2eb ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "pr-91.6l",     0x0000, 0x0020, CRC(413703bf ))
+ROM_END
+
+ROM_START( kazzy )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "frogger.26",   0x0000, 0x1000, CRC(597696d6) SHA1(e7e021776cad00f095a1ebbef407b7c0a8f5d835) )
+ROM_LOAD( "frogger.27",   0x1000, 0x1000, CRC(b6e6fcc3) SHA1(5e8692f2b0c7f4b3642b3ee6670e1c3b20029cdc) )
+ROM_LOAD( "frsm3.7",      0x2000, 0x1000, CRC(aca22ae0) SHA1(5a99060ea2506a3ac7d61ca5876ce5cb3e493565) )
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "frogger.608",  0x0000, 0x0800, CRC(e8ab0256) SHA1(f090afcfacf5f13cdfa0dfda8e3feb868c6ce8bc) )
+ROM_LOAD( "frogger.609",  0x0800, 0x0800, CRC(7380a48f) SHA1(75582a94b696062cbdb66a4c5cf0bc0bb94f81ee) )
+ROM_LOAD( "frogger.610",  0x1000, 0x0800, CRC(31d7eb27) SHA1(2e1d34ae4da385fd7cac94707d25eeddf4604e1a) )
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "frogger.607",  0x0000, 0x0800, CRC(05f7d883) SHA1(78831fd287da18928651a8adb7e578d291493eff) )
+ROM_LOAD( "frogger.606",  0x0800, 0x0800, CRC(f524ee30) SHA1(dd768967add61467baa08d5929001f157d6cd911) )
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "pr-91.6l",     0x0000, 0x0020, CRC(413703bf) SHA1(66648b2b28d3dcbda5bdb2605d1977428939dd3c) )
+ROM_END
+
 
 
 GAME( 1981, frogger,  0,	   frogger,  frogger,  frogger,  ROT90, "Konami", "Frogger" )
 GAME( 1981, frogseg1, frogger, frogger,  frogger,  frogger,  ROT90, "[Konami] (Sega license)", "Frogger (Sega set 1)" )
 GAME( 1981, frogseg2, frogger, frogger,  frogger,  frogger,  ROT90, "[Konami] (Sega license)", "Frogger (Sega set 2)" )
+GAME (1999, trukker, frogger, frogger, frogger, frogger, ROT90, "Grimlick hack","Trukker")
+GAME( 1981, kazzy,  frogger,	   frogger,  frogger,  frogger,  ROT90, "Konami", "Kazzy" )

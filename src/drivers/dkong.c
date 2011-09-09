@@ -2578,6 +2578,30 @@ ROM_START( shootgal )
 	ROM_LOAD( "sg-01-2n",    0x0200, 0x0200, CRC(e08ed788) SHA1(6982f6bcc70dbf4c75ff538a5df70da11bc89bb4) )
 ROM_END
 
+ROM_START( kong2600 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "dk.5e",        0x0000, 0x1000, CRC(ba70b88b ))
+ROM_LOAD( "dk.5c",        0x1000, 0x1000, CRC(5ec461ec ))
+ROM_LOAD( "dk.5b",        0x2000, 0x1000, CRC(1c97d324 ))
+ROM_LOAD( "dk.5a",        0x3000, 0x1000, CRC(b9005ac0 ))
+/* space for diagnostic ROM */
+ROM_REGION( 0x1000, REGION_CPU2, 0 )	/* sound */
+ROM_LOAD( "dk.3h",        0x0000, 0x0800, CRC(45a4ed06 ))
+ROM_LOAD( "dk.3f",        0x0800, 0x0800, CRC(4743fe92 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "dk.3n",        0x0000, 0x0800, CRC(0e6a2a6d ))
+ROM_LOAD( "dk.3p",        0x0800, 0x0800, CRC(ca57e0f4 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "dk.7c",        0x0000, 0x0800, CRC(cf450a43 ))
+ROM_LOAD( "dk.7d",        0x0800, 0x0800, CRC(d5046907 ))
+ROM_LOAD( "dk.7e",        0x1000, 0x0800, CRC(1539fe2a ))
+ROM_LOAD( "dk.7f",        0x1800, 0x0800, CRC(77cc00ab ))
+ROM_REGION( 0x0300, REGION_PROMS, 0 )
+ROM_LOAD( "dkong.2k",     0x0000, 0x0100, CRC(1e82d375 )) /* palette low 4 bits (inverted) */
+ROM_LOAD( "dkong.2j",     0x0100, 0x0100, CRC(2ab01dc8 )) /* palette high 4 bits (inverted) */
+ROM_LOAD( "dkong.5f",     0x0200, 0x0100, CRC(44988665 )) /* character color codes on a per-column basis */
+ROM_END
+
 
 static DRIVER_INIT( herodk )
 {
@@ -2652,3 +2676,4 @@ GAMEX(1985, spcfrcii, 0,		spclforc, spclforc, 0,        ROT90, "Senko Industries
 
 GAMEX(198?, drakton,  0,        dkong,    dkong,    0,        ROT90, "Epos Corporation", "Drakton", GAME_NOT_WORKING )
 GAMEX(1985, strtheat, 0,        strtheat, strtheat, 0,        ROT90, "Epos Corporation", "Street Heat - Cardinal Amusements", GAME_NO_SOUND)
+GAME( 1999, kong2600, dkong, dkong, dkong, 0, ROT90, "Vic Twenty George hack", "Donkey Kong (2600 graphics)")

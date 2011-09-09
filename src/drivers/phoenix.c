@@ -1021,6 +1021,28 @@ ROM_START( survival )
 	ROM_LOAD( "clr.u41",      0x0100, 0x0100, CRC(abddf69a) SHA1(e22c380a94fb491bec95c4f4c2d4f072839c09cf) )   /* palette high bits */
 ROM_END
 
+ROM_START( phoenixr )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "ic45",         0x0000, 0x0800, CRC(5b8c55a8 ) )
+ROM_LOAD( "ic46",         0x0800, 0x0800, CRC(5748f486 ) )
+ROM_LOAD( "ic47",         0x1000, 0x0800, CRC(cbbb8839 ) )
+ROM_LOAD( "ic48",         0x1800, 0x0800, CRC(9253e642 ) )
+ROM_LOAD( "ic49",         0x2000, 0x0800, CRC(a105e4e7 ) )
+ROM_LOAD( "ic50",         0x2800, 0x0800, CRC(ac5e9ec1 ) )
+ROM_LOAD( "ic51",         0x3000, 0x0800, CRC(2eab35b4 ) )
+ROM_LOAD( "ic52",         0x3800, 0x0800, CRC(d2c5c984 ) )
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "ic23",         0x0000, 0x0800, CRC(02bc87ea ) )
+ROM_LOAD( "ic24",         0x0800, 0x0800, CRC(675388ee ) )
+ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "ic39",         0x0000, 0x0800, CRC(8b1653ba ) )
+ROM_LOAD( "ic40",         0x0800, 0x0800, CRC(3b811dfb ) )
+ROM_REGION( 0x0200, REGION_PROMS, 0 )
+ROM_LOAD( "ic40_b.bin",   0x0000, 0x0100, CRC(79350b25 ) )  /* palette low bits */
+ROM_LOAD( "ic41_a.bin",   0x0100, 0x0100, CRC(e176b768 ) )  /* palette high bits */
+ROM_END
+
+GAMEX( 2000, phoenixr, phoenix, phoenix, phoenix, 0, ROT90, "CYBERYOGI =CO= Windler hack", "PhoenixR (German Democratic Republic version)", GAME_NO_COCKTAIL )
 
 static DRIVER_INIT( survival )
 {

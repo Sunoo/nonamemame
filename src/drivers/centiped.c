@@ -1629,6 +1629,113 @@ ROM_START( bullsdrt )
 ROM_END
 
 
+ROM_START( astroped )
+ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
+ROM_LOAD( "centiped.307", 0x2000, 0x0800, CRC(5ab0d9de ))
+ROM_LOAD( "centiped.308", 0x2800, 0x0800, CRC(4c07fd3e ))
+ROM_LOAD( "centiped.309", 0x3000, 0x0800, CRC(ff69b424 ))
+ROM_LOAD( "centiped.310", 0x3800, 0x0800, CRC(44e40fa4 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "centiped.211", 0x0000, 0x0800, CRC(47992235 ))
+ROM_LOAD( "centiped.212", 0x0800, 0x0800, CRC(1f877066 ))
+ROM_END
+
+ROM_START( cemescry ) 
+ROM_REGION(0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "centiped.307", 0x2000, 0x0800, CRC(5ab0d9de ))
+ROM_LOAD( "centiped.308", 0x2800, 0x0800, CRC(4c07fd3e ))
+ROM_LOAD( "centiped.309", 0x3000, 0x0800, CRC(ff69b424 ))
+ROM_LOAD( "centiped.310", 0x3800, 0x0800, CRC(44e40fa4 ))
+ROM_RELOAD(               0xf800, 0x0800 )	/* for the reset and interrupt vectors */
+ROM_REGION(0x1000, REGION_GFX1, ROMREGION_DISPOSE )	/* temporary space for graphics (disposed after conversion) */
+ROM_LOAD( "centiped.211", 0x0000, 0x0800, CRC(dad550a7 ))
+ROM_LOAD( "centiped.212", 0x0800, 0x0800, CRC(47982803 ))
+ROM_END
+
+ROM_START( centidux )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "centiped.307", 0x2000, 0x0800, CRC(5ab0d9de ))
+ROM_LOAD( "centiped.308", 0x2800, 0x0800, CRC(4c07fd3e ))
+ROM_LOAD( "centiped.309", 0x3000, 0x0800, CRC(ff69b424 ))
+ROM_LOAD( "centiped.310", 0x3800, 0x0800, CRC(44e40fa4 ))
+ROM_RELOAD(               0xf800, 0x0800 )	/* for the reset and interrupt vectors */
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "centiped.211", 0x0000, 0x0800, CRC(fee15594 ))
+ROM_LOAD( "centiped.212", 0x0800, 0x0800, CRC(f980c777 ))
+ROM_END
+
+ROM_START( killiped )
+ROM_REGION(0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "centiped.307", 0x2000, 0x0800, CRC(5ab0d9de ))
+ROM_LOAD( "centiped.308", 0x2800, 0x0800, CRC(4c07fd3e ))
+ROM_LOAD( "centiped.309", 0x3000, 0x0800, CRC(ff69b424 ))
+ROM_LOAD( "centiped.310", 0x3800, 0x0800, CRC(44e40fa4 ))
+ROM_RELOAD(               0xf800, 0x0800 )	/* for the reset and interrupt vectors */
+ROM_REGION(0x1000, REGION_GFX1, ROMREGION_DISPOSE )	/* temporary space for graphics (disposed after conversion) */
+ROM_LOAD( "centiped.211", 0x0000, 0x0800, CRC(6115917c ))
+ROM_LOAD( "centiped.212", 0x0800, 0x0800, CRC(3d545e5b ))
+ROM_END
+
+ROM_START( pacipede )
+ROM_REGION(0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "centiped.307", 0x2000, 0x0800, CRC(5ab0d9de ))
+ROM_LOAD( "centiped.308", 0x2800, 0x0800, CRC(4c07fd3e ))
+ROM_LOAD( "centiped.309", 0x3000, 0x0800, CRC(ff69b424 ))
+ROM_LOAD( "centiped.310", 0x3800, 0x0800, CRC(44e40fa4 ))
+ROM_RELOAD(               0xf800, 0x0800 )	/* for the reset and interrupt vectors */
+ROM_REGION(0x1000, REGION_GFX1, ROMREGION_DISPOSE )	/* temporary space for graphics (disposed after conversion) */
+ROM_LOAD( "centiped.211", 0x0000, 0x0800, CRC(4d2a94c0 ))
+ROM_LOAD( "centiped.212", 0x0800, 0x0800, CRC(10fac52e ))
+ROM_END
+
+ROM_START( astropd2 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "centiped.307", 0x2000, 0x0800, CRC(5ab0d9de ))
+ROM_LOAD( "centiped.308", 0x2800, 0x0800, CRC(4c07fd3e ))
+ROM_LOAD( "centiped.309", 0x3000, 0x0800, CRC(ff69b424 ))
+ROM_LOAD( "centiped.310", 0x3800, 0x0800, CRC(44e40fa4 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "centiped.211", 0x0000, 0x0800, CRC(7bdb6861 ))
+ROM_LOAD( "centiped.212", 0x0800, 0x0800, CRC(043f9810 ))
+ROM_END
+
+ROM_START( silliped )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "milliped.104", 0x4000, 0x1000, CRC(40711675 ))
+ROM_LOAD( "milliped.103", 0x5000, 0x1000, CRC(fb01baf2 ))
+ROM_LOAD( "milliped.102", 0x6000, 0x1000, CRC(62e137e0 ))
+ROM_LOAD( "milliped.101", 0x7000, 0x1000, CRC(46752c7d ))
+ROM_RELOAD(               0xf000, 0x1000 )	       /* for the reset and interrupt vectors */
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "milliped.106", 0x0000, 0x0800, CRC(b946599e ))
+ROM_LOAD( "milliped.107", 0x0800, 0x0800, CRC(89442fbc ))
+ROM_END
+
+ROM_START( vectiped )
+ROM_REGION(0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "centiped.307", 0x2000, 0x0800, CRC(5ab0d9de ))
+ROM_LOAD( "centiped.308", 0x2800, 0x0800, CRC(4c07fd3e ))
+ROM_LOAD( "centiped.309", 0x3000, 0x0800, CRC(ff69b424 ))
+ROM_LOAD( "centiped.310", 0x3800, 0x0800, CRC(44e40fa4 ))
+ROM_RELOAD(               0xf800, 0x0800 )	/* for the reset and interrupt vectors */
+ROM_REGION(0x1000, REGION_GFX1, ROMREGION_DISPOSE )	/* temporary space for graphics (disposed after conversion) */
+ROM_LOAD( "centiped.211", 0x0000, 0x0800, CRC(33eccc59 ))
+ROM_LOAD( "centiped.212", 0x0800, 0x0800, CRC(bc71790c ))
+ROM_END
+
+ROM_START( vectrped )
+ROM_REGION(0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "centiped.307", 0x2000, 0x0800, CRC(5ab0d9de ))
+ROM_LOAD( "centiped.308", 0x2800, 0x0800, CRC(4c07fd3e ))
+ROM_LOAD( "centiped.309", 0x3000, 0x0800, CRC(ff69b424 ))
+ROM_LOAD( "centiped.310", 0x3800, 0x0800, CRC(44e40fa4 ))
+ROM_RELOAD(               0xf800, 0x0800 )	/* for the reset and interrupt vectors */
+ROM_REGION(0x1000, REGION_GFX1, ROMREGION_DISPOSE )	/* temporary space for graphics (disposed after conversion) */
+ROM_LOAD( "centiped.211", 0x0000, 0x0800, CRC(e65cd908 ))
+ROM_LOAD( "centiped.212", 0x0800, 0x0800, CRC(72616fcb ))
+ROM_END
+
+
 /*************************************
  *
  *	Driver initialization
@@ -1676,3 +1783,12 @@ GAME( 1982, milliped, 0,        milliped, milliped, 0,        ROT270, "Atari",  
 GAME( 1980, warlords, 0,        warlords, warlords, 0,        ROT0,   "Atari",   "Warlords" )
 
 GAMEX(1985, bullsdrt, 0,        bullsdrt, bullsdrt, bullsdrt, ROT270, "Shinkai Inc. (Magic Eletronics Inc. licence)", "Bulls Eye Darts", GAME_IMPERFECT_COLORS )
+GAME( 2002, astroped, centiped, centiped, centiped, 0, ROT270, "Twisty Hack", "Astropede (Centipede Hack)" )
+GAME( 1998, cemescry, centiped, centiped, centiped, 0, ROT270, "NoSync hack", "Cemescary (Centipede Hack)" )
+GAME( 2000, centidux, centiped, centiped, centiped, 0, ROT270, "Two-Bit Score", "Centipede Dux (Centipede Hack)" )
+GAME( 1998, killiped, centiped, centiped, centiped, 0, ROT270, "The Dog hack", "Killipede (Centipede Hack)" )
+GAME( 2000, pacipede, centiped, centiped, centiped, 0, ROT270, "Jeff Coleburn hack", "Pacipede (Centipede Hack)" )
+GAME( 2002, astropd2, centiped, centiped, centiped, 0, ROT270, "Twisty Hack", "Astropede II (Centipede Hack)" )
+GAME( 1998, silliped, 0,         milliped, milliped, 0, ROT270, "Andy Hack", "Sillipede" )
+GAME( 1998, vectiped, centiped, centiped, centiped, 0, ROT270, "The Dog hack", "Vectipede (Centipede Hack)" )
+GAME( 1998, vectrped, centiped, centiped, centiped, 0, ROT270, "T-Bone hack", "Vectorpede (Centipede Hack)" )

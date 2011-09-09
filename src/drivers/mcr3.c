@@ -1957,6 +1957,60 @@ ROM_START( turbotag )
 	ROM_LOAD( "ttan.bin",     0x00000, 0x1000, CRC(aa0b1471) SHA1(e3dd69f1a14926c6b709d6b19d9e90a1f0867465) )
 ROM_END
 
+ROM_START( stapper )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "tappg0.bin",   0x00000, 0x4000, CRC(127171d1 ))
+ROM_LOAD( "tappg1.bin",   0x04000, 0x4000, CRC(9d6a47f7 ))
+ROM_LOAD( "tappg2.bin",   0x08000, 0x4000, CRC(3a1f8778 ))
+ROM_LOAD( "tappg3.bin",   0x0c000, 0x2000, CRC(e8dcdaa4 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "tapsnda7.bin", 0x0000, 0x1000, CRC(0e8bb9d5 ))
+ROM_LOAD( "tapsnda8.bin", 0x1000, 0x1000, CRC(0cf0e29b ))
+ROM_LOAD( "tapsnda9.bin", 0x2000, 0x1000, CRC(31eb6dc6 ))
+ROM_LOAD( "tapsda10.bin", 0x3000, 0x1000, CRC(01a9be6a ))
+ROM_REGION( 0x08000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "tapbg1.bin",   0x00000, 0x4000, CRC(1326da21 ))
+ROM_LOAD( "tapbg0.bin",   0x04000, 0x4000, CRC(539b93c3 ))
+ROM_REGION( 0x20000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "tapfg1.bin",   0x00000, 0x4000, CRC(29dd8e85 ))
+ROM_LOAD( "tapfg0.bin",   0x04000, 0x4000, CRC(a8ba850f ))
+ROM_LOAD( "tapfg3.bin",   0x08000, 0x4000, CRC(3d9133e4 ))
+ROM_LOAD( "tapfg2.bin",   0x0c000, 0x4000, CRC(9254d87c ))
+ROM_LOAD( "tapfg5.bin",   0x10000, 0x4000, CRC(5ec2544f ))
+ROM_LOAD( "tapfg4.bin",   0x14000, 0x4000, CRC(9b970c4b ))
+ROM_LOAD( "tapfg7.bin",   0x18000, 0x4000, CRC(a2ef5c06 ))
+ROM_LOAD( "tapfg6.bin",   0x1c000, 0x4000, CRC(1baca746 ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "5784",         0x0000, 0x0020, CRC(e1281ee9 ))
+ROM_END
+
+ROM_START( stapper1 )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "tappg0.bin",   0x00000, 0x4000, CRC(c915f608 ))
+ROM_LOAD( "tappg1.bin",   0x04000, 0x4000, CRC(9d6a47f7 ))
+ROM_LOAD( "tappg2.bin",   0x08000, 0x4000, CRC(3a1f8778 ))
+ROM_LOAD( "tappg3.bin",   0x0c000, 0x2000, CRC(dd4c785f ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "tapsnda7.bin", 0x0000, 0x1000, CRC(0e8bb9d5 ))
+ROM_LOAD( "tapsnda8.bin", 0x1000, 0x1000, CRC(0cf0e29b ))
+ROM_LOAD( "tapsnda9.bin", 0x2000, 0x1000, CRC(31eb6dc6 ))
+ROM_LOAD( "tapsda10.bin", 0x3000, 0x1000, CRC(01a9be6a ))
+ROM_REGION( 0x08000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "tapbg1.bin",   0x00000, 0x4000, CRC(1326da21 ))
+ROM_LOAD( "tapbg0.bin",   0x04000, 0x4000, CRC(539b93c3 ))
+ROM_REGION( 0x20000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "tapfg1.bin",   0x00000, 0x4000, CRC(29dd8e85 ))
+ROM_LOAD( "tapfg0.bin",   0x04000, 0x4000, CRC(a8ba850f ))
+ROM_LOAD( "tapfg3.bin",   0x08000, 0x4000, CRC(3d9133e4 ))
+ROM_LOAD( "tapfg2.bin",   0x0c000, 0x4000, CRC(9254d87c ))
+ROM_LOAD( "tapfg5.bin",   0x10000, 0x4000, CRC(5ec2544f ))
+ROM_LOAD( "tapfg4.bin",   0x14000, 0x4000, CRC(9b970c4b ))
+ROM_LOAD( "tapfg7.bin",   0x18000, 0x4000, CRC(a2ef5c06 ))
+ROM_LOAD( "tapfg6.bin",   0x1c000, 0x4000, CRC(1baca746 ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "5784",         0x0000, 0x0020, CRC(e1281ee9 ))
+ROM_END
+
 
 
 /*************************************
@@ -2115,3 +2169,6 @@ GAME( 1987, stargrds, 0,        mono_sg,  stargrds, stargrds, ROT0,  "Bally Midw
 GAME( 1983, spyhunt,  0,        spyhunt,  spyhunt,  spyhunt,  ROT90, "Bally Midway", "Spy Hunter" )
 GAME( 1984, crater,   0,        crater,   crater,   crater,   ORIENTATION_FLIP_X, "Bally Midway", "Crater Raider" )
 GAMEX(1985, turbotag, 0,        turbotag, turbotag, turbotag, ROT90, "Bally Midway", "Turbo Tag (prototype)", GAME_NO_SOUND )
+
+GAME( 2002, stapper,  tapper,   mcr3_ssio,tapper,   tapper,   ROT0,  "Bally Midway", "Tapper (Simpsons Hack)" ) 
+GAME( 2002, stapper1, tapper,   mcr3_ssio,tapper,   tapper,   ROT0,  "Bally Midway", "Tapper (Simpsons Hack ver.81)" ) 

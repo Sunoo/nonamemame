@@ -457,6 +457,50 @@ ROM_START( penta )
 	ROM_LOAD( "pr1636.70",		0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )	/* timing - not used */
 ROM_END
 
+ROM_START( pengopop )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "pengo.u8",     0x0000, 0x1000, CRC(3dfeb20e ) )
+ROM_LOAD( "pengo.u7",     0x1000, 0x1000, CRC(1db341bd ) )
+ROM_LOAD( "pengo.u15",    0x2000, 0x1000, CRC(7c2842d5 ) )
+ROM_LOAD( "pengo.u14",    0x3000, 0x1000, CRC(6e3c1f2f ) )
+ROM_LOAD( "pengo.u21",    0x4000, 0x1000, CRC(95f354ff ) )
+ROM_LOAD( "pengo.u20",    0x5000, 0x1000, CRC(0fdb04b8 ) )
+ROM_LOAD( "pengo.u32",    0x6000, 0x1000, CRC(e5920728 ) )
+ROM_LOAD( "pengopc.u31",  0x7000, 0x1000, CRC(1ede8569 ) )
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "ic92",         0x0000, 0x2000, CRC(d7eec6cd ) )
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "ic105",        0x0000, 0x2000, CRC(5bfd26e9 ) )
+ROM_REGION( 0x0420, REGION_PROMS, 0 )
+ROM_LOAD( "pr1633.078",   0x0000, 0x0020, CRC(3a5844ec ) )
+ROM_LOAD( "pr1634.088",   0x0020, 0x0400, CRC(766b139b ) )
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+ROM_LOAD( "pr1635.051",   0x0000, 0x0100, CRC(c29dea27 ) )
+ROM_LOAD( "pr1636.070",   0x0100, 0x0100, CRC(77245b66 ) )	/* timing - not used */
+ROM_END
+
+ROM_START( vecpengo )
+ROM_REGION( 2*0x10000, REGION_CPU1, 0 )     /* 64k for code + 64k for decrypted opcodes */
+ROM_LOAD( "ic8",          0x0000, 0x1000, CRC(f37066a8 ))
+ROM_LOAD( "ic7",          0x1000, 0x1000, CRC(baf48143 ))
+ROM_LOAD( "ic15",         0x2000, 0x1000, CRC(adf0eba0 ))
+ROM_LOAD( "ic14",         0x3000, 0x1000, CRC(a086d60f ))
+ROM_LOAD( "ic21",         0x4000, 0x1000, CRC(b72084ec ))
+ROM_LOAD( "ic20",         0x5000, 0x1000, CRC(94194a89 ))
+ROM_LOAD( "ic32",         0x6000, 0x1000, CRC(af7b12c4 ))
+ROM_LOAD( "ic31",         0x7000, 0x1000, CRC(933950fe ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "ic92",         0x0000, 0x2000, CRC(57c5e53c ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "ic105",        0x0000, 0x2000, CRC(b93588b0 ))
+ROM_REGION( 0x0420, REGION_PROMS, 0 )
+ROM_LOAD( "pr1633.078",   0x0000, 0x0020, CRC(3a5844ec ))
+ROM_LOAD( "pr1634.088",   0x0020, 0x0400, CRC(766b139b ))
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
+ROM_LOAD( "pr1635.051",   0x0000, 0x0100, CRC(c29dea27 ))
+ROM_LOAD( "pr1636.070",   0x0100, 0x0100, CRC(77245b66 ))	/* timing - not used */
+ROM_END
+
 
 
 /*************************************
@@ -560,3 +604,5 @@ GAME( 1982, pengo2u, pengo, pengo, pengo, 0,     ROT90, "Sega", "Pengo (set 2 no
 GAME( 1982, pengo3u, pengo, pengo, pengo, 0,     ROT90, "Sega", "Pengo (set 3 not encrypted)" )
 GAME( 1982, pengob,  pengo, pengo, pengo, penta, ROT90, "bootleg", "Pengo (bootleg)" )
 GAME( 1982, penta,   pengo, pengo, pengo, penta, ROT90, "bootleg", "Penta" )
+GAME( 1997, pengopop, pengo, pengo, pengo, 0,    ROT90, "Sega", "Pengo (Popcorn Music)" )
+GAME( 2000, vecpengo, pengo, pengo, pengo, pengo, ROT90, "T-Bone hack", "Pengo (Vector sim)")

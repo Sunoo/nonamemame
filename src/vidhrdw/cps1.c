@@ -382,6 +382,10 @@ static struct CPS1config cps1_config_table[]=
 	{"sfzch",   NOBATTRY, 0,0,0, 0x0000,0xffff,0x0000,0xffff },
 	#endif
 
+{"dinoh",   QSOUND_2, 0,0,0, 0x0000,0xffff,0x0000,0xffff },	/* layer enable never used */
+{"hwofa",   CPS_B_01, 0,0,0, 0x0000,0xffff,0x0000,0xffff },	/* bootleg? */
+{"kouryu",  NOBATTRY, 2,2,2, 0x0000,0xffff,0x0000,0xffff },
+
     /* CPS2 games */
 	{"cps2",    NOBATTRY, 4,4,4, 0x0000,0xffff,0x0000,0xffff },
 	{"ssf2",    NOBATTRY, 4,4,0, 0x0000,0xffff,0x0000,0xffff },

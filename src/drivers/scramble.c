@@ -2210,6 +2210,64 @@ ROM_START( mimonscr )
 	ROM_LOAD( "82s123.6e",    0x0000, 0x0020, CRC(4e3caeab) SHA1(a25083c3e36d28afdefe4af6e6d4f3155e303625) )
 ROM_END
 
+ROM_START( froggrs )
+ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
+ROM_LOAD( "frog4.bin",    0x0000, 0x1000, CRC(4d563992 ))
+ROM_LOAD( "frog5.bin",    0x1000, 0x1000, CRC(d8b8c06e ))
+ROM_LOAD( "frog6.bin",    0x2000, 0x1000, CRC(b55a1cb5 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "frogger.608",  0x0000, 0x0800, CRC(e8ab0256 ))
+ROM_LOAD( "frogger.609",  0x0800, 0x0800, CRC(7380a48f ))
+ROM_LOAD( "frog3.bin",    0x1000, 0x0800, CRC(837c16ab ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "frogger.607",  0x0000, 0x0800, CRC(05f7d883 ))
+ROM_LOAD( "frogger.606",  0x0800, 0x0800, CRC(f524ee30 ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "pr-91.6l",     0x0000, 0x0020, CRC(413703bf ))
+ROM_END
+
+ROM_START( offender )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "2d",           0x0000, 0x0800, CRC(bb09d91e ))
+ROM_LOAD( "2e",           0x0800, 0x0800, CRC(e9b4b9eb ))
+ROM_LOAD( "2f",           0x1000, 0x0800, CRC(a1f14f4c ))
+ROM_LOAD( "2h",           0x1800, 0x0800, CRC(591bc0d9 ))
+ROM_LOAD( "2j",           0x2000, 0x0800, CRC(22f11b6b ))
+ROM_LOAD( "2l",           0x2800, 0x0800, CRC(705ffe49 ))
+ROM_LOAD( "2m",           0x3000, 0x0800, CRC(ea26c35c ))
+ROM_LOAD( "2p",           0x3800, 0x0800, CRC(94d8f5e3 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "5c",           0x0000, 0x0800, CRC(bcd297f0 ))
+ROM_LOAD( "5d",           0x0800, 0x0800, CRC(de7912da ))
+ROM_LOAD( "5e",           0x1000, 0x0800, CRC(ba2fa933 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "5f",           0x0000, 0x0800, CRC(7015a2e1 ))
+ROM_LOAD( "5h",           0x0800, 0x0800, CRC(a36ac0fa ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "scramble.clr", 0x0000, 0x0020, CRC(4e3caeab ))
+ROM_END
+
+ROM_START( superdog )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "2d",           0x0000, 0x0800, CRC(99dc8bb5 ))
+ROM_LOAD( "2e",           0x0800, 0x0800, CRC(e9b4b9eb ))
+ROM_LOAD( "2f",           0x1000, 0x0800, CRC(a1f14f4c ))
+ROM_LOAD( "2h",           0x1800, 0x0800, CRC(591bc0d9 ))
+ROM_LOAD( "2j",           0x2000, 0x0800, CRC(22f11b6b ))
+ROM_LOAD( "2l",           0x2800, 0x0800, CRC(705ffe49 ))
+ROM_LOAD( "2m",           0x3000, 0x0800, CRC(ea26c35c ))
+ROM_LOAD( "2p",           0x3800, 0x0800, CRC(94d8f5e3 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "5c",           0x0000, 0x0800, CRC(bcd297f0 ))
+ROM_LOAD( "5d",           0x0800, 0x0800, CRC(de7912da ))
+ROM_LOAD( "5e",           0x1000, 0x0800, CRC(ba2fa933 ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "5f",           0x0000, 0x0800, CRC(7edbc59c ))
+ROM_LOAD( "5h",           0x0800, 0x0800, CRC(5b130bea ))
+ROM_REGION( 0x0020, REGION_PROMS, 0 )
+ROM_LOAD( "scramble.clr", 0x0000, 0x0020, CRC(4e3caeab ))
+ROM_END
+
 
 GAME( 1981, scramble, 0,        scramble, scramble, scramble,     ROT90, "Konami", "Scramble" )
 GAME( 1981, scrambls, scramble, scramble, scramble, scrambls,     ROT90, "[Konami] (Stern license)", "Scramble (Stern)" )
@@ -2237,3 +2295,6 @@ GAME( 1983, hunchbks, hunchbak, hunchbks, hunchbks, scramble_ppi, ROT90, "Centur
 GAME( 1983, cavelon,  0,        cavelon,  cavelon,  cavelon,      ROT90, "Jetsoft", "Cavelon" )
 GAME( 1983, sfx,      0,        sfx,      sfx,      sfx,          ORIENTATION_FLIP_X, "Nichibutsu", "SF-X" )
 GAME( 198?, mimonscr, mimonkey, mimonscr, mimonscr, mimonscr,     ROT90, "bootleg", "Mighty Monkey (bootleg on Scramble hardware)" )
+GAME( 1981, froggrs,  frogger,  froggers, froggers, froggers,     ROT90, "bootleg", "Frogger (Scramble hardware)" )
+GAME( 1998, offender, scramble, scramble, scramble, scrambls,     ROT90, "Chris Henry hack", "Offender")
+GAME( 1998, superdog, scramble, scramble, scramble, scrambls,     ROT90, "Jerky Hack", "Superdog" )

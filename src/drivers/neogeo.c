@@ -1188,6 +1188,96 @@ INPUT_PORTS_START( mjneogeo )
 INPUT_PORTS_END
 
 
+INPUT_PORTS_START( pbobbldx )
+	PORT_START		/* IN0 */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 )
+
+	PORT_START		/* IN1 */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
+
+	PORT_START		/* IN2 */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )   /* Player 1 Start */
+	PORT_BITX( 0x02, IP_ACTIVE_LOW, 0, "Next Game",KEYCODE_7, IP_JOY_NONE )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 )   /* Player 2 Start */
+	PORT_BITX( 0x08, IP_ACTIVE_LOW, 0, "Previous Game",KEYCODE_8, IP_JOY_NONE )
+	PORT_BIT( 0x30, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* memory card inserted */
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* memory card write protection */
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
+	PORT_START		/* IN3 */
+	PORT_DIPNAME( 0x01, 0x01, "Test Switch" )
+	PORT_DIPSETTING(	0x01, DEF_STR( Off ) )
+	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x02, 0x02, "Coin Chutes?" )
+	PORT_DIPSETTING(	0x00, "1?" )
+	PORT_DIPSETTING(	0x02, "2?" )
+	PORT_DIPNAME( 0x04, 0x04, "Autofire (in some games)" )
+	PORT_DIPSETTING(	0x04, DEF_STR( Off ) )
+	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x38, 0x38, "COMM Setting" )
+	PORT_DIPSETTING(	0x38, DEF_STR( Off ) )
+	PORT_DIPSETTING(	0x30, "1" )
+	PORT_DIPSETTING(	0x20, "2" )
+	PORT_DIPSETTING(	0x10, "3" )
+	PORT_DIPSETTING(	0x00, "4" )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Free_Play ) )
+	PORT_DIPSETTING(	0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80, 0x80, "Freeze" )
+	PORT_DIPSETTING(	0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
+
+	PORT_START		/* IN4 */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SPECIAL )  /* handled by fake IN5 */
+
+	/* Fake  IN 5 */
+	PORT_START
+	PORT_DIPNAME( 0x03, 0x02,"Territory" )
+	PORT_DIPSETTING(	0x00,"Japan" )
+	PORT_DIPSETTING(	0x01,"USA" )
+	PORT_DIPSETTING(	0x02,"Europe" )
+	PORT_DIPNAME( 0x04, 0x04,"Machine Mode" )
+	PORT_DIPSETTING(	0x00,"Home" )
+	PORT_DIPSETTING(	0x04,"Arcade" )
+	/* Fake Dip Switch to select normal or new levels */
+	PORT_DIPNAME( 0x10, 0x00, "Version" )
+	PORT_DIPSETTING(	0x00,"Normal" )
+	PORT_DIPSETTING(	0x10,"Deluxe" )
+	PORT_DIPNAME( 0x60, 0x60,"Game Slots" )		// Stored at 0x47 of NVRAM
+	PORT_DIPSETTING(	0x60,"2" )
+//	PORT_DIPSETTING(	0x40,"2" )
+	PORT_DIPSETTING(	0x20,"4" )
+	PORT_DIPSETTING(	0x00,"6" )
+
+	PORT_START		/* Test switch */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL )  /* handled by fake IN5 */
+	PORT_BITX( 0x80, IP_ACTIVE_LOW, 0, "Test Switch", KEYCODE_F2, IP_JOY_NONE )
+INPUT_PORTS_END
+
+
 INPUT_PORTS_START( irrmaze )
 	PORT_START		/* IN0 multiplexed */
 	PORT_ANALOG( 0xff, 0x7f, IPT_TRACKBALL_X | IPF_REVERSE, 10, 20, 0, 0 )
@@ -1532,11 +1622,11 @@ SYSTEM_BIOS_START( neogeo )
 	SYSTEM_BIOS_ADD( 4, "asia",       "Asia MVS (Ver. 3)" )
 	SYSTEM_BIOS_ADD( 5, "japan",      "Japan MVS (Ver. 3)" )
 	SYSTEM_BIOS_ADD( 6, "japan-s2",   "Japan MVS (Ver. 2)" )
-
-//	SYSTEM_BIOS_ADD( 7, "uni-bios.10","Unibios MVS (Hack, Ver. 1.0)" )
-//	SYSTEM_BIOS_ADD( 8, "uni-bios.11","Unibios MVS (Hack, Ver. 1.1)" )
-//	SYSTEM_BIOS_ADD( 9, "debug",      "Debug MVS (Hack?)" )
-//	SYSTEM_BIOS_ADD(10, "asia-aes",   "Asia AES" )
+	SYSTEM_BIOS_ADD( 7, "uni-bios.12","Unibios MVS (Hack, Ver. 1.2)" )
+	SYSTEM_BIOS_ADD( 8, "uni-bios.11","Unibios MVS (Hack, Ver. 1.1)" )
+	SYSTEM_BIOS_ADD( 9, "uni-bios.10","Unibios MVS (Hack, Ver. 1.0)" )
+	SYSTEM_BIOS_ADD(10, "debug",      "Debug MVS (Hack?)" )
+	SYSTEM_BIOS_ADD(11, "asia-aes",   "Asia AES" )
 SYSTEM_BIOS_END
 
 #define ROM_LOAD16_WORD_SWAP_BIOS(bios,name,offset,length,hash) \
@@ -1550,11 +1640,11 @@ SYSTEM_BIOS_END
 	ROM_LOAD16_WORD_SWAP_BIOS( 4, "asia-s3.rom",  0x00000, 0x020000, CRC(91b64be3) SHA1(720a3e20d26818632aedf2c2fd16c54f213543e1) ) /* Asia */ \
 	ROM_LOAD16_WORD_SWAP_BIOS( 5, "vs-bios.rom",  0x00000, 0x020000, CRC(f0e8f27d) SHA1(ecf01eda815909f1facec62abf3594eaa8d11075) ) /* Japan, Ver 6 VS Bios */ \
 	ROM_LOAD16_WORD_SWAP_BIOS( 6, "sp-j2.rom",    0x00000, 0x020000, CRC(acede59c) SHA1(b6f97acd282fd7e94d9426078a90f059b5e9dd91) ) /* Japan, Older */ \
-
-//	ROM_LOAD16_WORD_SWAP_BIOS( 7, "uni-bios.10",  0x00000, 0x020000, CRC(0ce453a0) SHA1(3b4c0cd26c176fc6b26c3a2f95143dd478f6abf9) ) /* Universe Bios v1.0 (hack) */
-//	ROM_LOAD16_WORD_SWAP_BIOS( 8, "uni-bios.11",  0x00000, 0x020000, CRC(5dda0d84) SHA1(4153d533c02926a2577e49c32657214781ff29b7) ) /* Universe Bios v1.1 (hack) */
-//	ROM_LOAD16_WORD_SWAP_BIOS( 9, "neodebug.rom", 0x00000, 0x020000, CRC(698ebb7d) SHA1(081c49aa8cc7dad5939833dc1b18338321ea0a07) ) /* Debug (Development) Bios */
-//	ROM_LOAD16_WORD_SWAP_BIOS(10, "aes-bios.bin", 0x00000, 0x020000, CRC(d27a71f1) SHA1(1b3b22092f30c4d1b2c15f04d1670eb1e9fbea07) ) /* AES Console (Asia?) Bios */
+	ROM_LOAD16_WORD_SWAP_BIOS( 7, "uni-bios.12",  0x00000, 0x020000, CRC(4fa698e9) ) /* Universe Bios v1.2 (hack) */ \
+	ROM_LOAD16_WORD_SWAP_BIOS( 8, "uni-bios.11",  0x00000, 0x020000, CRC(5dda0d84) SHA1(4153d533c02926a2577e49c32657214781ff29b7) ) /* Universe Bios v1.1 (hack) */ \
+	ROM_LOAD16_WORD_SWAP_BIOS( 9, "uni-bios.10",  0x00000, 0x020000, CRC(0ce453a0) SHA1(3b4c0cd26c176fc6b26c3a2f95143dd478f6abf9) ) /* Universe Bios v1.0 (hack) */ \
+	ROM_LOAD16_WORD_SWAP_BIOS(10, "neodebug.rom", 0x00000, 0x020000, CRC(698ebb7d) SHA1(081c49aa8cc7dad5939833dc1b18338321ea0a07) ) /* Debug (Development) Bios */ \
+	ROM_LOAD16_WORD_SWAP_BIOS(11, "aes-bios.bin", 0x00000, 0x020000, CRC(d27a71f1) SHA1(1b3b22092f30c4d1b2c15f04d1670eb1e9fbea07) ) /* AES Console (Asia?) Bios */
 
 /* note you'll have to modify the last for lines of each block to use the extra bios roms,
    they're hacks / homebrew / console bios roms so Mame doesn't list them by default */
@@ -5677,6 +5767,94 @@ ROM_START( nitd ) /* Original Version - Encrypted GFX */
 	ROM_LOAD16_BYTE( "260-c2.bin", 0x0000001, 0x800000, CRC(d2b04b0d) SHA1(ce4322e6cfacb627fe997efe81018861e21d3c27) )
 ROM_END
 
+ROM_START( vliner )
+	ROM_REGION( 0x100000, REGION_CPU1, 0 )
+	ROM_LOAD16_WORD_SWAP( "vl_p1.rom", 0x000000, 0x080000, CRC(72a2c043) )
+	NEO_SFIX_128K( "vl_s1.rom", CRC(972d8c31) )
+	NEO_BIOS_SOUND_64K( "vl_m1.rom", CRC(9b92b7d1) )
+
+	ROM_REGION( 0x200000, REGION_SOUND1, ROMREGION_SOUNDONLY )
+	NO_DELTAT_REGION
+
+	ROM_REGION( 0x400000, REGION_GFX3, 0 )
+	ROM_LOAD16_BYTE( "vl_c1.rom", 0x000000, 0x80000, CRC(5118f7c0) ) /* Plane 0,1 */
+	ROM_LOAD16_BYTE( "vl_c2.rom", 0x000001, 0x80000, CRC(efe9b33e) ) /* Plane 2,3 */
+ROM_END
+
+ROM_START( diggermn )
+ROM_REGION( 0x100000, REGION_CPU1, 0 )
+ROM_LOAD16_WORD_SWAP( "dig_p1.rom", 0x000000, 0x080000, CRC(eda433d7 ))
+NEO_SFIX_64K( "dig_s1.rom", CRC(75a88c1f ))
+NEO_BIOS_SOUND_64K( "dig_m1.rom", CRC(833cdf1b ))
+ROM_REGION( 0x200000, REGION_SOUND1, ROMREGION_SOUNDONLY )
+ROM_LOAD( "dig_v1.rom", 0x000000, 0x080000, CRC(ee15bda4 ))
+NO_DELTAT_REGION
+ROM_REGION( 0x400000, REGION_GFX3, 0 )
+ROM_LOAD16_BYTE ( "dig_c1.rom", 0x000000, 0x080000, CRC(3db0a4ed ))
+ROM_LOAD16_BYTE ( "dig_c2.rom", 0x000001, 0x080000, CRC(3e632161 ))
+ROM_END
+
+ROM_START(neonopon )
+ROM_REGION( 0x080000, REGION_CPU1, 0 )
+ROM_LOAD16_WORD_SWAP( "nnp-p1.rom", 0x000000, 0x080000, CRC(8a792271 ))
+NEO_SFIX_64K( "nnp-s1.rom", CRC(93e6fe7d ))
+NEO_BIOS_SOUND_64K( "nnp-m1.rom", CRC(7669de64 ))
+ROM_REGION( 0x080000, REGION_SOUND1, ROMREGION_SOUNDONLY )
+ROM_LOAD( "nnp-v1.rom", 0x000000, 0x080000, CRC(504bf849 ))
+NO_DELTAT_REGION
+ROM_REGION( 0x400000, REGION_GFX3, 0 )
+ROM_LOAD16_BYTE( "nnp-c1.rom", 0x000000, 0x100000, CRC(4a718ae3 )) /* Plane 0,1 */
+ROM_LOAD16_BYTE( "nnp-c2.rom", 0x000001, 0x100000, CRC(0e2cbc25 )) /* Plane 2,3 */
+ROM_END
+
+ROM_START(neonopnd )
+ROM_REGION( 0x080000, REGION_CPU1, 0 )
+ROM_LOAD16_WORD_SWAP( "nnp-p1.rom", 0x000000, 0x080000, CRC(8a792271 ))
+NEO_SFIX_64K( "nnp-s1.rom", CRC(93e6fe7d ))
+NEO_BIOS_SOUND_64K( "nnp-m1.rom", CRC(7669de64 ))
+ROM_REGION( 0x080000, REGION_SOUND1, ROMREGION_SOUNDONLY )
+ROM_LOAD( "nnp-v1.rom", 0x000000, 0x080000, CRC(504bf849 ))
+NO_DELTAT_REGION
+ROM_REGION( 0x400000, REGION_GFX3, 0 )
+ROM_LOAD16_BYTE( "nnp-c1.rom", 0x000000, 0x100000, CRC(4a718ae3 )) /* Plane 0,1 */
+ROM_LOAD16_BYTE( "nnp-c2.rom", 0x000001, 0x100000, CRC(0e2cbc25 )) /* Plane 2,3 */
+ROM_END
+
+ROM_START( jockeygp )
+	ROM_REGION( 0x100000, REGION_CPU1, 0 )
+	ROM_LOAD16_WORD_SWAP( "jgp-p1.rom", 0x000000, 0x100000, CRC(2fb7f388) ) /* The Encrypted Boards do _not_ have an s1 rom, data for it comes from the Cx ROMs */
+
+	ROM_REGION( 0x20000, REGION_GFX1, 0 ) ROM_FILL( 0x000000, 0x20000, 0 )
+
+	ROM_REGION( 0x20000, REGION_GFX2, 0 ) ROM_LOAD( "ng-sfix.rom", 0x000000, 0x20000, CRC(354029fc) ) /* The M1 ROM is encrypted, so we take the M1 rom from V-Liner */
+	// NEO_BIOS_SOUND_512K( "jgp-m1.rom", CRC(d163c690) )
+	NEO_BIOS_SOUND_64K( "vl_m1.rom", CRC(9b92b7d1) )
+
+	ROM_REGION( 0x0200000, REGION_SOUND1, ROMREGION_SOUNDONLY )
+	ROM_LOAD( "jgp-v1.rom", 0x000000, 0x200000, CRC(443eadba) ) NO_DELTAT_REGION
+
+	ROM_REGION( 0x1000000, REGION_GFX3, 0 ) /* Encrypted */
+	ROM_LOAD16_BYTE( "jgp-c1.rom", 0x0000000, 0x800000, CRC(a9acbf18) )
+	ROM_LOAD16_BYTE( "jgp-c2.rom", 0x0000001, 0x800000, CRC(6289eef9) )
+ROM_END
+
+ROM_START( jckeygpd )
+	ROM_REGION( 0x100000, REGION_CPU1, 0 )
+	ROM_LOAD16_WORD_SWAP( "jgp-p1.rom", 0x000000, 0x100000, CRC(2fb7f388) )
+	NEO_SFIX_128K( "jgp-s1.rom", CRC(bb0efa71) )
+	/* This M1 is maybe the decrypted version */
+	NEO_BIOS_SOUND_128K( "jgp-m1d.rom", CRC(c070872f) )
+
+	ROM_REGION( 0x0200000, REGION_SOUND1, ROMREGION_SOUNDONLY )
+	ROM_LOAD( "jgp-v1.rom", 0x000000, 0x200000, CRC(443eadba) )
+	NO_DELTAT_REGION
+
+	ROM_REGION( 0x1000000, REGION_GFX3, 0 )
+	/* Decrypted */
+	ROM_LOAD16_BYTE( "jgp-c1d.rom", 0x0000000, 0x800000, CRC(ea259019) )
+	ROM_LOAD16_BYTE( "jgp-c2d.rom", 0x0000001, 0x800000, CRC(97f270be) )
+ROM_END
+
 /******************************************************************************/
 
 /* dummy entry for the dummy bios driver */
@@ -5942,6 +6120,13 @@ DRIVER_INIT( nitd )
 {
 	neogeo_fix_bank_type = 1;
 	kof99_neogeo_gfx_decrypt(0xff);
+	init_neogeo();
+}
+
+DRIVER_INIT( jockeygp )
+{
+	neogeo_fix_bank_type = 1;
+	kof2000_neogeo_gfx_decrypt(0xac);
 	init_neogeo();
 }
 
@@ -6317,3 +6502,10 @@ GAMEB( 2000, bangbead, neogeo,   neogeo, raster, neogeo,  bangbead, ROT0, "Visco
 #if 0
 GAMEB( 2000, bangbedp, bangbead, neogeo, raster, neogeo,  neogeo,   ROT0, "Visco", "Bang Bead (prototype)" )
 #endif
+GAMEBX( 2001, vliner, neogeo, neogeo, neogeo, neogeo, neogeo, ROT0, "Dyna", "V-Liner", GAME_NOT_WORKING )
+GAMEBX( 2001, jockeygp, neogeo, neogeo, neogeo, neogeo, jockeygp, ROT0, "Sun Amusement", "Jockey Grand Prix", GAME_NOT_WORKING )
+/* Sun Amusement */
+GAMEBX( 2001, jckeygpd,   jockeygp,   neogeo, neogeo, neogeo,  neogeo,   ROT0, "Sun Amusement / BrezzaSoft", "Jockey Grand Prix (decrypted C)", GAME_NOT_WORKING )
+GAMEB( 1994, diggermn, neogeo,  neogeo, neogeo,   neogeo,   neogeo, ROT0, "Face", "Digger Man" )
+GAMEB( 2002, neonopon, neogeo,  neogeo, neogeo,   neogeo,   neogeo, ROT0, "Blastar", "Neo No Panepon (beta)" )
+GAMEB( 2002, neonopnd, neogeo,  neogeo, neogeo,   neogeo,   neogeo, ROT0, "Blastar", "Neo No Panepon" )

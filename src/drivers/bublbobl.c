@@ -1052,6 +1052,68 @@ ROM_START( tokiob )
 ROM_END
 
 
+ROM_START( bb2bmh )
+ROM_REGION( 0x30000, REGION_CPU1, 0 )
+ROM_LOAD( "a78-06.51", 0x00000, 0x08000, CRC(32c8305b ))
+/* ROMs banked at 8000-bfff */
+ROM_LOAD( "a78-05.52", 0x10000, 0x10000, CRC(d286f2e9 ))
+/* 20000-2ffff empty */
+ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* 64k for the second CPU */
+ROM_LOAD( "a78-08.37", 0x0000, 0x08000, CRC(ebce6c5c ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 ) /* 64k for the third CPU */
+ROM_LOAD( "a78-07.46", 0x0000, 0x08000, CRC(4f9a26e8 ))
+ROM_REGION( 0x0800, REGION_CPU4, 0 ) /* 2k for the microcontroller */
+ROM_LOAD( "68705.bin", 0x0000, 0x0800, CRC(78caa635 )) /* from a pirate board */
+ROM_REGION( 0x80000, REGION_GFX1, ROMREGION_DISPOSE | ROMREGION_INVERT )
+ROM_LOAD( "a78-09.12", 0x00000, 0x8000, CRC(20358c22 )) /* 1st plane */
+ROM_LOAD( "a78-10.13", 0x08000, 0x8000, CRC(930168a9 ))
+ROM_LOAD( "a78-11.14", 0x10000, 0x8000, CRC(9773e512 ))
+ROM_LOAD( "a78-12.15", 0x18000, 0x8000, CRC(d045549b ))
+ROM_LOAD( "a78-13.16", 0x20000, 0x8000, CRC(d0af35c5 ))
+ROM_LOAD( "a78-14.17", 0x28000, 0x8000, CRC(7b5369a8 ))
+/* 0x30000-0x3ffff empty */
+ROM_LOAD( "a78-15.30", 0x40000, 0x8000, CRC(6b61a413 )) /* 2nd plane */
+ROM_LOAD( "a78-16.31", 0x48000, 0x8000, CRC(b5492d97 ))
+ROM_LOAD( "a78-17.32", 0x50000, 0x8000, CRC(d69762d5 ))
+ROM_LOAD( "a78-18.33", 0x58000, 0x8000, CRC(9f243b68 ))
+ROM_LOAD( "a78-19.34", 0x60000, 0x8000, CRC(66e9438c ))
+ROM_LOAD( "a78-20.35", 0x68000, 0x8000, CRC(9ef863ad ))
+/* 0x70000-0x7ffff empty */
+ROM_REGION( 0x0100, REGION_PROMS, 0 )
+ROM_LOAD( "a71-25.41", 0x0000, 0x0100, CRC(2d0f8545 )) /* video timing */
+ROM_END
+
+ROM_START( bbhackv1 )
+ROM_REGION( 0x30000, REGION_CPU1, 0 )
+ROM_LOAD( "a78-06.51", 0x00000, 0x08000, CRC(32c8305b ))
+/* ROMs banked at 8000-bfff */
+ROM_LOAD( "a78-05.52", 0x10000, 0x10000, CRC(8da82422 ))
+/* 20000-2ffff empty */
+ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* 64k for the second CPU */
+ROM_LOAD( "a78-08.37", 0x0000, 0x08000, CRC(419caf60 ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 ) /* 64k for the third CPU */
+ROM_LOAD( "a78-07.46", 0x0000, 0x08000, CRC(4f9a26e8 ))
+ROM_REGION( 0x0800, REGION_CPU4, 0 ) /* 2k for the microcontroller */
+ROM_LOAD( "68705.bin", 0x0000, 0x0800, CRC(78caa635 )) /* from a pirate board */
+ROM_REGION( 0x80000, REGION_GFX1, ROMREGION_DISPOSE | ROMREGION_INVERT )
+ROM_LOAD( "a78-09.12", 0x00000, 0x8000, CRC(20358c22 )) /* 1st plane */
+ROM_LOAD( "a78-10.13", 0x08000, 0x8000, CRC(930168a9 ))
+ROM_LOAD( "a78-11.14", 0x10000, 0x8000, CRC(9773e512 ))
+ROM_LOAD( "a78-12.15", 0x18000, 0x8000, CRC(d045549b ))
+ROM_LOAD( "a78-13.16", 0x20000, 0x8000, CRC(d0af35c5 ))
+ROM_LOAD( "a78-14.17", 0x28000, 0x8000, CRC(7b5369a8 ))
+/* 0x30000-0x3ffff empty */
+ROM_LOAD( "a78-15.30", 0x40000, 0x8000, CRC(6b61a413 )) /* 2nd plane */
+ROM_LOAD( "a78-16.31", 0x48000, 0x8000, CRC(b5492d97 ))
+ROM_LOAD( "a78-17.32", 0x50000, 0x8000, CRC(d69762d5 ))
+ROM_LOAD( "a78-18.33", 0x58000, 0x8000, CRC(9f243b68 ))
+ROM_LOAD( "a78-19.34", 0x60000, 0x8000, CRC(66e9438c ))
+ROM_LOAD( "a78-20.35", 0x68000, 0x8000, CRC(9ef863ad ))
+/* 0x70000-0x7ffff empty */
+ROM_REGION( 0x0100, REGION_PROMS, 0 )
+ROM_LOAD( "a71-25.41", 0x0000, 0x0100, CRC(2d0f8545 )) /* video timing */
+ROM_END
+
 
 static DRIVER_INIT( bublbobl )
 {
@@ -1097,3 +1159,5 @@ GAME( 1986, boblbobl, bublbobl, boblbobl, boblbobl, boblbobl, ROT0,  "bootleg", 
 GAME( 1986, sboblbob, bublbobl, boblbobl, sboblbob, bublbobl, ROT0,  "bootleg", "Super Bobble Bobble" )
 GAMEX(1986, tokio,    0,        tokio,    tokio,    tokio,    ROT90, "Taito", "Tokio / Scramble Formation", GAME_NOT_WORKING )
 GAME( 1986, tokiob,   tokio,    tokio,    tokio,    tokio,    ROT90, "bootleg", "Tokio / Scramble Formation (bootleg)" )
+GAME( 2000, bb2bmh, 0, bublbobl, bublbobl, bublbobl, ROT0, "Taito", "Bubble Bobble (Memories Hack)" )
+GAME( 2000, bbhackv1, 0, bublbobl, bublbobl, bublbobl, ROT0, "Taito Hack", "Bubble Bobble (Level Hack)" )

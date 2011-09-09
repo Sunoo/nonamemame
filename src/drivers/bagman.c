@@ -855,6 +855,29 @@ ROM_START( botanic )
 	ROM_LOAD( "bota_3a.3a",    0x0020, 0x0020, CRC(edf88f34) SHA1(b9c342d51303d552f87df2543a34e38c30acd07c) )
 ROM_END
 
+ROM_START( bagturbo )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "a4_9e.bin",    0x0000, 0x1000, CRC(c070635c ))
+ROM_LOAD( "a5-9f",        0x1000, 0x1000, CRC(2ddf6bb9 ))
+ROM_LOAD( "a4_9j.bin",    0x2000, 0x1000, CRC(b2da8b77 ))
+ROM_LOAD( "a5-9k",        0x3000, 0x1000, CRC(f91d617b ))
+ROM_LOAD( "a4_9m.bin",    0x4000, 0x1000, CRC(8cb278fe ))
+ROM_LOAD( "a5-9n",        0x5000, 0x1000, CRC(68e4b64d ))
+ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "a2_1e.bin",    0x0000, 0x1000, CRC(f217ac09 ))
+ROM_LOAD( "j1_b04.bin",   0x1000, 0x1000, CRC(c680ef04 ))
+ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "a2_1c.bin",    0x0000, 0x1000, CRC(f3e11bd7 ))
+ROM_LOAD( "a2_1f.bin",    0x1000, 0x1000, CRC(d0f7105b ))
+ROM_REGION( 0x0060, REGION_PROMS, 0 )
+ROM_LOAD( "p3.bin",       0x0000, 0x0020, CRC(2a855523 ))
+ROM_LOAD( "r3.bin",       0x0020, 0x0020, CRC(ae6f1019 ))
+ROM_LOAD( "r6.bin",       0x0040, 0x0020, CRC(c58a4f6a )) /*state machine driving TMS5110*/
+ROM_REGION( 0x2000, REGION_SOUND1, 0 ) /* data for the TMS5110 speech chip */
+ROM_LOAD( "r9_b11.bin",   0x0000, 0x1000, CRC(2e0057ff ))
+ROM_LOAD( "t9_b12.bin",   0x1000, 0x1000, CRC(b2120edd ))
+ROM_END
+
 
 GAME(1982, bagman,	 0, 	  bagman, bagman,  0, ROT270, "Valadon Automation", "Bagman" )
 GAME(1982, bagnard,  bagman,  bagman, bagman,  0, ROT270, "Valadon Automation", "Le Bagnard" )
@@ -864,4 +887,5 @@ GAME(1984, sbagman,  0, 	  bagman, sbagman, 0, ROT270, "Valadon Automation", "Su
 GAME(1984, sbagmans, sbagman, bagman, sbagman, 0, ROT270, "Valadon Automation (Stern license)", "Super Bagman (Stern)" )
 GAME(1983, pickin,	 0, 	  pickin, pickin,  0, ROT270, "Valadon Automation", "Pickin'" )
 GAME(1984, botanic,  0,       botanic, pickin, 0, ROT270, "Valadon Automation", "Botanic" )
+GAME(1991, bagturbo,  bagman,  bagman, bagmans, 0, ROT270, "Hack (Stern license)", "Bagman Turbo (Stern set 1)" )
 

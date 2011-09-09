@@ -1141,6 +1141,87 @@ ROM_START( gulfwar2 )
 	ROM_LOAD( "82s123.b24",	0x240, 0x020, CRC(4fb5df2a) SHA1(506ef2c8e4cf45c256d6831a0a5760732f2de422) )	/* tile to sprite priority ?? */
 ROM_END
 
+ROM_START( twincbu2 )
+ROM_REGION( 0x30000, REGION_CPU1, 0 )	/* Main 68K code */
+ROM_LOAD16_BYTE( "tc16",			0x00000, 0x10000, CRC(07f64d13 ))
+ROM_LOAD16_BYTE( "tc14",			0x00001, 0x10000, CRC(41be6978 ))
+ROM_LOAD16_BYTE( "tcbra26.bin",	0x20000, 0x08000, CRC(bdd00ba4 ))
+ROM_LOAD16_BYTE( "tcbra27.bin",	0x20001, 0x08000, CRC(ed600907 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* Sound Z80 code */
+ROM_LOAD( "b30-05",				0x00000, 0x08000, CRC(1a8f1e10 ))
+ROM_REGION( 0x10000, REGION_CPU3, 0 )	/* Co-Processor TMS320C10 MCU code */
+ROM_LOAD16_BYTE( "dsp_22.bin",    0x8001, 0x0800, CRC(79389a71 ))
+ROM_LOAD16_BYTE( "dsp_21.bin",    0x8000, 0x0800, CRC(2d135376 ))
+ROM_REGION( 0x0c000, REGION_GFX1, ROMREGION_DISPOSE )	/* chars */
+ROM_LOAD( "tc11",			0x00000, 0x04000, CRC(0a254133 ))
+ROM_LOAD( "b30_07.128",		0x04000, 0x04000, CRC(3160894d ))
+ROM_LOAD( "tc04",			0x08000, 0x04000, CRC(a599d845 ))
+ROM_REGION( 0x40000, REGION_GFX2, ROMREGION_DISPOSE )	/* fg tiles */
+ROM_LOAD( "b30_15.512",		0x00000, 0x10000, CRC(88795b18 ))
+ROM_LOAD( "b30_16.512",		0x10000, 0x10000, CRC(e6f421d2 ))
+ROM_LOAD( "tc06",			0x20000, 0x10000, CRC(13daeac8 ))
+ROM_LOAD( "tc05",			0x30000, 0x10000, CRC(8cc79357 ))
+ROM_REGION( 0x20000, REGION_GFX3, ROMREGION_DISPOSE )	/* bg tiles */
+ROM_LOAD( "tc07",			0x00000, 0x08000, CRC(b5d48389 ))
+ROM_LOAD( "tc08",			0x08000, 0x08000, CRC(97f20fdc ))
+ROM_LOAD( "tc09",			0x10000, 0x08000, CRC(170c01db ))
+ROM_LOAD( "tc10",			0x18000, 0x08000, CRC(44f5accd ))
+ROM_REGION( 0x40000, REGION_GFX4, ROMREGION_DISPOSE )	/* sprites */
+ROM_LOAD( "tc20",			0x00000, 0x10000, CRC(cb4092b8 ))
+ROM_LOAD( "b30_19.512",		0x10000, 0x10000, CRC(4043ad5a ))
+ROM_LOAD( "b30_18.512",		0x20000, 0x10000, CRC(cdc16155 ))
+ROM_LOAD( "tc17",			0x30000, 0x10000, CRC(4264bff8 ))
+ROM_REGION( 0x260, REGION_PROMS, 0 )	/* nibble bproms, lo/hi order to be determined */
+ROM_LOAD( "82s129.d3",	0x000, 0x100, CRC(24e7d62f ))	/* sprite priority control ?? */
+ROM_LOAD( "82s129.d4",	0x100, 0x100, CRC(a50cef09 ))	/* sprite priority control ?? */
+ROM_LOAD( "82s123.d2",	0x200, 0x020, CRC(f72482db ))	/* sprite control ?? */
+ROM_LOAD( "82s123.e18",	0x220, 0x020, CRC(bc88cced ))	/* sprite attribute (flip/position) ?? */
+ROM_LOAD( "82s123.b24",	0x240, 0x020, CRC(4fb5df2a ))	/* tile to sprite priority ?? */
+ROM_END
+
+ROM_START( twintwst )
+ROM_REGION( 0x30000, REGION_CPU1, 0 )	/* Main 68K code */
+ROM_LOAD16_BYTE( "tc16",		0x00000, 0x10000, CRC(07f64d13 ))
+ROM_LOAD16_BYTE( "tc14",		0x00001, 0x10000, CRC(41be6978 ))
+ROM_LOAD16_BYTE( "tc15",		0x20000, 0x08000, CRC(3a646618 ))
+ROM_LOAD16_BYTE( "tc13",		0x20001, 0x08000, CRC(d7d1e317 ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* Sound Z80 code */
+ROM_LOAD( "tc12",			0x00000, 0x08000, CRC(e37b3c44 ))	/* slightly different from the other two sets */
+ROM_REGION( 0x10000, REGION_CPU3, 0 )	/* Co-Processor TMS320C10 MCU code */
+ROM_LOAD16_BYTE( "dsp_22.bin",    0x8001, 0x0800, CRC(79389a71 ))
+ROM_LOAD16_BYTE( "dsp_21.bin",    0x8000, 0x0800, CRC(2d135376 ))
+/******  The following are from a bootleg board. ******
+A0 and A1 are swapped between the TMS320C10 and these BPROMs on the board.
+ROM_LOAD16_BYTE( "tc1b",		0x0000, 0x0800, CRC(1757cc33 ))
+ROM_LOAD16_BYTE( "tc2a",		0x0001, 0x0800, CRC(d6d878c9 ))
+*/
+ROM_REGION( 0x0c000, REGION_GFX1, ROMREGION_DISPOSE )	/* chars */
+ROM_LOAD( "tc11",			0x00000, 0x04000, CRC(0a254133 ))
+ROM_LOAD( "tc03",			0x04000, 0x04000, CRC(e9e2d4b1 ))
+ROM_LOAD( "tc04",			0x08000, 0x04000, CRC(a599d845 ))
+ROM_REGION( 0x40000, REGION_GFX2, ROMREGION_DISPOSE )	/* fg tiles */
+ROM_LOAD( "tc01",			0x00000, 0x10000, CRC(15b3991d ))
+ROM_LOAD( "tc02",			0x10000, 0x10000, CRC(d9e2e55d ))
+ROM_LOAD( "tc06",			0x20000, 0x10000, CRC(13daeac8 ))
+ROM_LOAD( "tc05",			0x30000, 0x10000, CRC(8cc79357 ))
+ROM_REGION( 0x20000, REGION_GFX3, ROMREGION_DISPOSE )	/* bg tiles */
+ROM_LOAD( "tc07",			0x00000, 0x08000, CRC(b5d48389 ))
+ROM_LOAD( "tc08",			0x08000, 0x08000, CRC(97f20fdc ))
+ROM_LOAD( "tc09",			0x10000, 0x08000, CRC(170c01db ))
+ROM_LOAD( "tc10",			0x18000, 0x08000, CRC(44f5accd ))
+ROM_REGION( 0x40000, REGION_GFX4, ROMREGION_DISPOSE )	/* sprites */
+ROM_LOAD( "tc20",			0x00000, 0x10000, CRC(41c8f4ea ))
+ROM_LOAD( "tc19",			0x10000, 0x10000, CRC(8d5db99e ))
+ROM_LOAD( "tc18",			0x20000, 0x10000, CRC(eade1ca3 ))
+ROM_LOAD( "tc17",			0x30000, 0x10000, CRC(6a559622 ))
+ROM_REGION( 0x260, REGION_PROMS, 0 )	/* nibble bproms, lo/hi order to be determined */
+ROM_LOAD( "82s129.d3",	0x000, 0x100, CRC(24e7d62f ))	/* sprite priority control ?? */
+ROM_LOAD( "82s129.d4",	0x100, 0x100, CRC(a50cef09 ))	/* sprite priority control ?? */
+ROM_LOAD( "82s123.d2",	0x200, 0x020, CRC(f72482db ))	/* sprite control ?? */
+ROM_LOAD( "82s123.e18",	0x220, 0x020, CRC(bc88cced ))	/* sprite attribute (flip/position) ?? */
+ROM_LOAD( "82s123.b24",	0x240, 0x020, CRC(4fb5df2a ))	/* tile to sprite priority ?? */
+ROM_END
+
 static DRIVER_INIT( fshark )
 {
 	data8_t *source = memory_region(REGION_USER1);
@@ -1162,3 +1243,5 @@ GAME( 1987, skyshark, fshark,   twincobr, skyshark, fshark, ROT270, "[Toaplan] T
 GAME( 1987, hishouza, fshark,   twincobr, hishouza, fshark, ROT270, "[Toaplan] Taito Corporation", "Hishou Zame (Japan)" )
 GAME( 1987, fsharkbt, fshark,   twincobr, skyshark, fshark, ROT270, "bootleg", "Flying Shark (bootleg)" )
 GAME( 1991, gulfwar2, 0,        twincobr, gulfwar2, 0,      ROT270, "Comad", "Gulf War II" )
+GAME( 2002, twincbu2, twincobr, twincobr, twincobu, 0,      ROT270, "[Hack]", "Twin Cobra (Hack)" )
+GAME( 2002, twintwst, twincobr, twincobr, twincobr, 0,      ROT270, "[Hack]", "Twin Twist (Twin Cobra Hack)" )

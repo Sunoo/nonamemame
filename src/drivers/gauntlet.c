@@ -1548,6 +1548,40 @@ ROM_START( vindc2r1 )
 	ROM_LOAD( "1185-2u.059",  0x0b8000, 0x008000, CRC(9d62f6b7) SHA1(0d0f94dd81958c41674096d326ad1662284209e6) )
 ROM_END
 
+ROM_START( gaunt2s )
+ROM_REGION( 0x80000, REGION_CPU1, 0 )	/* 8*64k for 68000 code */
+ROM_LOAD16_BYTE( "gauntlt2.9a",  0x00000, 0x08000, CRC(46fe8743 ))
+ROM_LOAD16_BYTE( "gauntlt2.9b",  0x00001, 0x08000, CRC(276e15c4 ))
+ROM_LOAD16_BYTE( "gauntlt2.10a", 0x38000, 0x04000, CRC(45dfda47 ))
+ROM_LOAD16_BYTE( "gauntlt2.10b", 0x38001, 0x04000, CRC(343c029c ))
+ROM_LOAD16_BYTE( "gauntlt2.7a",  0x40000, 0x08000, CRC(32c909b4 ))
+ROM_LOAD16_BYTE( "gauntlt2.7b",  0x40001, 0x08000, CRC(a1a2ac12 ))
+ROM_LOAD16_BYTE( "gauntlt2.6a",  0x50000, 0x08000, CRC(ae301bba ))
+ROM_LOAD16_BYTE( "gauntlt2.6b",  0x50001, 0x08000, CRC(e94aaa8a ))
+ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for 6502 code */
+ROM_LOAD( "gauntlt2.16r", 0x4000, 0x4000, CRC(5c731006 ))
+ROM_LOAD( "gauntlt2.16s", 0x8000, 0x8000, CRC(dc3591e7 ))
+ROM_REGION( 0x04000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "gauntlt2.6p",  0x00000, 0x04000, CRC(d101905d ))
+ROM_REGION( 0x60000, REGION_GFX2, ROMREGION_DISPOSE | ROMREGION_INVERT )
+ROM_LOAD( "gauntlt2.1a",  0x00000, 0x08000, CRC(09df6e23 ))
+ROM_LOAD( "gauntlt2.1b",  0x08000, 0x08000, CRC(869330be ))
+ROM_LOAD( "gauntlt2.1c",  0x10000, 0x04000, CRC(e4c98f01 ))
+ROM_RELOAD(               0x14000, 0x04000 )
+ROM_LOAD( "gauntlt2.1l",  0x18000, 0x08000, CRC(33cb476e ))
+ROM_LOAD( "gauntlt2.1mn", 0x20000, 0x08000, CRC(29ef9882 ))
+ROM_LOAD( "gauntlt2.1p",  0x28000, 0x04000, CRC(c4857879 ))
+ROM_RELOAD(               0x2c000, 0x04000 )
+ROM_LOAD( "gauntlt2.2a",  0x30000, 0x08000, CRC(f71e2503 ))
+ROM_LOAD( "gauntlt2.2b",  0x38000, 0x08000, CRC(11e0ac5b ))
+ROM_LOAD( "gauntlt2.2c",  0x40000, 0x04000, CRC(d9c2c2d1 ))
+ROM_RELOAD(               0x44000, 0x04000 )
+ROM_LOAD( "gauntlt2.2l",  0x48000, 0x08000, CRC(9e30b2e9 ))
+ROM_LOAD( "gauntlt2.2mn", 0x50000, 0x08000, CRC(8bf3b263 ))
+ROM_LOAD( "gauntlt2.2p",  0x58000, 0x04000, CRC(a32c732a ))
+ROM_RELOAD(               0x5c000, 0x04000 )
+ROM_END
+
 
 
 /*************************************
@@ -1656,3 +1690,4 @@ GAME( 1986, gaun22pg, gaunt2,   gauntlet, gauntlet, gauntlet2, ROT0, "Atari Game
 GAME( 1988, vindctr2, 0,        gauntlet, vindctr2, vindctr2,  ROT0, "Atari Games", "Vindicators Part II (rev 3)" )
 GAME( 1988, vindc2r2, vindctr2, gauntlet, vindctr2, vindctr2,  ROT0, "Atari Games", "Vindicators Part II (rev 2)" )
 GAME( 1988, vindc2r1, vindctr2, gauntlet, vindctr2, vindctr2,  ROT0, "Atari Games", "Vindicators Part II (rev 1)" )
+GAME( 1987, gaunt2s,  0,        gauntlet, gauntlet, gauntlet2, ROT0, "Atari Games", "Gauntlet II Speed Hack" )

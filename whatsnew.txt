@@ -1,3 +1,12 @@
+0.79u4.03:
+ - Added MAMEinfo 0.79u4 changes
+ - Fixed view source option
+ - Added MAMEinfo extra MAME32 folders for MAME 0.79u1
+ - Added Deco Cassette Turbo Loader (Madda's Mame)
+ - Added Neo Geo Universal BIOS (Madda's Mame)
+ - Added new sampling rate (Madda's Mame)
+ - Added 364 games from MiSFiT MAME and No Name MAME (Madda's Mame)
+
 0.79u4.02:
  - Updated to MAME 0.79u4 source code
  - Added Oliver's Asterix fixes
@@ -6,4 +15,4 @@
 0.79u1.01:
  - Started with MAME 0.79u1 source code (including MAME32 and DOS)
  - Copied several miscellaneous changes from the old No Name MAME over
- - Added the games from the Extra Games Compile Pack (Madda's Mame?)
+ - Added the games from the Extra Games Compile Pack (Madda's Mame)

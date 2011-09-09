@@ -961,6 +961,26 @@ ROM_START( nrallyx )
 ROM_END
 
 
+ROM_START( rxtron )
+ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+ROM_LOAD( "1b",           0x0000, 0x1000, CRC(5882700d ))
+ROM_LOAD( "1e",           0x1000, 0x1000, CRC(8d5b88e5 ))
+ROM_LOAD( "1h",           0x2000, 0x1000, CRC(1ecfddc0 ))
+ROM_LOAD( "1k",           0x3000, 0x1000, CRC(2729e00a ))
+ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "8e",           0x0000, 0x1000, CRC(91538868 ))
+ROM_REGION( 0x0100, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "im5623.8m",    0x0000, 0x0100, CRC(3c16f62c ))	/* dots */
+ROM_REGION( 0x0120, REGION_PROMS, 0 )
+ROM_LOAD( "m3-7603.11n",  0x0000, 0x0020, CRC(c7865434 ))
+ROM_LOAD( "im5623.8p",    0x0020, 0x0100, CRC(834d4fda ))
+ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound proms */
+ROM_LOAD( "im5623.3p",    0x0000, 0x0100, CRC(4bad7017 ))
+/*	ROM_LOAD( "im5623.2m",    0x0100, 0x0100, CRC(77245b66 )) */	
+/* timing - not used */
+ROM_END
+
+
 ROM_START( jungler )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )
 	ROM_LOAD( "jungr1",       0x0000, 0x1000, CRC(5bd6ad15) SHA1(608de86e19c6726bb7d21e7dc0e936f00121a3f4) )
@@ -1178,3 +1198,4 @@ GAME( 1982, locomotn, 0,        locomotn, locomotn, locomotn, ROT90, "Konami (Ce
 GAME( 1982, gutangtn, locomotn, locomotn, locomotn, locomotn, ROT90, "Konami (Sega license)", "Guttang Gottong" )
 GAME( 1982, cottong,  locomotn, locomotn, locomotn, locomotn, ROT90, "bootleg", "Cotocoto Cottong" )
 GAMEX(1983, commsega, 0,        locomotn, commsega, commsega, ROT90, "Sega", "Commando (Sega)", GAME_IMPERFECT_SOUND )
+GAME( 1998, rxtron, rallyx, rallyx, rallyx, 0, ROT0, "Jerky and Sil hack", "Rally-X Tron")

@@ -463,9 +463,139 @@ ROM_START( rastsaga )
 	ROM_LOAD( "ic76_20.bin", 0x0000, 0x10000, CRC(fd1a34cc) SHA1(b1682959521fa295769207b75cf7d839e9ec95fd) ) /* samples are 4bit ADPCM */
 ROM_END
 
+ROM_START( rastwack )
+ROM_REGION( 0x60000, REGION_CPU1, 0 )	/* 6*64k for 68000 code */
+ROM_LOAD16_BYTE( "rs19_38.bin", 0x00000, 0x10000, CRC(a38ac909 ))
+ROM_LOAD16_BYTE( "rs07_37.bin", 0x00001, 0x10000, CRC(bad60872 ))
+ROM_LOAD16_BYTE( "rs20_40.bin", 0x20000, 0x10000, CRC(6bcf70dc ))
+ROM_LOAD16_BYTE( "rs08_39.bin", 0x20001, 0x10000, CRC(8838ecc5 ))
+ROM_LOAD16_BYTE( "rs21_42.bin", 0x40000, 0x10000, CRC(b626c439 ))
+ROM_LOAD16_BYTE( "rs09_43.bin", 0x40001, 0x10000, CRC(c928a516 ))
+ROM_REGION( 0x1c000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "ic49_19.bin", 0x00000, 0x4000, CRC(ee81fdd8 ))
+ROM_CONTINUE(            0x10000, 0xc000 )
+ROM_REGION( 0x080000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "ic40_01.bin",  0x00000, 0x20000, CRC(f2111c1f ))        /* 8x8 0 */
+ROM_LOAD( "ic39_03.bin",  0x20000, 0x20000, CRC(a25b10c1 ))        /* 8x8 0 */
+ROM_LOAD( "ic67_02.bin",  0x40000, 0x20000, CRC(a465449c ))        /* 8x8 1 */
+ROM_LOAD( "ic66_04.bin",  0x60000, 0x20000, CRC(9d4f8e36 ))        /* 8x8 1 */
+ROM_REGION( 0x080000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "ic15_05.bin",  0x00000, 0x20000, CRC(edc6f1bb ))        /* sprites 1a */
+ROM_LOAD( "ic14_07.bin",  0x20000, 0x20000, CRC(c672101c ))        /* sprites 3a */
+ROM_LOAD( "ic28_06.bin",  0x40000, 0x20000, CRC(f6ada09a ))        /* sprites 1b */
+ROM_LOAD( "ic27_08.bin",  0x60000, 0x20000, CRC(533d567e ))        /* sprites 3b */
+ROM_REGION( 0x10000, REGION_SOUND1, 0 )	/* 64k for the samples */
+ROM_LOAD( "ic76_20.bin", 0x0000, 0x10000, CRC(fd1a34cc )) /* samples are 4bit ADPCM */
+ROM_END
+
+ROM_START( rastandh )
+ROM_REGION( 0x60000, REGION_CPU1, 0 )	/* 6*64k for 68000 code */
+ROM_LOAD16_BYTE( "ic19_38.bin", 0x00000, 0x10000, CRC(1c91dbb1 ))
+ROM_LOAD16_BYTE( "ic07_37.bin", 0x00001, 0x10000, CRC(ecf20bdd ))
+ROM_LOAD16_BYTE( "ic20_40.bin", 0x20000, 0x10000, CRC(8f1ab70d ))
+ROM_LOAD16_BYTE( "ic08_39.bin", 0x20001, 0x10000, CRC(553a1ed8 ))
+ROM_LOAD16_BYTE( "ic21_42.bin", 0x40000, 0x10000, CRC(08dc89b1 ))
+ROM_LOAD16_BYTE( "ic09_43.bin", 0x40001, 0x10000, CRC(a93fc337 ))
+ROM_REGION( 0x1c000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "ic49_19.bin", 0x00000, 0x4000, CRC(ee81fdd8 ))
+ROM_CONTINUE(            0x10000, 0xc000 )
+ROM_REGION( 0x080000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "ic40_01.bin",  0x00000, 0x20000, CRC(cd30de19 ))        /* 8x8 0 */
+ROM_LOAD( "ic39_03.bin",  0x20000, 0x20000, CRC(ab67e064 ))        /* 8x8 0 */
+ROM_LOAD( "ic67_02.bin",  0x40000, 0x20000, CRC(54040fec ))        /* 8x8 1 */
+ROM_LOAD( "ic66_04.bin",  0x60000, 0x20000, CRC(94737e93 ))        /* 8x8 1 */
+ROM_REGION( 0x080000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "ic15_05.bin",  0x00000, 0x20000, CRC(c22d94ac ))        /* sprites 1a */
+ROM_LOAD( "ic14_07.bin",  0x20000, 0x20000, CRC(b5632a51 ))        /* sprites 3a */
+ROM_LOAD( "ic28_06.bin",  0x40000, 0x20000, CRC(002ccf39 ))        /* sprites 1b */
+ROM_LOAD( "ic27_08.bin",  0x60000, 0x20000, CRC(feafca05 ))        /* sprites 3b */
+ROM_REGION( 0x10000, REGION_SOUND1, 0 )	/* 64k for the samples */
+ROM_LOAD( "ic76_20.bin", 0x0000, 0x10000, CRC(fd1a34cc )) /* samples are 4bit ADPCM */
+ROM_END
+
+ROM_START( rastaneh )
+ROM_REGION( 0x60000, REGION_CPU1, 0 )	/* 6*64k for 68000 code */
+ROM_LOAD16_BYTE( "ic19_38.bin", 0x00000, 0x10000, CRC(1c91dbb1 ))
+ROM_LOAD16_BYTE( "ic07_37.bin", 0x00001, 0x10000, CRC(ecf20bdd ))
+ROM_LOAD16_BYTE( "ic20_40.bin", 0x20000, 0x10000, CRC(8f1ab70d ))
+ROM_LOAD16_BYTE( "ic08_39.bin", 0x20001, 0x10000, CRC(553a1ed8 ))
+ROM_LOAD16_BYTE( "ic21_42.bin", 0x40000, 0x10000, CRC(1857a7cb ))
+ROM_LOAD16_BYTE( "ic09_43.bin", 0x40001, 0x10000, CRC(71037966 ))
+ROM_REGION( 0x1c000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "ic49_19.bin", 0x00000, 0x4000, CRC(ee81fdd8 ))
+ROM_CONTINUE(            0x10000, 0xc000 )
+ROM_REGION( 0x080000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "ic40_01.bin",  0x00000, 0x20000, CRC(cd30de19 ))        /* 8x8 0 */
+ROM_LOAD( "ic39_03.bin",  0x20000, 0x20000, CRC(ab67e064 ))        /* 8x8 0 */
+ROM_LOAD( "ic67_02.bin",  0x40000, 0x20000, CRC(54040fec ))        /* 8x8 1 */
+ROM_LOAD( "ic66_04.bin",  0x60000, 0x20000, CRC(94737e93 ))        /* 8x8 1 */
+ROM_REGION( 0x080000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "ic15_05.bin",  0x00000, 0x20000, CRC(c22d94ac ))        /* sprites 1a */
+ROM_LOAD( "ic14_07.bin",  0x20000, 0x20000, CRC(b5632a51 ))        /* sprites 3a */
+ROM_LOAD( "ic28_06.bin",  0x40000, 0x20000, CRC(002ccf39 ))        /* sprites 1b */
+ROM_LOAD( "ic27_08.bin",  0x60000, 0x20000, CRC(feafca05 ))        /* sprites 3b */
+ROM_REGION( 0x10000, REGION_SOUND1, 0 )	/* 64k for the samples */
+ROM_LOAD( "ic76_20.bin", 0x0000, 0x10000, CRC(fd1a34cc )) /* samples are 4bit ADPCM */
+ROM_END
+
+ROM_START( rastand2 )
+ROM_REGION( 0x60000, REGION_CPU1, 0 )	/* 6*64k for 68000 code */
+ROM_LOAD16_BYTE( "ic19_38.bin", 0x00000, 0x10000, CRC(1c91dbb1 ))
+ROM_LOAD16_BYTE( "ic07_37.bin", 0x00001, 0x10000, CRC(ecf20bdd ))
+ROM_LOAD16_BYTE( "ic20_40.bin", 0x20000, 0x10000, CRC(8f1ab70d ))
+ROM_LOAD16_BYTE( "ic08_39.bin", 0x20001, 0x10000, CRC(553a1ed8 ))
+ROM_LOAD16_BYTE( "ic21_42.bin", 0x40000, 0x10000, CRC(1857a7cb ))
+ROM_LOAD16_BYTE( "ic09_43.bin", 0x40001, 0x10000, CRC(e08d2b2d ))
+ROM_REGION( 0x1c000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "ic49_19.bin", 0x00000, 0x4000, CRC(ee81fdd8 ))
+ROM_CONTINUE(            0x10000, 0xc000 )
+ROM_REGION( 0x080000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "ic40_01.bin",  0x00000, 0x20000, CRC(cd30de19 ))        /* 8x8 0 */
+ROM_LOAD( "ic39_03.bin",  0x20000, 0x20000, CRC(ab67e064 ))        /* 8x8 0 */
+ROM_LOAD( "ic67_02.bin",  0x40000, 0x20000, CRC(54040fec ))        /* 8x8 1 */
+ROM_LOAD( "ic66_04.bin",  0x60000, 0x20000, CRC(94737e93 ))        /* 8x8 1 */
+ROM_REGION( 0x080000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "ic15_05.bin",  0x00000, 0x20000, CRC(c22d94ac ))        /* sprites 1a */
+ROM_LOAD( "ic14_07.bin",  0x20000, 0x20000, CRC(b5632a51 ))        /* sprites 3a */
+ROM_LOAD( "ic28_06.bin",  0x40000, 0x20000, CRC(002ccf39 ))        /* sprites 1b */
+ROM_LOAD( "ic27_08.bin",  0x60000, 0x20000, CRC(feafca05 ))        /* sprites 3b */
+ROM_REGION( 0x10000, REGION_SOUND1, 0 )	/* 64k for the samples */
+ROM_LOAD( "ic76_20.bin", 0x0000, 0x10000, CRC(fd1a34cc )) /* samples are 4bit ADPCM */
+ROM_END
+
+ROM_START( rastane2 )
+ROM_REGION( 0x60000, REGION_CPU1, 0 )	/* 6*64k for 68000 code */
+ROM_LOAD16_BYTE( "ic19_38.bin", 0x00000, 0x10000, CRC(1c91dbb1 ))
+ROM_LOAD16_BYTE( "ic07_37.bin", 0x00001, 0x10000, CRC(ecf20bdd ))
+ROM_LOAD16_BYTE( "ic20_40.bin", 0x20000, 0x10000, CRC(8f1ab70d ))
+ROM_LOAD16_BYTE( "ic08_39.bin", 0x20001, 0x10000, CRC(553a1ed8 ))
+ROM_LOAD16_BYTE( "ic21_42.bin", 0x40000, 0x10000, CRC(27845873 ))
+ROM_LOAD16_BYTE( "ic09_43.bin", 0x40001, 0x10000, CRC(a38131f3 ))
+ROM_REGION( 0x1c000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
+ROM_LOAD( "ic49_19.bin", 0x00000, 0x4000, CRC(ee81fdd8 ))
+ROM_CONTINUE(            0x10000, 0xc000 )
+ROM_REGION( 0x080000, REGION_GFX1, ROMREGION_DISPOSE )
+ROM_LOAD( "ic40_01.bin",  0x00000, 0x20000, CRC(cd30de19 ))        /* 8x8 0 */
+ROM_LOAD( "ic39_03.bin",  0x20000, 0x20000, CRC(ab67e064 ))        /* 8x8 0 */
+ROM_LOAD( "ic67_02.bin",  0x40000, 0x20000, CRC(54040fec ))        /* 8x8 1 */
+ROM_LOAD( "ic66_04.bin",  0x60000, 0x20000, CRC(94737e93 ))        /* 8x8 1 */
+ROM_REGION( 0x080000, REGION_GFX2, ROMREGION_DISPOSE )
+ROM_LOAD( "ic15_05.bin",  0x00000, 0x20000, CRC(c22d94ac ))        /* sprites 1a */
+ROM_LOAD( "ic14_07.bin",  0x20000, 0x20000, CRC(b5632a51 ))        /* sprites 3a */
+ROM_LOAD( "ic28_06.bin",  0x40000, 0x20000, CRC(002ccf39 ))        /* sprites 1b */
+ROM_LOAD( "ic27_08.bin",  0x60000, 0x20000, CRC(feafca05 ))        /* sprites 3b */
+ROM_REGION( 0x10000, REGION_SOUND1, 0 )	/* 64k for the samples */
+ROM_LOAD( "ic76_20.bin", 0x0000, 0x10000, CRC(fd1a34cc )) /* samples are 4bit ADPCM */
+ROM_END
+
 
 GAME( 1987, rastan,   0,      rastan, rastan,   0, ROT0, "Taito Corporation Japan", "Rastan (World)")
 /* IDENTICAL to rastan, only difference is copyright notice and Coin B coinage */
 GAME( 1987, rastanu,  rastan, rastan, rastsaga, 0, ROT0, "Taito America Corporation", "Rastan (US set 1)")
 GAME( 1987, rastanu2, rastan, rastan, rastsaga, 0, ROT0, "Taito America Corporation", "Rastan (US set 2)")
 GAME( 1987, rastsaga, rastan, rastan, rastsaga, 0, ROT0, "Taito Corporation", "Rastan Saga (Japan)")
+GAME( 2000, rastwack, rastan, rastan, rastsaga, 0, ROT0, "Vogel Hack", "Wacky Rastan" )
+GAME( 2001, rastandh, rastan, rastan, rastsaga, 0, ROT0, "Neil Pearce Hack", "Rastan Dragon Hack" )
+GAME( 2001, rastaneh, rastan, rastan, rastsaga, 0, ROT0, "Neil Pearce Hack", "Rastan Enemy Hack" )
+GAME( 2001, rastand2, rastan, rastan, rastsaga, 0, ROT0, "Neil Pearce Hack", "Rastan Dragon Hack (set 2)" )
+GAME( 2001, rastane2, rastan, rastan, rastsaga, 0, ROT0, "Neil Pearce Hack", "Rastan Enemy Hack (set 2)" )
