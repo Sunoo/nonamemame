@@ -1,3 +1,9 @@
+0.75u1.10:
+ - Updated to MAME 0.75u1 source code
+ - Fixed more CRC errors (thanks again to Vladimir Rajovic)
+ - Added several ATHLON optimizations in the makefile (from SmoothMame)
+ - More sloppy unprofessional Analog+ code comment outs
+
 0.74u2.09:
  - Updated to MAME 0.74u2 source code
  - Fixed a few CRC errors in the MiSFiTMAME drivers (thanks Vladimir Rajovic)

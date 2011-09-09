@@ -69,6 +69,17 @@ Preliminary Memory map:
                   at every start-up.Missing/wrong irq I guess.
 -vmahjong:locks up the emulation due to various DMA/irq issues.
 
+
+----------------------- 14 Oct 2003, notes -----------
+
+most (all) of the remaining non ic-13 games which don't boot appear to use a fairly
+common sega boot sequence.
+
+the master cpu is sending 2 commands to the slave (with MINIT) and then no more.
+
+prikura sprites are controlled by the second cpu, it we patch out the frt wait loop
+then we get sprites, the main cpu never does an MINIT, i guess it should somewhere?
+
 */
 
 #include "driver.h"
@@ -305,14 +316,23 @@ static void system_reset()
 
 static UINT8 stv_SMPC_r8 (int offset)
 {
-//	logerror ("8-bit SMPC Read from Offset %02x Returns %02x\n", offset, smpc_ram[offset]);
+	int return_data;
+
+
+	return_data = smpc_ram[offset];
+
 	if (offset == 0x75)//PDR1 read
-		return readinputport(0);
+		return_data = readinputport(0);
 
 	if (offset == 0x77)//PDR2 read
-		return readinputport(1);
+		return_data = readinputport(1);
 
-	return smpc_ram[offset];
+//	if (activecpu_get_pc()==0x060020E6) return_data = 0x10;
+
+	logerror ("cpu #%d (PC=%08X) SMPC: Read from Byte Offset %02x Returns %02x\n", cpu_getactivecpu(), activecpu_get_pc(), offset, return_data);
+
+
+	return return_data;
 }
 
 static void stv_SMPC_w8 (int offset, UINT8 data)
@@ -464,8 +484,8 @@ static void stv_SMPC_w8 (int offset, UINT8 data)
 				smpc_ram[0x5f]=0x1a;
 				SCSP_reset = 0;
 				break;
-			//default:
-			//	logerror ("SMPC: Unhandled Command %02x\n",data);
+			default:
+				logerror ("cpu #%d (PC=%08X) SMPC: Unhandled Command %02x\n", cpu_getactivecpu(), activecpu_get_pc(), data);
 		}
 
 		// we've processed the command, clear status flag
@@ -999,7 +1019,8 @@ WRITE32_HANDLER( stv_scu_w32 )
 		   stv_scu[40] != 0xfffffffc &&
 		   stv_scu[40] != 0xffffffff)
 		{
-			logerror("IRQ mask reg set %08x = %d%d%d%d|%d%d%d%d|%d%d%d%d|%d%d%d%d\n",
+			logerror("cpu #%d (PC=%08X) IRQ mask reg set %08x = %d%d%d%d|%d%d%d%d|%d%d%d%d|%d%d%d%d\n",
+			cpu_getactivecpu(), activecpu_get_pc(),
 			stv_scu[offset],
 			stv_scu[offset] & 0x8000 ? 1 : 0, /*A-Bus irq*/
 			stv_scu[offset] & 0x4000 ? 1 : 0, /*<reserved>*/
@@ -1506,15 +1527,22 @@ static void dma_scsp()
  * Enter into Radiant Silver Gun specific menu for a test...                       */
 static WRITE32_HANDLER( minit_w )
 {
-	logerror("MINIT write at %08x = %08x\n",activecpu_get_pc(),data);
+	logerror("cpu #%d (PC=%08X) MINIT write = %08x\n",cpu_getactivecpu(), activecpu_get_pc(),data);
 	// causes data to be written to internal st-2 register + interrupt?
 	// frt input capture (level 1, addr 0x64) (not sure about the 64/164 bits ..might be reversed)
+
+
+	// quick hack just to make sure the slave is always ready for a command ... probably won't work with the games
+	// as it will kill the master cpu performance but might be ok while we attempt to get around our boot problems
+	cpu_spinuntil_time(TIME_IN_USEC(400000));
+
+
 	sh2_set_frt_input(1, PULSE_LINE);
 }
 
 static WRITE32_HANDLER( sinit_w )
 {
-	logerror("SINIT write at %08x = %08x\n",activecpu_get_pc(),data);
+	logerror("cpu #%d (PC=%08X) SINIT write = %08x\n",cpu_getactivecpu(), activecpu_get_pc(),data);
 	// causes data to be written to internal st-2 register + interrupt?
 	// frt input capture (level 1, addr 0x164) (not sure about the 64/164 bits ..might be reversed)
 	sh2_set_frt_input(0, PULSE_LINE);
@@ -1841,6 +1869,24 @@ static READ32_HANDLER( stv_speedup2_r )
 	return stv_workram_h[0x0335bc/4];
 }
 
+
+WRITE32_HANDLER ( w60ffc44_write )
+{
+	COMBINE_DATA(&stv_workram_h[0xffc44/4]);
+
+	logerror("cpu #%d (PC=%08X): 60ffc44_write write = %08X & %08X\n", cpu_getactivecpu(), activecpu_get_pc(), data, mem_mask ^ 0xffffffff);
+
+}
+
+WRITE32_HANDLER ( w60ffc48_write )
+{
+	COMBINE_DATA(&stv_workram_h[0xffc48/4]);
+
+	logerror("cpu #%d (PC=%08X): 60ffc48_write write = %08X & %08X\n", cpu_getactivecpu(), activecpu_get_pc(), data, mem_mask ^ 0xffffffff);
+
+}
+
+
 DRIVER_INIT ( stv )
 {
 	unsigned char *ROM = memory_region(REGION_USER1);
@@ -1863,6 +1909,13 @@ DRIVER_INIT ( stv )
 /* idle skip bios? .. not 100% sure this is safe .. we'll see */
 	install_mem_read32_handler(0, 0x60335d0, 0x60335d3, stv_speedup_r );
 	install_mem_read32_handler(0, 0x60335bc, 0x60335bf, stv_speedup2_r );
+
+	/* debug .. watch the command buffer rsgun, cottonbm etc. appear to use to communicate between cpus */
+	install_mem_write32_handler(0, 0x60ffc44, 0x60ffc47, w60ffc44_write );
+	install_mem_write32_handler(0, 0x60ffc48, 0x60ffc4b, w60ffc48_write );
+	install_mem_write32_handler(1, 0x60ffc44, 0x60ffc47, w60ffc44_write );
+	install_mem_write32_handler(1, 0x60ffc48, 0x60ffc4b, w60ffc48_write );
+
 }
 
 static READ32_HANDLER( shienryu_slave_speedup_r )
@@ -2088,6 +2141,7 @@ MACHINE_DRIVER_END
 	ROM_LOAD16_WORD_SWAP_BIOS( 2, "mp17952a.s",     0x000000, 0x080000, CRC(d1be2adf) SHA1(eaf1c3e5d602e1139d2090a78d7e19f04f916794) ) /* us */ \
 	ROM_LOAD16_WORD_SWAP_BIOS( 3, "20091.bin",      0x000000, 0x080000, CRC(59ed40f4) SHA1(eff0f54c70bce05ff3a289bf30b1027e1c8cd117) ) /* jp alt 2 */ \
 	ROM_LOAD16_WORD_SWAP_BIOS( 4, "mp17953a.ic8",   0x000000, 0x080000, CRC(a4c47570) SHA1(9efc73717ec8a13417e65c54344ded9fc25bf5ef) ) /* taiwan */ \
+	ROM_LOAD16_WORD_SWAP_BIOS( 5, "mp17954a.s",     0x000000, 0x080000, CRC(f7722da3) SHA1(af79cff317e5b57d49e463af16a9f616ed1eee08) ) /* Europe */ \
 	ROM_REGION( 0x080000, REGION_CPU2, 0 ) /* SH2 code */ \
 	ROM_COPY( REGION_CPU1,0,0,0x080000) \
 	ROM_REGION( 0x100000, REGION_CPU3, 0 ) /* 68000 code */ \
@@ -2104,7 +2158,7 @@ SYSTEM_BIOS_START( stvbios )
 	SYSTEM_BIOS_ADD( 2, "us",          "USA (bios mp17952a)" )
 	SYSTEM_BIOS_ADD( 3, "japanb",      "Japan (bios 20091)" )
 	SYSTEM_BIOS_ADD( 4, "taiwan",      "Taiwan (bios mp17953a)" )
-	/*Europe*/
+	SYSTEM_BIOS_ADD( 5, "europe",      "Europe (bios mp17954a)" )
 	/*Korea*/
 	/*Asia (Pal Area)*/
 	/*Brazil*/

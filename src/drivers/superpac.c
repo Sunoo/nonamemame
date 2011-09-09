@@ -593,7 +593,7 @@ ROM_START( superpcp )
 	ROM_LOAD( "spv-1.3c",     0x0000, 0x1000, CRC(78337e74) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "spv-2.3f",     0x0000, 0x2000, CRC(d52ef4d) )
+	ROM_LOAD( "spv-2.3f",     0x0000, 0x2000, CRC(0d52ef4d) )
 
 	ROM_REGION( 0x0220, REGION_PROMS, 0 )
 	ROM_LOAD( "superpac.4c",  0x0000, 0x0020, CRC(9ce22c46) ) /* palette */

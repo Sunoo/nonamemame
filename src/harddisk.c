@@ -723,7 +723,8 @@ int hard_disk_binary_search(struct hard_disk_block *blocks, UINT8 hash[16], int 
 /* no check is done on their length as they SHOULD be the same length */
 int hard_disk_compare_hash(const UINT8 one[16], const UINT8 two[16])
 {
-	for (int i=0; i<16; i++) {
+	int i;
+	for (i=0; i<16; i++) {
 		if (one[i] != two[i]) return two[i] - one[i];
 	}
 	return 0;
@@ -749,7 +750,10 @@ int hard_disk_compress(const char *rawfile, UINT32 offset, const char *newfile, 
 	int totalsectors;
 	clock_t lastupdate;
 	int err=0;
+	int i;
 	int block = 0;
+	UINT8 bytes;
+
 /* DUPE BLOCK */
 	/* pointer to the array of unique blocks */
 	struct hard_disk_block * unique_blocks;
@@ -884,7 +888,7 @@ int hard_disk_compress(const char *rawfile, UINT32 offset, const char *newfile, 
 				/* move the array down one. */
 				/* i don't know if this can be done easier, or quicker */
 				/* but this works */
-				for (int i=last_crc-1; i>=duplicate_block; i--) unique_blocks[i+1]=unique_blocks[i];
+				for (i=last_crc-1; i>=duplicate_block; i--) unique_blocks[i+1]=unique_blocks[i];
 
 				/* create the new record in unique blocks for this entry */
 				memcpy(unique_blocks[duplicate_block].hash,temp_md5,16);
@@ -917,7 +921,7 @@ int hard_disk_compress(const char *rawfile, UINT32 offset, const char *newfile, 
 				/* this block SHOULD be right, but it isn't tested */
 				if (!current_is_good)
 				{
-					for (int i=last_crc-1; i>=duplicate_block; i--) unique_blocks[i+1]=unique_blocks[i];
+					for (i=last_crc-1; i>=duplicate_block; i--) unique_blocks[i+1]=unique_blocks[i];
 
 					memcpy(unique_blocks[duplicate_block].hash,temp_md5,16);
 					unique_blocks[duplicate_block].ptr=block;
@@ -934,7 +938,7 @@ int hard_disk_compress(const char *rawfile, UINT32 offset, const char *newfile, 
 				/* update the map on disk */
 				entry = destfile->map[block];
 				byteswap_mapentry(&entry);
-				UINT8 bytes = (*interface.write)(destfile->file, destfile->header.length + block * sizeof(destfile->map[0]), sizeof(entry), &entry);
+				bytes = (*interface.write)(destfile->file, destfile->header.length + block * sizeof(destfile->map[0]), sizeof(entry), &entry);
 				if (bytes != sizeof(entry)) return HDERR_WRITE_ERROR;
 				write_this_block = 0;
 			}
@@ -987,8 +991,6 @@ int hard_disk_compress(const char *rawfile, UINT32 offset, const char *newfile, 
 
 /* DUPE BLOCK */
 /* kill our arrays */
-printf("freeing temp_md5\n");
-if (temp_md5) free(temp_md5);
 printf("freeing unique blocks\n");
 if (unique_blocks) free(unique_blocks);
 printf("freeing temp_cache\n");

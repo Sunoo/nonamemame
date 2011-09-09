@@ -482,7 +482,7 @@ ROM_START( jrpacad )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(51ecf940c) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(1ecf940c) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
 	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(c0b35564) )
@@ -507,10 +507,10 @@ ROM_START( jrhearts )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(50527ff9b) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(0527ff9b) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(573477193) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(73477193) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */

@@ -48,7 +48,11 @@ endif
 # MAP = 1
 
 # uncomment next line to use Assembler 68000 engine
+ifdef ATLHON
+X86_ASM_68000 = 1
+else
 # X86_ASM_68000 = 1
+endif
 
 # uncomment next line to use Assembler 68020 engine
 # X86_ASM_68020 = 1
@@ -135,6 +139,32 @@ endif
 
 CFLAGS = -std=gnu99 -Isrc -Isrc/includes -Isrc/$(MAMEOS) -I$(OBJ)/cpu/m68000 -Isrc/cpu/m68000
 
+ifdef ATHLON
+ifdef SYMBOLS
+CFLAGS += -O0 -Wall -Werror -Wno-unused -g
+else
+CFLAGS += -DNDEBUG \
+	$(ARCH) -O2 -fomit-frame-pointer -fstrict-aliasing \
+	-pipe -ffast-math -fprefetch-loop-arrays -minline-all-stringops -fschedule-insns2 -fexpensive-optimizations \
+	-Wall -Wno-sign-compare -Wunused \
+	-Wpointer-arith -Wbad-function-cast -Wcast-align -Waggregate-return \
+	-Wshadow -Wstrict-prototypes -Wundef \
+	-Wformat-security -Wwrite-strings \
+	-Wdisabled-optimization \
+#	-Werror
+#	-Wredundant-decls
+#	-Wfloat-equal
+#	-Wunreachable-code -Wpadded
+#	-W had to remove because of the "missing initializer" warning
+#	-Wlarger-than-262144  \
+#	-Wcast-qual \
+#	-Wwrite-strings \
+#	-Wconversion \
+#	-Wmissing-prototypes \
+#	-Wmissing-declarations
+endif
+endif
+
 ifdef SYMBOLS
 CFLAGS += -O0 -Wall -Wno-error -Wno-unused -g
 else
@@ -157,7 +187,11 @@ CFLAGS += -DNDEBUG \
 #	-Wmissing-declarations
 endif
 
+ifdef ATHLON
+CFLAGSPEDANTIC = $(CFLAGS) -pedantic
+else
 CFLAGSPEDANTIC = $(CFLAGS) -Werror -pedantic
+endif
 
 ifdef SYMBOLS
 LDFLAGS =
@@ -217,6 +251,12 @@ $(EMULATOR): $(OBJS) $(COREOBJS) $(OSOBJS) $(DRVLIBS)
 	$(CC) $(CDEFS) $(CFLAGS) -c src/version.c -o $(OBJ)/version.o
 	@echo Linking $@...
 	$(LD) $(LDFLAGS) $(OBJS) $(COREOBJS) $(OSOBJS) $(LIBS) $(DRVLIBS) -o $@ $(MAPFLAGS)
+
+ifdef ATHLON
+ifndef DEBUG
+	upx -9 $(EMULATOR)
+endif
+endif
 
 romcmp$(EXE): $(OBJ)/romcmp.o $(OBJ)/unzip.o
 	@echo Linking $@...
