@@ -678,7 +678,7 @@ ROM_END
 ROM_START( aktaytdx )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
 	/* I changed the CRC to 0x00000000 so I can run patched ROMS 8) */
-	ROM_LOAD( "aktaytdx.bin", 0x0000, 0x10000, CRC(00000000) )
+	ROM_LOAD( "aktaytdx.bin", 0x0000, 0x10000, NO_DUMP )
 
 	ROM_REGION( 0x18000, REGION_GFX1, ROMREGION_DISPOSE )
 	ROM_LOAD( "a75_03.rom",   0x00000, 0x8000, CRC(038b74ba) )
@@ -694,7 +694,7 @@ ROM_END
 ROM_START( akblc2dx )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
 	/* I changed the CRC to 0x00000000 so I can run patched ROMS 8) */
-	ROM_LOAD( "akblc2dx.bin", 0x0000, 0x10000, CRC(00000000) )
+	ROM_LOAD( "akblc2dx.bin", 0x0000, 0x10000, NO_DUMP )
 
 	ROM_REGION( 0x18000, REGION_GFX1, ROMREGION_DISPOSE )
 	ROM_LOAD( "a75_03.rom",   0x00000, 0x8000, CRC(038b74ba) )
@@ -710,7 +710,7 @@ ROM_END
 ROM_START( akgcdx )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
 	/* I changed the CRC to 0x00000000 so I can run patched ROMS 8) */
-	ROM_LOAD( "akgcdx.bin",   0x0000, 0x10000, CRC(00000000) )
+	ROM_LOAD( "akgcdx.bin",   0x0000, 0x10000, NO_DUMP )
 
 	ROM_REGION( 0x18000, REGION_GFX1, ROMREGION_DISPOSE )
 	ROM_LOAD( "a75_03.rom",   0x00000, 0x8000, CRC(038b74ba) )

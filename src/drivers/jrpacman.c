@@ -531,10 +531,10 @@ ROM_START( jr1000 )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(58f93c273) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(8f93c273) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5eac97aec) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(eac97aec) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -555,10 +555,10 @@ ROM_START( jr2000 )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(52784936b) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(2784936b) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5a26f1a49) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(a26f1a49) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -579,10 +579,10 @@ ROM_START( jr2001 )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(59171f08f) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(9171f08f) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(53164b853) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(3164b853) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -603,10 +603,10 @@ ROM_START( jr2001p)
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(5d56cb9c5) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(d56cb9c5) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(51b534804) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(1b534804) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -627,10 +627,10 @@ ROM_START( jr2002 )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(5e254096c) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(e254096c) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5e3240bec) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(e3240bec) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -651,10 +651,10 @@ ROM_START( jr2002p )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(5ad1d0360) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(ad1d0360) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5160321a1) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(160321a1) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -675,10 +675,10 @@ ROM_START( jr2003 )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(5ffe21f5) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(0ffe21f5) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(51fd35d7a) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(1fd35d7a) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -699,10 +699,10 @@ ROM_START( jr2003p )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(5b24e9383) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(b24e9383) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(565ba2fb7) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(65ba2fb7) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -723,10 +723,10 @@ ROM_START( jr2004 )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(53c20cf84) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(3c20cf84) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5f08575ab) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(f08575ab) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -747,10 +747,10 @@ ROM_START( jr2004p )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(56e1db602) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(6e1db602) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5ab075ebe) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(ab075ebe) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -771,10 +771,10 @@ ROM_START( jr2005 )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(542eb8848) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(42eb8848) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5502d286c) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(502d286c) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -795,10 +795,10 @@ ROM_START( jr2005p )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(54d03cd0a) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(4d03cd0a) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(551cbce81) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(51cbce81) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -819,10 +819,10 @@ ROM_START( jr3000p )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(58f93c273) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(8f93c273) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5a8f7b5c) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(0a8f7b5c) )
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
 	ROM_LOAD( "jrprom.9f",    0x0100, 0x0100, CRC(eee34a79) ) /* palette high bits */
@@ -842,10 +842,10 @@ ROM_START( jr4000p )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(5c5f05f11) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(c5f05f11) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5944add80) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(944add80) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -866,10 +866,10 @@ ROM_START( jr5000p )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(586979e1) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(086979e1) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5a0fce81b) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(a0fce81b) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -890,10 +890,10 @@ ROM_START( jr6000 )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(544bd3c24) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(44bd3c24) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(583c8ff32) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(83c8ff32) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -914,10 +914,10 @@ ROM_START( jr7000 )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(53dca34d5) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(3dca34d5) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5202f2f37) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(202f2f37) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -938,10 +938,10 @@ ROM_START( jr7000p )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(53b3e60fe) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(3b3e60fe) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(589b17c92) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(89b17c92) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -962,10 +962,10 @@ ROM_START( jr8000 )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(59653f563) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(9653f563) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5b1791f8) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(0b1791f8) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -986,10 +986,10 @@ ROM_START( jr8000p )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(5913a0bea) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(913a0bea) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5aed01226) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(aed01226) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -1010,10 +1010,10 @@ ROM_START( jr9000p )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(5b2653891) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(b2653891) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(587f45bd7) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(87f45bd7) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -1034,10 +1034,10 @@ ROM_START( jrdeluxe )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(590517001) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(90517001) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5ef042965) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(ef042965) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -1058,10 +1058,10 @@ ROM_START( jrpacjr)
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(554e6c297) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(54e6c297) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(55b34dd98) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5b34dd98) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -1082,10 +1082,10 @@ ROM_START( jrpacjrp )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(554e6c297) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(54e6c297) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(51ee279ef) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(1ee279ef) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */
@@ -1106,10 +1106,10 @@ ROM_START( jrpacp )
 	ROM_LOAD( "jrp8k.bin",    0xc000, 0x2000, CRC(5252dd97) )
 
 	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(54fe4238e) )
+	ROM_LOAD( "jrp2c.bin",    0x0000, 0x2000, CRC(4fe4238e) )
 
 	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(55993c0fa) )
+	ROM_LOAD( "jrp2e.bin",    0x0000, 0x2000, CRC(5993c0fa) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
 	ROM_LOAD( "jrprom.9e",    0x0000, 0x0100, CRC(029d35c4) ) /* palette low bits */

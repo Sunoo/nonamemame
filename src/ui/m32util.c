@@ -240,7 +240,7 @@ char* MyStrStrI(const char* pFirst, const char* pSrch)
 
 char * ConvertToWindowsNewlines(const char *source)
 {
-	static char buf[9000];
+	static char buf[46080];
 	char *dest;
 
 	dest = buf;

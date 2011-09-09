@@ -421,6 +421,37 @@ ROM_START( sauro )
 	ROM_LOAD( "82s137-1.bin",    0x0800, 0x0400, CRC(bdfcf00c) SHA1(9faf4d7f8959b64faa535c9945eec59c774a3760) )  /* Blue component */
 ROM_END
 
+ROM_START( saurob )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )          /* 64k for code */
+	ROM_LOAD( "sauro02.7c",      0x00000, 0x8000, CRC(72026b9a) )
+	ROM_LOAD( "sauro01.6c",      0x08000, 0x8000, CRC(4ff12c25) )
+
+	ROM_REGION( 0x10000, REGION_CPU2, 0 )          /* 64k for sound CPU */
+	ROM_LOAD( "sauro03.16e",     0x00000, 0x8000, CRC(a30b60fc) )
+
+	ROM_REGION( 0x10000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "sauro-4.bin",     0x00000, 0x8000, CRC(9b617cda) )
+	ROM_LOAD( "sauro-5.bin",     0x08000, 0x8000, CRC(a6e2640d) )
+
+	ROM_REGION( 0x10000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "sauro-6.bin",     0x00000, 0x8000, CRC(4b77cb0f) )
+	ROM_LOAD( "sauro-7.bin",     0x08000, 0x8000, CRC(187da060) )
+
+	ROM_REGION( 0x20000, REGION_GFX3, ROMREGION_DISPOSE )
+	ROM_LOAD( "sauro-8.bin",     0x00000, 0x8000, CRC(e08b5d5e) )
+	ROM_LOAD( "sauro-9.bin",     0x08000, 0x8000, CRC(7c707195) )
+	ROM_LOAD( "sauro-10.bin",    0x10000, 0x8000, CRC(c93380d1) )
+	ROM_LOAD( "sauro-11.bin",    0x18000, 0x8000, CRC(f47982a8) )
+
+	ROM_REGION( 0x0c00, REGION_PROMS, 0 )
+	ROM_LOAD( "82s137-3.bin",    0x0000, 0x0400, CRC(d52c4cd0) )  /* Red component */
+	ROM_LOAD( "82s137-2.bin",    0x0400, 0x0400, CRC(c3e96d5d) )  /* Green component */
+	ROM_LOAD( "82s137-1.bin",    0x0800, 0x0400, CRC(bdfcf00c) )  /* Blue component */
+
+	ROM_REGION( 0x0c00, REGION_USER1, 0 )
+	ROM_LOAD( "sauropr4.16h",    0x0000, 0x0200, CRC(5261bc11) )  /* ??? */
+ROM_END
+
 ROM_START( trckydoc )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )          /* 64k for code */
 	ROM_LOAD( "trckydoc.d9",  0x0000,  0x8000, CRC(c6242fc3) SHA1(c8a6f6abe8b51061a113ed75fead0479df68ec40) )
@@ -457,4 +488,5 @@ static DRIVER_INIT( tecfri )
 }
 
 GAMEX( 1987, sauro,    0, sauro,    tecfri, tecfri, ROT0, "Tecfri", "Sauro", GAME_IMPERFECT_SOUND )
+GAMEX( 1987, saurob,   sauro,    sauro,    tecfri,   tecfri,    ROT0, "bootleg", "Sauro (bootleg)", GAME_IMPERFECT_SOUND )
 GAME ( 1987, trckydoc, 0, trckydoc, tecfri, tecfri, ROT0, "Tecfri", "Tricky Doc" )

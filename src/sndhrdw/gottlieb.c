@@ -1,7 +1,6 @@
 #include "driver.h"
 #include "cpu/m6502/m6502.h"
-
-
+//#include "led.h"
 
 WRITE_HANDLER( gottlieb_sh_w )
 {
@@ -83,7 +82,7 @@ WRITE_HANDLER( gottlieb_sh_w )
 }
 
 
-void gottlieb_knocker(void)
+void gottlieb_knocker_on(void)
 {
 	if (Machine->samples)
 	{
@@ -91,14 +90,32 @@ void gottlieb_knocker(void)
 		{
 		}
 		else	/* qbert */
-			sample_start(0,44,0);
+		{
+//			change_led(1, 1, 1);
+//			sample_stop(0);
+//			//sample_start(0,44,0);
+		}
+	}
+}
+
+void gottlieb_knocker_off(void)
+{
+	if (Machine->samples)
+	{
+		if (!strcmp(Machine->gamedrv->name,"reactor"))	/* reactor */
+		{
+		}
+		else	/* qbert */
+		{
+//			change_led(0, 0, 0);
+		}
 	}
 }
 
 /* callback for the timer */
 void gottlieb_nmi_generate(int param)
 {
-	cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
+//	cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
 }
 
 static const char *PhonemeTable[65] =

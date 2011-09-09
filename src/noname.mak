@@ -678,6 +678,7 @@ $(OBJ)/snk.a: \
 	$(OBJ)/vidhrdw/lasso.o $(OBJ)/drivers/lasso.o \
 	$(OBJ)/drivers/munchmo.o $(OBJ)/vidhrdw/munchmo.o \
 	$(OBJ)/vidhrdw/marvins.o $(OBJ)/drivers/marvins.o \
+	$(OBJ)/vidhrdw/jcross.o $(OBJ)/drivers/jcross.o \
 	$(OBJ)/drivers/mainsnk.o \
 	$(OBJ)/drivers/hal21.o \
 	$(OBJ)/vidhrdw/snk.o $(OBJ)/drivers/snk.o \
@@ -798,6 +799,7 @@ $(OBJ)/jaleco.a: \
 	$(OBJ)/vidhrdw/psychic5.o $(OBJ)/drivers/psychic5.o \
 	$(OBJ)/vidhrdw/ginganin.o $(OBJ)/drivers/ginganin.o \
 	$(OBJ)/vidhrdw/skyfox.o $(OBJ)/drivers/skyfox.o \
+	$(OBJ)/vidhrdw/homerun.o $(OBJ)/drivers/homerun.o \
 	$(OBJ)/vidhrdw/cischeat.o $(OBJ)/drivers/cischeat.o \
 	$(OBJ)/vidhrdw/tetrisp2.o $(OBJ)/drivers/tetrisp2.o \
 	$(OBJ)/vidhrdw/megasys1.o $(OBJ)/drivers/megasys1.o \
@@ -1075,6 +1077,7 @@ $(OBJ)/other.a: \
 	$(OBJ)/drivers/ltcasino.o \
 	$(OBJ)/drivers/vamphalf.o \
 	$(OBJ)/drivers/strvmstr.o \
+	$(OBJ)/vidhrdw/dorachan.o $(OBJ)/drivers/dorachan.o \
 
 
 COREOBJS += $(OBJ)/driver.o $(OBJ)/cheat.o

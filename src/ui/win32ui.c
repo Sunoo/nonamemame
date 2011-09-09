@@ -3703,6 +3703,23 @@ static BOOL MameCommand(HWND hwnd,int id, HWND hwndCtl, UINT codeNotify)
 		if (id == ID_VIEW_TAB_HISTORY && GetShowTab(TAB_HISTORY) == FALSE)
 			break;
 
+	case ID_VIEW_PCBINFO:
+		{
+			int  nGame;
+			char filename[MAX_PATH];
+
+			*filename = 0;
+
+			nGame = GetSelectedPickItem();
+			if (drivers[nGame]->clone_of && !(drivers[nGame]->clone_of->flags & NOT_A_DRIVER))
+				sprintf(filename, "pcb/%s.txt", drivers[nGame]->clone_of->name);
+			else
+				sprintf(filename, "pcb/%s.txt", drivers[nGame]->name);
+
+			DisplayTextFile(hMain, filename);
+		}
+		break;
+
 		SetCurrentTab(id - ID_VIEW_TAB_SCREENSHOT);
 		UpdateScreenShot();
 		TabCtrl_SetCurSel(hTabCtrl, CalculateCurrentTabIndex());

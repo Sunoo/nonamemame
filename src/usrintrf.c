@@ -2745,11 +2745,23 @@ static int displaygameinfo(struct mame_bitmap *bitmap,int selected)
 	else
 	{
 		sprintf(&buf[strlen(buf)],"\n%s:\n", ui_getstring (UI_screenres));
-		sprintf(&buf[strlen(buf)],"%d x %d (%s) %f Hz\n",
-				Machine->visible_area.max_x - Machine->visible_area.min_x + 1,
+
+		if (Machine->gamedrv->flags & ORIENTATION_SWAP_XY)
+		{
+			sprintf(&buf[strlen(buf)],"%d x %d (V) ",
 				Machine->visible_area.max_y - Machine->visible_area.min_y + 1,
-				(Machine->gamedrv->flags & ORIENTATION_SWAP_XY) ? "V" : "H",
-				Machine->drv->frames_per_second);
+				Machine->visible_area.max_x - Machine->visible_area.min_x + 1);
+		}
+		else
+		{
+			sprintf(&buf[strlen(buf)],"%d x %d (H) ",
+				Machine->visible_area.max_x - Machine->visible_area.min_x + 1,
+				Machine->visible_area.max_y - Machine->visible_area.min_y + 1);
+		}
+
+		sprintf(&buf[strlen(buf)],"%f Hz\n", Machine->drv->frames_per_second);
+		sprintf(&buf[strlen(buf)],"Palettesize: %d\n",Machine->drv->total_colors);
+
 #if 0
 		{
 			int pixelx,pixely,tmax,tmin,rem;
@@ -2840,9 +2852,7 @@ int showgamewarnings(struct mame_bitmap *bitmap)
 	int i;
 	char buf[2048];
 
-	if (Machine->gamedrv->flags &
-			(GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_WRONG_COLORS | GAME_IMPERFECT_COLORS |
-			  GAME_NO_SOUND | GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL))
+	if (Machine->gamedrv->flags & GAME_NOT_WORKING)
 	{
 		int done;
 
@@ -2859,43 +2869,7 @@ int showgamewarnings(struct mame_bitmap *bitmap)
 		}
 #endif
 
-		if (Machine->gamedrv->flags & GAME_IMPERFECT_COLORS)
-		{
-			strcat(buf, ui_getstring (UI_imperfectcolors));
-			strcat(buf, "\n");
-		}
-
-		if (Machine->gamedrv->flags & GAME_WRONG_COLORS)
-		{
-			strcat(buf, ui_getstring (UI_wrongcolors));
-			strcat(buf, "\n");
-		}
-
-		if (Machine->gamedrv->flags & GAME_IMPERFECT_GRAPHICS)
-		{
-			strcat(buf, ui_getstring (UI_imperfectgraphics));
-			strcat(buf, "\n");
-		}
-
-		if (Machine->gamedrv->flags & GAME_IMPERFECT_SOUND)
-		{
-			strcat(buf, ui_getstring (UI_imperfectsound));
-			strcat(buf, "\n");
-		}
-
-		if (Machine->gamedrv->flags & GAME_NO_SOUND)
-		{
-			strcat(buf, ui_getstring (UI_nosound));
-			strcat(buf, "\n");
-		}
-
-		if (Machine->gamedrv->flags & GAME_NO_COCKTAIL)
-		{
-			strcat(buf, ui_getstring (UI_nococktail));
-			strcat(buf, "\n");
-		}
-
-		if (Machine->gamedrv->flags & (GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION))
+		if (Machine->gamedrv->flags & GAME_NOT_WORKING)
 		{
 			const struct GameDriver *maindrv;
 			int foundworking;
@@ -2903,11 +2877,6 @@ int showgamewarnings(struct mame_bitmap *bitmap)
 			if (Machine->gamedrv->flags & GAME_NOT_WORKING)
 			{
 				strcpy(buf, ui_getstring (UI_brokengame));
-				strcat(buf, "\n");
-			}
-			if (Machine->gamedrv->flags & GAME_UNEMULATED_PROTECTION)
-			{
-				strcat(buf, ui_getstring (UI_brokenprotection));
 				strcat(buf, "\n");
 			}
 
@@ -2921,7 +2890,7 @@ int showgamewarnings(struct mame_bitmap *bitmap)
 			{
 				if (drivers[i] == maindrv || drivers[i]->clone_of == maindrv)
 				{
-					if ((drivers[i]->flags & (GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION)) == 0)
+					if ((drivers[i]->flags & GAME_NOT_WORKING) == 0)
 					{
 						if (foundworking == 0)
 						{
@@ -3160,10 +3129,12 @@ static void display_scroll_message (struct mame_bitmap *bitmap, int *scroll, int
 }
 
 
-/* Display text entry for current driver from history.dat and mameinfo.dat. */
-static int displayhistory (struct mame_bitmap *bitmap, int selected)
+/* Display text entry for current driver from Mameinfo-, Driverinfo-, History.dat and Statistics. */
+static int displaydatinfo (struct mame_bitmap *bitmap, int selected, int dattype)
 {
 	static int scroll = 0;
+	static int counter = 0;
+	static int fast = 4;
 	static char *buf = 0;
 	int maxcols,maxrows;
 	int sel;
@@ -3185,7 +3156,18 @@ static int displayhistory (struct mame_bitmap *bitmap, int selected)
 		if (buf)
 		{
 			/* try to load entry */
+			#ifndef MESS
+
+			/* Disable sound to prevent strange sound*/
+			osd_sound_enable(0);
+
+			if ((dattype == 1 && (load_driver_mameinfo (Machine->gamedrv, buf, 16384) == 0))
+			|| (dattype == 2 && (load_driver_drivinfo (Machine->gamedrv, buf, 16384) == 0))
+			|| (dattype == 3 && (load_driver_history (Machine->gamedrv, buf, bufsize) == 0))
+			|| (dattype == 4 && (load_driver_statistics (buf, 16384) == 0)))
+			#else
 			if (load_driver_history (Machine->gamedrv, buf, bufsize) == 0)
+			#endif
 			{
 				scroll = 0;
 				wordwrap_text_buffer (buf, maxcols);
@@ -3202,6 +3184,10 @@ static int displayhistory (struct mame_bitmap *bitmap, int selected)
 				free (buf);
 				buf = 0;
 			}
+
+			#ifndef MESS
+			osd_sound_enable(1);
+			#endif
 		}
 	}
 
@@ -3213,7 +3199,14 @@ static int displayhistory (struct mame_bitmap *bitmap, int selected)
 			char msg[80];
 
 			strcpy(msg,"\t");
-			strcat(msg,ui_getstring(UI_historymissing));
+			if (dattype == 1)
+				strcat(msg,ui_getstring(UI_mameinfomissing));
+			if (dattype == 2)
+				strcat(msg,ui_getstring(UI_drivinfomissing));
+			if (dattype == 3)
+				strcat(msg,ui_getstring(UI_historymissing));
+			if (dattype == 4)
+				strcat(msg,ui_getstring(UI_historymissing));
 			strcat(msg,"\n\n\t");
 			strcat(msg,ui_getstring (UI_lefthilight));
 			strcat(msg," ");
@@ -3223,17 +3216,28 @@ static int displayhistory (struct mame_bitmap *bitmap, int selected)
 			ui_displaymessagewindow(bitmap,msg);
 		}
 
-		if ((scroll > 0) && input_ui_pressed_repeat(IPT_UI_UP,4))
+		if ((scroll > 0) && input_ui_pressed_repeat(IPT_UI_UP,fast))
 		{
 			if (scroll == 2) scroll = 0;	/* 1 would be the same as 0, but with arrow on top */
 			else scroll--;
 		}
 
-		if (input_ui_pressed_repeat(IPT_UI_DOWN,4))
+		if (input_ui_pressed_repeat(IPT_UI_DOWN,fast))
 		{
 			if (scroll == 0) scroll = 2;	/* 1 would be the same as 0, but with arrow on top */
 			else scroll++;
 		}
+
+		if (seq_pressed(input_port_type_seq(IPT_UI_UP)) | seq_pressed(input_port_type_seq(IPT_UI_DOWN)))
+		{
+			if (++counter == 70)
+			{
+				fast--;
+				if (fast < 1) fast = 0;
+				counter = 0;
+			}
+		}
+		else fast = 4;
 
 		if (input_ui_pressed_repeat(IPT_UI_PAN_UP, 4))
 		{
@@ -3413,7 +3417,7 @@ int memcard_menu(struct mame_bitmap *bitmap, int selection)
 #ifndef MESS
 enum { UI_SWITCH = 0,UI_DEFCODE,UI_CODE,UI_ANALOG,UI_CALIBRATE,
 		UI_MOUSECNTL,UI_MOUSEAXESCNTL,
-		UI_STATS,UI_GAMEINFO, UI_HISTORY,
+		UI_STATS,UI_GAMEINFO, UI_MAMEINFO, UI_DRIVINFO, UI_HISTORY, UI_STATISTICS,
 		UI_CHEAT,UI_RESET,UI_MEMCARD,UI_RAPIDFIRE,UI_EXIT };
 #else
 enum { UI_SWITCH = 0,UI_DEFCODE,UI_CODE,UI_ANALOG,UI_CALIBRATE,
@@ -3521,7 +3525,10 @@ static void setup_menu_init(void)
 #ifndef MESS
 	menu_item[menu_total] = ui_getstring (UI_bookkeeping); menu_action[menu_total++] = UI_STATS;
 	menu_item[menu_total] = ui_getstring (UI_gameinfo); menu_action[menu_total++] = UI_GAMEINFO;
+	menu_item[menu_total] = ui_getstring (UI_mameinfo); menu_action[menu_total++] = UI_MAMEINFO;
+	menu_item[menu_total] = ui_getstring (UI_drivinfo); menu_action[menu_total++] = UI_DRIVINFO;
 	menu_item[menu_total] = ui_getstring (UI_history); menu_action[menu_total++] = UI_HISTORY;
+	menu_item[menu_total] = ui_getstring (UI_statistics); menu_action[menu_total++] = UI_STATISTICS;
 #else
 	menu_item[menu_total] = ui_getstring (UI_imageinfo); menu_action[menu_total++] = UI_IMAGEINFO;
 	menu_item[menu_total] = ui_getstring (UI_filemanager); menu_action[menu_total++] = UI_FILEMANAGER;
@@ -3560,11 +3567,18 @@ static void setup_menu_init(void)
 static int setup_menu(struct mame_bitmap *bitmap, int selected)
 {
 	int sel,res=-1;
-	static int menu_lastselected = 0;
+	static int menu_lastselected = -1;
 
 
 	if (selected == -1)
+	{
 		sel = menu_lastselected;
+		if (menu_lastselected == -1)
+		{
+			sel = menu_total - 6;
+			if (options.cheat) sel--;
+		}
+	}
 	else sel = selected - 1;
 
 	if (sel > SEL_MASK)
@@ -3604,6 +3618,12 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 			case UI_GAMEINFO:
 				res = displaygameinfo(bitmap, sel >> SEL_BITS);
 				break;
+			case UI_MAMEINFO:
+				res = displaydatinfo(bitmap, sel >> SEL_BITS, 1);
+				break;
+			case UI_DRIVINFO:
+				res = displaydatinfo(bitmap, sel >> SEL_BITS, 2);
+				break;
 #endif
 #ifdef MESS
 			case UI_IMAGEINFO:
@@ -3619,7 +3639,10 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 #endif /* HAS_WAVE */
 #endif
 			case UI_HISTORY:
-				res = displayhistory(bitmap, sel >> SEL_BITS);
+				res = displaydatinfo(bitmap, sel >> SEL_BITS, 3);
+				break;
+			case UI_STATISTICS:
+				res = displaydatinfo(bitmap, sel >> SEL_BITS, 4);
 				break;
 			case UI_CHEAT:
 				res = cheat_menu(bitmap, sel >> SEL_BITS);
@@ -3676,6 +3699,8 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 			case UI_MOUSEAXESCNTL:
 			case UI_STATS:
 			case UI_GAMEINFO:
+			case UI_MAMEINFO:
+			case UI_DRIVINFO:
 			#else
 			case UI_GAMEINFO:
 			case UI_IMAGEINFO:
@@ -3683,6 +3708,7 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 			case UI_TAPECONTROL:
 			#endif
 			case UI_HISTORY:
+			case UI_STATISTICS:
 			case UI_CHEAT:
 			case UI_MEMCARD:
 				sel |= 1 << SEL_BITS;

@@ -1,3 +1,10 @@
+0.74u2.09:
+ - Updated to MAME 0.74u2 source code
+ - Fixed a few CRC errors in the MiSFiTMAME drivers (thanks Vladimir Rajovic)
+ - Made changes from MAMEinfo (including MAME32 changes)
+ - Made QMAME changes (except for the knocker stuff, which needs VC++)
+ - Added Sauro (Bootleg) driver (from PatchMAME)
+
 0.74u1.08:
  - Updated to MAME 0.74u1 source code
  - Now using the folders from the MAME32 0.74

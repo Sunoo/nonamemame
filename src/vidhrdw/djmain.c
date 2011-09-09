@@ -92,8 +92,8 @@ static void djmain_draw_sprites(struct mame_bitmap *bitmap, const struct rectang
 				{
 					int sx = ox + ((x * xscale + (1 << 11)) >> 12);
 					int sy = oy + ((y * yscale + (1 << 11)) >> 12);
-					int zw =ox + (((x + 1) * xscale + (1 << 11)) >> 12) - sx;
-					int zh =oy + (((y + 1) * yscale + (1 << 11)) >> 12) - sy;
+					int zw = ox + (((x + 1) * xscale + (1 << 11)) >> 12) - sx;
+					int zh = oy + (((y + 1) * yscale + (1 << 11)) >> 12) - sy;
 
 					drawgfxzoom(bitmap,
 					            Machine->gfx[0],
@@ -148,7 +148,8 @@ VIDEO_START( djmain )
 	K055555_vh_start();
 
 	K056832_set_LayerOffset(0, -92, -27);
-	K056832_set_LayerOffset(1, -87, -27);
+	// K056832_set_LayerOffset(1, -87, -27);
+	K056832_set_LayerOffset(1, -88, -27);
 
 	return 0;
 }
@@ -159,10 +160,6 @@ VIDEO_UPDATE( djmain )
 	int pri[NUM_LAYERS + 1];
 	int order[NUM_LAYERS + 1];
 	int i, j;
-
-	// To fix wrong background color of tile layer, we should
-	// find out where is info about transparency pen.
-	int opaque = TILEMAP_IGNORE_TRANSPARENCY;
 
 	for (i = 0; i < NUM_LAYERS; i++)
 		pri[i] = K055555_read_register(K55_PRIINP_0 + i * 3);
@@ -181,8 +178,7 @@ VIDEO_UPDATE( djmain )
 				order[j] = temp;
 			}
 
-	if (!opaque)
-		fillbitmap(bitmap, get_black_pen(), cliprect);
+	fillbitmap(bitmap, Machine->remapped_colortable[0], cliprect);
 
 	for (i = 0; i < NUM_LAYERS + 1; i++)
 	{
@@ -190,20 +186,13 @@ VIDEO_UPDATE( djmain )
 
 		if (layer == NUM_LAYERS)
 		{
-			if (opaque)
-				fillbitmap(bitmap, get_black_pen(), cliprect);
-
 			if (enables & K55_INP_SUB2)
 				djmain_draw_sprites(bitmap, cliprect);
 		}
 		else
 		{
 			if (enables & (K55_INP_VRAM_A << layer))
-				K056832_tilemap_draw_dj(bitmap, cliprect, layer, opaque, 1 << i);
-			else if (opaque)
-				fillbitmap(bitmap, get_black_pen(), cliprect);
+				K056832_tilemap_draw_dj(bitmap, cliprect, layer, 0, 1 << i);
 		}
-
-		opaque = 0;
 	}
 }

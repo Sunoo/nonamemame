@@ -1,0 +1,169 @@
+Mameinfo Source v0.74  DMAME / MAMEW / MAME32
+=============================================
+
+
+WHAT's NEW 
+----------
+
+* Update to 0.74. Correct src\usrintrf.c
+
+
+
+
+
+
+HOW-TO-COMPILE
+--------------
+
+To compile the Mameinfo Source you must copy the files in \src
+to your djgpp  or  mingw\mame\src directory.
+For MAME32 you must also make the changes in history.c and m32util.c
+(see MAME32-Changes.txt)
+
+Test 'MAME STATISTICS' with games like '720' or 'Mr. Do'.
+
+
+
+
+
+
+
+
+MAMEINFO SOURCE FEATURES
+========================
+
+- Extra TAB menu points for Mameinfo-, Driver-, History and MAME STATISTICS
+- Faster textscroll
+- TAB menu selector shows on GAME MAMEINFO at startup
+- MAME shows only the  GAME_NOT_WORKING  warning. All other flags or warnings
+  can be displayed with 'GAME MAMEINFO'
+- Palettesize in 'GAME INFORMATION' 
+- Buffer is set to 45 kbytes (see Scramble History)
+
+
+With 'GAME MAMEINFO' you list the following game informations:
+- List the game info 'flags' (GAME_NO_SOUND, NO_COCKTAIL...)
+- TODO list
+- SETUP, SERVICE- and TESTMODE
+- Reported bugs from the MAME Testing Project
+- Work-In-Progress (WIP) news
+- Game levels
+- Other Emulators for the game
+- Category/Recommended Games
+- Romset (kb/files/zipsize)
+- ROM REGION (listed by the program)
+- ORIGINAL/CLONES (listed by the program)
+
+
+With 'GAME DRIVERINFO' you list the following game informations:
+- Game driver name and author
+- TODO list
+- Driver and hardware notes
+- Driver WIP news
+- Supported games by the driver
+
+
+With 'GAME HISTORY' you list the History.dat informations
+
+
+With 'MAME STATISTICS' you list the following MAME statistics informations:
+- The number of supported games
+- Arcade, Clones, NeoGeo, Playch10, DECO Cass and CVS games
+- Vector and Raster
+- Screen Orientation and Stereo
+- Various game info 'flags'
+- Games sorted by year and type
+- Romfiles and sizes
+- Typical romset sizes
+- Hardware list: CPU, Sound and Input
+- Monitor/Video ASPECT RATIO
+- Dual Monitor, 24-bit Display, RGB direct, Shadows and Highlights
+- FPS, Graphics Resolution and Palettesize List
+- Drivers and supported games in MAME from 0.01 - 0.72u2
+- All MAME versions and releases
+
+
+
+
+MAME STATISTICS NOTES
+---------------------
+
+- GAMES(ALL) = ORIGINALS (+CLONES) + NEOGEO (+CLONES)
+  GAMES(ALL) = RASTER (+CLONES) + VECTOR (+CLONES)
+  GAMES(ALL) = HORIZONTAL (+CLONES) + VERTICAL (+CLONES)
+
+- NEOGEO/Playch10/DECO CASS/CVS: If you compile the Mameinfo Source you must have the
+  drivers in the directory mame\src\drivers\ to calc all these games, because the
+  function that MAME STATISTICS use is ==>  if (!ci_strcmp (s, drivers[i]->source_file+12)).
+
+- The CPU- and soundinterface (CPU + SNDINTRF) list only the hardware of original games,
+  without clones or NeoGeo games. The sound subsystems is 4. The only game with 5 is
+  'tmnt' (YM2151, 007232, uPD7759, Samples and Custom) and this is not listed.
+  TOTAL means the number of all CPU or Sound hardware in the original games.
+
+  Some CPU and Sound chips have longer names, like TMS9980A/TMS9981.
+  MAME STATISTICS use shorter names:
+
+  DECO16    =  DECO CPU16
+  Jag. DSP  =  Jaguar DSP
+  Jag. GPU  =  Jaguar GPU
+  TMS9980A  =  TMS9980A/TMS9981
+
+  Discrete  =  Discrete Components
+  GA.CG-1V  =  GAELCO CG-1V
+  GA.GAE1   =  GAELCO GAE1
+  Sega 315  =  Sega 315-5560
+
+
+- DUAL MONITOR are games with two or more monitors (VIDEO_DUAL_MONITOR).
+
+- 24-BIT DISPLAY are games with a palette that has 6 or more bits per gun, and would
+  therefore require a 24-bit display. This is entirely up to the OS dependant layer,
+  the bitmap will still be 16-bit (VIDEO_NEEDS_6BITS_PER_GUN).
+
+- HI/TRUE BITMAP are games that wants to use a hicolor or truecolor bitmap, e.g. for
+  alpha blending (VIDEO_RGB_DIRECT).
+
+- SHADOWS are games that automatically extend the palette creating a darker copy for
+  shadows (VIDEO_HAS_SHADOWS). Games: TMNT, Asterix and GI Joe.
+
+- HIGHLIGHTS are games that automatically extend the palette creating a brighter copy for
+  highlights (VIDEO_HAS_HIGHLIGHTS). Games: all SEGA C/C2.
+
+- RESOLUTIONS: Displays all graphic resolutions and the number of games without the Vector
+  games. Because Vector games didn't have a graphic resolution.
+
+
+
+
+
+History:
+v4.71: Add LIGHTGUN to the Input/Controls (datafile.c)
+v4.72: Update to 0.62. Correct FILESIZE: %d MB (UNCOMPRESSED) and "Jaguar GPU/DSP" to "Jag. GPU/DSP" in the CPU list of MAME STATISTICS. Added number of TESTDRIVER GAMES.
+v4.73: Update to 0.63. MAME STATISTICS: Correct "DECO CPU16" to "DECO16" in the CPU list, "GAELCO GAE1" to "GA.GAE1 " and "GAELCO CG-1V" to "GA.CG-1V" in the SOUND List.
+v4.74: Correct snd_interface compile problem
+v4.80: Update to 0.65. Use the new and faster index routine to display all datafiles (Mameinfo-, History and Driverinfo.dat)
+v4.81: Correct the MAME32 display problem (window under screenshot)
+v4.82: Update to 0.66.
+v4.83: Correct the MAME32 display problem.
+v4.84: Update to 0.67. MAME STATISTICS: Correct "Sega_315-5560" to "Sega 315" in the SOUND list and correct Resolution output. Correct the MAME32 display problem again :(
+v4.85: Update to 0.69. MAME STATISTICS: Added 'ROM NEEDS REDUMP' to the flags list.
+v5.00: Update to 0.69a. MAME STATISTICS: Cleanup source - STATISTICS now faster!. Added HARDDISK games. Added Games with NO BUTTONS and (NO/OTHER) INPUT. Correct number of ROM files (without Harddisk files). Correct VIDEO_ASPECT_RATIO list (4x games with 896:1056). Correct printoutput and DATA ARRAY clear.
+v5.01: Update to 0.70. MAME STATISTICS: Added list of games added from 1997-2003
+v5.02: Update to 0.70u1. Added W95a tip to the MAME32-Changes.txt
+v5.03: Update to 0.70u2
+v5.04: Update to 0.70u3
+v5.05: Update to 0.70u4
+v5.06: Update to 0.70u5
+v5.10: Update to 0.71. Added 'View PCB infos with MAME32' to the MAME32-Changes.txt
+v5.11: Update to 0.71u1
+v5.12: Update to 0.71u2
+v5.13: Update to 0.72
+v5.14: Update to 0.72u1. Correct ui_text.c/h and usrintrf.c/h
+v5.15: Update to 0.72u2
+v5.16: Update to 0.73. Correct src\usrintrf.c and input handling src\datafile.c
+
+
+
+
+(c) 2000-2003  M.A.S.H.

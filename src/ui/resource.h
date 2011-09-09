@@ -355,6 +355,7 @@
 #define ID_TOGGLE_TAB_CONTROL_PANEL     40076
 #define ID_TOGGLE_TAB_HISTORY           40077
 #define ID_VIEW_FULLSCREEN              40079
+#define ID_VIEW_PCBINFO                 40080
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -364,7 +365,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        185
-#define _APS_NEXT_COMMAND_VALUE         40080
+#define _APS_NEXT_COMMAND_VALUE         40081
 #define _APS_NEXT_CONTROL_VALUE         1214
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
