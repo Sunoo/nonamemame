@@ -1231,6 +1231,8 @@ void handle_command(struct ide_state *ide, UINT8 command)
 			LOGPRINT(("IDE Set block count (%02X)\n", ide->sector_count));
 
 			ide->block_count = ide->sector_count;
+			// judge dredd wants 'drive ready' on this command
+			ide->status |= IDE_STATUS_DRIVE_READY;
 
 			/* signal an interrupt */
 			signal_interrupt(ide);
@@ -1637,6 +1639,15 @@ void ide_bus_0_w(int select, int offset, int data)
 		ide_controller_write(&idestate[0], offset, 1, data & 0xff);
 }
 
+int ide_controller_0_r(int reg)
+{
+	return ide_controller_read(&idestate[0], reg, 1);
+}
+
+void ide_controller_0_w(int reg, int data)
+{
+	ide_controller_write(&idestate[0], reg, 1, data);
+}
 
 
 /*************************************

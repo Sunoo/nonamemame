@@ -1433,6 +1433,8 @@ void e132xs_mask(void)
 {
 	INT32 val, const_val;
 
+	const_val = get_const();
+
 	if( S_BIT )
 	{
 		val = GET_L_REG(S_CODE);
@@ -1441,8 +1443,6 @@ void e132xs_mask(void)
 	{
 		val = GET_G_REG(S_CODE);
 	}
-
-	const_val = get_const();
 
 	val &= const_val;
 
@@ -1458,6 +1458,8 @@ void e132xs_sum(void)
 	UINT32 op1;
 	INT32 const_val;
 
+	const_val = get_const();
+
 	if( S_BIT )
 	{
 		op1 = GET_L_REG(S_CODE);
@@ -1469,8 +1471,6 @@ void e132xs_sum(void)
 		else
 			op1 = GET_G_REG(S_CODE);
 	}
-
-	const_val = get_const();
 
 	if(D_CODE == PC_CODE && !D_BIT)
 		PC -= 2;
@@ -1489,6 +1489,8 @@ void e132xs_sums(void)
 {
 	INT32 op1, const_val;
 
+	const_val = get_const();
+
 	if( S_BIT )
 	{
 		op1 = GET_L_REG(S_CODE);
@@ -1500,8 +1502,6 @@ void e132xs_sums(void)
 		else
 			op1 = GET_G_REG(S_CODE);
 	}
-
-	const_val = get_const();
 
 	op1 += const_val;
 	SET_RD(op1, NOINC);
@@ -2140,7 +2140,10 @@ void e132xs_movi(void)
 
 void e132xs_addi(void)
 {
-	UINT32 op1, op2;
+	UINT32 op1 = 0, op2;
+
+	if( N_VALUE )
+		op1 = immediate_value();
 
 	if( D_BIT )
 	{
@@ -2153,8 +2156,6 @@ void e132xs_addi(void)
 
 	if( !N_VALUE )
 		op1 = GET_C & ((GET_Z == 0 ? 1 : 0) | (op2 & 0x01));
-	else
-		op1 = immediate_value();
 
 	if(D_CODE == PC_CODE && !D_BIT)
 		PC -= 2;
@@ -2171,7 +2172,10 @@ void e132xs_addi(void)
 
 void e132xs_addsi(void)
 {
-	INT32 op1, op2;
+	INT32 op1 = 0, op2;
+
+	if( N_VALUE )
+		op1 = immediate_value();
 
 	if( D_BIT )
 	{
@@ -2184,8 +2188,6 @@ void e132xs_addsi(void)
 
 	if( !N_VALUE )
 		op1 = GET_C & ((GET_Z == 0 ? 1 : 0) | (op2 & 0x01));
-	else
-		op1 = immediate_value();
 
 	op2 += op1;
 	SET_RD(op2, NOINC);

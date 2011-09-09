@@ -1,3 +1,6 @@
+0.81u3.09:
+ - Updated to MAME 0.81u3 source
+
 0.81.09:
  - Updated to MAME 0.81 source
  - Removed Unavailable folder from MAME32
