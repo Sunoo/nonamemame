@@ -188,7 +188,7 @@ void adsp2115_get_info(UINT32 state, union cpuinfo *info);
 #include "cpu/cdp1802/cdp1802.h"
 #endif
 #if (HAS_CP1610)
-#include "cpu/cp1600/cp1600.h"
+#include "cpu/cp1610/cp1610.h"
 #endif
 #if (HAS_F8)
 #include "cpu/f8/f8.h"
@@ -621,7 +621,7 @@ const struct
 	{ CPU_CDP1802, cdp1802_get_info },
 #endif
 #if (HAS_CP1610)
-	{ CPU_CP1610, cp1600_get_info },
+	{ CPU_CP1610, cp1610_get_info },
 #endif
 #if (HAS_F8)
 	{ CPU_F8, f8_get_info },

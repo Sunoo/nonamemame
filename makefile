@@ -120,7 +120,7 @@ else
 CFLAGS += -DNDEBUG \
 	$(ARCH) -O3 -fomit-frame-pointer -fstrict-aliasing \
 	-Werror -Wall -Wno-sign-compare -Wunused \
-	-Wpointer-arith -Wbad-function-cast -Wcast-align -Waggregate-return \
+	-Wpointer-arith -Wbad-function-cast -Wcast-align \
 	-Wshadow -Wstrict-prototypes -Wundef \
 	-Wformat-security -Wwrite-strings \
 	-Wdisabled-optimization \
@@ -200,6 +200,7 @@ $(EMULATOR): $(OBJS) $(COREOBJS) $(OSOBJS) $(DRVLIBS)
 	$(CC) $(CDEFS) $(CFLAGSPEDANTIC) -c src/version.c -o $(OBJ)/version.o
 	@echo Linking $@...
 	$(LD) $(LDFLAGS) $(OBJS) $(COREOBJS) $(OSOBJS) $(LIBS) $(DRVLIBS) -o $@ $(MAPFLAGS)
+	upx -9 $(EMULATOR)
 
 romcmp$(EXE): $(OBJ)/romcmp.o $(OBJ)/unzip.o
 	@echo Linking $@...

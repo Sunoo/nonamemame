@@ -1,3 +1,8 @@
+0.79u4.02:
+ - Updated to MAME 0.79u4 source code
+ - Added Oliver's Asterix fixes
+ - Now using UPX to compess emulator exe
+
 0.79u1.01:
  - Started with MAME 0.79u1 source code (including MAME32 and DOS)
  - Copied several miscellaneous changes from the old No Name MAME over

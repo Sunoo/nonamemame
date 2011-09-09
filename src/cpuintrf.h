@@ -129,7 +129,7 @@ enum
 #ifdef MESS
 	CPU_APEXC,
 	CPU_CDP1802,
-	CPU_CP1600,
+	CPU_CP1610,
 	CPU_F8,
 	CPU_LH5801,
 	CPU_PDP1,
@@ -228,6 +228,7 @@ enum
 	CPUINFO_PTR_REGISTER_LAYOUT,						/* R/O: struct debug_register_layout *layout */
 	CPUINFO_PTR_WINDOW_LAYOUT,							/* R/O: struct debug_window_layout *layout */
 	CPUINFO_PTR_INTERNAL_MEMORY_MAP,					/* R/O: construct_map_t map */
+	CPUINFO_PTR_INTERNAL_MEMORY_MAP_LAST = CPUINFO_PTR_INTERNAL_MEMORY_MAP + ADDRESS_SPACES - 1,
 
 	CPUINFO_PTR_CPU_SPECIFIC = 0x18000,					/* R/W: CPU-specific values start here */
 	
@@ -420,7 +421,7 @@ const char *activecpu_dump_state(void);
 #define activecpu_reg_string(reg)				activecpu_get_info_string(CPUINFO_STR_REGISTER + (reg))
 
 #define activecpu_set_reg(reg, val)				activecpu_set_info_int(CPUINFO_INT_REGISTER + (reg), (val))
-#define activecpu_set_irq_callback(val)			activecpu_set_info_ptr(CPUINFO_PTR_IRQ_CALLBACK, (val)
+#define activecpu_set_irq_callback(val)			activecpu_set_info_ptr(CPUINFO_PTR_IRQ_CALLBACK, (void *) (val))
 
 
 
@@ -565,7 +566,7 @@ void cpu_set_m68k_reset(int cpunum, void (*resetfn)(void));
 /* return a pointer to the interface struct for a given CPU type */
 INLINE const struct cpu_interface *cputype_get_interface(int cputype)
 {
-	extern const struct cpu_interface cpuintrf[];
+	extern struct cpu_interface cpuintrf[];
 	return &cpuintrf[cputype];
 }
 
