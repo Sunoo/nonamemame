@@ -5646,6 +5646,7 @@ Other Sun games
       DRIVER( multi14 )      /* Multi-Pac 1.4 by Clay Cowgill (c) 1998 */
       DRIVER( multi15 )      /* Multi-Pac 1.5 by Clay Cowgill (c) 1998 */
       DRIVER( superabc )     /* SuperABC Pacman by Two-Bit Score (c) 1999 */
+	DRIVER( bucaneer )
       DRIVER( kingdmgp )     /* Neill Corlett's  English Text Hack */
       DRIVER( bb2bmh )       /* Overclocked  Bubblebobble Memories Hack */
       DRIVER( bbhackv1 )     /* OVerclocked  Level Hack */

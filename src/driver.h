@@ -172,7 +172,7 @@
 
 /* core parameters */
 #define MDRV_FRAMES_PER_SECOND(rate)									\
-	machine->frames_per_second = (rate);								\
+	machine->frames_per_second = ((rate) >= 50) ? 60 : (rate);								\
 
 #define MDRV_VBLANK_DURATION(duration)									\
 	machine->vblank_duration = (duration);								\

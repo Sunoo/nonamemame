@@ -7534,6 +7534,30 @@ ROM_START( vectratk )
 	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
 ROM_END
 
+ROM_START( bucaneer )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	
+	ROM_LOAD( "6e.cpu",      0x0000, 0x1000, CRC(fee263b3) SHA1(87117ba5082cd7a615b4ec7c02dd819003fbd669) )
+	ROM_LOAD( "6f.cpu",      0x1000, 0x1000, CRC(39d1fc83) SHA1(326dbbf94c6fa2e96613dedb53702f8832b47d59) )
+	ROM_LOAD( "6h.cpu",      0x2000, 0x1000, CRC(197443f8) SHA1(119aab12a9e1052c7b9a1f81e563740b41429a8c) )
+	ROM_LOAD( "6k.cpu",      0x3000, 0x1000, CRC(c4d9169a) SHA1(f34a51d9fa90739214ab9e837b2602c992a73576) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "5e.cpu",      0x0000, 0x0800, CRC(4060c077) SHA1(78d4aa5243246f73533fc0886438dc1fa6f7ebe5) )
+	ROM_LOAD( "5h.cpu",      0x0800, 0x0800, CRC(e3861283) SHA1(61cf8ed24902910e98438d9e2e2745f226ad2a13) )
+
+	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "5f.cpu",      0x0000, 0x0800, CRC(09f66dec) SHA1(2d3649341fed19bac15ec274f7d747de46a3edb2) )
+	ROM_LOAD( "5k.cpu",      0x0800, 0x0800, CRC(653314e7) SHA1(c466a421917b3502e9115ebda1b2d11f7f586de8) )
+
+	ROM_REGION( 0x0120, REGION_PROMS, 0 )
+	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) SHA1(8d0268dee78e47c712202b0ec4f1f51109b1f2a5) )
+	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) SHA1(19097b5f60d1030f8b82d9f1d3a241f93e5c75d6) )
+
+	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
+	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) SHA1(bbcec0570aeceb582ff8238a4bc8546a23430081) )
+	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )
+ROM_END
+
 /* End PacMAME */
 
 /*************************************
@@ -7950,4 +7974,5 @@ GAME( 2000, xensrev,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (M
 GAME( 1998, multi14, mspacman,  pacman,  mspacman, 0,        ROT90,  "Clay Cowgill", "MultiPac 1.4" )
 GAME( 1998, multi15, mspacman,  pacman,  mspacman, 0,        ROT90,  "PacMAME", "MultiPac 1.5" )
 GAME( 1998, superabc, mspacman, pacman,  mspacman, 0,        ROT90,  "TwoBit Score", "Super ABC Pacman" )
+GAME (1981, bucaneer, puckman,  pacman,  mspacman, 0,        ROT90,  "PacMAME", "Bucaneer" )
 /* End PacMAME */

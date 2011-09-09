@@ -1,3 +1,8 @@
+0.78.12:
+ - Added "fake" sample support to Tailgunner (thanks Erik Ruud)
+ - Added Bucaneer from PacMAME (thanks Steve Jensen)
+ - Made a small SmoothMaME modification (thanks Steve Jensen)
+
 0.78.11:
  - Updated to MAME 0.78 source code
  - Added Nemesis's protection fix for SegaSonic (Rev. C)
