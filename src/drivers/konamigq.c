@@ -6,10 +6,10 @@
 
   Crypt Killer
   Konami, 1995
-  
+
   PCB Layout
   ----------
-  
+
   GQ420  PWB354905B
   |----------------------------------------------------------|
   |CN14     420A01.2G  420A02.3M           CN6  CN7   CN8    |
@@ -36,7 +36,7 @@
   | KM48V514  KM48V514                (U420UAA04)            |
   | KM48V514  KM48V514                                       |
   |----------------------------------------------------------|
-  
+
   Notes:
         CN6, CN7, CN8: For connection of guns.
         CN3 : For connection of extra controls/buttons.
@@ -589,7 +589,7 @@ ROM_START( cryptklr )
 	ROM_LOAD( "420b03.27p",   0x0000000, 0x080000, CRC(aab391b1) SHA1(bf9dc7c0c8168c22a4be266fe6a66d3738df916b) )
 
 	DISK_REGION( REGION_DISKS )
-	DISK_IMAGE( "420uaa04", 0, MD5(179464886f58a2e14b284e3813227a86) SHA1(18fe867c44982bacf0d3ff8453487cd06425a6b7) )
+	DISK_IMAGE( "420uaa04.chd", 0, MD5(179464886f58a2e14b284e3813227a86) SHA1(18fe867c44982bacf0d3ff8453487cd06425a6b7) )
 ROM_END
 
 GAMEX( 1995, cryptklr, 0, konamigq, konamigq, konamigq, ROT0, "Konami", "Crypt Killer (ver. UAA)", GAME_IMPERFECT_GRAPHICS )

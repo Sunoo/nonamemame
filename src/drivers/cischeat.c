@@ -46,6 +46,12 @@ Year + Game		Hardware:	Main 	Sub#1	Sub#2	Sound	Sound Chips
 		CS90015-04 x 2 (64 pin PQFP)		[Road]
 		GS90015-05 x 2 (100 pin PQFP)
 
+[92	Wild Pilot]				68000	68000	68000	68000	YM2151 2xM6295 + another 68000
+
+		TB - Top board     (audio & I/O)       WP-92116 EB92020-20053
+        MB - Middle board  (GFX)               GP-9189  EB90015-20038
+        LB - Lower board   (CPU/GFX)           GP-9188A EB90015-20037-1
+
 [94	Scud Hammer]			68000	-		-		-		2xM6295
 
 	Board CF-92128B Chips:
@@ -168,6 +174,7 @@ READ16_HANDLER( bigrun_vregs_r );
 READ16_HANDLER( cischeat_vregs_r );
 READ16_HANDLER( f1gpstar_vregs_r );
 READ16_HANDLER( f1gpstr2_vregs_r );
+READ16_HANDLER( wildplt_vregs_r );
 
 WRITE16_HANDLER( bigrun_vregs_w );
 WRITE16_HANDLER( cischeat_vregs_w );
@@ -850,13 +857,13 @@ WRITE16_HANDLER( f1gpstr2_io_w )	{ COMBINE_DATA(&megasys1_vregs[offset + 0x1000/
 
 static MEMORY_READ16_START( f1gpstr2_io_readmem )
 	{ 0x000000, 0x07ffff, MRA16_ROM						},	// ROM
-	{ 0x180000, 0x182fff, MRA16_RAM						},	// RAM
+	{ 0x180000, 0x183fff, MRA16_RAM						},	// RAM
 	{ 0x080000, 0x080fff, f1gpstr2_io_r					},	//
 MEMORY_END
 
 static MEMORY_WRITE16_START( f1gpstr2_io_writemem )
 	{ 0x000000, 0x07ffff, MWA16_ROM						},	// ROM
-	{ 0x180000, 0x182fff, MWA16_RAM						},	// RAM
+	{ 0x180000, 0x183fff, MWA16_RAM						},	// RAM
 	{ 0x080000, 0x080fff, f1gpstr2_io_w					},	//
 	{ 0x100000, 0x100001, MWA16_RAM, &f1gpstr2_ioready	},	//
 	{ 0x200000, 0x200001, MWA16_NOP						},	//
@@ -1246,6 +1253,87 @@ INPUT_PORTS_START( f1gpstar )
 	PORT_DIPSETTING(      0x0030, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(      0x0028, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(      0x0020, DEF_STR( 1C_4C ) )
+INPUT_PORTS_END
+
+
+/**************************************************************************
+								Wild Pilot
+**************************************************************************/
+
+INPUT_PORTS_START( wildplt )
+	PORT_START	// IN0 - DSW 1 & 2
+	PORT_DIPNAME( 0x0007, 0x0007, DEF_STR( Coinage ) )
+	PORT_DIPSETTING(      0x0001, DEF_STR( 4C_1C ) )
+	PORT_DIPSETTING(      0x0002, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(      0x0003, DEF_STR( 2C_1C ) )	
+	PORT_DIPSETTING(      0x0007, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(      0x0006, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(      0x0005, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(      0x0004, DEF_STR( 1C_4C ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( Free_Play ) )
+	PORT_DIPNAME( 0x0008, 0x0008, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0008, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0010, 0x0010, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0010, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0020, 0x0020, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0020, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0080, 0x0080, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0080, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0100, 0x0100, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0100, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0200, 0x0200, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0200, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0400, 0x0400, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0400, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x0800, 0x0800, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x0800, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Demo_Sounds ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x1000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x2000, 0x2000, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x2000, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+	PORT_DIPNAME( 0x8000, 0x8000, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
+	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
+
+	PORT_START	// IN1
+	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
+	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
+	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 ) //start 1 too
+	PORT_BITX( 0x0008, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE ) //start 2 too
+	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
+	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
+	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
+	PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
+	PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT_NAME( 0x8000, IP_ACTIVE_LOW, IPT_SERVICE2, "Emergency Button" )
+
+	PORT_START	// IN2
+	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_REVERSE, 35, 15, 0, 0xff )
+	
+	PORT_START	// IN3 
+	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 35, 15, 0, 0xff )
 INPUT_PORTS_END
 
 
@@ -2196,6 +2284,220 @@ DRIVER_INIT( f1gpstar )
 
 /***************************************************************************
 
+							Wild Pilot
+
+
+Location   Device          File ID             Checksum
+-------------------------------------------------------
+LB IC124   27C020     GP-9188A_21_Ver1-0.bin     765B  [ CPU A PROG 1 ]
+LB IC91    27C020     GP-9188A_26_Ver1-0.bin     5614  [ CPU A PROG 1 ]
+LB IC92    27C020     GP-9188A_22_Ver1-4.bin     1907  [ CPU A PROG 2 ]
+LB IC125   27C020     GP-9188A_27_Ver1-4.bin     A118  [ CPU A PROG 2 ]
+LB IC46    27C010     GP-9188A_11_Ver1-0.bin     D98A  [ CPU B PROG   ]
+LB IC70    27C010     GP-9188A_16_Ver1-0.bin     41E6  [ CPU B PROG   ]
+LB IC2     27C010     GP-9188A_01_Ver1-0.bin     D714  [ CPU C PROG   ]
+LB IC27    27C010     GP-9188A_06_Ver1-0.bin     3937  [ CPU C PROG   ]
+LB IC23   27C4001     GP-9188A_25_Ver1-0.bin     90BE   
+LB IC152  27C4001     GP-9188A_28_Ver1-0.bin     6BBC
+LB IC174  27C1001     GP-9188A_30_Ver1-0.bin     1740
+LB IC14   27C4001         MR92020-01_C46.bin     E83D
+LB IC15   27C4001         MR92020-02_C53.bin     064F
+LB IC16   27C4001         MR92020-03_C52.bin     B77C
+LB IC17   27C4001         MR92020-04_C47.bin     D768
+LB IC61   27C4001         MR92020-05_C48.bin     7858
+LB IC62   27C4001         MR92020-06_C51.bin     8B52
+LB IC63   27C4001         MR92020-07_C49.bin     B2B6
+LB IC64   27C4001         MR92020-08_C50.bin     37B7
+LB IC37   27C4001         MR90015-01_w06.bin     F10F *
+LB IC38   27C4001         MR90015-02_w07.bin     F901 *
+LB IC39   27C4001         MR90015-03_w08.bin     F100 *
+LB IC40   27C4001         MR90015-04_w09.bin     FA00 *
+LB IC79   27C4001         MR90015-01_w06.bin     F10F *
+LB IC80   27C4001         MR90015-02_w07.bin     F901 *
+LB IC81   27C4001         MR90015-03_w08.bin     F100 *
+LB IC82   27C4001         MR90015-04_w09.bin     FA00 *
+MB IC1    27C4001         MR92020-11_W65.bin     80F8
+MB IC2    27C4001         MR92020-12_W66.bin     2775
+MB IC5    27C4001         MR92020-13_W67.bin     00D3
+MB IC6    27C4001         MR92020-14_W68.bin     5645
+MB IC11   27C4001         MR92020-15_W69.bin     F0BD
+MB IC12   27C4001         MR92020-16_W70.bin     9F01
+MB IC15    27C040      GP-9189_07_Ver1-0.bin     909A
+MB IC16    27C040      GP-9189_08_Ver1-0.bin     2FBE
+MB IC21    27C040      GP-9189_09_Ver1-0.bin     A33A
+MB IC22    27C040      GP-9189_10_Ver1-0.bin     CE2E 
+MB IC54   27C4001         MR90015-35_W33.bin     7890 *
+MB IC67   27C4001         MR90015-35_W33.bin     7890 *
+TB IC4    27C4001      WP-92116_1_Ver1-0.bin     7485  [ CPU D SND    ]
+TB IC18   27C4001      WP-92116_2_Ver1-0.bin     599D  [ CPU D SND    ]
+TB IC37    27C010      WP-92116_3_Ver1-1.bin     506F  [ CPU D PROG   ]
+TB IC38    27C010      WP-92116_4_Ver1-1.bin     F032  [ CPU D PROG   ]
+TB IC116   27C010      WP-92116_5_Ver1-0.bin     A8E2  [ CPU E PROG   ]
+TB IC117   27C010      WP-92116_6_Ver1-0.bin     253D  [ CPU E PROG   ]
+MB IC39   27CX642               CH9072-4.bin     10BE #
+MB IC33   27CX642               CH9072-5.bin     C83A #
+MB IC35   27CX642               CH9072-6.bin     D5C2 #
+MB IC59   27CX642               CH9072-8.bin     56C0 #
+LB IC105  N82S147               PR88004Q.bin     FCFC 
+MB IC66   N82S135               PR88004W.bin     20C8
+LB IC117  N82S185               PR90015A.bin     3326
+LB IC153  N82S135               PR90015B.bin     1E52
+
+
+Notes:  TB - Top board     (audio & I/O)       WP-92116 EB92020-20053
+        MB - Middle board  (GFX)               GP-9189  EB90015-20038
+        LB - Lower board   (CPU/GFX)           GP-9188A EB90015-20037-1
+
+         * - These ROMs are found twice on the PCB
+         # - Device is larger than it needs to be. A 27CX322 could be substituted.
+
+Brief hardware overview:
+------------------------
+
+Main processor(A)  - 68000
+                   - program ROMs: GP-9188A_21_Ver1-0.bin & GP-9188A_26_Ver1-0.bin
+                                   GP-9188A_22_Ver1-4.bin & GP-9188A_27_Ver1-4.bin
+                   - Processor RAM 2x LH52250AD-90L (32kx8 SRAM)
+
+Slave processor(B) - 68000
+                   - program ROMs: GP-9188A_11_Ver1-0.bin & , GP-9188A_16_Ver1-0.bin
+                   - Processor RAM 2x LH5168D-10L (8kx8 SRAM)
+                   - CS90015-04 (64 pin PQFP)  + 2x MCM2018AN45 (2kx8 SRAM)
+                   - GS90015-05 (100 pin PQFP) + 2x MCM2018AN45 (2kx8 SRAM)
+
+Slave processor(C) - 68000
+                   - Program ROMs: GP-9188A_01_Ver1-0.bin & GP-9188A_06_Ver1-0.bin
+                   - Processor RAM 2x LH5168D-10L (8kx8 SRAM)
+                   - CS90015-04 (64 pin PQFP)  + 2x MCM2018AN45 (2kx8 SRAM)
+                   - GS90015-05 (100 pin PQFP) + 2x MCM2018AN45 (2kx8 SRAM)
+
+Sound processor(D) - 68000
+                   - Program ROMs: WP-92116_3_Ver1-1.bin & WP-92116_4_Ver1-1.bin
+                   - Processor RAM 2x LH52256ALSP-10 (32kx8 SRAM)
+                   - M6295,  uses ROM  WP-92116_1_Ver1-0.bin
+                   - M6295,  uses ROM  WP-92116_2_Ver1-0.bin
+                   - YM2151
+                   - YM3012
+
+I/O Processor(E)   - 68000
+                   - Program ROMs: WP-92116_5_Ver1-0.bin & WP-92116_6_Ver1-0.bin
+                   - Processor RAM 2x LH5168D-10L (8kx8 SRAM)
+                   - GS90015-03 (80 PIN PQFP) + 2X 6116 SRAM
+
+GFX & Misc         - GS90015-02 (100 pin PQFP) 
+                     GS-9000406 (80 pin PQFP)  + 2x LH5168D-10L (8kx8 SRAM)
+
+                   - GS90015-02 (100 pin PQFP) 
+                     GS-9000406 (80 pin PQFP)  + 2x LH5168D-10L (8kx8 SRAM)
+ 
+                   - GS90015-02 (100 pin PQFP) 
+                     GS-9000406 (80 pin PQFP)  + 2x LH5168D-10L (8kx8 SRAM)
+
+                   - GS900151   (44 pin PQFP) (too small for the full part No.)
+               3x  - GS90015-03 (80 pin PQFP)  + 2x LH52258D-45 (32kx8 SRAM)
+               2x  - GS90015-06 (100 pin PQFP) + 2x LH52250AD-90L (32kx8 SRAM)
+                   - GS90015-07 (64 pin PQFP)
+                   - GS90015-08 (64 pin PQFP)
+                   - GS90015-09 (64 pin PQFP)  + 2x MCM2018AN45 (2kx8 SRAM)
+                   - GS90015-10 (64 pin PQFP)
+                   - GS90015-12 (80 pin PQFP)  + 2x MCM2018AN45 (2kx8 SRAM)
+                   - GS90015-11 (100 pin PQFP) 
+
+***************************************************************************/
+
+ROM_START( wildplt )
+	ROM_REGION( 0x100000, REGION_CPU1, 0 )
+	ROM_LOAD16_BYTE( "gp-9188a_27_ver1-4.bin", 0x000000, 0x40000, CRC(4754f023) SHA1(32865343d633fef7d3e081d52b423fbf4e5f2053) )
+	ROM_LOAD16_BYTE( "gp-9188a_22_ver1-4.bin", 0x000001, 0x40000, CRC(9e099111) SHA1(11b17d77dfe6315105e8297b8f5f7c8d93b18ac0) )
+
+	ROM_REGION( 0x80000, REGION_CPU2, 0 )
+	ROM_LOAD16_BYTE( "gp-9188a_16_ver1-0.bin", 0x000000, 0x20000, CRC(75e48920) SHA1(2344c1f394aa1199169e75b2f998e89648a39100) )
+	ROM_LOAD16_BYTE( "gp-9188a_11_ver1-0.bin", 0x000001, 0x20000, CRC(8174e65b) SHA1(2c35ae0d04fc4a075c297fe69c429f57457348e1) )
+
+	ROM_REGION( 0x80000, REGION_CPU3, 0 )
+	ROM_LOAD16_BYTE( "gp-9188a_06_ver1-0.bin", 0x000000, 0x20000, CRC(99139696) SHA1(4f8c96012a8214ed952aa44d65ff92e9b3adcf73) )
+	ROM_LOAD16_BYTE( "gp-9188a_01_ver1-0.bin", 0x000001, 0x20000, CRC(2c3d7ec4) SHA1(30215b2ea106aa3c8069fef9411e5f41be5645f6) )
+
+	ROM_REGION( 0x40000, REGION_CPU4, 0 )
+	ROM_LOAD16_BYTE( "wp-92116_3_ver1-1.bin", 0x000000, 0x20000, CRC(51dd594b) SHA1(3fbec13c1d2942797267820157180d374b38347c) )
+	ROM_LOAD16_BYTE( "wp-92116_4_ver1-1.bin", 0x000001, 0x20000, CRC(9ba3cb7b) SHA1(6f55e2675bde2756a2996e6ab6aaef4c9d3f4724) )
+
+	ROM_REGION( 0x80000, REGION_CPU5, 0 )
+	ROM_LOAD16_BYTE( "wp-92116_5_ver1-0.bin", 0x000000, 0x20000, CRC(8952e07c) SHA1(9025954c09c20dfe910a83283cfe010a5e898f38) )
+	ROM_LOAD16_BYTE( "wp-92116_6_ver1-0.bin", 0x000001, 0x20000, CRC(2c8108c2) SHA1(759ab884a09669c8cb532f72aa14a3df2806c5f2) )
+
+	ROM_REGION16_BE( 0x80000, REGION_USER1, 0 )	/* second halves of program ROMs */
+	ROM_LOAD16_BYTE( "gp-9188a_26_ver1-0.bin", 0x000000, 0x40000, CRC(bc48db69) SHA1(d66fa43347b991b899e086bfcf9ceb6277b859a9) )
+	ROM_LOAD16_BYTE( "gp-9188a_21_ver1-0.bin", 0x000001, 0x40000, CRC(c3192fbe) SHA1(c4a82a9174f6dc48946925ab94f81162632f58b0) )
+	
+	ROM_REGION( 0x080000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "gp-9188a_25_ver1-0.bin", 0x000000, 0x80000, CRC(e69d3ccc) SHA1(10ab3d1980c571a478625ec4e505d711d90670cf) )
+
+	ROM_REGION( 0x080000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "gp-9188a_28_ver1-0.bin", 0x000000, 0x80000, CRC(2166c803) SHA1(14b3446fbd9e6d65cdcc20e8e0820008d561894b) )
+
+	ROM_REGION( 0x020000, REGION_GFX3, ROMREGION_DISPOSE )
+	ROM_LOAD( "gp-9188a_30_ver1-0.bin", 0x000000, 0x20000, CRC(35478ed9) SHA1(4090ad8c529c1295799a0fe6d7b05d68ec2cf584) )
+
+	ROM_REGION( 0x500000, REGION_GFX4, ROMREGION_DISPOSE )	/* sprites */
+	ROM_LOAD16_BYTE( "mr92020-11_w65.bin",    0x000000, 0x80000, CRC(585448cb) SHA1(578d241b928cc5b531c63b118fd1e7f1b864d5f3) )
+	ROM_LOAD16_BYTE( "mr92020-12_w66.bin",    0x000001, 0x80000, CRC(07104f78) SHA1(757fa1e0722533f42f12c7e030a283b7e90fc225) )
+	ROM_LOAD16_BYTE( "mr92020-13_w67.bin",    0x100000, 0x80000, CRC(c4afa3dc) SHA1(deda215a72914c61d500fee82e108997990d4057) )
+	ROM_LOAD16_BYTE( "mr92020-14_w68.bin",    0x100001, 0x80000, CRC(c8676eca) SHA1(268cb259a974ca3f6bece090a53b1334ce77ac17) )
+	ROM_LOAD16_BYTE( "mr92020-15_w69.bin",    0x200000, 0x80000, CRC(cc24a3d7) SHA1(5cfce80677a6bd0d787e0d1b9175ceb2662c3ffd) )
+	ROM_LOAD16_BYTE( "mr92020-16_w70.bin",    0x200001, 0x80000, CRC(6f4c9d4e) SHA1(56bd05f4f80c544dce919d548be0b05cd0454582) )
+	ROM_LOAD16_BYTE( "gp-9189_7_ver1-0.bin",  0x300000, 0x80000, CRC(1ea6a85d) SHA1(2c8e7cf18219bb0a0f212234f967a89510c6e21f) )
+	ROM_LOAD16_BYTE( "gp-9189_8_ver1-0.bin",  0x300001, 0x80000, CRC(d9822da0) SHA1(9a4059727d1ed5a2dd09bde5131ff8f47348109c) )
+	ROM_LOAD16_BYTE( "gp-9189_9_ver1-0.bin",  0x400000, 0x80000, CRC(0d4f6b5e) SHA1(92412590d17b7297188678a2b64c1b0ee7b00622) )
+	ROM_LOAD16_BYTE( "gp-9189_10_ver1-0.bin", 0x400001, 0x80000, CRC(9240969c) SHA1(1f7995349787792a759b1ba60673f28d0fe15cfe) )
+
+	ROM_REGION( 0x200000, REGION_GFX5, ROMREGION_DISPOSE )	
+	ROM_LOAD( "mr92020-08_c50.bin", 0x000000, 0x80000, CRC(5e840567) SHA1(26e0278f455013600d37fc89eb83ce8bf11bb39d) )
+	ROM_LOAD( "mr92020-07_c49.bin", 0x080000, 0x80000, CRC(48d8ecb2) SHA1(dee5c274576c4463d33895a12e01b1b30a6daa58) )
+	ROM_LOAD( "mr92020-06_c51.bin", 0x100000, 0x80000, CRC(c00f1245) SHA1(11b9f6acbdf7094debb5a7a897afeb6a63b84103) )
+	ROM_LOAD( "mr92020-05_c48.bin", 0x180000, 0x80000, CRC(74ef3306) SHA1(9c22250df5bd14d50bb27728fe40b7f9ec283c24) )
+
+	ROM_REGION( 0x200000, REGION_GFX6, ROMREGION_DISPOSE )	
+	ROM_LOAD( "mr92020-04_c47.bin", 0x000000, 0x80000, CRC(c752f467) SHA1(9faa15567677dd5cc141727b182ba8d6de08329d) )
+	ROM_LOAD( "mr92020-03_c52.bin", 0x080000, 0x80000, CRC(985b5fe0) SHA1(a28eb20d37f171241fd0be702f2db12be1329836) )
+	ROM_LOAD( "mr92020-02_c53.bin", 0x100000, 0x80000, CRC(da961dd4) SHA1(fa36ee94d0a40a0e6e7201df2b74413f23e02ae0) )
+	ROM_LOAD( "mr92020-01_c46.bin", 0x180000, 0x80000, CRC(f908c6e0) SHA1(40c50a01b8b3fb184b8fa9824f95652399d479e2) )
+
+	ROM_REGION( 0x80000, REGION_SOUND1, 0 )	/* samples */
+	ROM_LOAD( "wp-92116_2_ver1-0.bin", 0x000000, 0x80000, CRC(95237bd0) SHA1(45780d587565edf8ee0b6443bdc44db72fe65a86) )
+
+	ROM_REGION( 0x80000, REGION_SOUND2, 0 )	/* samples */
+	ROM_LOAD( "wp-92116_1_ver1-0.bin", 0x000000, 0x80000, CRC(559bafc3) SHA1(612fa66b02e72a93ea5e89b40426b6ffb2a2a373) )
+
+	ROM_REGION( 0x80000, REGION_USER2, 0 )		/* ? Unused ROMs ? */
+	ROM_LOAD( "ch9072_4.bin", 0x000000, 0x2000, CRC(b45b4dc0) SHA1(b9fae0c9ac2d40f0a202c538d866d5f2941ba8dd) )
+	ROM_LOAD( "ch9072_5.bin", 0x000000, 0x2000, CRC(e122916b) SHA1(86d5ecc7ecc6f175ecb28459697ef33e1ee06860) )
+	ROM_LOAD( "ch9072_6.bin", 0x000000, 0x2000, CRC(05d95bf7) SHA1(78181cf71f22c090a1e62823a43757353a9ef6ab) )
+	ROM_LOAD( "ch9072_8.bin", 0x000000, 0x2000, CRC(6bf52596) SHA1(bf4e7e7df3daae4aa6a441b58b15a435aa45630e) )
+	
+	ROM_LOAD( "mr90015-01_w06.bin", 0x000000, 0x80000, CRC(ce4bfe6e) SHA1(d428eb3d5da3bd080957c585c5b72b94a7849fca) ) // x 2
+	ROM_LOAD( "mr90015-02_w07.bin", 0x000000, 0x80000, CRC(fcbecc9b) SHA1(0670c276730ee282ef8c9599c00571b8d97725ab) ) // x 2
+	ROM_LOAD( "mr90015-03_w08.bin", 0x000000, 0x80000, CRC(ccf5b158) SHA1(06250762646e0da1fb71fd7b638492eaab3f5b7f) ) // x 2
+	ROM_LOAD( "mr90015-04_w09.bin", 0x000000, 0x80000, CRC(5b324c81) SHA1(ce61f2ea29086a74bdcf9f4df8e2edb749e41da5) ) // x 2
+	ROM_LOAD( "mr90015_35_w33.bin", 0x000000, 0x80000, CRC(9d428fb7) SHA1(02f72938d73db932bd217620a175a05215f6016a) )
+
+	ROM_LOAD( "pr88004q.bin", 0x000000, 0x0200, CRC(9327dc37) SHA1(cfe7b144cdcd76170d47f1c4e0f72b6d4fca0c8d) )
+	ROM_LOAD( "pr88004w.bin", 0x000000, 0x0100, CRC(3d648467) SHA1(bf8dbaa2176c801f7370313425c87f0eefe8a3a4) )
+
+	ROM_LOAD( "pr90015a.bin", 0x000000, 0x0800, CRC(777583db) SHA1(8fd060a68fbb6156feb55afcfc5afd95999a8a62) )
+	ROM_LOAD( "pr90015b.bin", 0x000000, 0x0100, CRC(be240dac) SHA1(6203b73c1a5e09e525380a78b555c3818929d5eb) )	
+ROM_END
+
+DRIVER_INIT( wildplt )
+{
+	install_mem_read16_handler(0, 0x080000, 0x087fff, wildplt_vregs_r );
+	
+	init_f1gpstar();
+}
+
+
+/***************************************************************************
+
 							F1 GrandPrix Star II
 
 This game uses the same bottom and middle boards as Grand Prix Star, however the top board
@@ -2491,6 +2793,7 @@ ROM_END
 GAMEX( 1989, bigrun,   0, bigrun,   bigrun,   bigrun,   ROT0,   "Jaleco", "Big Run (11th Rallye version)", GAME_IMPERFECT_GRAPHICS )	// there's a 13th Rallye version (1991)
 GAMEX( 1990, cischeat, 0, cischeat, cischeat, cischeat, ROT0,   "Jaleco", "Cisco Heat",                    GAME_IMPERFECT_GRAPHICS )
 GAMEX( 1991, f1gpstar, 0, f1gpstar, f1gpstar, f1gpstar, ROT0,   "Jaleco", "Grand Prix Star",               GAME_IMPERFECT_GRAPHICS )
+GAMEX( 1992, wildplt,  0, f1gpstr2, wildplt,  wildplt,  ROT0,   "Jaleco", "Wild Pilot",                    GAME_IMPERFECT_GRAPHICS )
 GAMEX( 1993, f1gpstr2, 0, f1gpstr2, f1gpstar, f1gpstar, ROT0,   "Jaleco", "F-1 Grand Prix Star II",        GAME_IMPERFECT_GRAPHICS | GAME_NOT_WORKING )
 GAMEX( 1994, scudhamm, 0, scudhamm, scudhamm, 0,        ROT270, "Jaleco", "Scud Hammer",                   GAME_IMPERFECT_GRAPHICS )
 

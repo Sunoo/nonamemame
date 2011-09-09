@@ -155,6 +155,7 @@ struct GameOptions options;
 /* the active video display */
 static struct mame_display current_display;
 static UINT8 visible_area_changed;
+static UINT8 refresh_rate_changed;
 
 /* video updating */
 static UINT8 full_refresh_pending;
@@ -292,6 +293,7 @@ int run_game(int game)
 	Machine->gamedrv = gamedrv = drivers[game];
 	expand_machine_driver(gamedrv->drv, &internal_drv);
 	Machine->drv = &internal_drv;
+	Machine->refresh_rate = Machine->drv->frames_per_second;
 
 	/* initialize the game options */
 	if (init_game_options())
@@ -718,6 +720,9 @@ static int vh_open(void)
 	if (!Machine->scrbitmap)
 		goto cant_create_scrbitmap;
 
+	/* set the default refresh rate */
+	set_refresh_rate(Machine->drv->frames_per_second);
+
 	/* set the default visible area */
 	set_visible_area(0,1,0,1);	// make sure everything is recalculated on multiple runs
 	set_visible_area(
@@ -725,7 +730,7 @@ static int vh_open(void)
 			Machine->drv->default_visible_area.max_x,
 			Machine->drv->default_visible_area.min_y,
 			Machine->drv->default_visible_area.max_y);
-
+	
 	/* create spriteram buffers if necessary */
 	if (Machine->drv->video_attributes & VIDEO_BUFFERS_SPRITERAM)
 		if (init_buffered_spriteram())
@@ -769,7 +774,7 @@ static int vh_open(void)
 	last_fps_time = osd_cycles();
 	rendered_frames_since_last_fps = frames_since_last_fps = 0;
 	performance.game_speed_percent = 100;
-	performance.frames_per_second = Machine->drv->frames_per_second;
+	performance.frames_per_second = Machine->refresh_rate;
 	performance.vector_updates_last_second = 0;
 
 	/* reset video statics and get out of here */
@@ -1099,6 +1104,29 @@ void set_visible_area(int min_x, int max_x, int min_y, int max_y)
 
 
 /*-------------------------------------------------
+	set_refresh_rate - adjusts the refresh rate
+	of the video mode dynamically
+-------------------------------------------------*/
+
+void set_refresh_rate(float fps)
+{
+	/* bail if already equal */
+	if (Machine->refresh_rate == fps)
+		return;
+	
+	/* "dirty" the rate for the next display update */
+	refresh_rate_changed = 1;
+	
+	/* set the new values in the Machine struct */
+	Machine->refresh_rate = fps;
+
+	/* recompute scanline timing */
+	cpu_compute_scanline_timing();
+}
+
+
+
+/*-------------------------------------------------
 	schedule_full_refresh - force a full erase
 	and refresh the next frame
 -------------------------------------------------*/
@@ -1214,6 +1242,11 @@ void update_video_and_audio(void)
 	if (visible_area_changed)
 		current_display.changed_flags |= GAME_VISIBLE_AREA_CHANGED;
 
+	/* set the refresh rate */
+	current_display.game_refresh_rate = Machine->refresh_rate;
+	if (refresh_rate_changed)
+		current_display.changed_flags |= GAME_REFRESH_RATE_CHANGED;
+
 	/* set the vector dirty list */
 	if (Machine->drv->video_attributes & VIDEO_TYPE_VECTOR)
 		if (!full_refresh_pending && !ui_dirty && !skipped_it)
@@ -1255,6 +1288,7 @@ void update_video_and_audio(void)
 
 	/* reset dirty flags */
 	visible_area_changed = 0;
+	refresh_rate_changed = 0;
 	if (ui_dirty) ui_dirty--;
 }
 
@@ -1280,7 +1314,7 @@ static void recompute_fps(int skipped_it)
 		double frames_per_sec = (double)frames_since_last_fps / seconds_elapsed;
 
 		/* compute the performance data */
-		performance.game_speed_percent = 100.0 * frames_per_sec / Machine->drv->frames_per_second;
+		performance.game_speed_percent = 100.0 * frames_per_sec / Machine->refresh_rate;
 		performance.frames_per_second = (double)rendered_frames_since_last_fps / seconds_elapsed;
 
 		/* reset the info */
@@ -1291,7 +1325,7 @@ static void recompute_fps(int skipped_it)
 
 	/* for vector games, compute the vector update count once/second */
 	vfcount++;
-	if (vfcount >= (int)Machine->drv->frames_per_second)
+	if (vfcount >= (int)Machine->refresh_rate)
 	{
 #ifndef MESS
 		/* from vidhrdw/avgdvg.c */
@@ -1300,7 +1334,7 @@ static void recompute_fps(int skipped_it)
 		performance.vector_updates_last_second = vector_updates;
 		vector_updates = 0;
 #endif
-		vfcount -= (int)Machine->drv->frames_per_second;
+		vfcount -= (int)Machine->refresh_rate;
 	}
 }
 

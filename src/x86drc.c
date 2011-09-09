@@ -585,6 +585,42 @@ static void append_out_of_cycles(struct drccore *drc)
 }
 
 
+
+/*------------------------------------------------------------------
+	drc_x86_get_features()
+------------------------------------------------------------------*/
+UINT32 drc_x86_get_features(void)
+{
+	UINT32 features = 0;
+#ifdef _MSC_VER
+	__asm 
+	{
+		mov eax, 1
+		xor ebx, ebx
+		xor ecx, ecx
+		xor edx, edx
+		cpuid
+		mov features, edx
+	}
+#else /* !_MSC_VER */
+	__asm__
+	(
+		"movl $1,%%eax       ; "
+		"xorl %%ebx,%%ebx    ; "
+		"xorl %%ecx,%%ecx    ; "
+		"xorl %%edx,%%edx    ; "
+		"cpuid               ; "
+		"movl %%edx,%0       ; "
+	: "=&a" (features)		/* result has to go in eax */
+	: 				/* no inputs */
+	: "%ebx", "%ecx", "%edx"	/* clobbers ebx, ecx and edx */
+	);
+#endif /* MSC_VER */
+	return features;
+}
+
+
+
 /*------------------------------------------------------------------
 	log_dispatch
 ------------------------------------------------------------------*/

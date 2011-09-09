@@ -119,7 +119,7 @@ static MEMORY_READ_START( sound_readmem )
 MEMORY_END
 
 static MEMORY_WRITE_START( sound_writemem )
-	{ 0x0000, 0x3fff, MWA_ROM },
+	{ 0x0000, 0x3fff, MWA_ROM, &namco_wavedata },
 	{ 0x8000, 0x87ff, MWA_RAM },
 	{ 0xe000, 0xe000, AY8910_control_port_0_w },
 	{ 0xe001, 0xe001, AY8910_write_port_0_w },

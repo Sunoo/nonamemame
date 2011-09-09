@@ -4258,7 +4258,7 @@ void CLIB_DECL usrintf_showmessage(const char *text,...)
 	va_start(arg,text);
 	vsprintf(messagetext,text,arg);
 	va_end(arg);
-	messagecounter = 2 * Machine->drv->frames_per_second;
+	messagecounter = 2 * Machine->refresh_rate;
 }
 
 void CLIB_DECL usrintf_showmessage_secs(int seconds, const char *text,...)
@@ -4267,7 +4267,7 @@ void CLIB_DECL usrintf_showmessage_secs(int seconds, const char *text,...)
 	va_start(arg,text);
 	vsprintf(messagetext,text,arg);
 	va_end(arg);
-	messagecounter = seconds * Machine->drv->frames_per_second;
+	messagecounter = seconds * Machine->refresh_rate;
 }
 
 void do_loadsave(struct mame_bitmap *bitmap, int request_loadsave)
@@ -4327,7 +4327,7 @@ void do_loadsave(struct mame_bitmap *bitmap, int request_loadsave)
 void ui_show_fps_temp(double seconds)
 {
 	if (!showfps)
-		showfpstemp = (int)(seconds * Machine->drv->frames_per_second);
+		showfpstemp = (int)(seconds * Machine->refresh_rate);
 }
 
 void ui_show_fps_set(int show)

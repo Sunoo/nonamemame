@@ -46,11 +46,6 @@ const struct GameDriver *drivers[] =
 	0	/* end of array */
 };
 
-const struct GameDriver *test_drivers[] =
-{
-	0	/* end of array */
-};
-
 #else
 
 #ifndef DRIVER_RECURSIVE
@@ -59,27 +54,12 @@ const struct GameDriver *test_drivers[] =
 
 /* step 1: declare all external references */
 #define DRIVER(NAME) extern struct GameDriver driver_##NAME;
-#define TESTDRIVER(NAME) extern struct GameDriver driver_##NAME;
 #include "driver.c"
 
 /* step 2: define the drivers[] array */
 #undef DRIVER
-#undef TESTDRIVER
 #define DRIVER(NAME) &driver_##NAME,
-#define TESTDRIVER(NAME)
 const struct GameDriver *drivers[] =
-{
-#include "driver.c"
-	0	/* end of array */
-};
-
-/* step 2: define the test_drivers[] array */
-#undef DRIVER
-#undef TESTDRIVER
-#define DRIVER(NAME)
-#define TESTDRIVER(NAME) &driver_##NAME,
-
-const struct GameDriver *test_drivers[] =
 {
 #include "driver.c"
 	0	/* end of array */
@@ -497,9 +477,9 @@ const struct GameDriver *test_drivers[] =
 	DRIVER( geebeeg )	/* [1978] Gremlin */
 	DRIVER( bombbee )	/* [1979] Namco */
 	DRIVER( cutieq )	/* (c) 1979 Namco */
-	DRIVER( navalone )	/* (c) 1980 Namco */
-	DRIVER( kaitei )	/* [1980] K.K. Tokki */
-	DRIVER( kaitein )	/* [1980] Namco */
+	DRIVER( navarone )	/* (c) 1980 Namco */
+	DRIVER( kaitei )	/* [1980] Namco */
+	DRIVER( kaiteik )	/* [1980] K.K. Tokki (prototype?) */
 	DRIVER( sos )		/* [1980] Namco */
 	DRIVER( tankbatt )	/* (c) 1980 Namco */
 	DRIVER( warpwarp )	/* (c) 1981 Namco */
@@ -508,7 +488,6 @@ const struct GameDriver *test_drivers[] =
 	DRIVER( rallyx )	/* (c) 1980 Namco */
 	DRIVER( rallyxm )	/* (c) 1980 Midway */
 	DRIVER( nrallyx )	/* (c) 1981 Namco */
-	DRIVER( nrallyv )	/* hack */
 	DRIVER( jungler )	/* GX327 (c) 1981 Konami */
 	DRIVER( junglers )	/* GX327 (c) 1981 Stern */
 	DRIVER( tactcian )	/* GX335 (c) 1982 Sega */
@@ -748,6 +727,7 @@ const struct GameDriver *test_drivers[] =
 	DRIVER( cybrcomm )
 	DRIVER( airco22b )
 	DRIVER( cybrcycc )
+	DRIVER( timecris )
 	DRIVER( timecrsa )
 	DRIVER( propcycl )	/* (c) 1996 */
 
@@ -1288,6 +1268,7 @@ const struct GameDriver *test_drivers[] =
 	DRIVER( mplanets )	/* GV-102 (c) 1983 Gottlieb */
 	DRIVER( mplanuk )	/* GV-102 (c) 1983 Gottlieb */
 	DRIVER( qbert )		/* GV-103 (c) 1982 Gottlieb */
+	DRIVER( qberta )	/* GV-103 (c) 1982 Gottlieb */
 	DRIVER( qbertjp )	/* GV-103 (c) 1982 Gottlieb + Konami license */
 	DRIVER( myqbert )	/* GV-103?(c) 1982 Gottlieb */
 	DRIVER( qberttst )	/* GV-103 (c) 1982 Gottlieb */
@@ -1673,6 +1654,7 @@ const struct GameDriver *test_drivers[] =
 	DRIVER( rayforce )	/* D66 (c) 1993 Taito America Corporation (US) */
 	DRIVER( scfinals )	/* D68 (c) 1993 Taito Corporation Japan (World) */
 	DRIVER( intcup94 )	/* D78 (c) 1994 Taito */
+	DRIVER( hthero94 )	/* D78 (c) 1994 Taito */
 	DRIVER( dungeonm )	/* D69 (c) 1993 Taito Corporation Japan (World) */
 	DRIVER( lightbr )	/* D69 (c) 1993 Taito Corporation (Japan) */
 	DRIVER( dungenmu )	/* D69 (c) 1993 Taito America Corporation (US) */
@@ -3276,10 +3258,15 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	/* MCD ?? */
 	/* Dunk Dream 95/Hoops MCE (c) 1995 */
 	/* MCF ?? */
-	DRIVER( avengrgs )	/* MCG (c) 1995 Data East Corporation (Japan) */
 	DRIVER( sotsugyo )	/* (c) 1995 Mitchell (Atlus license) */
 	DRIVER( sshangha )	/* (c) 1992 Hot-B */
 	DRIVER( sshanghb )	/* bootleg */
+
+	/* Data East MLC Games */
+	DRIVER( avengrgs )	/* MCG (c) 1995 Data East Corporation (Japan) */
+	DRIVER( stadhr96 )	/* ??? (c) 1996 Data East */
+	DRIVER( stadh96a )	/* ??? (c) 1996 Data East */
+	DRIVER( skullfng )	/* ??? (c) 1996 Data East Corporation (Japan) */
 
 	/* Tehkan / Tecmo games (Tehkan became Tecmo in 1986) */
 	DRIVER( senjyo )	/* (c) 1983 Tehkan */
@@ -3577,7 +3564,9 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	DRIVER( mtlchamp )	/* GX234 (c) 1993 (World) */
 	DRIVER( mtlchmpj )	/* GX234 (c) 1993 (Japan) */
 	DRIVER( rungun )	/* GX247 (c) 1993 (World) */
+	DRIVER( runguna )	/* GX247 (c) 1993 (World) */
 	DRIVER( rungunu )	/* GX247 (c) 1993 (US) */
+	DRIVER( rungunua )	/* GX247 (c) 1993 (US) */
 	DRIVER( slmdunkj )	/* GX247 (c) 1993 (Japan) */
 	DRIVER( dbz )		/* (c) 1993 Banpresto */
 	DRIVER( dbz2 )		/* (c) 1994 Banpresto */
@@ -3624,15 +3613,15 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	DRIVER( rushhero )	/* GX605 */
 
 	/* DJ Main */
-	DRIVER( bm1stmix )
-	DRIVER( bm2ndmix )
-	DRIVER( bm2ndmxa )
-	DRIVER( bmcompmx )
-	DRIVER( hmcompmx )
-	DRIVER( bm4thmix )
-	DRIVER( hmcompm2 )
-	DRIVER( bmdct )
-	DRIVER( bmcorerm )
+	DRIVER( bm1stmix )	/* GQ753 (c) 1997 (Japan) */
+	DRIVER( bm2ndmix )	/* GX853 (c) 1998 (Japan) */
+	DRIVER( bm2ndmxa )	/* GX853 (c) 1998 (Japan) */
+	DRIVER( bmcompmx )	/* GX858 (c) 1999 (Japan) */
+	DRIVER( hmcompmx )	/* GX858 (c) 1999 */
+	DRIVER( bm4thmix )	/* GX847 (c) 1999 (Japan) */
+	DRIVER( bmcorerm )	/* GXA05 (c) 1999 (Japan) */
+	DRIVER( bmdct )		/* GX995 (c) 2000 (Japan) */
+	DRIVER( hmcompm2 )	/* GX988 (c) 2000 (Japan) */
 
 	/* Exidy games */
 	DRIVER( carpolo )	/* (c) 1977 */
@@ -4565,6 +4554,7 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	DRIVER( bigrun )	/* (c) 1989 Jaleco */
 	DRIVER( cischeat )	/* (c) 1990 Jaleco */
 	DRIVER( f1gpstar )	/* (c) 1991 Jaleco */
+	DRIVER( wildplt )	/* (c) 1992 Jaleco */
 	DRIVER( f1gpstr2 )	/* (c) 1993 Jaleco */
 	DRIVER( scudhamm )	/* (c) 1994 Jaleco */
 	DRIVER( tetrisp2 )	/* (c) 1997 Jaleco */
@@ -5136,7 +5126,7 @@ Other Sun games
 	DRIVER( quizchql )	/* "73" (c) 1993 Laxan */
 	DRIVER( quiz365 )	/* "78" (c) 1994 Nakanihon */
 	DRIVER( rongrong )	/* "80" (c) 1994 Nakanihon */
-	DRIVER( nettoqc )	/* "??" (c) 1995 Nakanihon */
+	DRIVER( nettoqc )	/* "103" (c) 1995 Nakanihon */
 	DRIVER( ddenlovr )	/* "113" (c) 1996 Dynax */
 	DRIVER( hanakanz )	/* "507" 1996 Dynax */
 						/* "510" Hana Kagerou 1996 Nakanihon */
@@ -5157,15 +5147,22 @@ Other Sun games
 	DRIVER( cabaret )
 	DRIVER( chindrag )
 	DRIVER( grtwall )
+
+	/* IGS PGM System Games */
 	DRIVER( orlegend )	/* (c) 1997 */
 	DRIVER( orlegnde )	/* (c) 1997 */
 	DRIVER( orlegndc )	/* (c) 1997 */
+	DRIVER( orld111c )	/* (c) 1997 */
+	DRIVER( orld105k )	/* (c) 1997 */
 	DRIVER( dragwld2 )	/* (c) 1997 */
 	DRIVER( kov )		/* (c) 1999 */
 	DRIVER( kovplus )	/* (c) 1999 */
+	DRIVER( kovplusa )	/* (c) 1999 */
 	DRIVER( kov115 )	/* (c) 1999 */
+	DRIVER( kovj )		/* (c) 1999 */
 	DRIVER( kovsh )		/* (c) 1999 */
 	DRIVER( photoy2k )	/* (c) 1999 */
+	DRIVER( raf102j )	/* (c) 1999 */
 
 	/* RamTek games */
 	DRIVER( hitme )		/* [1976 Ramtek] */

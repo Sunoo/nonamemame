@@ -277,8 +277,8 @@ INPUT_PORTS_END
 static struct YM2151interface ym2151_interface =
 {
 	1,			/* 1 chip */
-	3579545,	/* ??? */
-	{ YM3012_VOL(50,MIXER_PAN_LEFT,50,MIXER_PAN_RIGHT) },
+	4000000,	/* 32Mhz XTAL/8 */
+	{ YM3012_VOL(70,MIXER_PAN_LEFT,70,MIXER_PAN_RIGHT) },
 	{ 0 }
 };
 
@@ -286,9 +286,9 @@ static struct YM2151interface ym2151_interface =
 static struct K053260_interface k053260_interface =
 {
 	1,
-	{ 3579545 },
+	{ 4000000 },
 	{ REGION_SOUND1 }, /* memory region */
-	{ { MIXER(70,MIXER_PAN_LEFT), MIXER(70,MIXER_PAN_RIGHT) } },
+	{ { MIXER(60,MIXER_PAN_LEFT), MIXER(60,MIXER_PAN_RIGHT) } },
 	{ 0 }
 };
 
@@ -299,7 +299,7 @@ static MACHINE_DRIVER_START( asterix )
 	MDRV_CPU_MEMORY(readmem,writemem)
 	MDRV_CPU_VBLANK_INT(asterix_interrupt,1)
 
-	MDRV_CPU_ADD(Z80, 8000000)
+	MDRV_CPU_ADD(Z80, 6000000)
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_MEMORY(sound_readmem,sound_writemem)
 

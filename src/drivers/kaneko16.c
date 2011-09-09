@@ -27,11 +27,11 @@ Year + Game					PCB			Notes
 ---------------------------------------------------------------------------
 91	The Berlin Wall
 	Magical Crystals		Z00FC-02
-92	Bakuretsu Breaker					Incomplete dump (gfx+sfx missing)
+92	Bakuretsu Breaker
 	Blaze On							2 Sprites Chips !?
 	Sand Scorpion (by Face)				MCU protection (collision detection etc.)
 	Shogun Warriors						MCU protection (68k code snippets, NOT WORKING)
-    B.Rap Boys                          MCU protection (not working, game can be
+	B.Rap Boys							MCU protection (not working, game can be
                                                         run on a shoggwar board ok)
 94	Great 1000 Miles Rally				MCU protection (EEPROM handling etc.)
 	Bonks Adventure			Z09AF-003	MCU protection
@@ -1009,6 +1009,18 @@ MEMORY_END
 							Bakuretsu Breaker
 ***************************************************************************/
 
+/* Two un-assigned OKI samples get requested during game play. Leftover bug? */
+/* The two YM2149 chips are only used when entering high score initials, and */
+/* when the game is fully completed. Overkill??? */
+
+WRITE16_HANDLER( bakubrkr_oki_bank_sw )
+{
+	if (ACCESSING_LSB) {
+		OKIM6295_set_bank_base(0, 0x40000 * (data & 0x7) );
+		logerror("PC:%06X  Selecting OKI bank %02X\n",activecpu_get_pc(),data&0xff);
+	}
+}
+
 static MEMORY_READ16_START( bakubrkr_readmem )
 	{ 0x000000, 0x07ffff, MRA16_ROM					},	// ROM
 	{ 0x100000, 0x10ffff, MRA16_RAM					},	// Work RAM
@@ -1032,9 +1044,10 @@ MEMORY_END
 static MEMORY_WRITE16_START( bakubrkr_writemem )
 	{ 0x000000, 0x07ffff, MWA16_ROM											},	// ROM
 	{ 0x100000, 0x10ffff, MWA16_RAM											},	// Work RAM
-	{ 0x400000, 0x40001f, kaneko16_YM2149_0_w								},	// Sound
+	{ 0x400000, 0x40001d, kaneko16_YM2149_0_w								},	// Sound
+	{ 0x40001e, 0x40001f, bakubrkr_oki_bank_sw								},	// OKI bank Switch
 	{ 0x400200, 0x40021f, kaneko16_YM2149_1_w								},	//
-	{ 0x400400, 0x400401, OKIM6295_data_0_lsb_w	},	//
+	{ 0x400400, 0x400401, OKIM6295_data_0_lsb_w								},	//
 	{ 0x500000, 0x500fff, kaneko16_vram_1_w, &kaneko16_vram_1				},	// Layers 0
 	{ 0x501000, 0x501fff, kaneko16_vram_0_w, &kaneko16_vram_0				},	//
 	{ 0x502000, 0x502fff, MWA16_RAM, &kaneko16_vscroll_1,					},	//
@@ -2536,7 +2549,7 @@ INPUT_PORTS_END
 
 /*
 	16x16x4 made of 4 8x8x4 blocks arrenged like:		 	01
- 	(nibbles are swapped for tiles, not for sprites)		23
+	(nibbles are swapped for tiles, not for sprites)		23
 */
 static struct GfxLayout layout_16x16x4 =
 {
@@ -2624,13 +2637,6 @@ INTERRUPT_GEN( kaneko16_interrupt )
 	}
 }
 
-static struct OKIM6295interface okim6295_intf_8kHz =
-{
-	1,
-	{ 8000 },
-	{ REGION_SOUND1 },
-	{ 100 }
-};
 static struct OKIM6295interface okim6295_intf_12kHz =
 {
 	1,
@@ -2763,7 +2769,7 @@ static MACHINE_DRIVER_START( bakubrkr )
 
 	/* sound hardware */
 	MDRV_SOUND_ADD(AY8910, ay8910_intf_2x2MHz_EEPROM)
-	MDRV_SOUND_ADD(OKIM6295, okim6295_intf_8kHz)
+	MDRV_SOUND_ADD(OKIM6295, okim6295_intf_15kHz)
 MACHINE_DRIVER_END
 
 
@@ -3080,7 +3086,7 @@ DRIVER_INIT( berlwall )
 
 								Bakuretsu Breaker
 
-	USES TOSHIBA 68000 CPU W/TWO YM2149 SOUND
+	USES TOSHIBA 68000 CPU W/TWO YM2149 & OKI M6295 FOR SOUND
 
 	LOCATION    TYPE
 	------------------
@@ -3131,7 +3137,7 @@ Notes:
 ***************************************************************************/
 
 ROM_START( bakubrkr )
- 	ROM_REGION( 0x080000, REGION_CPU1, 0 )			/* 68000 Code */
+	ROM_REGION( 0x080000, REGION_CPU1, 0 )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "ts100j.u18", 0x000000, 0x040000, CRC(8cc0a4fd) SHA1(e7e18b5ea236522a79ba9db8f573ac8f7ade504b) )
 	ROM_LOAD16_BYTE( "ts101j.u19", 0x000001, 0x040000, CRC(aea92195) SHA1(e89f964e7e936fd7774f21956eb4ff5c9104837b) )
 
@@ -3148,8 +3154,28 @@ ROM_START( bakubrkr )
 	ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE )	/* Tiles */
 	ROM_LOAD( "ts020.u33",  0x000000, 0x100000, CRC(eb58c35d) SHA1(762c5219de6f729a0fc1df90fce09cdf711c2a1e) )
 
-	ROM_REGION( 0x0100000, REGION_SOUND1, 0 )	/* Samples */
-	ROM_LOAD( "ts030.u5",  0x000000, 0x100000, CRC(1d68e9d1) SHA1(aaa64a8e8d7cd7f91d2be346fafb9d1f29b40eda) )
+	ROM_REGION( 0x100000, REGION_USER1, ROMREGION_DISPOSE )	/* OKI Sample ROM */
+	ROM_LOAD( "ts030.u5",    0x000000, 0x100000, CRC(1d68e9d1) SHA1(aaa64a8e8d7cd7f91d2be346fafb9d1f29b40eda) )
+
+	/* $00000-$20000 stays the same in all sound banks, */
+	/* the second half of the bank is what gets switched */
+	ROM_REGION( 0x200000, REGION_SOUND1, 0 )	/* Samples */
+	ROM_COPY( REGION_USER1, 0x000000, 0x000000, 0x020000)
+	ROM_COPY( REGION_USER1, 0x020000, 0x020000, 0x020000)
+	ROM_COPY( REGION_USER1, 0x000000, 0x040000, 0x020000)
+	ROM_COPY( REGION_USER1, 0x040000, 0x060000, 0x020000)
+	ROM_COPY( REGION_USER1, 0x000000, 0x080000, 0x020000)
+	ROM_COPY( REGION_USER1, 0x060000, 0x0a0000, 0x020000)
+	ROM_COPY( REGION_USER1, 0x000000, 0x0c0000, 0x020000)
+	ROM_COPY( REGION_USER1, 0x080000, 0x0e0000, 0x020000)
+	ROM_COPY( REGION_USER1, 0x000000, 0x100000, 0x020000)
+	ROM_COPY( REGION_USER1, 0x0a0000, 0x120000, 0x020000)
+	ROM_COPY( REGION_USER1, 0x000000, 0x140000, 0x020000)
+	ROM_COPY( REGION_USER1, 0x0c0000, 0x160000, 0x020000)
+	ROM_COPY( REGION_USER1, 0x000000, 0x180000, 0x020000)
+	ROM_COPY( REGION_USER1, 0x0e0000, 0x1a0000, 0x020000)
+	ROM_FILL(                         0x1c0000, 0x020000, 0x00 )
+	ROM_FILL(                         0x1e0000, 0x020000, 0x00 )
 ROM_END
 
 
@@ -3187,7 +3213,7 @@ PALs : BW-U47, BW-U48 (backgrounds encryption)
 ***************************************************************************/
 
 ROM_START( berlwall )
- 	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
+	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "bw100a", 0x000000, 0x020000, CRC(e6bcb4eb) SHA1(220b8fddc79230b4f6a8cf33e1035355c485e8d1) )
 	ROM_LOAD16_BYTE( "bw101a", 0x000001, 0x020000, CRC(38056fb2) SHA1(48338b9a5ebea872286541a3c45016673c4af76b) )
 
@@ -3214,7 +3240,7 @@ ROM_START( berlwall )
 ROM_END
 
 ROM_START( berlwalt )
- 	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
+	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "u23_01.bin", 0x000000, 0x020000, CRC(76b526ce) SHA1(95ba7cccbe88fd695c28b6a7c25a1afd130c1aa6) )
 	ROM_LOAD16_BYTE( "u39_01.bin", 0x000001, 0x020000, CRC(78fa7ef2) SHA1(8392de6e307dcd2bf5bcbeb37d578d33246acfcf) )
 
@@ -3268,11 +3294,11 @@ CUSTOM:       KANEKO VU-002 x2
 ***************************************************************************/
 
 ROM_START( blazeon )
- 	ROM_REGION( 0x080000, REGION_CPU1, 0 )			/* 68000 Code */
+	ROM_REGION( 0x080000, REGION_CPU1, 0 )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "bz_prg1.u80", 0x000000, 0x040000, CRC(8409e31d) SHA1(a9dfc299f4b457df190314401aef309adfaf9bae) )
 	ROM_LOAD16_BYTE( "bz_prg2.u81", 0x000001, 0x040000, CRC(b8a0a08b) SHA1(5f275b98d3e49a834850b45179d26e8c2f9fd604) )
 
- 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* Z80 Code */
+	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* Z80 Code */
 	ROM_LOAD( "3.u45", 0x000000, 0x020000, CRC(52fe4c94) SHA1(896230e4627503292575bbd84edc3cf9cb18b27e) )	// 1xxxxxxxxxxxxxxxx = 0xFF
 
 	ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
@@ -3359,14 +3385,14 @@ of214e0220.u26 - 27C040
 ***************************************************************************/
 
 ROM_START( bloodwar )
- 	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
+	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "pof3.514", 0x000000, 0x080000, CRC(0c93da15) SHA1(65b6b1b4acfc32c551ae4fbe6a13f7f2b8554dbf) )
 	ROM_LOAD16_BYTE( "p1f3.513", 0x000001, 0x080000, CRC(894ecbe5) SHA1(bf403d19e6315266114ac742a08cac903e7b54b5) )
 
- 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
+	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
 	ROM_LOAD( "dox3.124",  0x000000, 0x020000, CRC(399f2005) SHA1(ff0370724770c35963953fd9596d9f808ba87d8f) )
 
- 	ROM_REGION16_BE( 0x0080, REGION_USER1, 0 )			/* EEPROM */
+	ROM_REGION16_BE( 0x0080, REGION_USER1, 0 )			/* EEPROM */
 	ROM_LOAD16_WORD( "9346.126",  0x0000, 0x0080, CRC(1579db94) SHA1(acb842676946efea29b73bdc9ecb266f49d2f5a8) )
 
 	ROM_REGION( 0x1e00000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
@@ -3499,11 +3525,11 @@ f1: 10F6
 	master up= 94/07/18 15:12:35			*/
 
 ROM_START( gtmr )
- 	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
+	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "u2.bin", 0x000000, 0x080000, CRC(031799f7) SHA1(a59a9635002d139247828e3b74f6cf2fbdd5e569) )
 	ROM_LOAD16_BYTE( "u1.bin", 0x000001, 0x080000, CRC(6238790a) SHA1(a137fd581138804534f3193068f117611a982004) )
 
- 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
+	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
 	ROM_LOAD( "mcu_code.u12",  0x000000, 0x020000, NO_DUMP )
 
 	ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
@@ -3538,11 +3564,11 @@ ROM_END
 	master up= 94/09/06 14:49:19			*/
 
 ROM_START( gtmre )
- 	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
+	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "gmmu2.bin", 0x000000, 0x080000, CRC(36dc4aa9) SHA1(0aea4dc169d7aad2ea957a1de698d1fa12c71556) )
 	ROM_LOAD16_BYTE( "gmmu1.bin", 0x000001, 0x080000, CRC(8653c144) SHA1(a253a01327a9443337a55a13c063ea5096444c4c) )
 
- 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
+	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
 	ROM_LOAD( "mcu_code.u12",  0x000000, 0x020000, NO_DUMP )
 
 	ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
@@ -3575,11 +3601,11 @@ ROM_END
 	master up= 94/09/06 20:30:39			*/
 
 ROM_START( gtmrusa )
- 	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
+	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "gtmrusa.u2", 0x000000, 0x080000, CRC(5be615c4) SHA1(c14d11a5bf6e025a65b932039165302ff407c4e1) )
 	ROM_LOAD16_BYTE( "gtmrusa.u1", 0x000001, 0x080000, CRC(ae853e4e) SHA1(31eaa73b0c5ddab1292f521ceec43b202653efe9) )
 
- 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code? */
+	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code? */
 	ROM_LOAD( "gtmrusa.u12",  0x000000, 0x020000, CRC(2e1a06ff) SHA1(475a7555653eefac84307492a385895b839cab0d) )
 
 	ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
@@ -3662,11 +3688,11 @@ ROMs   :  (filename is ROM Label, extension is PCB 'u' location)
 ***************************************************************************/
 
 ROM_START( gtmr2 )
- 	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
+	ROM_REGION( 0x100000, REGION_CPU1, 0 )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "m2p0x1.u8",  0x000000, 0x080000, CRC(525f6618) SHA1(da8008cc7768b4e8c0091aa3ea21752d0ca33691) )
 	ROM_LOAD16_BYTE( "m2p1x1.u7",  0x000001, 0x080000, CRC(914683e5) SHA1(dbb2140f7de86073647abc6e73ba739ea201dd30) )
 
- 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code? */
+	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code? */
 	ROM_LOAD( "m2d0x0.u31",        0x000000, 0x020000, CRC(2e1a06ff) SHA1(475a7555653eefac84307492a385895b839cab0d) )
 
 	ROM_REGION( 0x800000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
@@ -3746,7 +3772,7 @@ DIP settings:
 ***************************************************************************/
 
 ROM_START( mgcrystl )
- 	ROM_REGION( 0x040000*2, REGION_CPU1, ROMREGION_ERASE )			/* 68000 Code */
+	ROM_REGION( 0x040000*2, REGION_CPU1, ROMREGION_ERASE )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "magcrstl.u18", 0x000000, 0x020000, CRC(c7456ba7) SHA1(96c25c3432069373fa86d7af3e093e02e39aea34) )
 	ROM_LOAD16_BYTE( "magcrstl.u19", 0x000001, 0x040000, CRC(ea8f9300) SHA1(0cd0d448805aa45986b63befca00b08fe066dbb2) ) //!!
 
@@ -3770,7 +3796,7 @@ ROM_START( mgcrystl )
 ROM_END
 
 ROM_START( mgcrystj )
- 	ROM_REGION( 0x040000*2, REGION_CPU1, ROMREGION_ERASE )			/* 68000 Code */
+	ROM_REGION( 0x040000*2, REGION_CPU1, ROMREGION_ERASE )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "mc100j.u18", 0x000000, 0x020000, CRC(afe5882d) SHA1(176e6e12e3df63c08d7aff781f5e5a9bd83ec293) )
 	ROM_LOAD16_BYTE( "mc101j.u19", 0x000001, 0x040000, CRC(60da5492) SHA1(82b90a617d355825624ce9fb30bddf4714bd0d18) )	//!!
 
@@ -3879,11 +3905,11 @@ ROUTINES:
 ***************************************************************************/
 
 ROM_START( shogwarr )
- 	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
+	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "fb030a.u61", 0x000000, 0x020000, CRC(a04106c6) SHA1(95ab084f2e709be7cec2964cb09bcf5a8d3aacdf) )
 	ROM_LOAD16_BYTE( "fb031a.u62", 0x000001, 0x020000, CRC(d1def5e2) SHA1(f442de4433547e52b483549aca5786e4597a7122) )
 
- 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
+	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
 	ROM_LOAD( "fb040a.u33",  0x000000, 0x020000, CRC(4b62c4d9) SHA1(35c943dde70438a411714070e42a84366db5ef83) )
 
 	ROM_REGION( 0x600000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
@@ -3975,11 +4001,11 @@ NOTE: U67 & U68 are empty on this Original board.
 ***************************************************************************/
 
 ROM_START( fjbuster )	// Fujiyama Buster - Japan version of Shogun Warriors
- 	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
+	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "fb030j.u61", 0x000000, 0x020000, CRC(32ce7909) SHA1(02d87342706ac9547eb611bd542f8498ba41e34a) )
 	ROM_LOAD16_BYTE( "fb031j.u62", 0x000001, 0x020000, CRC(000c8c08) SHA1(439daac1541c34557b5a4308ed69dfebb93abe13) )
 
- 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
+	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
 	ROM_LOAD( "fb040j.u33",  0x000000, 0x020000, CRC(299d0746) SHA1(67fe3a47ab01fa02ce2bb5836c2041986c19d875) )
 
 	ROM_REGION( 0x600000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */
@@ -4136,11 +4162,11 @@ Game can be ROM Swapped onto a Shogun Warriors board and works
 ***************************************************************************/
 
 ROM_START( brapboys )
- 	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
+	ROM_REGION( 0x040000, REGION_CPU1, 0 )			/* 68000 Code */
 	ROM_LOAD16_BYTE( "rb-004.u61", 0x000000, 0x020000, CRC(5432442c) SHA1(f0f7328ece96ef25e6d4fd1958d734f64a9ef371) )
 	ROM_LOAD16_BYTE( "rb-005.u62", 0x000001, 0x020000, CRC(118b3cfb) SHA1(1690ecf5c629879bd97131ff77029e152919e45d) )
 
- 	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
+	ROM_REGION( 0x020000, REGION_CPU2, 0 )			/* MCU Code */
 	ROM_LOAD( "rb-006.u33",  0x000000, 0x020000, CRC(f1d76b20) SHA1(c571b5f28e529589ee2d7697ef5d4b60ccb66e7a) )
 
 	ROM_REGION( 0x400000, REGION_GFX1, ROMREGION_DISPOSE )	/* Sprites */

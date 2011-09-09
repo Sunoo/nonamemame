@@ -5085,7 +5085,7 @@ static void cmd_set_key_repeat( void )
 
 	dbg_key_repeat = dtou( &cmd, NULL );
 	if( dbg_key_repeat == 0 )
-		dbg_key_repeat = Machine->drv->frames_per_second / 15;
+		dbg_key_repeat = Machine->refresh_rate / 15;
 
 	edit_cmds_reset();
 	dbg_update = 1;
@@ -5226,7 +5226,7 @@ void mame_debug_init(void)
 	}
 
 	/* set keyboard repeat rate based on the game's frame rate */
-	dbg_key_repeat = Machine->drv->frames_per_second / 15;
+	dbg_key_repeat = Machine->refresh_rate / 15;
 
 	/* create windows for the active CPU */
 	dbg_open_windows();

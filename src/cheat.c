@@ -10033,7 +10033,7 @@ static void DoCheatAction(CheatAction * action)
 	{
 		case kType_NormalOrDelay:
 		{
-			if(action->frameTimer >= (parameter * Machine->drv->frames_per_second))
+			if(action->frameTimer >= (parameter * Machine->refresh_rate))
 			{
 				action->frameTimer = 0;
 
@@ -10079,7 +10079,7 @@ static void DoCheatAction(CheatAction * action)
 
 				if(currentValue != action->lastValue)
 				{
-					action->frameTimer = parameter * Machine->drv->frames_per_second;
+					action->frameTimer = parameter * Machine->refresh_rate;
 
 					action->flags |= kActionFlag_WasModified;
 				}

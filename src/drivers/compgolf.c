@@ -5,7 +5,7 @@ Competition Golf Final Round (c) 1985 Data East
 Preliminary driver by Angelo Salese & Pierpaolo Prazzoli
 Thanks to David Haywood for the decoding the bg roms
 Driver finished off by Bryan McPhail, except:
-Todo:  Decode background roms.
+Todo:  Fix background tilemap.
 Todo:  Split into seperate driver/vidhrdw files.
 Todo:  Check input ports (they seem correct already though)
 
@@ -283,17 +283,6 @@ static struct GfxLayout spritelayout =
 	16*16
 };
 
-static struct GfxLayout tilelayoutbg =
-{
-	8,8,
-	RGN_FRAC(1,2),
-	6,
-	{ 0,4,8,12, RGN_FRAC(1,2)+0, RGN_FRAC(1,2)+8 },
-	{ 0,1,2,3, 8*16, 8*16+1, 8*16+2, 8*16+3,  },
-	{ 0*16,1*16,2*16,3*16,4*16,5*16,6*16,7*16 },
-	8*32
-};
-
 static struct GfxLayout tilelayout8 =
 {
 	8,8,
@@ -305,6 +294,18 @@ static struct GfxLayout tilelayout8 =
 	16*8
 };
 
+static struct GfxLayout tilelayoutbg =
+{
+	16,16,
+	RGN_FRAC(1,2),
+	6,
+	{ 0,4,8,12, RGN_FRAC(1,2)+0, RGN_FRAC(1,2)+8 },
+	{ 0, 1, 2, 3, 16*8+0, 16*8+1, 16*8+2, 16*8+3,
+		2*16*8+0, 2*16*8+1, 2*16*8+2, 2*16*8+3, 3*16*8+0, 3*16*8+1, 3*16*8+2, 3*16*8+3 },
+	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+	  8*8, 9*8,10*8,11*8,12*8,13*8,14*8,15*8 },
+	32*16
+};
 
 static struct GfxDecodeInfo gfxdecodeinfo[] =
 {
@@ -379,7 +380,7 @@ ROM_START( compgolf )
 	ROM_LOAD( "cv04.bin",    0x00000, 0x4000, CRC(df693a04) SHA1(45bef98c7e66881f8c62affecc1ab90dd2707240) )
 
 	ROM_REGION( 0x100, REGION_PROMS, 0 )
-	ROM_LOAD( "cv08-1.bpr",   0x00000, 0x0100, CRC(b7c43db9) SHA1(418b11e4c8a9bce6873b0624ac53a5011c5807d0) )
+	ROM_LOAD( "cv08-1.bpr",  0x00000, 0x0100, CRC(b7c43db9) SHA1(418b11e4c8a9bce6873b0624ac53a5011c5807d0) )
 ROM_END
 
 static void compgolf_expand_bg(void)

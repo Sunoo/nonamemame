@@ -34,6 +34,9 @@ extern void win_poll_input(void);
 extern void win_pause_input(int pause);
 extern UINT8 win_trying_to_quit;
 
+// from sound.c
+extern void sound_update_refresh_rate(float newrate);
+
 // from wind3dfx.c
 extern struct rc_option win_d3d_opts[];
 
@@ -523,7 +526,7 @@ const char *osd_get_fps_text(const struct performance_info *performance)
 			autoframeskip ? "auto" : "fskp", frameskip,
 			(int)(performance->game_speed_percent + 0.5),
 			(int)(performance->frames_per_second + 0.5),
-			(int)(Machine->drv->frames_per_second + 0.5));
+			(int)(Machine->refresh_rate + 0.5));
 
 	/* for vector games, add the number of vector updates */
 	if (Machine->drv->video_attributes & VIDEO_TYPE_VECTOR)
@@ -877,6 +880,13 @@ void osd_update_video_and_audio(struct mame_display *display)
 	// if the visible area has changed, update it
 	if (display->changed_flags & GAME_VISIBLE_AREA_CHANGED)
 		update_visible_area(display);
+
+	// if the refresh rate has changed, update it
+	if (display->changed_flags & GAME_REFRESH_RATE_CHANGED)
+	{
+		video_fps = display->game_refresh_rate;
+		sound_update_refresh_rate(display->game_refresh_rate);
+	}
 
 	// if the debugger focus changed, update it
 	if (display->changed_flags & DEBUG_FOCUS_CHANGED)

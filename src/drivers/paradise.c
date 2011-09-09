@@ -1,6 +1,6 @@
 /***************************************************************************
 
-							  -= Paradise =-
+							  -= Paradise / Target Ball =-
 
 					driver by	Luca Elia (l.elia@tin.it)
 
@@ -11,7 +11,7 @@ Sound Chips  :	2 x AR17961 (OKI M6295)
 
 Notes:
 
-I'm not sure it's working correctly:
+paradise: I'm not sure it's working correctly:
 
 - The high scores table can't be entered !?
 - The chance to play a bonus game is very slim. I think I got to play
@@ -185,6 +185,86 @@ INPUT_PORTS_START( paradise )
 INPUT_PORTS_END
 
 
+INPUT_PORTS_START( tgtball )
+	PORT_START	// IN0 - port $2020 - DSW 1
+	PORT_DIPNAME( 0x03, 0x02, "Time" )
+	PORT_DIPSETTING(    0x03, "60" )
+	PORT_DIPSETTING(    0x02, "80" )
+	PORT_DIPSETTING(    0x01, "100" )
+	PORT_DIPSETTING(    0x00, "120" )
+	PORT_DIPNAME( 0x0c, 0x08, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x0c, "15" )
+	PORT_DIPSETTING(    0x08, "20" )
+	PORT_DIPSETTING(    0x04, "25" )
+	PORT_DIPSETTING(    0x00, "30" )
+	PORT_DIPNAME( 0x30, 0x20, DEF_STR( Lives ) )
+	PORT_DIPSETTING(    0x30, "4" )
+	PORT_DIPSETTING(    0x20, "5" )
+	PORT_DIPSETTING(    0x10, "6" )
+	PORT_DIPSETTING(    0x00, "7" )
+	PORT_DIPNAME( 0x40, 0x40, "Balls Sequence Length" )
+	PORT_DIPSETTING(    0x40, "3" )
+	PORT_DIPSETTING(    0x00, "5" )
+	PORT_DIPNAME( 0x80, 0x80, "Game Goal" )
+	PORT_DIPSETTING(    0x80, "Target Score" )
+	PORT_DIPSETTING(    0x00, "Balls Sequence" )
+
+	PORT_START	// IN1 - port $2021 - DSW 2
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
+	PORT_DIPNAME( 0x0c, 0x08, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x0c, "120" )
+	PORT_DIPSETTING(    0x08, "160" )
+	PORT_DIPSETTING(    0x04, "200" )
+	PORT_DIPSETTING(    0x00, "240" )
+	PORT_DIPNAME( 0x10, 0x10, "Vs. Matches" )
+	PORT_DIPSETTING(    0x10, "1" )
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80, 0x80, "Characters Test" )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	PORT_START	// IN2 - port $2022 - Player 1
+	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
+	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )
+	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
+	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
+	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 )
+	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER1 )
+	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_START1  )
+
+	PORT_START	// IN3 - port $2023 - Player 2
+	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
+	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
+	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
+	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
+	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 )
+	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER2 )
+	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_START2  )
+
+	PORT_START	// IN4 - port $2024 - Coins
+	PORT_BIT_IMPULSE(  0x01, IP_ACTIVE_LOW, IPT_COIN1, 5)
+	PORT_BIT_IMPULSE(  0x02, IP_ACTIVE_LOW, IPT_COIN2, 5)
+	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_VBLANK  )
+	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+INPUT_PORTS_END
+
+
 /***************************************************************************
 
 								Graphics Layouts
@@ -324,30 +404,16 @@ ROM_START( paradise )
 	ROM_LOAD( "u113", 0x00000, 0x80000, CRC(53de6025) SHA1(c94b3778b57ff7f46ce4cff661841019fb187d5d) )
 ROM_END
 
-/* target ball
-
-looks like its probably similar hardware ... */
-
-READ_HANDLER( tgt_ball_unk )
-{
-	return rand();
-}
-
-DRIVER_INIT (tgtball)
-{
-	install_port_read_handler(0, 0x2000, 0x2fff, tgt_ball_unk);
-}
-
 ROM_START( tgtball )
 	ROM_REGION( 0x44000, REGION_CPU1, 0 )		/* Z80 Code */
 	ROM_LOAD( "rom7.bin", 0x00000, 0x0c000, CRC(8dbeab12) SHA1(7181c23459990aecbe2d13377aaf19f65108eac6) )
-	ROM_CONTINUE(     0x10000, 0x34000    )
+	ROM_CONTINUE(         0x10000, 0x34000    )
 
 	ROM_REGION( 0x80000, REGION_GFX1, ROMREGION_DISPOSE | ROMREGION_INVERT)	/* 16x16x8 Sprites */
-	ROM_LOAD( "rom6.bin", 0x00000, 0x40000, CRC(30f49dac) SHA1(b70d37973bd03069c48641d6c0804be6f9aa6553) )
-	ROM_LOAD( "rom5.bin", 0x40000, 0x40000, CRC(3dbe1872) SHA1(754f90123a3944ca548fc66ee65a93615155bf30) )
+	ROM_LOAD( "rom5.bin", 0x00000, 0x40000, CRC(3dbe1872) SHA1(754f90123a3944ca548fc66ee65a93615155bf30) )
+	ROM_LOAD( "rom6.bin", 0x40000, 0x40000, CRC(30f49dac) SHA1(b70d37973bd03069c48641d6c0804be6f9aa6553) )
 
-	ROM_REGION( 0x20000, REGION_GFX2, ROMREGION_DISPOSE | ROMREGION_INVERT)	/* 8x8x4 Background */
+	ROM_REGION( 0x20000, REGION_GFX2, ROMREGION_DISPOSE | ROMREGION_ERASEFF)	/* 8x8x4 Background */
 	/* not for this game? */
 
 	ROM_REGION( 0x100000, REGION_GFX3, ROMREGION_DISPOSE | ROMREGION_INVERT)	/* 8x8x8 Foreground */
@@ -365,12 +431,19 @@ ROM_START( tgtball )
 	ROM_LOAD( "rom9.bin", 0x00000, 0x40000, CRC(150a6cc6) SHA1(b435fcf8ba48006f506db6b63ba54a30a6b3eade) )
 ROM_END
 
+// Inverted flipscreen and sprites are packed in less memory (same number though)
+DRIVER_INIT (tgtball)
+{
+	spriteram_size = 0x100;
+	install_port_write_handler(0, 0x2001, 0x2001, tgtball_flipscreen_w );
+}
+
+
 /***************************************************************************
 
 								Game Drivers
 
 ***************************************************************************/
 
-GAME( 1994+, paradise, 0, paradise, paradise, 0, ROT90, "Yun Sung", "Paradise" )
-GAMEX(199?,  tgtball,  0, paradise, paradise, tgtball, ROT0,  "Yun Sung", "Target Ball", GAME_NOT_WORKING )
-
+GAME( 1994+, paradise, 0, paradise, paradise, 0,       ROT90, "Yun Sung", "Paradise" )
+GAME( 1995,  tgtball,  0, paradise, tgtball,  tgtball, ROT0,  "Yun Sung", "Target Ball" )

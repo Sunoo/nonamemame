@@ -1,3 +1,8 @@
+0.78u1.13:
+ - Updated to MAME 0.78u1 source code
+ - Added Oliver's Asterix fixes
+ - Now using UPX to compess emulator exe
+
 0.78.12:
  - Added "fake" sample support to Tailgunner (thanks Erik Ruud)
  - Added Bucaneer from PacMAME (thanks Steve Jensen)
@@ -44,7 +49,7 @@
 0.73.07:
  - Updated to MAME 0.73 source code
  - Added Analog+ changes to MAME32 version
- - Starting crediting Anaglog+ creator (sorry u_rebelscum)
+ - Starting crediting Analog+ creator (sorry u_rebelscum)
  - Modified makefile for easier compiling
 
 0.72u2.06 "Back to School":

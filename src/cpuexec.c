@@ -664,7 +664,7 @@ static void watchdog_reset(void)
 {
 	if (watchdog_counter == -1)
 		logerror("watchdog armed\n");
-	watchdog_counter = 3 * Machine->drv->frames_per_second;
+	watchdog_counter = 3 * Machine->refresh_rate;
 }
 
 
@@ -1200,8 +1200,6 @@ int cpu_scalebyfcount(int value)
 void cpu_init_refresh_timer(void)
 {
 	/* allocate an infinite timer to track elapsed time since the last refresh */
-	refresh_period = TIME_IN_HZ(Machine->drv->frames_per_second);
-	refresh_period_inv = 1.0 / refresh_period;
 	refresh_timer = timer_alloc(NULL);
 
 	/* while we're at it, compute the scanline times */
@@ -1218,6 +1216,16 @@ void cpu_init_refresh_timer(void)
 
 void cpu_compute_scanline_timing(void)
 {
+	/* recompute the refresh period */
+	refresh_period = TIME_IN_HZ(Machine->refresh_rate);
+	refresh_period_inv = 1.0 / refresh_period;
+	
+	/* recompute the vblank period */
+	vblank_period = TIME_IN_HZ(Machine->refresh_rate * vblank_multiplier);
+	if (vblank_timer)
+		timer_adjust(vblank_timer, timer_timeleft(vblank_timer), 0, vblank_period);
+
+	/* recompute the scanline period */
 	if (Machine->drv->vblank_duration)
 		scanline_period = (refresh_period - TIME_IN_USEC(Machine->drv->vblank_duration)) /
 				(double)(Machine->drv->default_visible_area.max_y - Machine->drv->default_visible_area.min_y + 1);
@@ -1265,14 +1273,14 @@ double cpu_getscanlinetime(int scanline)
 
 	/* if we're already past the computed time, count it for the next frame */
 	if (abstime >= scantime)
-		scantime += TIME_IN_HZ(Machine->drv->frames_per_second);
+		scantime += TIME_IN_HZ(Machine->refresh_rate);
 
 	/* compute how long from now until that time */
 	result = scantime - abstime;
 
 	/* if it's small, just count a whole frame */
 	if (result < TIME_IN_NSEC(1))
-		result += TIME_IN_HZ(Machine->drv->frames_per_second);
+		result += TIME_IN_HZ(Machine->refresh_rate);
 	return result;
 }
 
@@ -1816,7 +1824,7 @@ static void cpu_inittimers(void)
 	ipf = Machine->drv->cpu_slices_per_frame;
 	if (ipf <= 0)
 		ipf = 1;
-	timeslice_period = TIME_IN_HZ(Machine->drv->frames_per_second * ipf);
+	timeslice_period = TIME_IN_HZ(Machine->refresh_rate * ipf);
 	timeslice_timer = timer_alloc(cpu_timeslicecallback);
 	timer_adjust(timeslice_timer, timeslice_period, 0, timeslice_period);
 	
@@ -1865,7 +1873,7 @@ static void cpu_inittimers(void)
 	}
 
 	/* allocate a vblank timer at the frame rate * the LCD number of interrupts per frame */
-	vblank_period = TIME_IN_HZ(Machine->drv->frames_per_second * vblank_multiplier);
+	vblank_period = TIME_IN_HZ(Machine->refresh_rate * vblank_multiplier);
 	vblank_timer = timer_alloc(cpu_vblankcallback);
 	vblank_countdown = vblank_multiplier;
 
@@ -1882,7 +1890,7 @@ static void cpu_inittimers(void)
 		/* compute the average number of cycles per interrupt */
 		if (ipf <= 0)
 			ipf = 1;
-		cpu[cpunum].vblankint_period = TIME_IN_HZ(Machine->drv->frames_per_second * ipf);
+		cpu[cpunum].vblankint_period = TIME_IN_HZ(Machine->refresh_rate * ipf);
 		cpu[cpunum].vblankint_timer = timer_alloc(NULL);
 
 		/* see if we need to allocate a CPU timer */

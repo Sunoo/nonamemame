@@ -168,6 +168,7 @@ Notes:	pzlbowl PCB with extra parts:
 #include "driver.h"
 #include "vidhrdw/generic.h"
 #include "machine/tmp68301.h"
+#include "machine/eeprom.h"
 #include "seta.h"
 
 /***************************************************************************
@@ -243,6 +244,43 @@ MEMORY_END
 						Mobile Suit Gundam EX Revue
 ***************************************************************************/
 
+static NVRAM_HANDLER(93C46_gundamex)
+{
+	if (read_or_write)
+	{
+		EEPROM_save(file);
+	}
+	else
+	{
+		EEPROM_init(&eeprom_interface_93C46);
+		if (file)
+		{
+			EEPROM_load(file);
+		}
+		else
+		{
+			int length;
+			UINT8 *dat;
+
+			dat = EEPROM_get_data_pointer(&length);
+			dat[0]=0x70;
+			dat[1]=0x08;
+		}
+	}
+}
+
+READ16_HANDLER( gundamex_eeprom_r )
+{
+	return ((EEPROM_read_bit() & 1)) << 3;
+}
+
+WRITE16_HANDLER( gundamex_eeprom_w )
+{
+		EEPROM_set_clock_line((data & 0x2) ? ASSERT_LINE : CLEAR_LINE);
+		EEPROM_write_bit(data & 0x1);
+		EEPROM_set_cs_line((data & 0x4) ? CLEAR_LINE : ASSERT_LINE);
+}
+
 static MEMORY_READ16_START( gundamex_readmem )
 	{ 0x000000, 0x1fffff, MRA16_ROM					},	// ROM
 	{ 0x200000, 0x20ffff, MRA16_RAM					},	// RAM
@@ -255,7 +293,7 @@ static MEMORY_READ16_START( gundamex_readmem )
 	{ 0x700008, 0x700009, input_port_5_word_r		},	// P1
 	{ 0x70000a, 0x70000b, input_port_6_word_r		},	// P2
 	{ 0xb00000, 0xb03fff, seta_sound_word_r 		},	// Sound
-	{ 0xfffc00, 0xffffff, MRA16_RAM					},	// TMP68301 Registers
+	{ 0xfffd0a, 0xfffd0b, gundamex_eeprom_r 		},  // parallel data register
 MEMORY_END
 
 static MEMORY_WRITE16_START( gundamex_writemem )
@@ -270,6 +308,7 @@ static MEMORY_WRITE16_START( gundamex_writemem )
 	{ 0xc50000, 0xc5ffff, MWA16_RAM							},	// cleared
 	{ 0xc60000, 0xc6003f, seta2_vregs_w, &seta2_vregs		},	// Video Registers
 	{ 0xe00010, 0xe0001f, seta2_sound_bank_w				},	// Samples Banks
+	{ 0xfffd0a, 0xfffd0b, gundamex_eeprom_w 				},  // parallel data register
 	{ 0xfffc00, 0xffffff, tmp68301_regs_w, &tmp68301_regs	},	// TMP68301 Registers
 MEMORY_END
 
@@ -574,8 +613,10 @@ INPUT_PORTS_START( gundamex )
 	PORT_BIT_IMPULSE( 0x0002, IP_ACTIVE_LOW, IPT_COIN2, 5 )
 	PORT_BIT(  0x0004, IP_ACTIVE_LOW,  IPT_SERVICE1 )
 	PORT_BIT(  0x0008, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-	PORT_BIT(  0x0010, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-	PORT_BIT(  0x0020, IP_ACTIVE_LOW,  IPT_UNKNOWN )
+	PORT_BIT(  0x0010, IP_ACTIVE_LOW,  IPT_UNKNOWN ) //jumper pad
+	PORT_DIPNAME( 0x0020, 0x0020, "Language" ) 		 //jumper pad
+	PORT_DIPSETTING(      0x0020, "English" )
+	PORT_DIPSETTING(      0x0000, "Japanese" )
 	PORT_BIT(  0x0040, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT(  0x0080, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT(  0xff00, IP_ACTIVE_LOW,  IPT_UNKNOWN )
@@ -1377,6 +1418,8 @@ static MACHINE_DRIVER_START( gundamex )
 	MDRV_CPU_REPLACE("main",M68000,16000000)
 	MDRV_CPU_MEMORY(gundamex_readmem,gundamex_writemem)
 
+	MDRV_NVRAM_HANDLER(93C46_gundamex)
+
 	/* video hardware */
 	MDRV_VISIBLE_AREA(0x00, 0x180-1, 0x100, 0x1e0-1)
 MACHINE_DRIVER_END
@@ -1456,7 +1499,7 @@ ROM_START( gundamex )
 	ROM_LOAD16_BYTE(	  "ka002004.u3",  0x000001, 0x080000, CRC(c0fb1208) SHA1(84b25e4c73cb8e023ee5dbf69f588be98700b43f) )
 	ROM_LOAD16_BYTE(	  "ka002001.u4",  0x100000, 0x080000, CRC(553ebe6b) SHA1(7fb8a159513d31a1d60520ff14e4c4d133fd3e19) )
 	ROM_LOAD16_BYTE(	  "ka002003.u5",  0x100001, 0x080000, CRC(946185aa) SHA1(524911c4c510d6c3e17a7ab42c7077c2fffbf06b) )
-	ROM_LOAD16_WORD_SWAP( "ka001005.u77", 0x400000, 0x200000, CRC(8c09405f) SHA1(4a45d9db48f559386f72ad339695d85d40707fb1) )
+	ROM_LOAD16_WORD_SWAP(     "ka001005.u77", 0x500000, 0x080000, CRC(f01d3d00) SHA1(ff12834e99a76261d619f10d186f4b329fb9cb7a) )
 
 	ROM_REGION( 0x2000000, REGION_GFX1, ROMREGION_DISPOSE|ROMREGION_ERASE)	/* Sprites */
 	ROM_LOAD( "ka001009.u16",  0x0000000, 0x200000, CRC(997d8d93) SHA1(4cb4cdb7e8208af4b14483610d9d6aa5e13acd89) )
@@ -1601,15 +1644,7 @@ ROM_START( penbros )
 	ROM_LOAD( "u18.bin", 0x100000, 0x200000, CRC(de4e65e2) SHA1(82d4e590c714b3e9bf0ffaf1500deb24fd315595) )
 ROM_END
 
-DRIVER_INIT( gundamex )
-{
-	data16_t *ROM = (data16_t *)memory_region( REGION_CPU1 );
-
-	/* ??? doesn't boot otherwise */
-	ROM[0x0f98/2] = 0x4e71;
-}
-
-GAME(  1994, gundamex, 0, gundamex, gundamex, gundamex, ROT0, "Banpresto",           "Mobile Suit Gundam EX Revue" )
+GAME(  1994, gundamex, 0, gundamex, gundamex, 0, 		ROT0, "Banpresto",           "Mobile Suit Gundam EX Revue" )
 GAMEX( 1995, grdians,  0, grdians,  grdians,  0,  		ROT0, "Banpresto",           "Guardians / Denjin Makai II",                  GAME_NO_COCKTAIL | GAME_IMPERFECT_GRAPHICS )	// Displays (c) Winky Soft at game's end.
 GAMEX( 1996, mj4simai, 0, mj4simai, mj4simai, 0,        ROT0, "Maboroshi Ware",      "Wakakusamonogatari Mahjong Yonshimai (Japan)", GAME_NO_COCKTAIL )
 GAMEX( 1996, myangel,  0, myangel,  myangel,  0,        ROT0, "Namco",               "Kosodate Quiz My Angel (Japan)",               GAME_NO_COCKTAIL | GAME_IMPERFECT_GRAPHICS )

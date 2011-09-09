@@ -221,7 +221,7 @@ $(OBJ)/phoenix.a: \
 	$(OBJ)/vidhrdw/naughtyb.o $(OBJ)/drivers/naughtyb.o \
 
 $(OBJ)/namco.a: \
-	$(OBJ)/machine/geebee.o $(OBJ)/vidhrdw/geebee.o $(OBJ)/sndhrdw/geebee.o $(OBJ)/drivers/geebee.o \
+	$(OBJ)/sndhrdw/geebee.o \
 	$(OBJ)/vidhrdw/warpwarp.o $(OBJ)/sndhrdw/warpwarp.o $(OBJ)/drivers/warpwarp.o \
 	$(OBJ)/vidhrdw/tankbatt.o $(OBJ)/drivers/tankbatt.o \
 	$(OBJ)/vidhrdw/galaxian.o $(OBJ)/sndhrdw/galaxian.o $(OBJ)/drivers/galaxian.o \
@@ -509,7 +509,7 @@ $(OBJ)/dataeast.a: \
 	$(OBJ)/vidhrdw/lemmings.o $(OBJ)/drivers/lemmings.o \
 	$(OBJ)/vidhrdw/funkyjet.o $(OBJ)/drivers/funkyjet.o \
 	$(OBJ)/vidhrdw/deco32.o $(OBJ)/drivers/deco32.o \
-	$(OBJ)/vidhrdw/avengrgs.o $(OBJ)/drivers/avengrgs.o \
+	$(OBJ)/vidhrdw/deco_mlc.o $(OBJ)/drivers/deco_mlc.o \
 	$(OBJ)/vidhrdw/sshangha.o $(OBJ)/drivers/sshangha.o \
 
 $(OBJ)/tehkan.a: \
@@ -1101,8 +1101,8 @@ $(OBJ)/other.a: \
 	$(OBJ)/drivers/rabbit.o \
 	$(OBJ)/drivers/malzak.o $(OBJ)/vidhrdw/malzak.o \
 	$(OBJ)/drivers/supertnk.o \
-	$(OBJ)/drivers/crospang.o \
-	$(OBJ)/drivers/funybubl.o \
+	$(OBJ)/drivers/crospang.o $(OBJ)/vidhrdw/crospang.o \
+	$(OBJ)/drivers/funybubl.o $(OBJ)/vidhrdw/funybubl.o \
 
 
 COREOBJS += $(OBJ)/driver.o $(OBJ)/cheat.o

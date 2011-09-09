@@ -25,9 +25,13 @@ AQUARF1              68000-16            6
 /* To Do (top are higher priorities)
 
 Controls + Dipswitches *done* - stephh
-Fix Sound (z80, ym2151 + m6295) (program banking, oki illegal samples etc.)
+Verify Z80 program banking
 Fix Priority Problems
 Merge with gcpinbal.c (and clean up gcpinbal.c)
+
+
+Note, a bug in the program code causes the OKI to be reset on the very
+first coin inserted.
 
 
 Stephh's notes (based on the game M68000 code and some tests) :
@@ -49,6 +53,8 @@ Stephh's notes (based on the game M68000 code and some tests) :
 #include "vidhrdw/generic.h"
 
 #define AQUARIUS_HACK	0
+
+static int aquarium_snd_ack;
 
 data16_t *aquarium_scroll, *aquarium_priority;
 data16_t *aquarium_txt_videoram;
@@ -75,14 +81,21 @@ static MACHINE_INIT( aquarium )
 }
 #endif
 
-READ16_HANDLER( aquarium_coins_r )
+static READ16_HANDLER( aquarium_coins_r )
 {
-	static int toggle = 0x0000;
-	toggle ^= 0x8000; /* sound status */
-	return (input_port_2_word_r(0,mem_mask) & 0x7fff) | toggle;	/* IN1 */
+	int data;
+	data = (input_port_2_word_r(0,mem_mask) & 0x7fff);	/* IN1 */
+	data |= aquarium_snd_ack;
+	aquarium_snd_ack = 0;
+	return data;
 }
 
-WRITE16_HANDLER( aquarium_sound_w )
+static WRITE_HANDLER( aquarium_snd_ack_w )
+{
+	aquarium_snd_ack = 0x8000;
+}
+
+static WRITE16_HANDLER( aquarium_sound_w )
 {
 //	usrintf_showmessage("sound write %04x",data);
 
@@ -97,6 +110,36 @@ static WRITE_HANDLER( aquarium_z80_bank_w )
 
 	cpu_setbank(1, &Z80[soundbank + 0x10000]);
 }
+
+static UINT8 aquarium_snd_bitswap(UINT8 scrambled_data)
+{
+	UINT8 data = 0;
+
+	data |= ((scrambled_data & 0x01) << 7);
+	data |= ((scrambled_data & 0x02) << 5);
+	data |= ((scrambled_data & 0x04) << 3);
+	data |= ((scrambled_data & 0x08) << 1);
+	data |= ((scrambled_data & 0x10) >> 1);
+	data |= ((scrambled_data & 0x20) >> 3);
+	data |= ((scrambled_data & 0x40) >> 5);
+	data |= ((scrambled_data & 0x80) >> 7);
+
+	return data;
+}
+
+static READ_HANDLER( aquarium_oki_r )
+{
+	return (aquarium_snd_bitswap(OKIM6295_status_0_r(0)) );
+}
+
+static WRITE_HANDLER( aquarium_oki_w )
+{
+	logerror("Z80-PC:%04x Writing %04x to the OKI M6295\n",activecpu_get_previouspc(),aquarium_snd_bitswap(data));
+	OKIM6295_data_0_w( 0, (aquarium_snd_bitswap(data)) );
+}
+
+
+
 
 static MEMORY_READ16_START( readmem )
 	{ 0x000000, 0x07ffff, MRA16_ROM },
@@ -118,8 +161,8 @@ static MEMORY_WRITE16_START( writemem )
 	{ 0xc80000, 0xc81fff, MWA16_RAM, &spriteram16, &spriteram_size },
 	{ 0xd00000, 0xd00fff, paletteram16_RRRRGGGGBBBBRGBx_word_w, &paletteram16 },
 	{ 0xd80014, 0xd8001f, MWA16_RAM, &aquarium_scroll },
-	{ 0xd80068, 0xd80069, MWA16_RAM, &aquarium_priority },  /* maybe not on this game? */
-	{ 0xd80088, 0xd80089, MWA16_NOP }, /* ?? */
+	{ 0xd80068, 0xd80069, MWA16_RAM, &aquarium_priority },	/* maybe not on this game? */
+	{ 0xd80088, 0xd80089, MWA16_NOP },				/* ?? video related */
 	{ 0xd8008a, 0xd8008b, aquarium_sound_w },
 	{ 0xff0000, 0xffffff, MWA16_RAM },
 MEMORY_END
@@ -137,15 +180,15 @@ MEMORY_END
 
 static PORT_READ_START( snd_readport )
 	{ 0x01, 0x01, YM2151_status_port_0_r },
-	{ 0x02, 0x02, OKIM6295_status_0_r },
+	{ 0x02, 0x02, aquarium_oki_r },
 	{ 0x04, 0x04, soundlatch_r },
 PORT_END
 
 static PORT_WRITE_START( snd_writeport )
 	{ 0x00, 0x00, YM2151_register_port_0_w },
 	{ 0x01, 0x01, YM2151_data_port_0_w },
-	{ 0x02, 0x02, OKIM6295_data_0_w },
-	{ 0x06, 0x06, IOWP_NOP },	/* zero is always written here, command ack? */
+	{ 0x02, 0x02, aquarium_oki_w },
+	{ 0x06, 0x06, aquarium_snd_ack_w },
 	{ 0x08, 0x08, aquarium_z80_bank_w },
 PORT_END
 
@@ -187,7 +230,7 @@ INPUT_PORTS_START( aquarium )
 	PORT_DIPNAME( 0x1000, 0x1000, DEF_STR( Flip_Screen ) )	// to be confirmed - code at 0x01f82c
 	PORT_DIPSETTING(      0x1000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_DIPNAME( 0x2000, 0x2000, DEF_STR( Demo_Sounds ) )	// to be confirmed - code at 0x0037de
+	PORT_DIPNAME( 0x2000, 0x2000, DEF_STR( Demo_Sounds ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x2000, DEF_STR( On ) )
 	PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Unused ) )
@@ -333,11 +376,12 @@ static struct YM2151interface ym2151_interface =
 
 static struct OKIM6295interface okim6295_interface =
 {
-	1,				/* 1 chip */
-	{ 8500 },		/* frequency (Hz) */
+	1,					/* 1 chip */
+	{ 8500 },			/* frequency (Hz) */
 	{ REGION_SOUND1 },	/* memory region */
 	{ 47 }
 };
+
 
 static MACHINE_DRIVER_START( aquarium )
 
@@ -405,7 +449,7 @@ ROM_START( aquarium )
 ROM_END
 
 #if !AQUARIUS_HACK
-GAMEX( 1996, aquarium, 0, aquarium, aquarium, aquarium, ROT0, "Excellent System", "Aquarium (Japan)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL )
+GAMEX( 1996, aquarium, 0, aquarium, aquarium, aquarium, ROT0, "Excellent System", "Aquarium (Japan)", GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL )
 #else
-GAMEX( 1996, aquarium, 0, aquarium, aquarium, aquarium, ROT0, "Excellent System", "Aquarium", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL )
+GAMEX( 1996, aquarium, 0, aquarium, aquarium, aquarium, ROT0, "Excellent System", "Aquarium", GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL )
 #endif

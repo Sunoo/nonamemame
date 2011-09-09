@@ -1958,11 +1958,11 @@ int load_driver_statistics (char *buffer, int bufsize)
 	strcat(buffer, name);
 	sprintf(name, " %4d HARDDISK\n", hddisk);
 	strcat(buffer, name);
-
+/*
 	for (i = 0; test_drivers[i]; i++)
 	sprintf(name, " %4d TESTGAMES\n", i+1);
 	strcat(buffer, name);
-
+*/
 
 	/* Print number of various info 'flags' */
 	strcat(buffer,"\n\nGAME INFO FLAGS   : ORIG CLNS\n\n");

@@ -1645,6 +1645,29 @@ ROM_START( qbert )
 	ROM_LOAD( "qb-fg0.bin",   0x6000, 0x2000, CRC(2f695b85) SHA1(807d16459838f129e10b913890bbc95065d5dd40) )
 ROM_END
 
+ROM_START( qberta )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code */
+	ROM_LOAD( "qrom_2.bin",  0xa000, 0x2000, CRC(b54a8ffc) SHA1(5e19690f141d3db8f3bfa6c7de75026256758c1f) )
+	ROM_LOAD( "qrom_1.bin",  0xc000, 0x2000, CRC(19d924e3) SHA1(af55ecb5b650e7b069d8be67eb9a9d0f3e69e3f1) )
+	ROM_LOAD( "qrom_0.bin",  0xe000, 0x2000, CRC(2e7fad1b) SHA1(5c1feafe00c21ddddde67ab0093e847a5fc9ec2d) )
+
+	ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for sound cpu */
+	ROM_LOAD( "qb-snd1.bin",  0xf000, 0x800, CRC(15787c07) SHA1(8b7d03fbf2ebaa71b3a7e2f636a0d1bb9b796e43) )
+	ROM_RELOAD(               0x7000, 0x800 ) /* A15 is not decoded */
+	ROM_LOAD( "qb-snd2.bin",  0xf800, 0x800, CRC(58437508) SHA1(09d8053e7e99679b602dcda230d64db7fe6cb7f5) )
+	ROM_RELOAD(               0x7800, 0x800 ) /* A15 is not decoded */
+
+	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "qb-bg0.bin",   0x0000, 0x1000, CRC(7a9ba824) SHA1(12aa6df499eb6996ee35f56acac403ff6290f844) )	/* chars */
+	ROM_LOAD( "qb-bg1.bin",   0x1000, 0x1000, CRC(22e5b891) SHA1(5bb67e333255c0ea679ab4312256a8a71a950db8) )
+
+	ROM_REGION( 0x8000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "qb-fg3.bin",   0x0000, 0x2000, CRC(dd436d3a) SHA1(ae16087a6ceec84551b5d7aae4036e0ed432cbb7) )	/* sprites */
+	ROM_LOAD( "qb-fg2.bin",   0x2000, 0x2000, CRC(f69b9483) SHA1(06894a1474c79c1274efbd32d7371179e7e0a661) )
+	ROM_LOAD( "qb-fg1.bin",   0x4000, 0x2000, CRC(224e8356) SHA1(f7f26b879aa8b964ff6311136ed8157e44de736c) )
+	ROM_LOAD( "qb-fg0.bin",   0x6000, 0x2000, CRC(2f695b85) SHA1(807d16459838f129e10b913890bbc95065d5dd40) )
+ROM_END
+
 ROM_START( qbertjp )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code */
 	ROM_LOAD( "qbj-rom2.bin", 0xa000, 0x2000, CRC(67bb1cb2) SHA1(23a7f8c86d6db9220a98b3f630c5d000e80f2d53) )
@@ -1669,26 +1692,26 @@ ROM_START( qbertjp )
 ROM_END
 
 ROM_START( myqbert )
- ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code */
- ROM_LOAD( "mqb-rom2.bin",  0xa000, 0x2000, CRC(6860f957) SHA1(ebd68aeb6d54868295bd20cf64ee0187a52df0e3) )
- ROM_LOAD( "mqb-rom1.bin",  0xc000, 0x2000, CRC(11f0a4e4) SHA1(a805e51c40042fae209ace277abd9b35a990905b) )
- ROM_LOAD( "mqb-rom0.bin",  0xe000, 0x2000, CRC(12a90cb2) SHA1(a33203aea79fe43d1233a16e3fdddaceac6e4a20) )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code */
+	ROM_LOAD( "mqb-rom2.bin",  0xa000, 0x2000, CRC(6860f957) SHA1(ebd68aeb6d54868295bd20cf64ee0187a52df0e3) )
+	ROM_LOAD( "mqb-rom1.bin",  0xc000, 0x2000, CRC(11f0a4e4) SHA1(a805e51c40042fae209ace277abd9b35a990905b) )
+	ROM_LOAD( "mqb-rom0.bin",  0xe000, 0x2000, CRC(12a90cb2) SHA1(a33203aea79fe43d1233a16e3fdddaceac6e4a20) )
 
- ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* 64k for sound cpu */
- ROM_LOAD( "mqb-snd1.bin",  0xf000, 0x800, CRC(e704b450) SHA1(d509f54658e9f0264b9ab865a6f36e5423a28904) )
- ROM_RELOAD(               0x7000, 0x800 ) /* A15 is not decoded */
- ROM_LOAD( "mqb-snd2.bin",  0xf800, 0x800, CRC(c6a98bf8) SHA1(cc5b5bb5966f5d79226f1f665a3f9fc934f4ef7f) )
- ROM_RELOAD(               0x7800, 0x800 ) /* A15 is not decoded */
+	ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* 64k for sound cpu */
+	ROM_LOAD( "mqb-snd1.bin",  0xf000, 0x800, CRC(e704b450) SHA1(d509f54658e9f0264b9ab865a6f36e5423a28904) )
+	ROM_RELOAD(               0x7000, 0x800 ) /* A15 is not decoded */
+	ROM_LOAD( "mqb-snd2.bin",  0xf800, 0x800, CRC(c6a98bf8) SHA1(cc5b5bb5966f5d79226f1f665a3f9fc934f4ef7f) )
+	ROM_RELOAD(               0x7800, 0x800 ) /* A15 is not decoded */
 
- ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
- ROM_LOAD( "qb-bg0.bin",   0x0000, 0x1000, CRC(7a9ba824) SHA1(12aa6df499eb6996ee35f56acac403ff6290f844) ) /* chars */
- ROM_LOAD( "qb-bg1.bin",   0x1000, 0x1000, CRC(22e5b891) SHA1(5bb67e333255c0ea679ab4312256a8a71a950db8) )
+	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "qb-bg0.bin",   0x0000, 0x1000, CRC(7a9ba824) SHA1(12aa6df499eb6996ee35f56acac403ff6290f844) ) /* chars */
+	ROM_LOAD( "qb-bg1.bin",   0x1000, 0x1000, CRC(22e5b891) SHA1(5bb67e333255c0ea679ab4312256a8a71a950db8) )
 
- ROM_REGION( 0x8000, REGION_GFX2, ROMREGION_DISPOSE )
- ROM_LOAD( "mqb-fg3.bin",   0x0000, 0x2000, CRC(8b5d0852) SHA1(e2cf1679a7ec9e88b254b0a8d690a74d88db0cdc) ) /* sprites */
- ROM_LOAD( "mqb-fg2.bin",   0x2000, 0x2000, CRC(823f1e57) SHA1(a7305815d71d6e3b1c92c387a675e969edc77b7d) )
- ROM_LOAD( "mqb-fg1.bin",   0x4000, 0x2000, CRC(05343ae6) SHA1(6ae3e6949c9eb0df85216575ffd21adc939df0a2) )
- ROM_LOAD( "mqb-fg0.bin",   0x6000, 0x2000, CRC(abc71bdd) SHA1(b72c6867d8e342a6794a4bbab991761c01cfae44) )
+	ROM_REGION( 0x8000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "mqb-fg3.bin",   0x0000, 0x2000, CRC(8b5d0852) SHA1(e2cf1679a7ec9e88b254b0a8d690a74d88db0cdc) ) /* sprites */
+	ROM_LOAD( "mqb-fg2.bin",   0x2000, 0x2000, CRC(823f1e57) SHA1(a7305815d71d6e3b1c92c387a675e969edc77b7d) )
+	ROM_LOAD( "mqb-fg1.bin",   0x4000, 0x2000, CRC(05343ae6) SHA1(6ae3e6949c9eb0df85216575ffd21adc939df0a2) )
+	ROM_LOAD( "mqb-fg0.bin",   0x6000, 0x2000, CRC(abc71bdd) SHA1(b72c6867d8e342a6794a4bbab991761c01cfae44) )
 ROM_END
 
 ROM_START( qberttst )
@@ -1941,7 +1964,8 @@ static DRIVER_INIT( gottlieb )
 
 
 GAME( 1982, reactor,  0,     reactor,  reactor,  0,        ROT0,   "Gottlieb", "Reactor" )
-GAME( 1982, qbert,    0,     qbert,    qbert,    0,        ROT270, "Gottlieb", "Q*bert (US)" )
+GAME( 1982, qbert,    0,     qbert,    qbert,    0,        ROT270, "Gottlieb", "Q*bert (US set 1)" )
+GAME( 1982, qberta,   qbert, qbert,    qbert,    0,        ROT270, "Gottlieb", "Q*bert (US set 2)" )
 GAME( 1982, qbertjp,  qbert, qbert,    qbert,    0,        ROT270, "Gottlieb (Konami license)", "Q*bert (Japan)" )
 GAME( 1982, myqbert,  qbert, qbert,    qbert,    0,        ROT270, "Gottlieb", "Mello Yello Q*bert" )
 GAME( 1982, qberttst, qbert, qbert,    qbert,    0,        ROT270, "Gottlieb", "Q*bert (early test version)" )

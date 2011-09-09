@@ -114,12 +114,12 @@ static int build_decoded_waveform(int region)
 	if (region == -1)
 	{
 		/* We need waveform data. It fails if region is not specified. */
-		if (!namco_wavedata)
-			return 1;
-
-		/* use full byte, first 4 high bits, then low 4 bits, 256 bytes */
-		for (offset = 0; offset < 256; offset++)
-			update_namcos1_waveform(offset, namco_wavedata[offset]);
+		if (namco_wavedata)
+		{
+			/* use full byte, first 4 high bits, then low 4 bits, 256 bytes */
+			for (offset = 0; offset < 256; offset++)
+				update_namcos1_waveform(offset, namco_wavedata[offset]);
+		}
 	}
 	else
 	{
