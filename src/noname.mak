@@ -399,6 +399,7 @@ $(OBJ)/taito.a: \
 	$(OBJ)/vidhrdw/taito_f2.o $(OBJ)/drivers/taito_f2.o \
 	$(OBJ)/vidhrdw/taito_f3.o $(OBJ)/sndhrdw/taito_f3.o $(OBJ)/drivers/taito_f3.o \
 	$(OBJ)/vidhrdw/taitoair.o $(OBJ)/drivers/taitoair.o \
+	$(OBJ)/drivers/taitojc.o \
 
 $(OBJ)/toaplan.a: \
 	$(OBJ)/machine/slapfght.o $(OBJ)/vidhrdw/slapfght.o $(OBJ)/drivers/slapfght.o \
@@ -964,6 +965,7 @@ $(OBJ)/metro.a: \
 
 $(OBJ)/venture.a: \
 	$(OBJ)/vidhrdw/spcforce.o $(OBJ)/drivers/spcforce.o \
+	$(OBJ)/vidhrdw/suprridr.o $(OBJ)/drivers/suprridr.o \
 	$(OBJ)/drivers/looping.o \
 
 $(OBJ)/yunsung.a: \
@@ -1006,6 +1008,7 @@ $(OBJ)/igs.a: \
 	$(OBJ)/vidhrdw/iqblock.o $(OBJ)/drivers/iqblock.o \
 	$(OBJ)/drivers/chindrag.o \
 	$(OBJ)/drivers/grtwall.o \
+	$(OBJ)/drivers/lordgun.o \
 	$(OBJ)/vidhrdw/pgm.o $(OBJ)/drivers/pgm.o \
 	$(OBJ)/machine/pgmprot.o $(OBJ)/machine/pgmcrypt.o \
 
@@ -1035,7 +1038,7 @@ $(OBJ)/sanritsu.a: \
 
 $(OBJ)/rare.a: \
 	$(OBJ)/vidhrdw/btoads.o $(OBJ)/drivers/btoads.o \
-	$(OBJ)/vidhrdw/kinst.o $(OBJ)/drivers/kinst.o \
+	$(OBJ)/drivers/kinst.o \
 
 $(OBJ)/nihonsys.a: \
 	$(OBJ)/vidhrdw/freekick.o $(OBJ)/drivers/freekick.o \

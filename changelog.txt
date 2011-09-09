@@ -1,3 +1,13 @@
+0.81u5.10:
+ - Updated to MAME 0.81u5 source
+ - Fixed the parent roms in jrpacman.c and pacland.c
+ - Changed the parents of many Jerronimo's things around
+ - Added The Games That Time Forgot folder (Nathan Strum)
+ - Added Best Games I've Never Played folder (BYOAC Forums)
+ - Updated Loony Bin folder (MAME World Forums)
+ - Cleaned up folders directory / Updated Crashtest's folders
+ - Added support for Metal Axe, Metal Beast, and Metal Contra (Nino)
+
 0.81u3.09:
  - Updated to MAME 0.81u3 source
 

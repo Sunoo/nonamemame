@@ -172,15 +172,16 @@ DEFS += -DVOLUME_AUTO_ADJUST \
 CFLAGS = -std=gnu99 -Isrc -Isrc/includes -Isrc/$(MAMEOS) -I$(OBJ)/cpu/m68000 -Isrc/cpu/m68000
 
 ifdef SYMBOLS
-CFLAGS += -O0 -Werror -Wall -Wno-unused -g
+CFLAGS += -O0 -g
+#CFLAGS += --Werror -Wall -Wno-unused O0 -g
 else
 CFLAGS += -DNDEBUG \
-	$(ARCH) -O3 -fomit-frame-pointer -fstrict-aliasing \
-	-Werror -Wall -Wno-sign-compare -Wunused \
-	-Wpointer-arith -Wbad-function-cast -Wcast-align \
-	-Wstrict-prototypes -Wundef \
-	-Wformat-security -Wwrite-strings \
-	-Wdisabled-optimization \
+#	$(ARCH) -O3 -fomit-frame-pointer -fstrict-aliasing \
+#	-Werror -Wall -Wno-sign-compare -Wunused \
+#	-Wpointer-arith -Wbad-function-cast -Wcast-align \
+#	-Wstrict-prototypes -Wundef \
+#	-Wformat-security -Wwrite-strings \
+#	-Wdisabled-optimization \
 #	-Wredundant-decls
 #	-Wfloat-equal
 #	-Wunreachable-code -Wpadded
@@ -213,7 +214,7 @@ MAPFLAGS =
 endif
 
 # platform .mak files will want to add to this
-LIBS = -lz
+LIBS = -lz -lfmod
 
 OBJDIRS = obj $(OBJ) $(OBJ)/cpu $(OBJ)/sound $(OBJ)/$(MAMEOS) \
 	$(OBJ)/drivers $(OBJ)/machine $(OBJ)/vidhrdw $(OBJ)/sndhrdw

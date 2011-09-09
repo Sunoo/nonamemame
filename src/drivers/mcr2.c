@@ -1103,4 +1103,4 @@ GAME( 1984, twotiger, 0,        mcr2,     twotiger, mcr2,     ROT0,  "Bally Midw
 GAME( 1984, twotigra, twotiger, twotigra, twotigra, twotigra, ROT0,  "Bally Midway", "Two Tigers (dedicated)" )
 GAMEX(1983, journey,  0,        journey,  journey,   mcr2,     ROT90, "Bally Midway", "Journey", GAME_IMPERFECT_SOUND )
 GAME (1998, handiman, 0,        mcr2,    tron,     tron,     ROT90, "Bobby Tribble hack", "Handi-Man in Cyberworld")
-GAME( 2004, shtron,    tron,     mcr2,     tron,     mcr2,     ROT90, "Jerronimo", "Satan's Hollow (Tron Hardware)" )
+GAME( 2004, shtron,    shollow,     mcr2,     tron,     mcr2,     ROT90, "Jerronimo", "Satan's Hollow (Tron Hardware)" )

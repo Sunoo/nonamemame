@@ -556,6 +556,9 @@ const struct GameDriver driver_##NAME =		\
 ***************************************************************************/
 
 extern const struct GameDriver *drivers[];
+extern signed char StopFile(int channel);
+extern void PlayFile(int channel, char file[500], int looping, int start, int stop);
+extern signed char PauseFile(int channel, signed char paused);
 
 
 /***************************************************************************

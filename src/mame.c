@@ -670,6 +670,13 @@ void mame_pause(int pause)
 	osd_sound_enable(!pause);
 	palette_set_global_brightness_adjust(pause ? options.pause_bright : 1.00);
 	schedule_full_refresh();
+	
+	if(pause == 1){
+	logerror("pausing music\n");
+	}else{
+	logerror("resuming music\n"); 
+	}
+	PauseFile(0, pause);
 }
 
 

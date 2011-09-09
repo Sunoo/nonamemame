@@ -12,6 +12,7 @@
 #include "artwork.h"
 #include <stdarg.h>
 #include <ctype.h>
+#include "nino.c"
 
 
 //#define LOG_LOAD
@@ -161,8 +162,10 @@ static struct GameSample *read_wav_sample(mame_file *f)
 
 	/* read the format -- make sure it is PCM */
 	offset += mame_fread_lsbfirst(f, &temp16, 2);
-	if (temp16 != 1)
+	if (temp16 != 1){
+   		logerror("read_wav_sample - only mono is supported\n");
 		return NULL;
+		}
 
 	/* number of channels -- only mono is supported */
 	offset += mame_fread_lsbfirst(f, &temp16, 2);
@@ -172,6 +175,7 @@ static struct GameSample *read_wav_sample(mame_file *f)
 	/* sample rate */
 	offset += mame_fread(f, &rate, 4);
 	rate = intelLong(rate);
+	logerror("RATE: %d\n", rate);
 
 	/* bytes/second and block alignment are ignored */
 	offset += mame_fread(f, buf, 6);
@@ -225,7 +229,7 @@ static struct GameSample *read_wav_sample(mame_file *f)
 		/* 16-bit data is fine as-is */
 		mame_fread_lsbfirst(f, result->data, length);
 	}
-
+	logerror("read_wav_sample - ALL CLEAR\n");
 	return result;
 }
 
@@ -1220,6 +1224,7 @@ static void verify_length_and_hash(struct rom_load_data *romdata, const char *na
 static int display_rom_load_results(struct rom_load_data *romdata)
 {
 	int region;
+	char *ress[80];
 
 	/* final status display */
 	osd_display_loading_rom_message(NULL, romdata);
@@ -1240,6 +1245,9 @@ static int display_rom_load_results(struct rom_load_data *romdata)
 
 		/* display the result */
 		printf("%s", romdata->errorbuf);
+		
+		sprintf(ress, "ERROR\n%s", romdata->errorbuf);
+		mpegcmd(ress);
 
 		/* if we're not getting out of here, wait for a keypress */
 		if (!options.gui_host && !options.skip_warnings && !bailing && !options.skip_baddumps)

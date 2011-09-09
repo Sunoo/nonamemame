@@ -376,7 +376,7 @@ INLINE void invalid_instruction(UINT32 op)
 
 static void check_irqs(void)
 {
-	if ((CAUSE & SR & 0xff00) && (SR & SR_IE) && !(SR & SR_EXL) && !(SR & SR_ERL))
+	if ((CAUSE & SR & 0xfc00) && (SR & SR_IE) && !(SR & SR_EXL) && !(SR & SR_ERL))
 		generate_exception(EXCEPTION_INTERRUPT, 0);
 }
 
@@ -591,8 +591,8 @@ INLINE void set_cop0_reg(int idx, UINT64 val)
 	{
 		case COP0_Cause:
 			CAUSE = (CAUSE & 0xfc00) | (val & ~0xfc00);
-			/* update interrupts -- software ints can occur this way */
-			check_irqs();
+			if (CAUSE & 0x300)
+				generate_exception(EXCEPTION_INTERRUPT, 0);
 			break;
 
 		case COP0_Status:

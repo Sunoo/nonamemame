@@ -660,5 +660,5 @@ GAME( 1982, pengob,  pengo, pengo, pengo, penta, ROT90, "bootleg", "Pengo (bootl
 GAME( 1982, penta,   pengo, pengo, pengo, penta, ROT90, "bootleg", "Penta" )
 GAME( 1997, pengopop, pengo, pengo, pengo, 0,    ROT90, "Sega", "Pengo (Popcorn Music)" )
 GAME( 2000, vecpengo, pengo, pengo, pengo, pengo, ROT90, "T-Bone hack", "Pengo (Vector sim)")
-GAME( 2003, alpacap7, pengo, pengo, pengo, 0,     ROT90, "Jerronimo", "Alpaca v0.7 (Pengo Hardware)" )
-GAME( 2003, alpacap8, pengo, pengo, pengo, 0,     ROT90, "Jerronimo", "Alpaca v0.8 (Pengo Hardware)" )
+GAME( 2003, alpacap7, alpaca8, pengo, pengo, 0,     ROT90, "Jerronimo", "Alpaca v0.7 (Pengo Hardware)" )
+GAME( 2003, alpacap8, alpaca8, pengo, pengo, 0,     ROT90, "Jerronimo", "Alpaca v0.8 (Pengo Hardware)" )

@@ -60,6 +60,102 @@ WRITE_HANDLER( contra_coin_counter_w )
 
 static WRITE_HANDLER( cpu_sound_command_w )
 {
+	if(Machine->gamedrv->name == "metlcnta"){
+
+/* Debugger for song digging ...
+char str[500];
+sprintf(str, "echo %s %d-%d>>contra.txt", Machine->gamedrv->name, data, offset);
+system(str);
+*/
+	
+	switch(data){
+	case 0:
+	StopFile(0);
+	return;
+	break;
+	
+	case 77: /* Intro */
+	logerror("SONG: Intro %d\n", data);
+	PlayFile(0, "SONGS\\metlcnta\\intro.ogg", 0, 0, 0);
+	return;
+	break;
+	
+	
+	case 64: /* First Stage */
+	logerror("SONG: 1st Stage %d\n", data);
+	PlayFile(0, "SONGS\\metlcnta\\stage1.ogg", 1, 72619, 2320000);
+	return;
+	break;
+
+	case 68: /* Corridors */
+	logerror("SONG: Corridors %d\n", data);
+	PlayFile(0, "SONGS\\metlcnta\\stage1a.ogg", 1, 0, 0);
+	return;
+	break;
+	
+	case 66: /* Second Stage */
+	logerror("SONG: 2nd Stage %d\n", data);
+	PlayFile(0, "SONGS\\metlcnta\\stage2.ogg", 1, 447367, 1938000);
+	return;
+	break;
+
+	case 71: /* BOSS */
+	logerror("SONG: BOSS %d\n", data);
+	PlayFile(0, "SONGS\\metlcnta\\boss.ogg", 1, 447367, 1938000);
+	return;
+	break;
+
+	case 70: /* Third Stage */
+	logerror("SONG: 3rd Stage %d\n", data);
+	PlayFile(0, "SONGS\\metlcnta\\stage3.ogg", 1, 161777, 1673000);
+	return;
+	break;
+	
+	case 67: /* Third Stage */
+	logerror("SONG: 3rd Stage A %d\n", data);
+	PlayFile(0, "SONGS\\metlcnta\\stage3a.ogg", 1, 0, 0);
+	return;
+	break;
+	
+	case 72: /* Alien's nast */
+	logerror("SONG: Alien's nast %d\n", data);
+	PlayFile(0, "SONGS\\metlcnta\\stage3b.ogg", 1, 480544, 1473000);
+	return;
+	break;
+	
+	case 76: /* Conclusion */
+	logerror("SONG: Conclusion %d\n", data);
+	PlayFile(0, "SONGS\\metlcnta\\cnclsion.ogg", 0, 0, 0);
+	return;
+	break;
+
+	case 73: /* Ending */
+	logerror("SONG: Ending %d\n", data);
+	PlayFile(0, "SONGS\\metlcnta\\ending.ogg", 1, 0, 0);
+	return;
+	break;
+	
+	case 69: /* High Score */
+	logerror("SONG: High Score %d\n", data);
+	PlayFile(0, "SONGS\\metlcnta\\complete.ogg", 0, 0, 0);
+	return;
+	break;
+	
+	
+	case 74: /* Game Over */
+	logerror("SONG: Game Over %d\n", data);
+	PlayFile(0, "SONGS\\metlcnta\\gameover.ogg", 0, 0, 0);
+	return;
+	break;
+	
+	case 75: /* Mission Complete */
+	logerror("SONG: Mission Complete %d\n", data);
+	PlayFile(0, "SONGS\\metlcnta\\complete.ogg", 0, 0, 0);
+	return;
+	break;	
+
+	}
+	}
 	soundlatch_w(offset,data);
 }
 
@@ -430,6 +526,30 @@ ROM_START( gryzor )
 	ROM_LOAD( "633f11.20g",   0x0300, 0x0100, CRC(14ca5e19) SHA1(eeee2f8b3d1e4acf47de1e74c4e507ff924591e7) )	/* 007121 #1 char lookup table */
 ROM_END
 
+ROM_START( metlcnta )
+	ROM_REGION( 0x28000, REGION_CPU1, 0 )	/* 64k for code + 96k for banked ROMs */
+	ROM_LOAD( "633e03.18a",   0x20000, 0x08000, CRC(7fc0d8cf) SHA1(cf1cf15646a4e5dc72671e957bc51ca44d30995c) )
+	ROM_CONTINUE(			  0x08000, 0x08000 )
+	ROM_LOAD( "633e02.17a",   0x10000, 0x10000, CRC(b2f7bd9a) SHA1(6c29568419bc49f0be3995b0c34edd9038f6f8d9) )
+
+	ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for SOUND code */
+	ROM_LOAD( "633e01.12a",   0x08000, 0x08000, CRC(d1549255) SHA1(d700c7de36746ba247e3a5d0410b7aa036aa4073) )
+
+	ROM_REGION( 0x80000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD16_BYTE( "633e04.7d",    0x00000, 0x40000, CRC(14ddc542) SHA1(c7d8592672a6e50c2fe6b0670001c340022f16f9) )
+	ROM_LOAD16_BYTE( "633e05.7f",    0x00001, 0x40000, CRC(42185044) SHA1(a6e2598d766e6995c1a912e4a04987e6f4d547ff) )
+
+	ROM_REGION( 0x80000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD16_BYTE( "633e06.16d",   0x00000, 0x40000, CRC(9cf6faae) SHA1(9ab79c06cb541ce6fdac322886b8a14a2f3f5cf7) )
+	ROM_LOAD16_BYTE( "633e07.16f",   0x00001, 0x40000, CRC(f2d06638) SHA1(0fa0fbfc53ab5c31b9de22f90153d9af37ff22ce) )
+
+	ROM_REGION( 0x0400, REGION_PROMS, 0 )
+	ROM_LOAD( "633e08.10g",   0x0000, 0x0100, CRC(9f0949fa) SHA1(7c8fefdcae4523d008a7d39062194c7a80aa3500) )	/* 007121 #0 sprite lookup table */
+	ROM_LOAD( "633e09.12g",   0x0100, 0x0100, CRC(14ca5e19) SHA1(eeee2f8b3d1e4acf47de1e74c4e507ff924591e7) )	/* 007121 #0 char lookup table */
+	ROM_LOAD( "633f10.18g",   0x0200, 0x0100, CRC(2b244d84) SHA1(c3bde7afb501bae58d07721c637dc06938c22150) )	/* 007121 #1 sprite lookup table */
+	ROM_LOAD( "633f11.20g",   0x0300, 0x0100, CRC(14ca5e19) SHA1(eeee2f8b3d1e4acf47de1e74c4e507ff924591e7) )	/* 007121 #1 char lookup table */
+ROM_END
+
 
 
 GAME( 1987, contra,   0,      contra, contra, 0, ROT90, "Konami", "Contra (US)" )
@@ -437,3 +557,5 @@ GAME( 1987, contrab,  contra, contra, contra, 0, ROT90, "bootleg", "Contra (US b
 GAME( 1987, contraj,  contra, contra, contra, 0, ROT90, "Konami", "Contra (Japan)" )
 GAME( 1987, contrajb, contra, contra, contra, 0, ROT90, "bootleg", "Contra (Japan bootleg)" )
 GAME( 1987, gryzor,   contra, contra, contra, 0, ROT90, "Konami", "Gryzor" )
+
+GAME( 2004, metlcnta, contra, contra, contra, 0, ROT90, "Megadriver", "Metal Contra" )

@@ -390,6 +390,75 @@ ADDRESS_MAP_END
 
 
 static WRITE16_HANDLER( sound_command_w ){
+	logerror("SOUNDCMD: %s %d\n",Machine->gamedrv->name, data);
+	if(Machine->gamedrv->name == "metalbst"){
+	switch (data)
+		{
+		case 0: /* STOP */
+		StopFile(0);
+		break;
+
+		case 144: /* BOSS */
+		logerror("SONG: BOSS %d\n", data);
+		PlayFile(0, "SONGS\\metalbst\\boss.ogg", 1, 0, 0);
+		return;
+		break;
+
+		case 145: /* METAMORPHOSED */
+		logerror("SONG: METAMORPHOSED %d\n", data);
+		PlayFile(0, "SONGS\\metalbst\\beast.ogg", 1, 0, 0);
+		return;
+		break;
+
+		case 146: /* GAME OVER */
+		logerror("SONG: GAME OVER %d\n", data);
+		PlayFile(0, "SONGS\\metalbst\\gameover.ogg", 1, 0, 0);
+		return;
+		break;
+
+		case 147: /* INTERMISSION */
+		logerror("SONG: INTERMISSION %d\n", data);
+		PlayFile(0, "SONGS\\metalbst\\dialog.ogg", 1, 0, 0);
+		return;
+		break;
+
+		case 148: /* FIRST STAGE */
+		logerror("SONG: FIRST STAGE %d\n", data);
+		PlayFile(0, "SONGS\\metalbst\\stage1.ogg", 1, 0, 0);
+		return;
+		break;
+
+		case 149: /* SECOND STAGE */
+		logerror("SONG: SECOND STAGE %d\n", data);
+		PlayFile(0, "SONGS\\metalbst\\stage2.ogg", 1, 0, 0);
+		return;
+		break;
+
+		case 150: /* INTRO */
+		logerror("SONG: BOSS %d\n", data);
+		PlayFile(0, "SONGS\\metalbst\\intro.ogg", 1, 0, 0);
+		return;
+		break;
+
+		case 151: /* ENDING */
+		logerror("SONG: ENDING %d\n", data);
+		PlayFile(0, "SONGS\\metalbst\\ending.ogg", 1, 0, 0);
+		return;
+		break;
+	}
+/*
+ Altered Beast Songs
+ 144 - Boss
+ 145 - Metamorphosed
+ 146 - Game Over
+ 147 - Intermission
+ 148 - First Stage
+ 149 - Second Stage
+ 150 - Intro
+ 151 - Ending
+*/	
+}
+	
 	if( ACCESSING_LSB ){
 		soundlatch_w( 0,data&0xff );
 		cpu_set_irq_line( 1, 0, HOLD_LINE );
@@ -397,6 +466,7 @@ static WRITE16_HANDLER( sound_command_w ){
 }
 
 static WRITE16_HANDLER( sound_command_nmi_w ){
+	logerror("NINO - WRITE16_HANDLER( sound_command_nmi_w )\n");
 	if( ACCESSING_LSB ){
 		soundlatch_w( 0,data&0xff );
 		cpu_set_nmi_line(1, PULSE_LINE);
@@ -3061,6 +3131,110 @@ static ADDRESS_MAP_START( goldnaxe_readmem, ADDRESS_SPACE_PROGRAM, 16 )
 ADDRESS_MAP_END
 
 static WRITE16_HANDLER( ga_sound_command_w ){
+	if(Machine->gamedrv->name == "metalaxe"){
+logerror("SOUND CMD: %d\n", data);
+	switch (data)
+		{
+		case 0: /* STOP */
+		StopFile(0);
+		break;
+
+		case 49152: /* 1 - BATTLE FIELD */
+		logerror("SONG: BATTLE FIELD %d\n", data);
+		PlayFile(0, "SONGS\\metalaxe\\btlfield.ogg", 1, 0, 0);
+		return;
+		break;
+		
+		case 49408: /* 2 - WILDERNESS */
+		logerror("SONG: WILDERNESS %d\n", data);
+		PlayFile(0, "SONGS\\metalaxe\\wild.ogg", 1, 0, 0);
+		return;
+		break;
+
+		case 49664: /* 3 - DEAD ADDER */
+		logerror("SONG: DEAD ADDER %d\n", data);
+		PlayFile(0, "SONGS\\metalaxe\\deadaddr.ogg", 1, 183742, 3628718);
+		return;
+		break;
+		
+		case 49920: /* 4 - TURTLE VILLAGE 1 */
+		logerror("SONG: TURTLE VILLAGE 1 %d\n", data);
+		PlayFile(0, "SONGS\\metalaxe\\turtle1.ogg", 1, 0, 0);
+		return;
+		break;
+		
+		case 50176: /* 5 - GAME OVER */
+		logerror("SONG: GAME OVER %d\n", data);
+		PlayFile(0, "SONGS\\metalaxe\\gameover.ogg", 0, 0, 0);
+		return;
+		break;		
+
+		case 50432: /* 6 - THE BATTLE */
+		logerror("SONG: THE BATTLE %d\n", data);
+		PlayFile(0, "SONGS\\metalaxe\\battle.ogg", 1, 0, 0);
+		return;
+		break;				
+
+		case 50688: /* 7 - THIEF'S THEME */
+		logerror("SONG: THIEF'S THEME %d\n", data);
+		PlayFile(0, "SONGS\\metalaxe\\thief.ogg", 1, 0, 0);
+		return;
+		break;		
+		
+		case 50944: /* 8 - OLD MAP */
+		logerror("SONG: OLD MAP %d\n", data);
+		PlayFile(0, "SONGS\\metalaxe\\map.ogg", 0, 0, 0);
+		return;
+		break;		
+		
+		case 51200: /* 9 - PATH OF FRIEND */
+		logerror("SONG: PATH OF FRIEND %d\n", data);
+		PlayFile(0, "SONGS\\metalaxe\\friend.ogg", 1, 0, 0);
+		return;
+		break;		
+		
+		case 51456: /* 10 - CONCLUSION */
+		logerror("SONG: CONCLUSION %d\n", data);
+		PlayFile(0, "SONGS\\metalaxe\\cnclsion.ogg", 0, 0, 0);
+		return;
+		break;		
+		
+		case 51712: /* 11 - HI SCORE */
+		logerror("SONG: HI SCORE %d\n", data);
+		PlayFile(0, "SONGS\\metalaxe\\cnclsion.ogg", 0, 0, 0);
+		return;
+		break;
+		
+		case 51968: /* 12 - TURTLE VILLAGE 2 */
+		logerror("SONG: TURTLE VILLAGE 2 %d\n", data);
+		PlayFile(0, "SONGS\\metalaxe\\turtle2.ogg", 1, 0, 0);
+		return;
+		break;		
+		
+		case 52224: /* 13 - SUTAROKA, SASSA! */
+		logerror("SONG: SUTAROKA, SASSA! %d\n", data);
+		PlayFile(0, "SONGS\\metalaxe\\sassa.ogg", 1, 0, 0);
+		return;
+		break;		
+    }
+	
+/*
+DIP - data  - Song
+00  - 49152 - BATTLE FIELD
+01  - 49408	- WILDERNESS
+02  - 49664	- SHOWDOWN
+03  - 49920	- TURTLE VILLAGE 1
+04  - 50176	- GAME OVER
+05  - 50432	- THE BATTLE 
+06  - 50688	- THIEF'S THEME
+07  - 50944	- OLD MAP
+08  - 51200	- PATH OF FRIEND
+09  - 51456	- CONCLUSION
+0A  - 51712	- UNKNOWN 
+0B  - 51968	- TURTLE VILLAGE 2
+0C  - 52224	- SUTAROKA, SASSA!
+*/
+}
 	COMBINE_DATA( &sys16_workingram[(0xecfc-0xc000)/2] );
 	if( ACCESSING_MSB ){
 		soundlatch_w( 0,data>>8 );
@@ -6972,6 +7146,59 @@ ROM_START( aceattac )
 ROM_END
 
 
+ROM_START( metalaxe )
+	ROM_REGION( 0x0c0000, REGION_CPU1, 0 ) /* 68000 code */
+	ROM_LOAD16_BYTE( "epr12523.a7", 0x00000, 0x20000, CRC(8e6128d7) SHA1(b8de216f4ca08815ca98d39a773024d191d21b4d) )
+	ROM_LOAD16_BYTE( "epr12522.a5", 0x00001, 0x20000, CRC(b6c35160) SHA1(88015d0a486f56911360362c96a82f36a13de886) )
+	/* empty 0x40000 - 0x80000 */
+	ROM_LOAD16_BYTE( "epr12521.a8", 0x80000, 0x20000, CRC(5001d713) SHA1(68cf3f48d6e440e5b800503a211adda02107d956) )
+	ROM_LOAD16_BYTE( "epr12519.a6", 0x80001, 0x20000, CRC(4438ca8e) SHA1(0af53d64f06abf41f4c46540d28d5f008a4835a3) )
+
+	ROM_REGION( 0x60000, REGION_GFX1, ROMREGION_DISPOSE ) /* tiles */
+	ROM_LOAD( "epr12385", 0x00000, 0x20000, CRC(b8a4e7e0) SHA1(9b36f50209d45a835ded53eb045f63c649b02fc9) )
+	ROM_LOAD( "epr12386", 0x20000, 0x20000, CRC(25d7d779) SHA1(2de14a76a5176d5abc7e7f7f723146c620927610) )
+	ROM_LOAD( "epr12387", 0x40000, 0x20000, CRC(c7fcadf3) SHA1(5f0fd600a75a02749935af21e1e0d2c714c6417e) )
+
+	ROM_REGION( 0x180000, REGION_GFX2, 0 ) /* sprites */
+	ROM_LOAD16_BYTE( "mpr12378.b1", 0x000001, 0x40000, CRC(119e5a82) SHA1(261ed2bc4ebac7142e2ecca9f03c91242e792a98) )
+	ROM_LOAD16_BYTE( "mpr12379.b4", 0x000000, 0x40000, CRC(1a0e8c57) SHA1(674f1ae7db632876fff346e76786801ae19d9799) )
+	ROM_LOAD16_BYTE( "mpr12380.b2", 0x080001, 0x40000, CRC(bb2c0853) SHA1(3f3b546d078f22d787c93ee74d9ad3a6e84383ac) )
+	ROM_LOAD16_BYTE( "mpr12381.b5", 0x080000, 0x40000, CRC(81ba6ecc) SHA1(7f59e4d86a192b97e92729371b78c3f1c784a0b5) )
+	ROM_LOAD16_BYTE( "mpr12382.b3", 0x100001, 0x40000, CRC(81601c6f) SHA1(604bc5613c6c734a06860303ba36d61bb54508a0) )
+	ROM_LOAD16_BYTE( "mpr12383.b6", 0x100000, 0x40000, CRC(5dbacf7a) SHA1(236866fb94672b13cbb2cb479324e61de87eeb34) )
+
+	ROM_REGION( 0x30000, REGION_CPU2, 0 ) /* sound CPU */
+	ROM_LOAD( "epr12390",     0x00000, 0x08000, CRC(399fc5f5) SHA1(6f290b36dc71ff4759598e2a9c185a8945a3c9e7) )
+	ROM_LOAD( "mpr12384.a11", 0x10000, 0x20000, CRC(6218d8e7) SHA1(5a745c750efb4a61716f99befb7ed14cc84e9973) )
+ROM_END
+
+ROM_START( metalbst )
+	ROM_REGION( 0x040000, REGION_CPU1, 0 ) /* 68000 code */
+	ROM_LOAD16_BYTE( "11705", 0x000000, 0x20000, CRC(57dc5c7a) SHA1(a5cc9b10a00778f5163fc915b956fa5d0d7a37ce) )
+	ROM_LOAD16_BYTE( "11704", 0x000001, 0x20000, CRC(33bbcf07) SHA1(534e5426580dbf72509dceb762b8b99766d3a739) )
+
+	ROM_REGION( 0x60000, REGION_GFX1, ROMREGION_DISPOSE ) /* tiles */
+	ROM_LOAD( "11674", 0x00000, 0x20000, CRC(a57a66d5) SHA1(5103583d48997abad12a0c5fee26431c486ced52) )
+	ROM_LOAD( "11675", 0x20000, 0x20000, CRC(2ef2f144) SHA1(38d22d609db2d9b6067b5d12f6499436de4605cb) )
+	ROM_LOAD( "11676", 0x40000, 0x20000, CRC(0c04acac) SHA1(87fe2a0dd9913f9550e9b4cbc7e7465b61640e07) )
+
+	ROM_REGION( 0x100000, REGION_GFX2, 0 ) /* sprites */
+	ROM_LOAD16_BYTE( "epr11677.b1", 0x00001, 0x20000, CRC(a01425cd) SHA1(72be5ec29e476601f9bf6aaedef9b73cedeb42f0) )
+	ROM_LOAD16_BYTE( "epr11681.b5", 0x00000, 0x20000, CRC(d9e03363) SHA1(995a7c6a8f0c61468b57a3bb407461a2a3ae8adc) )
+	ROM_LOAD16_BYTE( "epr11678.b2", 0x40001, 0x20000, CRC(17a9fc53) SHA1(85a9a605742ae5aab86db37189b9ee4d54c70e56) )
+	ROM_LOAD16_BYTE( "epr11682.b6", 0x40000, 0x20000, CRC(e3f77c5e) SHA1(6b3cb7918ab0c7c97a51cc5ea19ced3374ff3914) )
+	ROM_LOAD16_BYTE( "epr11679.b3", 0x80001, 0x20000, CRC(14dcc245) SHA1(1ca1b6e0f2b7bedad2a8ab70f52da8c54d40d3cf) )
+	ROM_LOAD16_BYTE( "epr11683.b7", 0x80000, 0x20000, CRC(f9a60f06) SHA1(0cffcfdb02733feaa869198b7e668c58b47c321a) )
+	ROM_LOAD16_BYTE( "epr11680.b4", 0xc0001, 0x20000, CRC(f43dcdec) SHA1(2941500cf33afca487f19f2329033d5d17aad826) )
+	ROM_LOAD16_BYTE( "epr11684.b8", 0xc0000, 0x20000, CRC(b20c0edb) SHA1(6c8694d05e3adac37c9015037ab800233371db36) )
+
+	ROM_REGION( 0x50000, REGION_CPU2, 0 ) /* sound CPU */
+	ROM_LOAD( "11671",		 0x00000, 0x08000, CRC(2b71343b) SHA1(8a657f787de2b9d5161ed2c109642a148348af09) )
+	ROM_LOAD( "opr11672",    0x10000, 0x20000, CRC(bbd7f460) SHA1(bbc5c2219cb3a827d84062b19affd9780da2a3cf) )
+	ROM_LOAD( "opr11673",    0x30000, 0x20000, CRC(400c4a36) SHA1(de4bdfa91734410e0a7f6a16bf8336db172f458a) )
+ROM_END
+
+
 
 /* pre-System16 */
 /*          rom       parent    machine   inp       init */
@@ -7061,3 +7288,6 @@ GAME( 1988, wb3,      0,        wb3,      wb3,      wb3,      ROT0,   "Sega / We
 GAMEX(1988, wb3a,     wb3,      wb3,      wb3,      wb3,      ROT0,   "Sega / Westone", "Wonder Boy III - Monster Lair (set 2)", GAME_NOT_WORKING )
 GAME( 1988, wb3bl,    wb3,      wb3bl,    wb3,      wb3bl,    ROT0,   "bootleg", "Wonder Boy III - Monster Lair (bootleg)" )
 GAME( 1989, wrestwar, 0,        wrestwar, wrestwar, wrestwar, ROT270, "Sega",    "Wrestle War" )
+
+GAME( 2004, metalaxe, goldnaxe, goldnaxe, goldnaxe, goldnaxe, ROT0,   "Megadriver",    "Metal Axe" )
+GAME( 2004, metalbst, altbeast, altbeast, altbeast, altbeast, ROT0,   "Megadriver",    "Metal Beast" )

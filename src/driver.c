@@ -17,6 +17,64 @@
 
 #ifndef DRIVER_RECURSIVE
 
+/* NINO FMOD IMPLEMENTATION */
+#include "fmod.h"
+#include "fmoddyn.h"
+#include "fmod_errors.h"
+#include <conio.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
+
+/*
+Play a sample file using the FMOD lib ... mp2 mp3 wav ogg wma asf
+PlayFile(filename, looping, start point, end point);
+*/
+void PlayFile(int channel, char file[500], int looping, int start, int stop){
+FSOUND_STREAM *stream;
+
+
+    if (!FSOUND_Init(44100, 16, 0))
+    {
+        printf("Error!\n");
+        printf("%s\n", FMOD_ErrorString(FSOUND_GetError()));
+        FSOUND_Close();
+        return;
+    }
+	if(looping){
+	stream = FSOUND_Stream_Open(file, FSOUND_LOOP_NORMAL , 0, 0);
+	FSOUND_Stream_SetLoopPoints(stream, start, stop);
+	}else{
+	stream = FSOUND_Stream_Open(file, FSOUND_LOOP_OFF, 0, 0);
+	}
+FSOUND_Stream_Play(channel, stream);
+
+  char gname[6];
+  sprintf(gname, "%s", Machine->gamedrv->name);
+
+  /* Volume adjustments */
+  if(strcmp(Machine->gamedrv->name,"contra") == 0){
+  FSOUND_SetVolume(channel,110);
+  }else{
+  FSOUND_SetVolume(channel,160);
+  }
+}
+
+/*
+  StopFile(channel to be stopped);
+*/
+signed char StopFile(int channel){
+return FSOUND_StopSound(channel);
+}
+
+signed char PauseFile(int channel, signed char paused){
+return FSOUND_SetPaused(channel,  paused );
+}
+
+
+
+/* END NINO FMOD IMPLEMENTATION */
+
 /* The "root" driver, defined so we can have &driver_##NAME in macros. */
 struct GameDriver driver_0 =
 {
@@ -217,6 +275,7 @@ const struct GameDriver *drivers[] =
 	DRIVER( ladybugg )	/* bootleg */
 	DRIVER( vpool )		/* bootleg */
 	DRIVER( drivfrcg )	/* Shinkai */
+	DRIVER( drivfrcb )	/* bootleg */
 	DRIVER( bongo )		/* Jetsoft */
 	DRIVER( hunchbkg )	/* Century */
 
@@ -1728,6 +1787,16 @@ const struct GameDriver *drivers[] =
 	DRIVER( landmakr )	/* E61 (c) 1998 Taito Corporation (Japan) */
 	DRIVER( landmkrp )	/* E61 (c) 1998 Taito Corporation (World, prototype) */
 
+	/* Taito JC System */
+	DRIVER( landgear )	/* E17 (c) 199? Taito Corporation */
+	DRIVER( dendeg )	/* E35 (c) 199? Taito Corporation */
+	DRIVER( dendegx )	/* E35 (c) 199? Taito Corporation */
+	DRIVER( dendeg2 )	/* E52 (c) 199? Taito Corporation */
+	DRIVER( dendeg2x )	/* E52 (c) 199? Taito Corporation */
+	DRIVER( sidebs )	/* E23 (c) 199? Taito Corporation */
+	DRIVER( sidebs2 )	/* E38 (c) 199? Taito Corporation */
+
+
 	/* Toaplan games */
 	DRIVER( perfrman )	/* (c) 1985 Data East Corporation (Japan) */
 	DRIVER( perfrmau )	/* (c) 1985 Data East USA (US) */
@@ -1775,6 +1844,7 @@ const struct GameDriver *drivers[] =
 	DRIVER( snowbros )	/* MIN16-02 (c) 1990 Toaplan + Romstar license */
 	DRIVER( snowbroa )	/* MIN16-02 (c) 1990 Toaplan + Romstar license */
 	DRIVER( snowbrob )	/* MIN16-02 (c) 1990 Toaplan + Romstar license */
+	DRIVER( snowbroc )	/* MIN16-02 (c) 1990 Toaplan + Romstar license */
 	DRIVER( snowbroj )	/* MIN16-02 (c) 1990 Toaplan */
 	DRIVER( wintbob )	/* bootleg */
 	/* SemiCom games on snowbros like hardware */
@@ -3052,8 +3122,10 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	DRIVER( mt_kcham )	/* 60 */
 
 	/* Sega MegaPlay */
-	DRIVER( mp_sonic )
-	DRIVER( mp_gaxe2 )
+	DRIVER( mp_sonic )	/* 01 */
+	DRIVER( mp_gaxe2 )	/* 02 */
+						/* 03 */
+	DRIVER( mp_twc )	/* 04 */
 
 	/* Data East "Burger Time hardware" games */
 	DRIVER( lnc )		/* (c) 1981 */
@@ -4456,7 +4528,8 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	DRIVER( wwfmania )	/* (c) 1995 Midway */
 	DRIVER( openice )	/* (c) 1995 Midway */
 	DRIVER( nbahangt )	/* (c) 1996 Midway */
-	DRIVER( nbamaxht )	/* (c) 1996 Midway */
+	DRIVER( nbamht )	/* (c) 1996 Midway */
+	DRIVER( nbamht1 )	/* (c) 1996 Midway */
 	DRIVER( rmpgwt )	/* (c) 1997 Midway */
 	DRIVER( rmpgwt11 )	/* (c) 1997 Midway */
 	DRIVER( crusnusa )	/* (c) 1994 Midway */
@@ -4472,12 +4545,15 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	DRIVER ( wg3dh )	/* (c) 1996 Atari Games */
 	DRIVER ( mace )		/* (c) 1996 Atari Games */
 	DRIVER ( sfrush )	/* (c) 1996 Atari Games */
+	DRIVER ( sfrushrk )	/* (c) 1996 Atari Games */
 	DRIVER ( calspeed )	/* (c) 1996 Atari Games */
+	DRIVER ( vaportrx )	/* (c) 1998 Atari Games */
 	DRIVER ( carnevil )	/* (c) 1998 Midway Games */
 	DRIVER ( biofreak )	/* (c) 1997 Midway Games */
 	DRIVER ( blitz )	/* (c) 1997 Midway Games */
 	DRIVER ( blitz99 )	/* (c) 1998 Midway Games */
 	DRIVER ( blitz2k )	/* (c) 1999 Midway Games */
+	DRIVER ( hyprdriv )	/* (c) 1998 Midway Games */
 
 	/* Cinematronics raster games */
 	DRIVER( embargo )
@@ -5093,6 +5169,8 @@ Other Sun games
 	/* Tong Electronic games */
 	DRIVER( leprechn )	/* (c) 1982 */
 	DRIVER( potogold )	/* (c) 1982 */
+	DRIVER( leprechp )	/* (c) 1982 */
+	DRIVER( piratetr )	/* (c) 1982 */
 	DRIVER( beezer )	/* (c) 1982 */
 	DRIVER( beezer1 )	/* (c) 1982 */
 
@@ -5168,6 +5246,7 @@ Other Sun games
 	DRIVER( looping )	/* (c) 1982 Venture Line + licensed from Video Games */
 	DRIVER( loopinga )	/* (c) 1982 Venture Line + licensed from Video Games */
 	DRIVER( skybump )	/* (c) 1982 Venture Line */
+	DRIVER( suprridr )	/* (c) 1983 Venture Line + Taito license */
 
 	/* Yun Sung games */
 	DRIVER( paradise )	/* (c) >1994 Yun Sung */
@@ -5268,6 +5347,7 @@ Other Sun games
 	DRIVER( cabaret )
 	DRIVER( chindrag )
 	DRIVER( grtwall )
+	DRIVER( lordgun )	/* (c) 1994 */
 
 	/* IGS PGM System Games */
 	DRIVER( orlegend )	/* (c) 1997 */
@@ -5323,7 +5403,11 @@ Other Sun games
 	/* Rare games */
 	DRIVER( btoads )	/* (c) 1994 Rare */
 	DRIVER( kinst )		/* (c) 1994 Rare */
+	DRIVER( kinst14 )	/* (c) 1994 Rare */
+	DRIVER( kinst13 )	/* (c) 1994 Rare */
 	DRIVER( kinst2 )	/* (c) 1994 Rare */
+	DRIVER( kinst213 )	/* (c) 1994 Rare */
+	DRIVER( kinst211 )	/* (c) 1994 Rare */
 
 	/* Nihon System games */
 	DRIVER( gigasb )
@@ -5656,7 +5740,7 @@ Other Sun games
 	DRIVER( wakuwak7 )	/* 0225 (c) 1996 Sunsoft */
 	/* 0226 Pair Pair Wars (prototype) 1996 Sunsoft? */
 	DRIVER( stakwin2 )	/* 0227 (c) 1996 Saurus */
-	/* 0228 GhostLop (prototype) 1996? Data East */
+	DRIVER( ghostlop )	/* 0228 GhostLop (prototype) 1996? Data East */
 	/* 0229 King of Fighters '96 CD Collection (CD only) */
 	DRIVER( breakers )	/* 0230 (c) 1996 Visco */
 	DRIVER( miexchng )	/* 0231 (c) 1997 Face */
@@ -6125,6 +6209,10 @@ DRIVER( alpacap8 )
 DRIVER( pacsnoop )
 DRIVER( ramsnoop )
 DRIVER( shtron )
+
+DRIVER( metalaxe )
+DRIVER( metalbst )
+DRIVER( metlcnta )
 
 #endif	/* DRIVER_RECURSIVE */
 

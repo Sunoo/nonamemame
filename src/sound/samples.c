@@ -10,9 +10,10 @@ static int firstchannel,numchannels;
 /* mixer_play_sample() */
 void sample_start(int channel,int samplenum,int loop)
 {
-	if (Machine->sample_rate == 0) return;
-	if (Machine->samples == 0) return;
-	if (Machine->samples->sample[samplenum] == 0) return;
+	logerror("SAMPLE_START %d %d %d\n", channel, samplenum, loop);
+	if (Machine->sample_rate == 0) {logerror("SAMPLE_START ERRO - Machine->sample_rate == 0\n"); return;}
+	if (Machine->samples == 0) {logerror("SAMPLE_START ERRO - Machine->samples == 0 = 0\n"); return;}
+	if (Machine->samples->sample[samplenum] == 0) {logerror("SAMPLE_START ERRO - Machine->samples->sample[%d] = 0\n", samplenum); return;}
 	if (channel >= numchannels)
 	{
 		logerror("error: sample_start() called with channel = %d, but only %d channels allocated\n",channel,numchannels);

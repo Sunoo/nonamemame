@@ -1229,7 +1229,7 @@ int mixer_need_samples_this_frame(int channel,int freq)
 void mixer_play_sample(int ch, INT8 *data, int len, int freq, int loop)
 {
 	struct mixer_channel_data *channel = &mixer_channel[ch];
-
+    logerror("Mixer:mixer_play_sample_8(%s,,%d,%d,%s)\n",channel->name,len,freq,loop ? "loop" : "single");
 	mixerlogerror(("Mixer:mixer_play_sample_8(%s,,%d,%d,%s)\n",channel->name,len,freq,loop ? "loop" : "single"));
 
 	/* skip if sound is off, or if this channel is a stream */
@@ -1258,6 +1258,7 @@ void mixer_play_sample(int ch, INT8 *data, int len, int freq, int loop)
 void mixer_play_sample_16(int ch, INT16 *data, int len, int freq, int loop)
 {
 	struct mixer_channel_data *channel = &mixer_channel[ch];
+	logerror("Mixer:mixer_play_sample_16(%s,,%d,%d,%s)\n",channel->name,len/2,freq,loop ? "loop" : "single");
 
 	mixerlogerror(("Mixer:mixer_play_sample_16(%s,,%d,%d,%s)\n",channel->name,len/2,freq,loop ? "loop" : "single"));
 
