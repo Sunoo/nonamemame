@@ -110,13 +110,16 @@ static cycles_t start_time;
 static cycles_t end_time;
 static int frames_displayed;
 static int frames_to_display;
+int smooth_fps;
+float override_fps;
 
 // frameskipping
 static int frameskip_counter;
 static int frameskipadjust;
 
 // game states that invalidate autoframeskip
-static int game_was_paused;
+int game_was_paused;
+int skip_startup_frames;
 static int game_is_paused;
 static int debugger_was_visible;
 
@@ -200,6 +203,9 @@ struct rc_option video_opts[] =
 	{ "throttle", NULL, rc_bool, &throttle, "1", 0, 0, NULL, "throttle speed to the game's framerate" },
 	{ "full_screen_brightness", "fsb", rc_float, &win_gfx_brightness, "0.0", 0.0, 4.0, NULL, "sets the brightness in full screen mode" },
 	{ "frames_to_run", "ftr", rc_int, &frames_to_display, "0", 0, 0, decode_ftr, "sets the number of frames to run within the game" },
+	{ "skip_startup_frames", "ssf", rc_int, &skip_startup_frames, "0", 0, 0, NULL, "skips the number of startup frames" },
+	{ "smooth_fps", "sf", rc_bool, &smooth_fps, "0", 0, 0, NULL, "enables automatic smooth fps rates" },
+	{ "override_fps", "of", rc_float, &override_fps, "0", 0, 0, NULL, "overrides the default game fps" },
 	{ "effect", NULL, rc_string, &effect, "none", 0, 0, decode_effect, "specify the blitting effect" },
 	{ "screen_aspect", NULL, rc_string, &aspect, "4:3", 0, 0, decode_aspect, "specify an alternate monitor aspect ratio" },
 	{ "sleep", NULL, rc_bool, &allow_sleep, "1", 0, 0, NULL, "allow " APPNAME " to give back time to the system when it's not needed" },

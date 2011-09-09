@@ -1926,4 +1926,4 @@ GAMEX( 1997, psarc95,  0,        zn,       zn, et01, ROT0, "Sony/Eighting/Raizin
 
 GAMEX( 1997, beastrzr, psarc95,  zn,       zn, et02, ROT0, "Eighting/Raizing", "Beastorizer", GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )
 GAMEX( 1997, beastrzb, taitofx1, zn,       zn, zn,   ROT0, "Eighting/Raizing", "Beastorizer (bootleg)", GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )
-GAMEX( 2000, brvblade, psarc95,  zn,       zn, mg11, ROT0, "Eighting/Raizing", "Brave Blade (JAPAN)", GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )
+GAMEX( 2000, brvblade, tps,	     zn,       zn, mg11, ROT0, "Eighting/Raizing", "Brave Blade (JAPAN)", GAME_UNEMULATED_PROTECTION | GAME_NO_SOUND | GAME_NOT_WORKING )

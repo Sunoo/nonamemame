@@ -14,14 +14,14 @@ Second, select your operating system (default = Windows):
 	MAME32 version for Windows XP:  OS=mame32xp
 
 Third, select your CPU optimization (default = none):
-	Debug:  CPU=debug
-	Athlon:  CPU=athlon
-	K6:  CPU=k6
-	Pentium Pro (I686):  CPU=i686
-	Pentium 4: CPU=p4
+	Debug:  OPT=debug
+	Athlon:  OPT=athlon
+	K6:  OPT=k6
+	Pentium Pro (I686):  OPT=i686
+	Pentium 4: OPT=p4
 
 So, for examble, to compile a MAME32 version for Windows XP optomized for
-a Pentium 4 processor:  make OS=mame32xp CPU=p4
+a Pentium 4 processor:  make OS=mame32xp OPT=p4
 
 I will probably make further modifications in the future, and when I do, I'll
 document them here.

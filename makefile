@@ -9,19 +9,19 @@ TARGET = noname
 endif
 
 # Processor
-ifeq ($(CPU),debug)
+ifeq ($(OPT),debug)
 DEBUG = 1
 else
-ifeq ($(CPU),athlon)
+ifeq ($(OPT),athlon)
 ATHLON = 1
 else
-ifeq ($(CPU),k6)
+ifeq ($(OPT),k6)
 K6 = 1
 else
-ifeq ($(CPU),i686)
+ifeq ($(OPT),i686)
 I686 = 1
 else
-ifeq ($(CPU),p4)
+ifeq ($(OPT),p4)
 P4 = 1
 endif
 endif

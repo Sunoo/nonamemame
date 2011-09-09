@@ -196,6 +196,7 @@ struct GameOptions
 	int		mame_debug;		/* 1 to enable debugging */
 	int		cheat;			/* 1 to enable cheating */
 	int 	gui_host;		/* 1 to tweak some UI-related things for better GUI integration */
+	int 	show_matches;
 	int 	skip_disclaimer;	/* 1 to skip the disclaimer screen at startup */
 	int 	skip_gameinfo;		/* 1 to skip the game info screen at startup */
 	int 	skip_warnings;		/* 1 to skip the warnings screen at startup */

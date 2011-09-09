@@ -271,6 +271,9 @@ INLINE void bail_and_print(const char *message)
 	run_game - run the given game in a session
 -------------------------------------------------*/
 
+extern int smooth_fps;
+extern float override_fps;
+
 int run_game(int game)
 {
 	int err = 1;
@@ -298,6 +301,18 @@ int run_game(int game)
 	/* initialize the CPU interfaces first */
 	if (cpuintrf_init())
 		return 1;
+
+	if (smooth_fps)
+	{	
+		if (internal_drv.frames_per_second>56)
+			internal_drv.frames_per_second=60;
+		else
+		if (internal_drv.frames_per_second>53.5)
+			internal_drv.frames_per_second=53;
+	}
+
+	if (override_fps)
+		internal_drv.frames_per_second=override_fps;
 
 	/* initialize the game options */
 	if (init_game_options())
@@ -1347,8 +1362,23 @@ static void recompute_fps(int skipped_it)
 	operations
 -------------------------------------------------*/
 
+extern int skip_startup_frames;
+extern int game_was_paused;
+
 int updatescreen(void)
 {
+	static int Frames=0;
+ 	if (skip_startup_frames)
+	{
+		Frames++;
+		if (Frames<=skip_startup_frames)
+			return 0;
+		if (Frames>skip_startup_frames)
+			game_was_paused=1;
+		if (Frames==skip_startup_frames+2)
+			game_was_paused=1;
+	}
+
 	/* update sound */
 	sound_update();
 

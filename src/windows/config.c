@@ -215,6 +215,7 @@ static struct rc_option opts[] = {
 	{ "log", NULL, rc_bool, &errorlog, "0", 0, 0, init_errorlog, "generate error.log" },
 	{ "maxlogsize", NULL, rc_int, &maxlogsize, "10000", 1, 2000000, NULL, "maximum error.log size (in KB)" },
 	{ "oslog", NULL, rc_bool, &erroroslog, "0", 0, 0, NULL, "output error log to debugger" },
+	{ "show_matches", "sm", rc_int, &options.show_matches, "10", 10, 256, NULL, "show how many matches when game name not found" },
 	{ "skip_disclaimer", NULL, rc_bool, &options.skip_disclaimer, "0", 0, 0, NULL, "skip displaying the disclaimer screen" },
 	{ "skip_gameinfo", NULL, rc_bool, &options.skip_gameinfo, "0", 0, 0, NULL, "skip displaying the " GAMENOUN " info screen" },
 	{ "crconly", NULL, rc_bool, &options.crc_only, "0", 0, 0, NULL, "use only CRC for all integrity checks" },
@@ -281,11 +282,11 @@ int penalty_compare (const char *s, const char *l)
  */
 void show_approx_matches(void)
 {
-	struct { int penalty; int index; } topten[10];
+	struct { int penalty; int index; } topten[256];
 	int i,j;
 	int penalty; /* best fuzz factor so far */
 
-	for (i = 0; i < 10; i++)
+	for (i = 0; i < options.show_matches; i++)
 	{
 		topten[i].penalty = 9999;
 		topten[i].index = -1;
@@ -300,7 +301,7 @@ void show_approx_matches(void)
 		if (tmp < penalty) penalty = tmp;
 
 		/* eventually insert into table of approximate matches */
-		for (j = 0; j < 10; j++)
+		for (j = 0; j < options.show_matches; j++)
 		{
 			if (penalty >= topten[j].penalty) break;
 			if (j > 0)
@@ -313,7 +314,7 @@ void show_approx_matches(void)
 		}
 	}
 
-	for (i = 9; i >= 0; i--)
+	for (i = options.show_matches-1; i >= 0; i--)
 	{
 		if (topten[i].index != -1)
 			fprintf (stderr, "%-10s%s\n", drivers[topten[i].index]->name, drivers[topten[i].index]->description);
