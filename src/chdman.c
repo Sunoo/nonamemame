@@ -589,8 +589,8 @@ static void do_createblankhd(int argc, char *argv[])
 		if (curtime - lastupdate > CLOCKS_PER_SEC / 2)
 		{
 			UINT64 sourcepos = (UINT64)hunknum * hunksize;
-			if (progress && sourcepos)
-				(*progress)("Zeroing hunk %d/%d...  \r", hunknum, totalhunks);
+			if (sourcepos)
+				progress("Zeroing hunk %d/%d...  \r", hunknum, totalhunks);
 			lastupdate = curtime;
 		}
 
@@ -603,6 +603,7 @@ static void do_createblankhd(int argc, char *argv[])
 			return;
 		}
 	}
+	progress("Creation complete!                    \n");
 
 	/* free buffer */
 	free(cache);
@@ -701,8 +702,8 @@ static void do_copydata(int argc, char *argv[])
 		/* progress */
 		if (curtime - lastupdate > CLOCKS_PER_SEC / 2)
 		{
-			if (progress && out_hunknum)
-				(*progress)("Copying hunk %d/%d...  \r", out_hunknum, out_totalhunks);
+			if (out_hunknum)
+				progress("Copying hunk %d/%d...  \r", out_hunknum, out_totalhunks);
 			lastupdate = curtime;
 		}
 
@@ -744,6 +745,7 @@ static void do_copydata(int argc, char *argv[])
 				memmove(cache, cache+out_hunksize, cache_data_len);
 		}
 	}
+	progress("Copy complete!                    \n");
 
 	/* free buffer */
 	free(cache);

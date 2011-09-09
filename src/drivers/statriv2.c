@@ -771,9 +771,20 @@ ROM_START( quaquiz2 )
 	ROM_LOAD( "gst.08",    0x38000, 0x08000, CRC(64a54915) SHA1(13bbdff3617ec14595bc72891f56d327d76f539d) )
 ROM_END
 
+ROM_START( stablkjk )
+	ROM_REGION( 0x01000, REGION_CPU1, 0 )
+	ROM_LOAD( "statusbj.1", 0x00000, 0x00800, CRC(d3faf340) SHA1(e03f7e3375a02a3bec07d9c7f4f2b1a711d4d1cc))
+	ROM_LOAD( "statusbj.2", 0x00800, 0x00800, CRC(3f1727af) SHA1(0df12626591fc70031a9d8615c37243813d67b70))
+
+	ROM_REGION( 0x00800, REGION_GFX1, ROMREGION_INVERT )
+	ROM_LOAD( "statusbj.vid", 0x00000, 0x00800, CRC(99ade7a2) SHA1(98704ca3a9fcfc4590f850c8ae24445baaed6dfa))
+
+	ROM_END
+
 GAMEX( 1984, trivquiz, 0, trivquiz, statriv2, 0, ROT0, "Status Games", "Triv Quiz",      GAME_WRONG_COLORS )
 GAMEX( 1984, statriv2, 0, statriv2, statriv2, 0, ROT0, "Status Games", "Triv Two",       GAME_WRONG_COLORS )
 GAMEX( 1985, statriv4, 0, statriv4, statriv4, 0, ROT0, "Status Games", "Triv Four",      GAME_WRONG_COLORS )
 GAMEX( 1985, quaquiz2, 0, quaquiz2, quaquiz2, 0, ROT0, "Status Games", "Quadro Quiz II", GAME_WRONG_COLORS | GAME_NOT_WORKING )
 GAMEX( 1986, supertr2, 0, supertr2, supertr2, 0, ROT0, "Status Games", "Super Triv II",  GAME_WRONG_COLORS )
 GAMEX( 1988, supertr3, 0, supertr3, supertr2, 0, ROT0, "Status Games", "Super Triv III", GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS)
+GAMEX( 1981, stablkjk, 0, statriv2, statriv2, 0, ROT0, "Status Games", "Blackjack (Status)", GAME_NOT_WORKING )

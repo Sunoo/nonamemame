@@ -2616,6 +2616,88 @@ void process_ctrlr_game(struct rc_struct *iptrc, const char *ctype, const struct
 		process_ctrlr_file (iptrc, ctype, drv->name);
 }
 
+void process_ctrlr_orient(struct rc_struct *iptrc, const char *ctype, const struct GameDriver *drv)
+{
+	/* if this is a vertical game, parse vertical.ini else horizont.ini */	
+	if (drv->flags & ORIENTATION_SWAP_XY) {		
+		process_ctrlr_file (iptrc, ctype, "vertical");
+	} else {		
+		process_ctrlr_file (iptrc, ctype, "horizont");
+	}
+}
+
+void process_ctrlr_players(struct rc_struct *iptrc, const char *ctype, const struct GameDriver *drv)
+{
+	char buffer[128];
+	const struct InputPortTiny *input = drv->input_ports;
+	int nplayer=0;
+
+	while ((input->type & ~IPF_MASK) != IPT_END)
+	{
+		switch (input->type & IPF_PLAYERMASK)
+		{
+			case IPF_PLAYER1:
+				if (nplayer<1) nplayer = 1;
+				break;
+			case IPF_PLAYER2:
+				if (nplayer<2) nplayer = 2;
+				break;
+			case IPF_PLAYER3:
+				if (nplayer<3) nplayer = 3;
+				break;
+			case IPF_PLAYER4:
+				if (nplayer<4) nplayer = 4;
+				break;
+		}
+		++input;
+	}
+	sprintf(buffer, "player%d", nplayer);
+	process_ctrlr_file (iptrc, ctype, buffer);
+}
+
+void process_ctrlr_buttons(struct rc_struct *iptrc, const char *ctype, const
+struct GameDriver *drv)
+{
+ char buffer[128];
+ const struct InputPortTiny *input = drv->input_ports;
+ int no_buttons=0;
+
+ while ((input->type & ~IPF_MASK) != IPT_END)
+ {
+  switch (input->type & ~IPF_MASK)
+  {
+  case IPT_BUTTON1:
+   if (no_buttons<1) no_buttons = 1;
+   break;
+  case IPT_BUTTON2:
+   if (no_buttons<2) no_buttons = 2;
+   break;
+  case IPT_BUTTON3:
+   if (no_buttons<3) no_buttons = 3;
+   break;
+  case IPT_BUTTON4:
+   if (no_buttons<4) no_buttons = 4;
+   break;
+  case IPT_BUTTON5:
+   if (no_buttons<5) no_buttons = 5;
+   break;
+  case IPT_BUTTON6:
+   if (no_buttons<6) no_buttons = 6;
+   break;
+  case IPT_BUTTON7:
+   if (no_buttons<7) no_buttons = 7;
+   break;
+  case IPT_BUTTON8:
+   if (no_buttons<8) no_buttons = 8;
+   break;
+  }
+  input++;
+ }
+
+ sprintf(buffer, "button%d", no_buttons);
+ process_ctrlr_file (iptrc, ctype, buffer);
+}
+
 // nice hack: load source_file.ini (omit if referenced later any)
 void process_ctrlr_system(struct rc_struct *iptrc, const char *ctype, const struct GameDriver *drv)
 {
@@ -2865,6 +2947,14 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 		// process the game-specific files for this controller
 		process_ctrlr_game (rc, ctrlrtype, Machine->gamedrv);
 
+		// process the orientation-specific files for this controller
+		process_ctrlr_orient (rc, ctrlrtype, Machine->gamedrv);
+
+		// process the player-specific files for this controller
+		process_ctrlr_players (rc, ctrlrtype, Machine->gamedrv);
+
+		// process the button-specific files for this controller
+		process_ctrlr_buttons (rc, ctrlrtype, Machine->gamedrv);
 
 		while ((input->type & ~IPF_MASK) != IPT_END)
 		{

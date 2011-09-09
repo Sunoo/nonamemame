@@ -627,6 +627,7 @@ int artwork_create_display(struct osd_create_params *params, UINT32 *rgb_compone
 	min_x = min_y = 0.0;
 	max_x = max_y = 1.0;
 	if (!options.artwork_crop)
+	{
 		for (piece = artwork_list; piece; piece = piece->next)
 		{
 			/* compute the outermost bounds */
@@ -635,6 +636,17 @@ int artwork_create_display(struct osd_create_params *params, UINT32 *rgb_compone
 			if (piece->top < min_y) min_y = piece->top;
 			if (piece->bottom > max_y) max_y = piece->bottom;
 		}
+	}
+	else
+	{
+		//Do we want leave artwork in edge space
+		if (options.artwork_fb)
+			for (piece = artwork_list; piece; piece = piece->next)
+			{
+				if (piece->top < min_y) min_y = piece->top;
+				if (piece->bottom > max_y) max_y = piece->bottom;
+			}
+	}
 
 	/* now compute the altered width/height and the new aspect ratio */
 	params->width = (int)((max_x - min_x) * (double)(original_width * gamescale) + 0.5);

@@ -1,1 +1,1 @@
-char build_version[] = "0.79u4.05 ("__DATE__")";
+char build_version[] = "0.80.06 ("__DATE__")";

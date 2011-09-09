@@ -1242,7 +1242,7 @@ static int display_rom_load_results(struct rom_load_data *romdata)
 		printf("%s", romdata->errorbuf);
 
 		/* if we're not getting out of here, wait for a keypress */
-		if (!options.gui_host && !options.skip_warnings && !bailing)
+		if (!options.gui_host && !options.skip_warnings && !bailing && !options.skip_baddumps)
 		{
 			int k;
 

@@ -417,5 +417,5 @@ static void init_goldstar(void)
 
 
 
-GAME( ????, goldstar, 0,        goldstar, goldstar, goldstar, ROT0, "IGS", "Golden Star" )
-GAME( ????, goldstbl, goldstar, goldstbl, goldstar, 0,        ROT0, "IGS", "Golden Star (Blue version)" )
+GAME( 198?, goldstar, 0,        goldstar, goldstar, goldstar, ROT0, "IGS", "Golden Star" )
+GAME( 198?, goldstbl, goldstar, goldstbl, goldstar, 0,        ROT0, "IGS", "Golden Star (Blue version)" )

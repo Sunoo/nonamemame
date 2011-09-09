@@ -85,6 +85,7 @@ static int single_step;
 
 static int showfps;
 static int showfpstemp;
+int showinput = 1;
 
 static int show_profiler;
 
@@ -3497,8 +3498,11 @@ static void setup_menu_init(void)
 {
 	menu_total = 0;
 
-	menu_item[menu_total] = ui_getstring (UI_inputgeneral); menu_action[menu_total++] = UI_DEFCODE;
-	menu_item[menu_total] = ui_getstring (UI_inputspecific); menu_action[menu_total++] = UI_CODE;
+	if(showinput)
+	{
+		menu_item[menu_total] = ui_getstring (UI_inputgeneral); menu_action[menu_total++] = UI_DEFCODE;
+		menu_item[menu_total] = ui_getstring (UI_inputspecific); menu_action[menu_total++] = UI_CODE;
+	}
 #ifdef MESS
 	menu_item[menu_total] = ui_getstring (UI_configuration); menu_action[menu_total++] = UI_CONFIGURATION;
 #endif /* MESS */

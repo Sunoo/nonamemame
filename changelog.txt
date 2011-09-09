@@ -1,3 +1,11 @@
+0.80.06
+ - Updated to MAME 0.80 source code
+ - Added horizont.ini, vertical.ini, and raster.ini (SirPoonga)
+ - Added buttonX.ini, playerX.ini, horizont.ini, and vertical.ini ctrlr files (SirPoonga)
+ - Added -skip_baddump and -skip_gamewarnings (SirPoonga)
+ - Added -showinputmenu and -atrwork_filledges (SirPoonga)
+ - Added the drivers from MAGE 0.10
+
 0.79u4.05:
  - Added Skip Startup Frames option (SmoothMame)
  - Added Smooth FPS and Override FPS (SmoothMame)
