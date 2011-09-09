@@ -36,6 +36,7 @@
 #if 0
 static UINT8 		which_input;
 #endif
+static data32_t *	mo_command;
 static data32_t *	protection_base;
 
 
@@ -147,6 +148,14 @@ static WRITE32_HANDLER( latch_w )
 }
 
 
+static WRITE32_HANDLER( mo_command_w )
+{
+	COMBINE_DATA(mo_command);
+	if (ACCESSING_LSW32)
+		atarirle_command_w(0, ((data & 0xffff) == 2) ? ATARIRLE_COMMAND_CHECKSUM : ATARIRLE_COMMAND_DRAW);
+}
+
+
 
 /*************************************
  *
@@ -164,7 +173,10 @@ static WRITE32_HANDLER( atarigx2_protection_w )
 //		if (pc == 0x11cbe || pc == 0x11c30)
 //			logerror("%06X:Protection W@%04X = %04X  (result to %06X)\n", pc, offset, data, activecpu_get_reg(M68K_A2));
 //		else
-			logerror("%06X:Protection W@%04X = %04X\n", pc, offset, data);
+		if (ACCESSING_MSW32)
+			logerror("%06X:Protection W@%04X = %04X\n", pc, offset * 4, data >> 16);
+		else
+			logerror("%06X:Protection W@%04X = %04X\n", pc, offset * 4 + 2, data);
 	}
 
 	COMBINE_DATA(&protection_base[offset]);
@@ -1141,7 +1153,10 @@ static READ32_HANDLER( atarigx2_protection_r )
 		}
 	}
 
-	logerror("%06X:Protection R@%04X = %04X\n", activecpu_get_previouspc(), offset, result);
+	if (ACCESSING_MSW32)
+		logerror("%06X:Protection R@%04X = %04X\n", activecpu_get_previouspc(), offset * 4, result >> 16);
+	else
+		logerror("%06X:Protection R@%04X = %04X\n", activecpu_get_previouspc(), offset * 4 + 2, result);
 	return result;
 }
 
@@ -1192,7 +1207,9 @@ static MEMORY_WRITE32_START( main_writemem )
 	{ 0xd76000, 0xd76fff, atarigen_alpha32_w, &atarigen_alpha32 },
 	{ 0xd77000, 0xd77fff, MWA32_RAM },
 	{ 0xd78000, 0xd78fff, atarirle_0_spriteram32_w, &atarirle_0_spriteram32 },
-	{ 0xd79000, 0xd7ffff, MWA32_RAM },
+	{ 0xd79000, 0xd7a1ff, MWA32_RAM },
+	{ 0xd7a200, 0xd7a203, mo_command_w, &mo_command },
+	{ 0xd7a204, 0xd7ffff, MWA32_RAM },
 	{ 0xd80000, 0xd9ffff, atarigen_eeprom_enable32_w },
 	{ 0xe06000, 0xe06003, atarigen_sound_upper32_w },
 	{ 0xe08000, 0xe08003, latch_w },
@@ -1234,21 +1251,21 @@ INPUT_PORTS_START( spclords )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 )
 
 	PORT_START      /* 68.STATUS (A2=0) */
-	PORT_BIT( 0x0007, IP_ACTIVE_LOW, IPT_UNUSED )	/* +5V */
-	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_UNUSED )	/* A2D.EOC */
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNUSED )	/* /AUDIRQ */
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNUSED )	/* /AUDFULL */
+	PORT_BIT( 0x0007, IP_ACTIVE_LOW, IPT_SPECIAL )	/* +5V */
+	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* A2D.EOC */
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /AUDIRQ */
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /AUDFULL */
 	PORT_SERVICE( 0x0040, IP_ACTIVE_LOW )
 	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_VBLANK )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START      /* 68.STATUS (A2=1) */
-	PORT_BIT( 0x0003, IP_ACTIVE_LOW, IPT_UNUSED )	/* +5V */
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNUSED )	/* /XIRQ */
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNUSED )	/* /XFULL */
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNUSED )	/* /SERVICER */
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNUSED )	/* /SER.L */
-	PORT_BIT( 0x00c0, IP_ACTIVE_LOW, IPT_UNUSED )	/* +5V */
+	PORT_BIT( 0x0003, IP_ACTIVE_LOW, IPT_SPECIAL )	/* +5V */
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /XIRQ */
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /XFULL */
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /SERVICER */
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /SER.L */
+	PORT_BIT( 0x00c0, IP_ACTIVE_LOW, IPT_SPECIAL )	/* +5V */
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	JSA_III_PORT	/* audio board port */
@@ -1271,6 +1288,52 @@ INPUT_PORTS_START( spclords )
 INPUT_PORTS_END
 
 
+INPUT_PORTS_START( motofren )
+	PORT_START		/* 68.SW (A1=0) */
+	PORT_BIT( 0x00ff, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START1 )						/* Start/fire */
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )		/* AUX3 */
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )		/* AUX2 */
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )		/* AUX1 */
+	PORT_BIT( 0xf000, IP_ACTIVE_LOW, IPT_UNUSED )
+
+	PORT_START		/* 68.SW (A1=1) */
+	PORT_BIT( 0xffff, IP_ACTIVE_LOW, IPT_UNUSED )
+
+	PORT_START      /* 68.STATUS (A2=0) */
+	PORT_BIT( 0x0007, IP_ACTIVE_LOW, IPT_UNUSED )	/* +5V */
+	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* A2D.EOC */
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /AUDIRQ */
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /AUDFULL */
+	PORT_SERVICE( 0x0040, IP_ACTIVE_LOW )
+	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_VBLANK )
+	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+
+	PORT_START      /* 68.STATUS (A2=1) */
+	PORT_BIT( 0x0003, IP_ACTIVE_LOW, IPT_SPECIAL )	/* +5V */
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /XIRQ */
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /XFULL */
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /SERVICER */
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /SER.L */
+	PORT_BIT( 0x00c0, IP_ACTIVE_LOW, IPT_SPECIAL )	/* +5V */
+	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+
+	JSA_III_PORT	/* audio board port */
+
+	PORT_START		/* A2D @ 0xD00000 */
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL, 100, 16, 0x00, 0xff )
+
+	PORT_START		/* A2D @ 0xD00002 */
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
+
+	PORT_START		/* A2D @ 0xD00004 */
+	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X, 50, 10, 0, 255 )
+
+	PORT_START		/* A2D @ 0xD00006 */
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
+INPUT_PORTS_END
+
+
 INPUT_PORTS_START( rrreveng )
 	PORT_START		/* 68.SW (A1=0) */
 	PORT_BIT( 0x00ff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -1288,21 +1351,21 @@ INPUT_PORTS_START( rrreveng )
 	PORT_BIT( 0xfe00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START      /* 68.STATUS (A2=0) */
-	PORT_BIT( 0x0007, IP_ACTIVE_LOW, IPT_UNUSED )	/* +5V */
-	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_UNUSED )	/* A2D.EOC */
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNUSED )	/* /AUDIRQ */
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNUSED )	/* /AUDFULL */
+	PORT_BIT( 0x0007, IP_ACTIVE_LOW, IPT_SPECIAL )	/* +5V */
+	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* A2D.EOC */
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /AUDIRQ */
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /AUDFULL */
 	PORT_SERVICE( 0x0040, IP_ACTIVE_LOW )
 	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_VBLANK )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START      /* 68.STATUS (A2=1) */
-	PORT_BIT( 0x0003, IP_ACTIVE_LOW, IPT_UNUSED )	/* +5V */
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNUSED )	/* /XIRQ */
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNUSED )	/* /XFULL */
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNUSED )	/* /SERVICER */
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNUSED )	/* /SER.L */
-	PORT_BIT( 0x00c0, IP_ACTIVE_LOW, IPT_UNUSED )	/* +5V */
+	PORT_BIT( 0x0003, IP_ACTIVE_LOW, IPT_SPECIAL )	/* +5V */
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /XIRQ */
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /XFULL */
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /SERVICER */
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_SPECIAL )	/* /SER.L */
+	PORT_BIT( 0x00c0, IP_ACTIVE_LOW, IPT_SPECIAL )	/* +5V */
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	JSA_III_PORT	/* audio board port */
@@ -1488,46 +1551,56 @@ ROM_START( spclorda )
 
 	ROM_REGION( 0x100000, REGION_SOUND1, 0 )	/* 1MB for ADPCM samples */
 	ROM_LOAD( "136095.81a",  0x80000, 0x80000, CRC(212560dd) SHA1(9d90bca5b478050d640b2393c9d3d59a4bd493dd) )
+
+	ROM_REGION( 0x0600, REGION_PROMS, ROMREGION_DISPOSE )	/* microcode for growth renderer */
+	ROM_LOAD( "094-001a.bin",  0x0000, 0x0200, NO_DUMP CRC(a70ade3f) )
+	ROM_LOAD( "094-002a.bin",  0x0200, 0x0200, NO_DUMP CRC(f4768b4d) )
+	ROM_LOAD( "094-003a.bin",  0x0400, 0x0200, NO_DUMP CRC(22a76ad4) )
 ROM_END
 
 
 ROM_START( motofren )
 	ROM_REGION( 0x80000, REGION_CPU1, 0 )	/* 8*64k for 68000 code */
-	ROM_LOAD32_BYTE( "94-0221a.23e", 0x00000, 0x20000, CRC(134e9ff0) )
-	ROM_LOAD32_BYTE( "94-0222a.23j", 0x00001, 0x20000, CRC(f6df65c7) )
-	ROM_LOAD32_BYTE( "94-0223a.37e", 0x00002, 0x20000, CRC(cdb04a4a) )
-	ROM_LOAD32_BYTE( "94-0224a.37j", 0x00003, 0x20000, CRC(f3a9949f) )
+	ROM_LOAD32_BYTE( "94-0221a.23e", 0x00000, 0x20000, CRC(134e9ff0) SHA1(801b817bf49b4317a7518192025a878b9cd13f7f) )
+	ROM_LOAD32_BYTE( "94-0222a.23j", 0x00001, 0x20000, CRC(f6df65c7) SHA1(0a2092a509ae8c61e3f55c30c47bf39c71e2aa6e) )
+	ROM_LOAD32_BYTE( "94-0223a.37e", 0x00002, 0x20000, CRC(cdb04a4a) SHA1(ee342bdb5654e8b841b1f60e46d1bcae7c4e5cd2) )
+	ROM_LOAD32_BYTE( "94-0224a.37j", 0x00003, 0x20000, CRC(f3a9949f) SHA1(d3fa68fc63c505dd4c9d0e0c7f0625cc24ac9571) )
 
 	ROM_REGION( 0x14000, REGION_CPU2, 0 )	/* 64k for 6502 code */
-	ROM_LOAD( "mfs6502.bin", 0x10000, 0x4000, CRC(0b1e565c) )
+	ROM_LOAD( "mfs6502.bin", 0x10000, 0x4000, CRC(0b1e565c) SHA1(03bdeafd8cf680f76bbd1f9aba6efac27f19a93c) )
 	ROM_CONTINUE(            0x04000, 0xc000 )
 
 	ROM_REGION( 0x180000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "motof2d.bin", 0x000000, 0x80000, CRC(1b63b493) ) /* playfield, planes 0-1 */
-	ROM_LOAD( "motof5d.bin", 0x080000, 0x80000, CRC(6d290056) ) /* playfield, planes 2-3 */
-	ROM_LOAD( "motof8d.bin", 0x100000, 0x80000, CRC(38197c88) ) /* playfield, planes 4-5 */
+	ROM_LOAD( "motof2d.bin", 0x000000, 0x80000, CRC(1b63b493) SHA1(980141fec011fa2b5cb020eeecb4784d31679dba) ) /* playfield, planes 0-1 */
+	ROM_LOAD( "motof5d.bin", 0x080000, 0x80000, CRC(6d290056) SHA1(fa32dbe5ac5e735d700d086353461eaa2c1dee55) ) /* playfield, planes 2-3 */
+	ROM_LOAD( "motof8d.bin", 0x100000, 0x80000, CRC(38197c88) SHA1(dc5d4d878759503b8500e8e3a032f499bfeedcb1) ) /* playfield, planes 4-5 */
 
 	ROM_REGION( 0x020000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "motof13n.bin", 0x000000, 0x20000, CRC(6ab762ad) ) /* alphanumerics */
+	ROM_LOAD( "motof13n.bin", 0x000000, 0x20000, CRC(6ab762ad) SHA1(c52dd207ff5adaffa458e020e7d452a1d1e65194) ) /* alphanumerics */
 
 	ROM_REGION16_BE( 0x700000, REGION_GFX3, 0 )
-	ROM_LOAD16_BYTE( "motof31n.bin", 0x000000, 0x80000, CRC(474770e9) )
-	ROM_LOAD16_BYTE( "motof31l.bin", 0x000001, 0x80000, CRC(cb777468) )
-	ROM_LOAD16_BYTE( "motof33n.bin", 0x100000, 0x80000, CRC(353d2dc3) )
-	ROM_LOAD16_BYTE( "motof33l.bin", 0x100001, 0x80000, CRC(17d49f77) )
-	ROM_LOAD16_BYTE( "motof35n.bin", 0x200000, 0x80000, CRC(13d89355) )
-	ROM_LOAD16_BYTE( "motof35l.bin", 0x200001, 0x80000, CRC(924c817e) )
-	ROM_LOAD16_BYTE( "motof37n.bin", 0x300000, 0x80000, CRC(43ee7453) )
-	ROM_LOAD16_BYTE( "motof37l.bin", 0x300001, 0x80000, CRC(980b9b92) )
-	ROM_LOAD16_BYTE( "motof31t.bin", 0x400000, 0x80000, CRC(25ac33af) )
-	ROM_LOAD16_BYTE( "motof31r.bin", 0x400001, 0x80000, CRC(d725a27d) )
-	ROM_LOAD16_BYTE( "motof33t.bin", 0x500000, 0x80000, CRC(a0fc90b2) )
-	ROM_LOAD16_BYTE( "motof33r.bin", 0x500001, 0x80000, CRC(dcc206cf) )
-	ROM_LOAD16_BYTE( "motof35t.bin", 0x600000, 0x80000, CRC(74320763) )
-	ROM_LOAD16_BYTE( "motof35r.bin", 0x600001, 0x80000, CRC(a7f9df2e) )
+	ROM_LOAD16_BYTE( "motof31n.bin", 0x000000, 0x80000, CRC(474770e9) SHA1(507dac654d1c350ab530892e3ec19793629d3a07) )
+	ROM_LOAD16_BYTE( "motof31l.bin", 0x000001, 0x80000, CRC(cb777468) SHA1(aa199bc02ab966b9f270057857aec50add8d684c) )
+	ROM_LOAD16_BYTE( "motof33n.bin", 0x100000, 0x80000, CRC(353d2dc3) SHA1(82c2c862404ea4c94c9baee1d0ac32696fcf78bd) )
+	ROM_LOAD16_BYTE( "motof33l.bin", 0x100001, 0x80000, CRC(17d49f77) SHA1(7ed85035128f3c9dc2bc3d9f387dba01a882e3f4) )
+	ROM_LOAD16_BYTE( "motof35n.bin", 0x200000, 0x80000, CRC(13d89355) SHA1(becd43a51c643732025386d7781dcf784b20d031) )
+	ROM_LOAD16_BYTE( "motof35l.bin", 0x200001, 0x80000, CRC(924c817e) SHA1(2c23fd8a85833875cfb2d60e1072bd59cea57e0c) )
+	ROM_LOAD16_BYTE( "motof37n.bin", 0x300000, 0x80000, CRC(43ee7453) SHA1(3549f62e6b2f50d663fbb4068cb8907b5073ef5e) )
+	ROM_LOAD16_BYTE( "motof37l.bin", 0x300001, 0x80000, CRC(980b9b92) SHA1(6a5cfb77b65c0a28dba705d4738c883be983cd4d) )
+	ROM_LOAD16_BYTE( "motof31t.bin", 0x400000, 0x80000, CRC(25ac33af) SHA1(e76af04d2e2cbf5769c1f53e2eac4f85e57003ba) )
+	ROM_LOAD16_BYTE( "motof31r.bin", 0x400001, 0x80000, CRC(d725a27d) SHA1(9d8d332a6c1d773888c2d9ef1d7ea1e865f6dd02) )
+	ROM_LOAD16_BYTE( "motof33t.bin", 0x500000, 0x80000, CRC(a0fc90b2) SHA1(08ac2510287e8c3e8e52995d8f741b2a58e5b37b) )
+	ROM_LOAD16_BYTE( "motof33r.bin", 0x500001, 0x80000, CRC(dcc206cf) SHA1(f0b7d5d289f4c0de99b536dd2874ffdabf648cb2) )
+	ROM_LOAD16_BYTE( "motof35t.bin", 0x600000, 0x80000, CRC(74320763) SHA1(9cbf61c51dd96dc3e4a4227f3080766b9482a16a) )
+	ROM_LOAD16_BYTE( "motof35r.bin", 0x600001, 0x80000, CRC(a7f9df2e) SHA1(c3e0c67081cf8f7b24350abf5a9adbb544ab44a7) )
 
 	ROM_REGION( 0x100000, REGION_SOUND1, 0 )	/* 1MB for ADPCM samples */
-	ROM_LOAD( "mfadpcm.bin",  0x80000, 0x80000, CRC(fde543c4) )
+	ROM_LOAD( "mfadpcm.bin",  0x80000, 0x80000, CRC(fde543c4) SHA1(7d36d7f2f30d0ac40da77a36a47488d75474caaf) )
+
+	ROM_REGION( 0x0600, REGION_PROMS, ROMREGION_DISPOSE )	/* microcode for growth renderer */
+	ROM_LOAD( "094-001a.bin",  0x0000, 0x0200, CRC(a70ade3f) SHA1(f4a558b17767eed2683c768d1b441e75edcff967) )
+	ROM_LOAD( "094-002a.bin",  0x0200, 0x0200, CRC(f4768b4d) SHA1(a506fa5386ab0ea2851ff1f8474d4bfc66deaa70) )
+	ROM_LOAD( "094-003a.bin",  0x0400, 0x0200, CRC(22a76ad4) SHA1(ce840c283bbd3a5f19dc8d91b19d1571eff51ff4) )
 ROM_END
 
 
@@ -1565,6 +1638,53 @@ ROM_START( rrreveng )
 	ROM_REGION( 0x100000, REGION_SOUND1, 0 )	/* 1MB for ADPCM samples */
 	ROM_LOAD( "rralpc0.bin",  0x80000, 0x80000, CRC(1f7b6ecf) SHA1(1787a2e89618e1338d70a54684dbc7d44c5f5559) )
 	ROM_LOAD( "rralpc1.bin",  0x80000, 0x80000, CRC(7ccd26d7) SHA1(1a74bdc66482896f5b9795d27383aa993e5fbaa4) )
+
+	ROM_REGION( 0x0600, REGION_PROMS, ROMREGION_DISPOSE )	/* microcode for growth renderer */
+	ROM_LOAD( "rrmoprg1.bin",  0x0000, 0x0200, NO_DUMP )
+	ROM_LOAD( "rrmoprg2.bin",  0x0200, 0x0200, NO_DUMP )
+	ROM_LOAD( "rrmoprg3.bin",  0x0400, 0x0200, NO_DUMP )
+ROM_END
+
+
+ROM_START( rrrevenp )
+	ROM_REGION( 0x80000, REGION_CPU1, 0 )	/* 8*64k for 68000 code */
+	ROM_LOAD32_BYTE( "rrprghh.bin", 0x00000, 0x20000, CRC(d2903e9d) SHA1(8782cd6ee39e2159b9ebc68ecdc3ecefcdeb8623) )
+	ROM_LOAD32_BYTE( "rrprghl.bin", 0x00001, 0x20000, CRC(1afd500c) SHA1(6d24087a839e5e7d9c764026a9f3089e52785cdb) )
+	ROM_LOAD32_BYTE( "rrprglh.bin", 0x00002, 0x20000, CRC(2b03a6fc) SHA1(7c95a0307b854bd37fd327ff1af1b69aa60fb2fd) )
+	ROM_LOAD32_BYTE( "rrprgll.bin", 0x00003, 0x20000, CRC(acf078da) SHA1(3506e105d3b208864ce12ab20e6250cb3a0005d6) )
+
+	ROM_REGION( 0x14000, REGION_CPU2, 0 )	/* 64k for 6502 code */
+	ROM_LOAD( "rr65snd.bin", 0x10000, 0x4000, CRC(d78429da) SHA1(a4d36d74986f08c793f15f2e67cb97a8c91c5e90) )
+	ROM_CONTINUE(            0x04000, 0xc000 )
+
+	ROM_REGION( 0x180000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "rralpl.bin", 0x000000, 0x80000, CRC(00488dad) SHA1(604f08a219db0438dcbf21337ebd497f353bd812) ) /* playfield, planes 0-1 */
+	ROM_LOAD( "rralpm.bin", 0x080000, 0x80000, CRC(ade27447) SHA1(641fdca97a4b08251e111425d8467e4640433df7) ) /* playfield, planes 2-3 */
+	ROM_LOAD( "rralph.bin", 0x100000, 0x80000, CRC(ef04f04e) SHA1(e518133096978c4a0152253231625c385a84530f) ) /* playfield, planes 4-5 */
+
+	ROM_REGION( 0x020000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "alpha.13n", 0x000000, 0x20000, CRC(f2efbd66) SHA1(d5339f0b3de7a102d659f7459b5f4800cab31829) ) /* alphanumerics */
+
+	ROM_REGION16_BE( 0x500000, REGION_GFX3, 0 )
+	ROM_LOAD16_BYTE( "mo0h.31n", 0x000000, 0x80000, CRC(fc2755d5) SHA1(e24319161307efbb3828b21a6250869051f1ccc1) )
+	ROM_LOAD16_BYTE( "mo0l.31l", 0x000001, 0x80000, CRC(f9f6bfe3) SHA1(c7e1479bb86646691d5ca7ee9127553cfd86571e) )
+	ROM_LOAD16_BYTE( "rrmo1h.bin", 0x100000, 0x80000, CRC(c7a48389) SHA1(a263aa4829cb243440ebe0496dd4f0158d97e2cc) )
+	ROM_LOAD16_BYTE( "rrmo1l.bin", 0x100001, 0x80000, CRC(085a67c1) SHA1(0449abb5fec9014bd0ad14ce4802f726a90bc48c) )
+	ROM_LOAD16_BYTE( "rrmo2h.bin", 0x200000, 0x80000, CRC(aea35aff) SHA1(2e02d2e877d356f9fb07e8b55ce252a148192d59) )
+	ROM_LOAD16_BYTE( "rrmo2l.bin", 0x200001, 0x80000, CRC(b256d6d6) SHA1(0f0a05e3e58a00662f99988a050f2f5a11592d29) )
+	ROM_LOAD16_BYTE( "mo3h.37n", 0x300000, 0x80000, CRC(563baaeb) SHA1(e356aa2048c6addefa62d10a17fe5736afa54b16) )
+	ROM_LOAD16_BYTE( "mo3l.37l", 0x300001, 0x80000, CRC(e0cf3396) SHA1(544863e5c18cce002ced8f96d5dfaedffdcfff1e) )
+	ROM_LOAD16_BYTE( "mo4h.31t", 0x400000, 0x80000, CRC(af6a027e) SHA1(08038bddb6aa7e97f013f9d3e508f5501821e460) )
+	ROM_LOAD16_BYTE( "mo4l.31r", 0x400001, 0x80000, CRC(9ebc5369) SHA1(ffd8418b328d99aa44fb1aed1db1aa6ac715c644) )
+
+	ROM_REGION( 0x100000, REGION_SOUND1, 0 )	/* 1MB for ADPCM samples */
+	ROM_LOAD( "rralpc0.bin",  0x80000, 0x80000, CRC(1f7b6ecf) SHA1(1787a2e89618e1338d70a54684dbc7d44c5f5559) )
+	ROM_LOAD( "rralpc1.bin",  0x80000, 0x80000, CRC(7ccd26d7) SHA1(1a74bdc66482896f5b9795d27383aa993e5fbaa4) )
+
+	ROM_REGION( 0x0600, REGION_PROMS, ROMREGION_DISPOSE )	/* microcode for growth renderer */
+	ROM_LOAD( "rrmoprg1.bin",  0x0000, 0x0200, NO_DUMP )
+	ROM_LOAD( "rrmoprg2.bin",  0x0200, 0x0200, NO_DUMP )
+	ROM_LOAD( "rrmoprg3.bin",  0x0400, 0x0200, NO_DUMP )
 ROM_END
 
 
@@ -1581,11 +1701,12 @@ static DRIVER_INIT( spclords )
 	atarigen_eeprom_default = NULL;
 	atarijsa_init(1, 4, 2, 0x0040);
 	atarijsa3_init_adpcm(REGION_SOUND1);
-	atarigen_init_6502_speedup(1, 0x422c, 0x4244);
 
 	atarigx2_playfield_base = 0x000;
 	atarigx2_motion_object_base = 0x400;
 	atarigx2_motion_object_mask = 0x3ff;
+	
+	memory_set_unmap_value(~0);
 }
 
 
@@ -1594,11 +1715,34 @@ static DRIVER_INIT( motofren )
 	atarigen_eeprom_default = NULL;
 	atarijsa_init(1, 4, 2, 0x0040);
 	atarijsa3_init_adpcm(REGION_SOUND1);
-	atarigen_init_6502_speedup(1, 0x4168, 0x4180);
 
 	atarigx2_playfield_base = 0x400;
 	atarigx2_motion_object_base = 0x200;
 	atarigx2_motion_object_mask = 0x1ff;
+
+	memory_set_unmap_value(~0);
+/*
+L/W=!68.A23*!E.A22*!E.A21										= 000x xxxx = 000000-1fffff
+   +68.A23*E.A22*E.A21*68.A20*68.A19*68.A18*68.A17				= 1111 111x = fe0000-ffffff
+
+68.XIO=68.A23*E.A22*E.A21*!68.A20*!68.A18*!68.A17*!68.A16		= 1110 x000 = e00000-e0ffff, e80000-e8ffff
+    +68.A23*E.A22*E.A21*!68.A20*!68.A19							= 1110 0xxx = e00000-e7ffff
+
+68.ROM=!68.A23*68.AS*!E.A22*!E.A21								= 000x xxxx = 000000-1fffff
+
+68.EXT=68.A23*68.AS*E.A22*!E.A21*!68.A20						= 1100 xxxx = c00000-cfffff
+
+68.WRAM=68.A23*68.AS*E.A22*E.A21*68.A20*68.A19*68.A18*68.A17	= 1111 111x = fe0000-ffffff
+
+XMEM=68.A23*E.A22*!E.A21*68.A20									= 1101 xxxx = d00000-dfffff
+
+68.W1=68.A23*E.A22*!E.A21*68.A20*!68.A18						= 1101 x0xx = d00000-d3ffff, d80000-dbffff
+
+68.W0=68.A23*E.A22*!E.A21*68.A20*!68.A18						= 1101 x0xx = d00000-d3ffff, d80000-dbffff
+    +68.A23*E.A22*!E.A21*68.A20*!68.A19							= 1101 0xxx = d00000-d7ffff
+    +68.A23*E.A22*!E.A21*!68.A20*68.A19							= 1100 1xxx = c80000-cfffff
+    +!68.A23*!E.A22*!E.A21										= 000x xxxx = 000000-1fffff
+*/
 }
 
 static READ32_HANDLER( rrreveng_prot_r )
@@ -1611,7 +1755,6 @@ static DRIVER_INIT( rrreveng )
 	atarigen_eeprom_default = NULL;
 	atarijsa_init(1, 4, 2, 0x0040);
 	atarijsa3_init_adpcm(REGION_SOUND1);
-	atarigen_init_6502_speedup(1, 0x416c, 0x4184);
 
 	atarigx2_playfield_base = 0x000;
 	atarigx2_motion_object_base = 0x400;
@@ -1630,5 +1773,6 @@ static DRIVER_INIT( rrreveng )
 
 GAMEX( 1992, spclords, 0,        atarigx2, spclords, spclords, ROT0, "Atari Games", "Space Lords", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
 GAMEX( 1992, spclorda, spclords, atarigx2, spclords, spclords, ROT0, "Atari Games", "Space Lords (alternate)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
-GAMEX( 1992, motofren, 0,        atarigx2, spclords, motofren, ROT0, "Atari Games", "Moto Frenzy", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
+GAMEX( 1992, motofren, 0,        atarigx2, motofren, motofren, ROT0, "Atari Games", "Moto Frenzy", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
 GAMEX( 1994, rrreveng, 0,        atarigx2, rrreveng, rrreveng, ROT0, "Atari Games", "Road Riot's Revenge (prototype)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
+GAMEX( 1994, rrrevenp, rrreveng, atarigx2, rrreveng, rrreveng, ROT0, "Atari Games", "Road Riot's Revenge (prototype alt)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )

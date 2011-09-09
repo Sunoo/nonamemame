@@ -1335,7 +1335,7 @@ ROM_START( wargods )
 	ROM_LOAD( "u41.rom", 0x000000, 0x20000, CRC(398c54cc) SHA1(6c4b5d6ec5c844dcbf181f9d86a9196a088ed2db) )
 
 	DISK_REGION( REGION_DISKS )
-	DISK_IMAGE( "wargods.chd", 0, MD5(9a41ae319a67fc626377b6d9ea34c860) )
+	DISK_IMAGE( "wargods.chd", 0, MD5(9a41ae319a67fc626377b6d9ea34c860) SHA1(4b02f8f33027a0e7b2c750c10da1fe22222b3e1e) )
 ROM_END
 
 
@@ -1407,6 +1407,9 @@ static DRIVER_INIT( offroadc )
 	install_mem_read32_handler(0, ADDR_RANGE(0x991030, 0x991030), offroadc_serial_status_r);
 	install_mem_read32_handler(0, ADDR_RANGE(0x996000, 0x996000), offroadc_serial_data_r);
 	install_mem_write32_handler(0, ADDR_RANGE(0x996000, 0x996000), offroadc_serial_data_w);
+
+	/* speedups */
+	generic_speedup = install_mem_read32_handler(0, ADDR_RANGE(0x195aa, 0x195aa), generic_speedup_r);
 }
 
 

@@ -1,14 +1,14 @@
 /***************************************************************************
 
-	PSX GPU - CXD8538Q
+	PSX GPU
 
 	Preliminary software renderer by smf.
 	Thanks to Ryan Holtz, Pete B & Farfetch'd.
 
 	Supports:
-	  type 1 1024x1024 framebuffer
+	  type 1 1024x1024 framebuffer (CXD8538Q)
 	  type 2 1024x512 framebuffer
-	  type 2 1024x1024 framebuffer
+	  type 2 1024x1024 framebuffer (CXD8514Q/CXD8561Q/CXD8654Q)
 
 	Debug Keys:
 		M toggles mesh viewer.
@@ -22,7 +22,9 @@
 #include "includes/psx.h"
 #include "usrintrf.h"
 
-#define VERBOSE_LEVEL ( 0 )
+#define STOP_ON_ERROR ( 0 )
+
+#define VERBOSE_LEVEL ( 1 )
 
 INLINE void verboselog( int n_level, const char *s_fmt, ... )
 {
@@ -158,6 +160,7 @@ static UINT32 m_n_horiz_disstart;
 static UINT32 m_n_horiz_disend;
 static UINT32 m_n_vert_disstart;
 static UINT32 m_n_vert_disend;
+static UINT32 m_b_reverseflag;
 static INT32 m_n_drawoffset_x;
 static INT32 m_n_drawoffset_y;
 static UINT32 m_n_displaystartx;
@@ -597,6 +600,7 @@ static int psx_gpu_init( int n_width, int n_height )
 	state_save_register_UINT32( "psx", 0, "m_n_horiz_disend", &m_n_horiz_disend, 1 );
 	state_save_register_UINT32( "psx", 0, "m_n_vert_disstart", &m_n_vert_disstart, 1 );
 	state_save_register_UINT32( "psx", 0, "m_n_vert_disend", &m_n_vert_disend, 1 );
+	state_save_register_UINT32( "psx", 0, "m_b_reverseflag", &m_b_reverseflag, 1 );
 	state_save_register_INT32( "psx", 0, "m_n_drawoffset_x", &m_n_drawoffset_x, 1 );
 	state_save_register_INT32( "psx", 0, "m_n_drawoffset_y", &m_n_drawoffset_y, 1 );
 	state_save_register_UINT32( "psx", 0, "m_n_displaystartx", &m_n_displaystartx, 1 );
@@ -634,6 +638,7 @@ VIDEO_STOP( psx )
 
 VIDEO_UPDATE( psx )
 {
+	UINT32 n_x;
 	UINT32 n_y;
 
 #if defined( MAME_DEBUG )
@@ -696,9 +701,29 @@ VIDEO_UPDATE( psx )
 
 	set_visible_area( 0, m_n_screenwidth - 1, 0, m_n_screenheight - 1 );
 
-	for( n_y = 0; n_y < m_n_screenheight; n_y++ )
+	if( ( m_n_gpustatus & ( 1 << 0x17 ) ) != 0 )
 	{
-		draw_scanline16( bitmap, 0, n_y, m_n_screenwidth, m_p_p_vram[ n_y + m_n_displaystarty ] + m_n_displaystartx, Machine->pens, -1 );
+		/* todo: only draw to necessary area */
+		fillbitmap( bitmap, 0, cliprect );
+	}
+	else
+	{
+		/* todo: clear border */
+		if( m_b_reverseflag )
+		{
+			n_x = ( 1023 - m_n_displaystartx );
+			/* todo: make this flip the screen, in the meantime.. */
+			n_x -= ( m_n_screenwidth - 1 );
+		}
+		else
+		{
+			n_x = m_n_displaystartx;
+		}
+
+		for( n_y = 0; n_y < m_n_screenheight; n_y++ )
+		{
+			draw_scanline16( bitmap, 0, n_y, m_n_screenwidth, m_p_p_vram[ n_y + m_n_displaystarty ] + n_x, Machine->pens, -1 );
+		}
 	}
 }
 
@@ -2742,11 +2767,12 @@ static void MoveImage( void )
 	}
 }
 
-WRITE32_HANDLER( psx_gpu_w )
+void psx_gpu_write( UINT32 *p_ram, INT32 n_size )
 {
-	switch( offset )
+	while( n_size > 0 )
 	{
-	case 0x00:
+		UINT32 data = *( p_ram );
+
 		verboselog( 2, "PSX Packet #%u %08x\n", m_n_gpu_buffer_offset, data );
 		m_packet.n_entry[ m_n_gpu_buffer_offset ] = data;
 		switch( m_packet.n_entry[ 0 ] >> 24 )
@@ -2891,6 +2917,7 @@ WRITE32_HANDLER( psx_gpu_w )
 			}
 			break;
 		case 0x40:
+		case 0x41:
 			if( m_n_gpu_buffer_offset < 2 )
 			{
 				m_n_gpu_buffer_offset++;
@@ -2925,6 +2952,7 @@ WRITE32_HANDLER( psx_gpu_w )
 			}
 			break;
 		case 0x50:
+		case 0x52:
 			if( m_n_gpu_buffer_offset < 3 )
 			{
 				m_n_gpu_buffer_offset++;
@@ -3014,6 +3042,7 @@ WRITE32_HANDLER( psx_gpu_w )
 			}
 			break;
 		case 0x74:
+		case 0x77:
 			if( m_n_gpu_buffer_offset < 2 )
 			{
 				m_n_gpu_buffer_offset++;
@@ -3069,15 +3098,15 @@ WRITE32_HANDLER( psx_gpu_w )
 
 					*( m_p_p_vram[ ( m_n_vramy + ( m_packet.n_entry[ 1 ] >> 16 ) ) & 1023 ] + ( ( m_n_vramx + m_packet.n_entry[ 1 ] ) & 1023 ) ) = data & 0xffff;
 					m_n_vramx++;
-					if( m_n_vramx >= ( m_packet.n_entry[ 2 ] & 1023 ) )
+					if( m_n_vramx >= ( m_packet.n_entry[ 2 ] & 0xffff ) )
 					{
 						m_n_vramx = 0;
 						m_n_vramy++;
-						if( m_n_vramy >= ( ( m_packet.n_entry[ 2 ] >> 16 ) & 1023 ) )
+						if( m_n_vramy >= ( m_packet.n_entry[ 2 ] >> 16 ) )
 						{
 							verboselog( 1, "%02x: send image to framebuffer %u,%u %u,%u\n", m_packet.n_entry[ 0 ] >> 24,
-								m_packet.n_entry[ 1 ] & 1023, ( m_packet.n_entry[ 1 ] >> 16 ) & 1023,
-								m_packet.n_entry[ 2 ] & 1023, ( m_packet.n_entry[ 2 ] >> 16 ) & 1023 );
+								m_packet.n_entry[ 1 ] & 0xffff, ( m_packet.n_entry[ 1 ] >> 16 ),
+								m_packet.n_entry[ 2 ] & 0xffff, ( m_packet.n_entry[ 2 ] >> 16 ) );
 							m_n_gpu_buffer_offset = 0;
 							m_n_vramx = 0;
 							m_n_vramy = 0;
@@ -3174,10 +3203,22 @@ WRITE32_HANDLER( psx_gpu_w )
 			usrintf_showmessage_secs( 1, "unknown GPU packet %08x", m_packet.n_entry[ 0 ] );
 #endif
 			verboselog( 0, "unknown GPU packet %08x (%08x)\n", m_packet.n_entry[ 0 ], data );
-			/* kludge */
-//			m_n_gpu_buffer_offset = 1;
+#if ( STOP_ON_ERROR )
+			m_n_gpu_buffer_offset = 1;
+#endif
 			break;
 		}
+		p_ram++;
+		n_size--;
+	}
+}
+
+WRITE32_HANDLER( psx_gpu_w )
+{
+	switch( offset )
+	{
+	case 0x00:
+		psx_gpu_write( &data, 1 );
 		break;
 	case 0x01:
 		switch( data >> 24 )
@@ -3199,6 +3240,10 @@ WRITE32_HANDLER( psx_gpu_w )
 			m_n_screenheight = 240;
 			m_n_vramx = 0;
 			m_n_vramy = 0;
+			m_n_twx = 0;
+			m_n_twy = 0;
+			m_n_twh = 255;
+			m_n_tww = 255;
 			break;
 		case 0x01:
 			verboselog( 1, "not handled: reset command buffer\n" );
@@ -3210,14 +3255,6 @@ WRITE32_HANDLER( psx_gpu_w )
 		case 0x03:
 			m_n_gpustatus &= ~( 1L << 0x17 );
 			m_n_gpustatus |= ( data & 0x01 ) << 0x17;
-			if( ( data & 1 ) != 0 )
-			{
-				verboselog( 1, "not handled: display enable %d\n", data & 1 );
-			}
-			else
-			{
-				verboselog( 1, "not handled: display enable %d\n", data & 1 );
-			}
 			break;
 		case 0x04:
 			verboselog( 1, "dma setup %d\n", data & 3 );
@@ -3251,7 +3288,7 @@ WRITE32_HANDLER( psx_gpu_w )
 			m_n_gpustatus &= ~( 127L << 0x10 );
 			m_n_gpustatus |= ( data & 0x3f ) << 0x11; /* width 0 + height + videmode + isrgb24 + isinter */
 			m_n_gpustatus |= ( ( data & 0x40 ) >> 0x06 ) << 0x10; /* width 1 */
-			/* reverseflag? */
+			m_b_reverseflag = ( data >> 7 ) & 1;
 			switch( ( m_n_gpustatus >> 0x13 ) & 1 )
 			{
 			case 0:
@@ -3351,11 +3388,11 @@ WRITE32_HANDLER( psx_gpu_w )
 	}
 }
 
-READ32_HANDLER( psx_gpu_r )
+
+void psx_gpu_read( UINT32 *p_ram, INT32 n_size )
 {
-	switch( offset )
+	while( n_size > 0 )
 	{
-	case 0x00:
 		if( ( m_n_gpustatus & ( 1L << 0x1b ) ) != 0 )
 		{
 			UINT32 n_pixel;
@@ -3388,18 +3425,37 @@ READ32_HANDLER( psx_gpu_r )
 					}
 				}
 			}
-			return data.d;
+			*( p_ram ) = data.d;
 		}
-		verboselog( 2, "read GPU info (%08x)\n", m_n_gpuinfo );
-		return m_n_gpuinfo;
+		else
+		{
+			verboselog( 2, "read GPU info (%08x)\n", m_n_gpuinfo );
+			*( p_ram ) = m_n_gpuinfo;
+		}
+		p_ram++;
+		n_size--;
+	}
+}
+
+READ32_HANDLER( psx_gpu_r )
+{
+	UINT32 data;
+
+	switch( offset )
+	{
+	case 0x00:
+		psx_gpu_read( &data, 1 );
+		break;
 	case 0x01:
 		verboselog( 1, "read GPU status (%08x)\n", m_n_gpustatus );
-		return m_n_gpustatus;
+		data = m_n_gpustatus;
+		break;
 	default:
 		verboselog( 0, "gpu_r( %08x, %08x ) unknown register\n", offset, mem_mask );
+		data = 0;
 		break;
 	}
-	return 0;
+	return data;
 }
 
 INTERRUPT_GEN( psx_vblank )

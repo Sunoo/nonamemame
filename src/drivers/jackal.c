@@ -361,10 +361,10 @@ INPUT_PORTS_START( topgunbl )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START	/* player 1 8-way rotary control - converted in rotary_0_r() */
-	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL, 25, 10, 0, 0, KEYCODE_Z, KEYCODE_X, 0, 0 )
+	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL, 25, 10, 0, 0, KEYCODE_Z, KEYCODE_X, IP_JOY_NONE, IP_JOY_NONE )
 
 	PORT_START	/* player 2 8-way rotary control - converted in rotary_1_r() */
-	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, 0, 0 )
+	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, IP_JOY_NONE, IP_JOY_NONE )
 
 	/* <jjs> */
 	PORT_START	/* alternate player 1 8-way rotary control - converted in rotary_0_r() */
@@ -558,7 +558,7 @@ ROM_START( topgunbl )
 	ROM_LOAD16_WORD_SWAP( "t-19.n14",     0x10000, 0x08000, CRC(46ee5dd2) )
 	ROM_LOAD16_WORD_SWAP( "t-20.n15",     0x18000, 0x08000, CRC(3f472344) )
 	ROM_LOAD16_WORD_SWAP( "t-6.n1",       0x20000, 0x08000, CRC(539cc48c) )
-	ROM_LOAD16_WORD_SWAP( "t-5.m1",       0x28000, 0x08000, BAD_DUMP CRC(2dd9a5e9)  )
+	ROM_LOAD16_WORD_SWAP( "t-5.m1",       0x28000, 0x08000, BAD_DUMP CRC(2dd9a5e9) )
 	ROM_LOAD16_WORD_SWAP( "t-7.n2",       0x30000, 0x08000, CRC(0ecd31b1) )
 	ROM_LOAD16_WORD_SWAP( "t-8.n3",       0x38000, 0x08000, CRC(f946ada7) )
 	ROM_LOAD16_WORD_SWAP( "t-13.n8",      0x40000, 0x08000, CRC(5d669abb) )

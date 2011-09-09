@@ -1,3 +1,7 @@
+0.78.11:
+ - Updated to MAME 0.78 source code
+ - Added Nemesis's protection fix for SegaSonic (Rev. C)
+
 0.76u2.11:
  - Updated to MAME 0.76u2 source code
  - Added sound to Armor Attack (from Tim's Cinematronics project)
