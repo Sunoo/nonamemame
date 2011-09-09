@@ -970,6 +970,47 @@ INPUT_PORTS_START( zerotime )
 	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_UNUSED )
 INPUT_PORTS_END
 
+INPUT_PORTS_START( luctoday )
+	PORT_START      /* IN0 */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_2WAY )
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_2WAY )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 )
+	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Cabinet ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Cocktail ) )
+	PORT_SERVICE( 0x40, IP_ACTIVE_HIGH )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SERVICE1 )
+
+	PORT_START      /* IN1 */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_START1 )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_2WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_2WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNUSED )
+	PORT_DIPNAME( 0xc0, 0x40, DEF_STR( Coinage ) )
+	PORT_DIPSETTING(    0x40, "A 1C/1C 2C/2C  B 1C/2C " )
+	PORT_DIPSETTING(    0xc0, "A 1C/1C 2C/3C  B 1C/3C " )
+	PORT_DIPSETTING(    0x00, "A 1C/2C 2C/4C  B 1C/4C " )
+	PORT_DIPSETTING(    0x80, "A 1C/2C 2C/5C  B 1C/5C " )
+
+	PORT_START      /* DSW0 */
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Bonus_Life ) )
+	PORT_DIPSETTING(    0x03, "6000" )
+	PORT_DIPSETTING(    0x02, "7000" )
+	PORT_DIPSETTING(    0x01, "9000" )
+	PORT_DIPSETTING(    0x00, "None" )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Lives ) )
+	PORT_DIPSETTING(    0x00, "3" )
+	PORT_DIPSETTING(    0x04, "5" )
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Difficulty ) )	/* player's bullet speed */
+	PORT_DIPSETTING(    0x00, "Easy" )				/* gap of 6 pixels */
+	PORT_DIPSETTING(    0x08, "Hard" )				/* gap of 8 pixels */
+	PORT_BIT( 0xf0, IP_ACTIVE_HIGH, IPT_UNUSED )
+INPUT_PORTS_END
+
 INPUT_PORTS_START( pisces )
 	PORT_START      /* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN2 )
@@ -3688,6 +3729,19 @@ ROM_START( zerotime )
 	ROM_LOAD( "6l.bpr",       0x0000, 0x0020, CRC(c3ac9467) SHA1(f382ad5a34d282056c78a5ec00c30ec43772bae2) )
 ROM_END
 
+ROM_START( luctoday )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+	ROM_LOAD( "ltprog1.bin",    0x0000, 0x0800, CRC(59c389b9) )
+	ROM_LOAD( "ltprog2.bin",    0x2000, 0x0800, CRC(ac3893b1) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "ltchar2.bin",    0x0000, 0x0800, CRC(8cd73bdc) )
+	ROM_LOAD( "ltchar1.bin",    0x0800, 0x0800, CRC(b5ba9946) )
+
+	ROM_REGION( 0x0020, REGION_PROMS, 0 )
+	ROM_LOAD( "luctoday.bpr",       0x0000, 0x0020, CRC(d5546262) )
+ROM_END
+
 ROM_START( gmgalax )
 	ROM_REGION( 0x18000, REGION_CPU1, 0 )	/* 64k for code + 32k for banked code */
 	ROM_LOAD( "pcb1_pm1.bin",0x10000, 0x1000, CRC(19338c70) SHA1(cc2665b7d534d324627d12025ee099ff415d4214) )
@@ -4963,6 +5017,28 @@ ROM_START( gmunch2 )
 	ROM_LOAD( "galaxian.clr", 0x0000, 0x0020, CRC(c3ac9467) )
 ROM_END
 
+/* Misfited */
+ROM_START( andromeh )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+	ROM_LOAD( "and01",        0x0000, 0x0400, CRC(a0059ddd) )
+	ROM_LOAD( "and02",        0x0400, 0x0400, CRC(da6421b8) )
+	ROM_LOAD( "and03",        0x0800, 0x0400, CRC(30e28016) )
+	ROM_LOAD( "and04",        0x0c00, 0x0400, CRC(de7e7770) )
+	ROM_LOAD( "and05",        0x1000, 0x0400, CRC(a916c919) )
+	ROM_LOAD( "and06",        0x1400, 0x0400, CRC(9175882b) )
+	ROM_LOAD( "and07",        0x1800, 0x0400, CRC(1237b9da) )
+	ROM_LOAD( "and08",        0x1c00, 0x0400, CRC(8b181929) )
+	ROM_LOAD( "and09",        0x2000, 0x0400, CRC(17fd5357) )
+	ROM_LOAD( "and10",        0x2400, 0x0400, CRC(3032821c) )
+
+	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "1h.bin",       0x0000, 0x0800, CRC(39fb43a4) )
+	ROM_LOAD( "1k.bin",       0x0800, 0x0800, CRC(7e3f56a2) )
+
+	ROM_REGION( 0x0020, REGION_PROMS, 0 )
+	ROM_LOAD( "6l.bpr",       0x0000, 0x0020, CRC(c3ac9467) )
+ROM_END
+
 
 GAME( 1979, galaxian, 0,        galaxian, galaxian, 0,        ROT90,  "Namco", "Galaxian (Namco set 1)" )
 GAME( 1979, galaxiaj, galaxian, galaxian, superg,   0,        ROT90,  "Namco", "Galaxian (Namco set 2)" )
@@ -4976,6 +5052,7 @@ GAME( 1979, galap4,   galaxian, galaxian, superg,   0,        ROT90,  "hack", "G
 GAME( 1979, galturbo, galaxian, galaxian, superg,   0,        ROT90,  "hack", "Galaxian Turbo" )
 GAME( 1979, swarm,    galaxian, galaxian, swarm,    0,        ROT90,  "hack", "Swarm" )
 GAME( 1979, zerotime, galaxian, galaxian, zerotime, 0,        ROT90,  "Petaco S.A.", "Zero Time" )
+GAME( 1980, luctoday, 0,        galaxian, luctoday, 0,        ROT270, "Sigma", "Lucky Today" )
 GAME( 1981, gmgalax,  0,        gmgalax,  gmgalax,  gmgalax,  ROT90,  "bootleg", "Ghostmuncher Galaxian (bootleg)" )
 GAME( 19??, pisces,   0,        pisces,   pisces,   pisces,	  ROT90,  "Subelectro", "Pisces" )
 GAME( 19??, piscesb,  pisces,   pisces,   piscesb,  pisces,   ROT90,  "bootleg", "Pisces (bootleg)" )
@@ -5038,6 +5115,7 @@ GAME( 1998, gaylaxn,  galaxian, galaxian, superg,   0,        ROT90,  "The Dog h
 GAME( 1979, galaxkyo, galaxian, galaxian, superg,   0,        ROT90,  "hack", "Galaxian (Kyoko)" )
 GAME( 1981, gmunch,   puckman,  pacmanbl, streakng, 0,        ROT90,  "bootleg", "Ghost Muncher (bootleg on Galaxian hardware)" )
 GAME( 1981, gmunch2,  puckman,  pacmanbl, streakng, 0,        ROT90,  "bootleg", "Ghost Muncher Set 2 (bootleg on Galaxian hardware)" )
+GAME( 1979, andromeh, galaxian, galaxian, galaxian, 0,        ROT90,  "hack", "Andromeda" )
 
 
 

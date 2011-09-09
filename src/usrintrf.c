@@ -2493,7 +2493,7 @@ static int displaygameinfo(struct mame_bitmap *bitmap,int selected)
 
 int showgamewarnings(struct mame_bitmap *bitmap)
 {
-//#ifdef NAG
+#ifndef NAG
 	int i;
 	char buf[2048];
 
@@ -2616,10 +2616,10 @@ int showgamewarnings(struct mame_bitmap *bitmap)
 				done = 2;
 		} while (done < 2);
 	}
-//#endif
+#endif
 
 	erase_screen(bitmap);
-//#ifdef NAG
+#ifndef NAG
 	update_video_and_audio();
 
 	return 0;
@@ -2628,18 +2628,18 @@ int showgamewarnings(struct mame_bitmap *bitmap)
 
 int showgameinfo(struct mame_bitmap *bitmap)
 {
-//#endif
+#endif
 	/* clear the input memory */
 	while (code_read_async() != CODE_NONE) {};
 
-//#ifdef NAG
+#ifndef NAG
 
 	while (displaygameinfo(bitmap,0) == 1)
 	{
 		update_video_and_audio();
 	}
 
-//#endif
+#endif
 
 	#ifdef MESS
 	while (displayimageinfo(bitmap,0) == 1)

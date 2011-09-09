@@ -512,7 +512,7 @@ void run_machine_core(void)
 {
 	/* disable artwork for the start */
 	artwork_enable(0);
-//#ifdef NAG
+#ifndef NAG
 	/* if we didn't find a settings file, show the disclaimer */
 	if (settingsloaded || options.skip_disclaimer || showcopyright(artwork_get_ui_bitmap()) == 0)
 	{
@@ -522,7 +522,7 @@ void run_machine_core(void)
 			/* show info about the game */
 			if (options.skip_gameinfo || showgameinfo(artwork_get_ui_bitmap()) == 0)
 			{
-//#endif
+#endif
 				init_user_interface();
 
 				/* enable artwork now */
@@ -565,11 +565,11 @@ void run_machine_core(void)
 
 				/* save input ports settings */
 				save_input_port_settings();
-//#ifdef NAG
+#ifndef NAG
 			}
 		}
 	}
-//#endif
+#endif
 }
 
 
