@@ -103,7 +103,7 @@ Reset the User Interface to its default state for fonts, colors, window position
 .topic HIDC_ROTATE
 Rotate the game screen
 .topic HIDC_SAMPLERATE
-Sample rate: 11025, 22050 or 44100
+Sample rate: 11025, 22050, 44100, or 48000
 .topic HIDC_SAMPLES
 Use sound samples
 .topic HIDC_SCANLINES
@@ -180,3 +180,7 @@ Use in conjunction with auto resolution.
 Do a non-aspect ratio corrected fullscreen stretch.
 .topic HIDC_D3D_ROTATE_EFFECTS
 De-select to allow horizontal scanlines & effects in vertical games.
+.topic HIDC_RELOAD
+Allows remapping of reload functionality in shooting games.
+.topic HIDC_DUAL_LIGHTGUN
+Allows use of a dual lightgun setup.

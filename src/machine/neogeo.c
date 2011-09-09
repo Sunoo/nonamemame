@@ -103,81 +103,6 @@ MACHINE_INIT( neogeo )
 
 
 /* This function is only called once per game. */
-MACHINE_INIT( pbobbldx )
-{
-	data16_t src, res, *mem16= (data16_t *)memory_region(REGION_USER1);
-	data16_t game_ver, *cpumem16 = (data16_t *)memory_region(REGION_CPU1);
-	time_t ltime;
-	struct tm *today;
-
-
-	/* Reset variables & RAM */
-	memset (neogeo_ram16, 0, 0x10000);
-
-	/* Set up machine country */
-	src = readinputport(5);
-	res = src & 0x3;
-
-	/* Console/arcade mode */
-	if(src & 0x04) 
-	res |= 0x8000;
-
-	/* write the ID in the system BIOS ROM */
-	mem16[0x0200] = res;
-
-	/* Version */
-	game_ver = src & 0x10;
-
-	/* Patch the ROM depending on the version */
-	/* Levels table */
-	cpumem16[0x1dbb2 >> 1] = cpumem16[(0x3ffe0 + game_ver) >> 1];
-	cpumem16[0x1dbb4 >> 1] = cpumem16[(0x3ffe2 + game_ver) >> 1];
-	/* Last level */
-	cpumem16[0x04fac >> 1] = cpumem16[(0x3ffe4 + game_ver) >> 1];
-	cpumem16[0x0590c >> 1] = cpumem16[(0x3ffe4 + game_ver) >> 1];
-	cpumem16[0x2025e >> 1] = cpumem16[(0x3ffe4 + game_ver) >> 1];
-	cpumem16[0x20a5a >> 1] = cpumem16[(0x3ffe4 + game_ver) >> 1];
-
-	if (memcard_manager==1)
-	{
-		memcard_manager=0;
-		mem16[0x11b1a/2] = 0x500a;
-	}
-	else
-	{
-		mem16[0x11b1a/2] = 0x1b6a;
-	}
-
-	time(&ltime);
-	today = localtime(&ltime);
-
-	/* Disable Real Time Clock if the user selects to record or playback an .inp file   */
-	/* This is needed in order to playback correctly an .inp on several games,as these  */
-	/* use the RTC of the NEC pd4990a as pseudo-random number generator   -kal 8 apr 02 */
-	if( record != 0 || playback != 0 )
-	{
-		pd4990a.seconds = 0;
-		pd4990a.minutes = 0;
-		pd4990a.hours = 0;
-		pd4990a.days = 0;
-		pd4990a.month = 0;
-		pd4990a.year = 0;
-		pd4990a.weekday = 0;
-	}
-	else
-	{
-		pd4990a.seconds = ((today->tm_sec/10)<<4) + (today->tm_sec%10);
-		pd4990a.minutes = ((today->tm_min/10)<<4) + (today->tm_min%10);
-		pd4990a.hours = ((today->tm_hour/10)<<4) + (today->tm_hour%10);
-		pd4990a.days = ((today->tm_mday/10)<<4) + (today->tm_mday%10);
-		pd4990a.month = (today->tm_mon + 1);
-		pd4990a.year = (((today->tm_year%100)/10)<<4) + (today->tm_year%10);
-		pd4990a.weekday = today->tm_wday;
-	}
-
-	neogeo_rng = 0x2345;	/* seed for the protection RNG in KOF99 onwards */
-}
-
 DRIVER_INIT( neogeo )
 {
 	extern struct YM2610interface neogeo_ym2610_interface;
@@ -609,46 +534,6 @@ static void neogeo_custom_memory(void)
 	/* Individual games can go here... */
 
 	/* kludges */
-	
-	if (!strcmp(Machine->gamedrv->name,"nitd") ||
-		!strcmp(Machine->gamedrv->name,"nitdd"))
-	{
-		/* Patch out loop to disable console mode */
-		data16_t *mem16 = (data16_t *)memory_region(REGION_CPU1);
-		mem16[0x19a00/2] = 0x4e71;
-	}
-
-        if (!strcmp(Machine->gamedrv->name,"sengoku3") ||
-                !strcmp(Machine->gamedrv->name,"sengok3d"))
-	{
-		/* Patch out loop to disable console mode */
-		data16_t *mem16 = (data16_t *)memory_region(REGION_CPU1);
-		mem16[0x00d04/2] = 0x4e71;
-	}
-
-	if (!strcmp(Machine->gamedrv->name,"zupapa"))
-	{
-		/* Patch out loop to disable console mode */
-		data16_t *mem16 = (data16_t *)memory_region(REGION_CPU1);
-		mem16[0x80290/2] = 0x4e71;
-	}
-
-	if (!strcmp(Machine->gamedrv->name,"kof2000") ||
-		!strcmp(Machine->gamedrv->name,"kof2000n") ||
-		!strcmp(Machine->gamedrv->name,"kof2knd"))
-	{
-		/* Patch out loop to disable console mode */
-		data16_t *mem16 = (data16_t *)memory_region(REGION_CPU1);
-		mem16[0xa22f6/2] = 0x4e71;
-	}
-	
-	if (!strcmp(Machine->gamedrv->name,"mslug4") ||
-		!strcmp(Machine->gamedrv->name,"mslug4d"))
-	{
-		/* Patch out loop to disable console mode */
-		data16_t *mem16 = (data16_t *)memory_region(REGION_CPU1);
-		mem16[0x0ae14/2] = 0x4e71;
-	}
 
 	if (!Machine->sample_rate &&
 			!strcmp(Machine->gamedrv->name,"popbounc"))
@@ -715,16 +600,15 @@ static void neogeo_custom_memory(void)
 			!strcmp(Machine->gamedrv->name,"kof97") ||
 			!strcmp(Machine->gamedrv->name,"kof97a") ||
 			!strcmp(Machine->gamedrv->name,"kof98") ||
+			!strcmp(Machine->gamedrv->name,"kof98k") ||
 			!strcmp(Machine->gamedrv->name,"kof98n") ||
 			!strcmp(Machine->gamedrv->name,"kof99") ||
 			!strcmp(Machine->gamedrv->name,"kof99a") ||
 			!strcmp(Machine->gamedrv->name,"kof99e") ||
 			!strcmp(Machine->gamedrv->name,"kof99n") ||
-			!strcmp(Machine->gamedrv->name,"kof99nd") ||
 			!strcmp(Machine->gamedrv->name,"kof99p") ||
 			!strcmp(Machine->gamedrv->name,"kof2000") ||
 			!strcmp(Machine->gamedrv->name,"kof2000n") ||
-			!strcmp(Machine->gamedrv->name,"kof2knd") ||
 			!strcmp(Machine->gamedrv->name,"kizuna") ||
 			!strcmp(Machine->gamedrv->name,"lastblad") ||
 			!strcmp(Machine->gamedrv->name,"lastblda") ||
@@ -735,7 +619,6 @@ static void neogeo_custom_memory(void)
 			!strcmp(Machine->gamedrv->name,"mslug3") ||
 			!strcmp(Machine->gamedrv->name,"garou") ||
 			!strcmp(Machine->gamedrv->name,"garouo") ||
-			!strcmp(Machine->gamedrv->name,"garoun") ||
 			!strcmp(Machine->gamedrv->name,"garoup"))
 		sram_protection_hack = 0x100/2;
 

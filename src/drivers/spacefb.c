@@ -229,48 +229,48 @@ static struct Samplesinterface spacefb_samples_interface =
 };
 
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x3fff, MRA_ROM },
-	{ 0x8000, 0x83ff, MRA_RAM },
-	{ 0xc000, 0xc7ff, MRA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0x83ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xc000, 0xc7ff) AM_READ(MRA8_RAM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x3fff, MWA_ROM },
-	{ 0x8000, 0x83ff, MWA_RAM, &videoram, &videoram_size },
-	{ 0xc000, 0xc7ff, MWA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x8000, 0x83ff) AM_WRITE(MWA8_RAM) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+	AM_RANGE(0xc000, 0xc7ff) AM_WRITE(MWA8_RAM)
+ADDRESS_MAP_END
 
-static PORT_READ_START( readport )
-	{ 0x00, 0x00, input_port_0_r }, /* IN 0 */
-	{ 0x01, 0x01, input_port_1_r }, /* IN 1 */
-	{ 0x02, 0x02, input_port_2_r }, /* Coin - Start */
-	{ 0x03, 0x03, input_port_3_r }, /* DSW0 */
-PORT_END
+static ADDRESS_MAP_START( readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_READ(input_port_0_r) /* IN 0 */
+	AM_RANGE(0x01, 0x01) AM_READ(input_port_1_r) /* IN 1 */
+	AM_RANGE(0x02, 0x02) AM_READ(input_port_2_r) /* Coin - Start */
+	AM_RANGE(0x03, 0x03) AM_READ(input_port_3_r) /* DSW0 */
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( writeport )
-	{ 0x00, 0x00, spacefb_video_control_w },
-	{ 0x01, 0x01, spacefb_port_1_w },
-	{ 0x02, 0x02, spacefb_port_2_w },
-PORT_END
+static ADDRESS_MAP_START( writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_WRITE(spacefb_video_control_w)
+	AM_RANGE(0x01, 0x01) AM_WRITE(spacefb_port_1_w)
+	AM_RANGE(0x02, 0x02) AM_WRITE(spacefb_port_2_w)
+ADDRESS_MAP_END
 
-static MEMORY_READ_START( readmem_sound )
-	{ 0x0000, 0x03ff, MRA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem_sound, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x03ff) AM_READ(MRA8_ROM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem_sound )
-	{ 0x0000, 0x03ff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( writemem_sound, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x03ff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
-static PORT_READ_START( readport_sound )
-	{ I8039_p2, I8039_p2, spacefb_sh_p2_r },
-	{ I8039_t0, I8039_t0, spacefb_sh_t0_r },
-	{ I8039_t1, I8039_t1, spacefb_sh_t1_r },
-PORT_END
+static ADDRESS_MAP_START( readport_sound, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(I8039_p2, I8039_p2) AM_READ(spacefb_sh_p2_r)
+	AM_RANGE(I8039_t0, I8039_t0) AM_READ(spacefb_sh_t0_r)
+	AM_RANGE(I8039_t1, I8039_t1) AM_READ(spacefb_sh_t1_r)
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( writeport_sound )
-	{ I8039_p1, I8039_p1, DAC_0_data_w },
-PORT_END
+static ADDRESS_MAP_START( writeport_sound, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(I8039_p1, I8039_p1) AM_WRITE(DAC_0_data_w)
+ADDRESS_MAP_END
 
 
 INPUT_PORTS_START( spacefb )
@@ -424,14 +424,14 @@ static MACHINE_DRIVER_START( spacefb )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 4000000)    /* 4 MHz? */
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(readport,writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(readport,writeport)
 	MDRV_CPU_VBLANK_INT(spacefb_interrupt,2) /* two int's per frame */
 
 	MDRV_CPU_ADD(I8035,6000000/15)
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
-	MDRV_CPU_MEMORY(readmem_sound,writemem_sound)
-	MDRV_CPU_PORTS(readport_sound,writeport_sound)
+	MDRV_CPU_PROGRAM_MAP(readmem_sound,writemem_sound)
+	MDRV_CPU_IO_MAP(readport_sound,writeport_sound)
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)

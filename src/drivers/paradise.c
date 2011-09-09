@@ -50,48 +50,48 @@ static WRITE_HANDLER( paradise_okibank_w )
 }
 
 
-static MEMORY_READ_START( paradise_readmem )
-	{ 0x0000, 0x7fff, MRA_ROM		},	// ROM
-	{ 0x8000, 0xbfff, MRA_BANK1		},	// ROM (banked)
-	{ 0xc000, 0xffff, MRA_RAM		},	// RAM
-MEMORY_END
+static ADDRESS_MAP_START( paradise_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM		)	// ROM
+	AM_RANGE(0x8000, 0xbfff) AM_READ(MRA8_BANK1		)	// ROM (banked)
+	AM_RANGE(0xc000, 0xffff) AM_READ(MRA8_RAM		)	// RAM
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( paradise_writemem )
-	{ 0x0000, 0x7fff, MWA_ROM		},	// ROM
-	{ 0x8000, 0xbfff, MWA_ROM		},	// ROM (banked)
-	{ 0xc000, 0xc7ff, paradise_vram_2_w,&paradise_vram_2	},	// Background
-	{ 0xc800, 0xcfff, paradise_vram_1_w,&paradise_vram_1	},	// Midground
-	{ 0xd000, 0xd7ff, paradise_vram_0_w,&paradise_vram_0	},	// Foreground
-	{ 0xd800, 0xd8ff, MWA_RAM								},	// RAM
-	{ 0xd900, 0xe0ff, MWA_RAM, &spriteram, &spriteram_size	},	// Sprites
-	{ 0xe100, 0xffff, MWA_RAM								},	// RAM
-MEMORY_END
+static ADDRESS_MAP_START( paradise_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_WRITE(MWA8_ROM		)	// ROM
+	AM_RANGE(0x8000, 0xbfff) AM_WRITE(MWA8_ROM		)	// ROM (banked)
+	AM_RANGE(0xc000, 0xc7ff) AM_WRITE(paradise_vram_2_w) AM_BASE(&paradise_vram_2	)	// Background
+	AM_RANGE(0xc800, 0xcfff) AM_WRITE(paradise_vram_1_w) AM_BASE(&paradise_vram_1	)	// Midground
+	AM_RANGE(0xd000, 0xd7ff) AM_WRITE(paradise_vram_0_w) AM_BASE(&paradise_vram_0	)	// Foreground
+	AM_RANGE(0xd800, 0xd8ff) AM_WRITE(MWA8_RAM								)	// RAM
+	AM_RANGE(0xd900, 0xe0ff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size	)	// Sprites
+	AM_RANGE(0xe100, 0xffff) AM_WRITE(MWA8_RAM								)	// RAM
+ADDRESS_MAP_END
 
 
 
-static PORT_READ_START( paradise_readport )
-	{ 0x0000, 0x17ff, paletteram_r			},	// Palette
-	{ 0x2010, 0x2010, OKIM6295_status_0_r	},	// OKI 0
-	{ 0x2030, 0x2030, OKIM6295_status_1_r	},	// OKI 1
-	{ 0x2020, 0x2020, input_port_0_r		},	// DSW 1
-	{ 0x2021, 0x2021, input_port_1_r		},	// DSW 2
-	{ 0x2022, 0x2022, input_port_2_r		},	// P1
-	{ 0x2023, 0x2023, input_port_3_r		},	// P2
-	{ 0x2024, 0x2024, input_port_4_r		},	// Coins
-	{ 0x8000, 0xffff, videoram_r			},	// Pixmap
-PORT_END
+static ADDRESS_MAP_START( paradise_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x0000, 0x17ff) AM_READ(paletteram_r			)	// Palette
+	AM_RANGE(0x2010, 0x2010) AM_READ(OKIM6295_status_0_r	)	// OKI 0
+	AM_RANGE(0x2030, 0x2030) AM_READ(OKIM6295_status_1_r	)	// OKI 1
+	AM_RANGE(0x2020, 0x2020) AM_READ(input_port_0_r		)	// DSW 1
+	AM_RANGE(0x2021, 0x2021) AM_READ(input_port_1_r		)	// DSW 2
+	AM_RANGE(0x2022, 0x2022) AM_READ(input_port_2_r		)	// P1
+	AM_RANGE(0x2023, 0x2023) AM_READ(input_port_3_r		)	// P2
+	AM_RANGE(0x2024, 0x2024) AM_READ(input_port_4_r		)	// Coins
+	AM_RANGE(0x8000, 0xffff) AM_READ(videoram_r			)	// Pixmap
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( paradise_writeport )
-	{ 0x0000, 0x17ff, paradise_palette_w	},	// Palette
-	{ 0x1800, 0x1800, paradise_priority_w	},	// Layers priority
-	{ 0x2001, 0x2001, paradise_flipscreen_w	},	// Flip Screen
-	{ 0x2004, 0x2004, paradise_palbank_w	},	// Layers palette bank
-	{ 0x2006, 0x2006, paradise_rombank_w	},	// ROM bank
-	{ 0x2007, 0x2007, paradise_okibank_w	},	// OKI 1 samples bank
-	{ 0x2010, 0x2010, OKIM6295_data_0_w		},	// OKI 0
-	{ 0x2030, 0x2030, OKIM6295_data_1_w		},	// OKI 1
-	{ 0x8000, 0xffff, paradise_pixmap_w		},	// Pixmap
-PORT_END
+static ADDRESS_MAP_START( paradise_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x0000, 0x17ff) AM_WRITE(paradise_palette_w	)	// Palette
+	AM_RANGE(0x1800, 0x1800) AM_WRITE(paradise_priority_w	)	// Layers priority
+	AM_RANGE(0x2001, 0x2001) AM_WRITE(paradise_flipscreen_w	)	// Flip Screen
+	AM_RANGE(0x2004, 0x2004) AM_WRITE(paradise_palbank_w	)	// Layers palette bank
+	AM_RANGE(0x2006, 0x2006) AM_WRITE(paradise_rombank_w	)	// ROM bank
+	AM_RANGE(0x2007, 0x2007) AM_WRITE(paradise_okibank_w	)	// OKI 1 samples bank
+	AM_RANGE(0x2010, 0x2010) AM_WRITE(OKIM6295_data_0_w		)	// OKI 0
+	AM_RANGE(0x2030, 0x2030) AM_WRITE(OKIM6295_data_1_w		)	// OKI 1
+	AM_RANGE(0x8000, 0xffff) AM_WRITE(paradise_pixmap_w		)	// Pixmap
+ADDRESS_MAP_END
 
 
 /***************************************************************************
@@ -333,8 +333,8 @@ static MACHINE_DRIVER_START( paradise )
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 6000000)			/* Z8400B */
 	MDRV_CPU_FLAGS(CPU_16BIT_PORT)
-	MDRV_CPU_MEMORY(paradise_readmem,paradise_writemem)
-	MDRV_CPU_PORTS(paradise_readport,paradise_writeport)
+	MDRV_CPU_PROGRAM_MAP(paradise_readmem,paradise_writemem)
+	MDRV_CPU_IO_MAP(paradise_readport,paradise_writeport)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,4)	/* No nmi routine */
 
 	MDRV_FRAMES_PER_SECOND(60)

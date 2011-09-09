@@ -123,84 +123,84 @@ static WRITE_HANDLER( sauro_coin2_w )
 	coin_counter_w(1, 0); // to get the coin counter working in sauro, as it doesn't write 0
 }
 
-static MEMORY_READ_START( sauro_readmem )
-	{ 0x0000, 0xdfff, MRA_ROM },
-	{ 0xe000, 0xebff, MRA_RAM },
-	{ 0xf000, 0xffff, MRA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( sauro_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xdfff) AM_READ(MRA8_ROM)
+	AM_RANGE(0xe000, 0xebff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xf000, 0xffff) AM_READ(MRA8_RAM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( sauro_writemem )
-	{ 0x0000, 0xdfff, MWA_ROM },
-	{ 0xe000, 0xe7ff, MWA_RAM },
-	{ 0xe800, 0xebff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0xf000, 0xf3ff, tecfri_videoram_w, &tecfri_videoram },
-	{ 0xf400, 0xf7ff, tecfri_colorram_w, &tecfri_colorram },
-	{ 0xf800, 0xfbff, tecfri_videoram2_w, &tecfri_videoram2 },
-	{ 0xfc00, 0xffff, tecfri_colorram2_w, &tecfri_colorram2 },
-MEMORY_END
+static ADDRESS_MAP_START( sauro_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xdfff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xe000, 0xe7ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xe800, 0xebff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0xf000, 0xf3ff) AM_WRITE(tecfri_videoram_w) AM_BASE(&tecfri_videoram)
+	AM_RANGE(0xf400, 0xf7ff) AM_WRITE(tecfri_colorram_w) AM_BASE(&tecfri_colorram)
+	AM_RANGE(0xf800, 0xfbff) AM_WRITE(tecfri_videoram2_w) AM_BASE(&tecfri_videoram2)
+	AM_RANGE(0xfc00, 0xffff) AM_WRITE(tecfri_colorram2_w) AM_BASE(&tecfri_colorram2)
+ADDRESS_MAP_END
 
-static PORT_READ_START( sauro_readport )
-	{ 0x00, 0x00, input_port_2_r },
-	{ 0x20, 0x20, input_port_3_r },
-	{ 0x40, 0x40, input_port_0_r },
-	{ 0x60, 0x60, input_port_1_r },
-PORT_END
+static ADDRESS_MAP_START( sauro_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_READ(input_port_2_r)
+	AM_RANGE(0x20, 0x20) AM_READ(input_port_3_r)
+	AM_RANGE(0x40, 0x40) AM_READ(input_port_0_r)
+	AM_RANGE(0x60, 0x60) AM_READ(input_port_1_r)
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( sauro_writeport )
-	{ 0xa0, 0xa0, tecfri_scroll_bg_w, },
-	{ 0xa1, 0xa1, sauro_scroll_fg_w, },
-	{ 0x80, 0x80, sauro_sound_command_w, },
-	{ 0xc0, 0xc0, flip_screen_w, },
-	{ 0xc1, 0xc2, MWA_NOP },
-	{ 0xc3, 0xc3, sauro_coin1_w },
-	{ 0xc4, 0xc4, MWA_NOP },
-	{ 0xc5, 0xc5, sauro_coin2_w },
-	{ 0xc6, 0xce, MWA_NOP },
-	{ 0xe0, 0xe0, watchdog_reset_w },
-PORT_END
+static ADDRESS_MAP_START( sauro_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0xa0, 0xa0) AM_WRITE(tecfri_scroll_bg_w)
+	AM_RANGE(0xa1, 0xa1) AM_WRITE(sauro_scroll_fg_w)
+	AM_RANGE(0x80, 0x80) AM_WRITE(sauro_sound_command_w)
+	AM_RANGE(0xc0, 0xc0) AM_WRITE(flip_screen_w)
+	AM_RANGE(0xc1, 0xc2) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0xc3, 0xc3) AM_WRITE(sauro_coin1_w)
+	AM_RANGE(0xc4, 0xc4) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0xc5, 0xc5) AM_WRITE(sauro_coin2_w)
+	AM_RANGE(0xc6, 0xce) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0xe0, 0xe0) AM_WRITE(watchdog_reset_w)
+ADDRESS_MAP_END
 
-static MEMORY_READ_START( sauro_sound_readmem )
-	{ 0x0000, 0x7fff, MRA_ROM },
-	{ 0x8000, 0x87ff, MRA_RAM },
-	{ 0xe000, 0xe000, sauro_sound_command_r },
-MEMORY_END
+static ADDRESS_MAP_START( sauro_sound_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0x87ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xe000, 0xe000) AM_READ(sauro_sound_command_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( sauro_sound_writemem )
-	{ 0x8000, 0x87ff, MWA_RAM },
-	{ 0xc000, 0xc000, YM3812_control_port_0_w },
-	{ 0xc001, 0xc001, YM3812_write_port_0_w },
-//	{ 0xa000, 0xa000, ADPCM_trigger },
-	{ 0xe000, 0xe006, MWA_NOP },
-	{ 0xe00e, 0xe00f, MWA_NOP },
-MEMORY_END
+static ADDRESS_MAP_START( sauro_sound_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x8000, 0x87ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xc000, 0xc000) AM_WRITE(YM3812_control_port_0_w)
+	AM_RANGE(0xc001, 0xc001) AM_WRITE(YM3812_write_port_0_w)
+//	AM_RANGE(0xa000, 0xa000) AM_WRITE(ADPCM_trigger)
+	AM_RANGE(0xe000, 0xe006) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0xe00e, 0xe00f) AM_WRITE(MWA8_NOP)
+ADDRESS_MAP_END
 
-static MEMORY_READ_START( trckydoc_readmem )
-	{ 0x0000, 0xdfff, MRA_ROM },
-	{ 0xe000, 0xe7ff, MRA_RAM },
-	{ 0xf800, 0xf800, input_port_2_r },
-	{ 0xf808, 0xf808, input_port_3_r },
-	{ 0xf810, 0xf810, input_port_0_r },
-	{ 0xf818, 0xf818, input_port_1_r },
-	{ 0xf828, 0xf828, watchdog_reset_r },
-MEMORY_END
+static ADDRESS_MAP_START( trckydoc_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xdfff) AM_READ(MRA8_ROM)
+	AM_RANGE(0xe000, 0xe7ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xf800, 0xf800) AM_READ(input_port_2_r)
+	AM_RANGE(0xf808, 0xf808) AM_READ(input_port_3_r)
+	AM_RANGE(0xf810, 0xf810) AM_READ(input_port_0_r)
+	AM_RANGE(0xf818, 0xf818) AM_READ(input_port_1_r)
+	AM_RANGE(0xf828, 0xf828) AM_READ(watchdog_reset_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( trckydoc_writemem )
-	{ 0x0000, 0xdfff, MWA_ROM },
-	{ 0xe000, 0xe7ff, MWA_RAM },
-	{ 0xe800, 0xebff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0xec00, 0xefff, trckydoc_spriteram_mirror_w }, // it clears sprites from the screen by writing here to set some of the attributes
-	{ 0xf000, 0xf3ff, tecfri_videoram_w, &tecfri_videoram },
-	{ 0xf400, 0xf7ff, tecfri_colorram_w, &tecfri_colorram },
-	{ 0xf820, 0xf820, YM3812_control_port_0_w },
-	{ 0xf821, 0xf821, YM3812_write_port_0_w },
-	{ 0xf830, 0xf830, tecfri_scroll_bg_w },
-	{ 0xf838, 0xf838, MWA_NOP },
-	{ 0xf839, 0xf839, flip_screen_w },
-	{ 0xf83a, 0xf83a, sauro_coin1_w },
-	{ 0xf83b, 0xf83b, sauro_coin2_w },
-	{ 0xf83c, 0xf83c, watchdog_reset_w },
-	{ 0xf83f, 0xf83f, MWA_NOP },
-MEMORY_END
+static ADDRESS_MAP_START( trckydoc_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xdfff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xe000, 0xe7ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xe800, 0xebff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0xec00, 0xefff) AM_WRITE(trckydoc_spriteram_mirror_w) // it clears sprites from the screen by writing here to set some of the attributes
+	AM_RANGE(0xf000, 0xf3ff) AM_WRITE(tecfri_videoram_w) AM_BASE(&tecfri_videoram)
+	AM_RANGE(0xf400, 0xf7ff) AM_WRITE(tecfri_colorram_w) AM_BASE(&tecfri_colorram)
+	AM_RANGE(0xf820, 0xf820) AM_WRITE(YM3812_control_port_0_w)
+	AM_RANGE(0xf821, 0xf821) AM_WRITE(YM3812_write_port_0_w)
+	AM_RANGE(0xf830, 0xf830) AM_WRITE(tecfri_scroll_bg_w)
+	AM_RANGE(0xf838, 0xf838) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0xf839, 0xf839) AM_WRITE(flip_screen_w)
+	AM_RANGE(0xf83a, 0xf83a) AM_WRITE(sauro_coin1_w)
+	AM_RANGE(0xf83b, 0xf83b) AM_WRITE(sauro_coin2_w)
+	AM_RANGE(0xf83c, 0xf83c) AM_WRITE(watchdog_reset_w)
+	AM_RANGE(0xf83f, 0xf83f) AM_WRITE(MWA8_NOP)
+ADDRESS_MAP_END
 
 INPUT_PORTS_START( tecfri )
 	PORT_START      /* IN0 */
@@ -361,7 +361,7 @@ static MACHINE_DRIVER_START( trckydoc )
 	MDRV_IMPORT_FROM(tecfri)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(trckydoc_readmem, trckydoc_writemem )
+	MDRV_CPU_PROGRAM_MAP(trckydoc_readmem, trckydoc_writemem )
 
 	MDRV_GFXDECODE(trckydoc_gfxdecodeinfo)
 
@@ -373,12 +373,12 @@ static MACHINE_DRIVER_START( sauro )
 	MDRV_IMPORT_FROM(tecfri)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(sauro_readmem, sauro_writemem)
-	MDRV_CPU_PORTS(sauro_readport, sauro_writeport)
+	MDRV_CPU_PROGRAM_MAP(sauro_readmem, sauro_writemem)
+	MDRV_CPU_IO_MAP(sauro_readport, sauro_writeport)
 
 	MDRV_CPU_ADD(Z80, 4000000)	// 4 MHz?
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
-	MDRV_CPU_MEMORY(sauro_sound_readmem, sauro_sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(sauro_sound_readmem, sauro_sound_writemem)
 	MDRV_CPU_VBLANK_INT(sauro_interrupt, 8) // ?
 
 	MDRV_GFXDECODE(sauro_gfxdecodeinfo)
@@ -421,37 +421,6 @@ ROM_START( sauro )
 	ROM_LOAD( "82s137-1.bin",    0x0800, 0x0400, CRC(bdfcf00c) SHA1(9faf4d7f8959b64faa535c9945eec59c774a3760) )  /* Blue component */
 ROM_END
 
-ROM_START( saurob )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )          /* 64k for code */
-	ROM_LOAD( "sauro02.7c",      0x00000, 0x8000, CRC(72026b9a) )
-	ROM_LOAD( "sauro01.6c",      0x08000, 0x8000, CRC(4ff12c25) )
-
-	ROM_REGION( 0x10000, REGION_CPU2, 0 )          /* 64k for sound CPU */
-	ROM_LOAD( "sauro03.16e",     0x00000, 0x8000, CRC(a30b60fc) )
-
-	ROM_REGION( 0x10000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "sauro-4.bin",     0x00000, 0x8000, CRC(9b617cda) )
-	ROM_LOAD( "sauro-5.bin",     0x08000, 0x8000, CRC(a6e2640d) )
-
-	ROM_REGION( 0x10000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "sauro-6.bin",     0x00000, 0x8000, CRC(4b77cb0f) )
-	ROM_LOAD( "sauro-7.bin",     0x08000, 0x8000, CRC(187da060) )
-
-	ROM_REGION( 0x20000, REGION_GFX3, ROMREGION_DISPOSE )
-	ROM_LOAD( "sauro-8.bin",     0x00000, 0x8000, CRC(e08b5d5e) )
-	ROM_LOAD( "sauro-9.bin",     0x08000, 0x8000, CRC(7c707195) )
-	ROM_LOAD( "sauro-10.bin",    0x10000, 0x8000, CRC(c93380d1) )
-	ROM_LOAD( "sauro-11.bin",    0x18000, 0x8000, CRC(f47982a8) )
-
-	ROM_REGION( 0x0c00, REGION_PROMS, 0 )
-	ROM_LOAD( "82s137-3.bin",    0x0000, 0x0400, CRC(d52c4cd0) )  /* Red component */
-	ROM_LOAD( "82s137-2.bin",    0x0400, 0x0400, CRC(c3e96d5d) )  /* Green component */
-	ROM_LOAD( "82s137-1.bin",    0x0800, 0x0400, CRC(bdfcf00c) )  /* Blue component */
-
-	ROM_REGION( 0x0c00, REGION_USER1, 0 )
-	ROM_LOAD( "sauropr4.16h",    0x0000, 0x0200, CRC(5261bc11) )  /* ??? */
-ROM_END
-
 ROM_START( trckydoc )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )          /* 64k for code */
 	ROM_LOAD( "trckydoc.d9",  0x0000,  0x8000, CRC(c6242fc3) SHA1(c8a6f6abe8b51061a113ed75fead0479df68ec40) )
@@ -488,5 +457,4 @@ static DRIVER_INIT( tecfri )
 }
 
 GAMEX( 1987, sauro,    0, sauro,    tecfri, tecfri, ROT0, "Tecfri", "Sauro", GAME_IMPERFECT_SOUND )
-GAMEX( 1987, saurob,   sauro,    sauro,    tecfri,   tecfri,    ROT0, "bootleg", "Sauro (bootleg)", GAME_IMPERFECT_SOUND )
 GAME ( 1987, trckydoc, 0, trckydoc, tecfri, tecfri, ROT0, "Tecfri", "Tricky Doc" )

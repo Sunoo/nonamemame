@@ -16,7 +16,7 @@ unsigned gensyncd(char *buffer, unsigned PC)
 			buffer += sprintf(buffer, " HS");
     }
 	else
-		buffer += sprintf(buffer, " X:%03X", activecpu_get_reg(GS_X));
+		buffer += sprintf(buffer, " X:%03X", (UINT32)activecpu_get_reg(GS_X));	/* SU 078u2 */
 
     if( vblank )
     {
@@ -25,7 +25,7 @@ unsigned gensyncd(char *buffer, unsigned PC)
 			buffer += sprintf(buffer, " VS");
     }
 	else
-		buffer += sprintf(buffer, " Y:%03X", activecpu_get_reg(GS_Y));
+		buffer += sprintf(buffer, " Y:%03X", (UINT32)activecpu_get_reg(GS_Y));	/* SU 078u2 */
 
     return 1;
 }

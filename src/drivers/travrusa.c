@@ -66,27 +66,27 @@ VIDEO_UPDATE( shtrider );
 
 
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x7fff, MRA_ROM },
-	{ 0x8000, 0x8fff, MRA_RAM },        /* Video and Color ram */
-	{ 0xd000, 0xd000, input_port_0_r },	/* IN0 */
-	{ 0xd001, 0xd001, input_port_1_r },	/* IN1 */
-	{ 0xd002, 0xd002, input_port_2_r },	/* IN2 */
-	{ 0xd003, 0xd003, input_port_3_r },	/* DSW1 */
-	{ 0xd004, 0xd004, input_port_4_r },	/* DSW2 */
-	{ 0xe000, 0xefff, MRA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0x8fff) AM_READ(MRA8_RAM)        /* Video and Color ram */
+	AM_RANGE(0xd000, 0xd000) AM_READ(input_port_0_r)	/* IN0 */
+	AM_RANGE(0xd001, 0xd001) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0xd002, 0xd002) AM_READ(input_port_2_r)	/* IN2 */
+	AM_RANGE(0xd003, 0xd003) AM_READ(input_port_3_r)	/* DSW1 */
+	AM_RANGE(0xd004, 0xd004) AM_READ(input_port_4_r)	/* DSW2 */
+	AM_RANGE(0xe000, 0xefff) AM_READ(MRA8_RAM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x7fff, MWA_ROM },
-	{ 0x8000, 0x8fff, travrusa_videoram_w, &travrusa_videoram },
-	{ 0x9000, 0x9000, travrusa_scroll_x_low_w },
-	{ 0xa000, 0xa000, travrusa_scroll_x_high_w },
-	{ 0xc800, 0xc9ff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0xd000, 0xd000, irem_sound_cmd_w },
-	{ 0xd001, 0xd001, travrusa_flipscreen_w },	/* + coin counters - not written by shtrider */
-	{ 0xe000, 0xefff, MWA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x8000, 0x8fff) AM_WRITE(travrusa_videoram_w) AM_BASE(&travrusa_videoram)
+	AM_RANGE(0x9000, 0x9000) AM_WRITE(travrusa_scroll_x_low_w)
+	AM_RANGE(0xa000, 0xa000) AM_WRITE(travrusa_scroll_x_high_w)
+	AM_RANGE(0xc800, 0xc9ff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0xd000, 0xd000) AM_WRITE(irem_sound_cmd_w)
+	AM_RANGE(0xd001, 0xd001) AM_WRITE(travrusa_flipscreen_w)	/* + coin counters - not written by shtrider */
+	AM_RANGE(0xe000, 0xefff) AM_WRITE(MWA8_RAM)
+ADDRESS_MAP_END
 
 
 
@@ -266,52 +266,45 @@ INPUT_PORTS_START( motorace )
 INPUT_PORTS_END
 
 INPUT_PORTS_START( shtrider )
-	PORT_START
+	PORT_START	// IN0
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT_IMPULSE( 0x04, IP_ACTIVE_LOW, IPT_COIN2, 4 )
-	PORT_BIT_IMPULSE( 0x08, IP_ACTIVE_LOW, IPT_COIN1, 4 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN1 )
+	PORT_BIT( 0x70, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
 
-	PORT_START
+	PORT_START	// IN1
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_2WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 )
 
-	PORT_START	/* IN 2 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_2WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_START	// IN2
+	PORT_BIT( 0x03, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_2WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY | IPF_COCKTAIL )
+	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START	/* DSW A */
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_START	// DSW0
+	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Coin_A ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 5C_1C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 4C_1C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x06, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x07, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x03, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x05, DEF_STR( 1C_3C ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( 1C_5C ) )
+	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Coin_B ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x18, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -322,19 +315,19 @@ INPUT_PORTS_START( shtrider )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START      /* DSW B */
-	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
+	PORT_START	// DSW1
+	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Flip_Screen ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, "Speed Type" )
-	PORT_DIPSETTING(    0x02, "Km/h" )
-	PORT_DIPSETTING(    0x00, "Ml/h" )
+	PORT_DIPNAME( 0x02, 0x02, "Speed Display" )
+	PORT_DIPSETTING(    0x02, "km/h" )
+	PORT_DIPSETTING(    0x00, "mph" )
 	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Cabinet ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
 	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -408,7 +401,7 @@ static MACHINE_DRIVER_START( travrusa )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 4000000)	/* 4 MHz (?) */
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
 
 	MDRV_FRAMES_PER_SECOND(56.75)
@@ -568,4 +561,4 @@ static DRIVER_INIT( shtrider )
 
 GAME( 1983, travrusa, 0,        travrusa, travrusa, 0,        ROT270, "Irem", "Traverse USA / Zippy Race" )
 GAME( 1983, motorace, travrusa, travrusa, motorace, motorace, ROT270, "Irem (Williams license)", "MotoRace USA" )
-GAMEX(1984, shtrider, 0,        shtrider, shtrider, shtrider, ROT270|ORIENTATION_FLIP_X, "Seibu Kaihatsu (Sigma license)", "Shot Rider", GAME_NO_COCKTAIL )
+GAME( 1984, shtrider, 0,        shtrider, shtrider, shtrider, ROT270|ORIENTATION_FLIP_X, "Seibu Kaihatsu (Sigma license)", "Shot Rider" )

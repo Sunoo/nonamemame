@@ -73,32 +73,32 @@
  *
  *************************************/
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x7fff, MRA_ROM },
-	{ 0x8000, 0x8fff, MRA_RAM },	/* video and color RAM, scratchpad RAM, sprite codes */
-	{ 0x9000, 0x903f, input_port_3_r },	/* DSW1 */
-	{ 0x9040, 0x907f, input_port_2_r },	/* DSW0 */
-	{ 0x9080, 0x90bf, input_port_1_r },	/* IN1 */
-	{ 0x90c0, 0x90ff, input_port_0_r },	/* IN0 */
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0x8fff) AM_READ(MRA8_RAM)	/* video and color RAM, scratchpad RAM, sprite codes */
+	AM_RANGE(0x9000, 0x903f) AM_READ(input_port_3_r)	/* DSW1 */
+	AM_RANGE(0x9040, 0x907f) AM_READ(input_port_2_r)	/* DSW0 */
+	AM_RANGE(0x9080, 0x90bf) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0x90c0, 0x90ff) AM_READ(input_port_0_r)	/* IN0 */
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x7fff, MWA_ROM },
-	{ 0x8000, 0x83ff, videoram_w, &videoram, &videoram_size },
-	{ 0x8400, 0x87ff, colorram_w, &colorram },
-	{ 0x8800, 0x8fef, MWA_RAMROM },
-	{ 0x8ff0, 0x8fff, MWA_RAM, &spriteram, &spriteram_size},
-	{ 0x9000, 0x901f, pengo_sound_w, &pengo_soundregs },
-	{ 0x9020, 0x902f, MWA_RAM, &spriteram_2 },
-	{ 0x9040, 0x9040, interrupt_enable_w },
-	{ 0x9041, 0x9041, pengo_sound_enable_w },
-	{ 0x9042, 0x9042, MWA_NOP },
-	{ 0x9043, 0x9043, pengo_flipscreen_w },
-	{ 0x9044, 0x9046, MWA_NOP },
-	{ 0x9047, 0x9047, pengo_gfxbank_w },
-	{ 0x9070, 0x9070, MWA_NOP },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x8000, 0x83ff) AM_WRITE(videoram_w) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+	AM_RANGE(0x8400, 0x87ff) AM_WRITE(colorram_w) AM_BASE(&colorram)
+	AM_RANGE(0x8800, 0x8fef) AM_WRITE(MWA8_RAMROM)
+	AM_RANGE(0x8ff0, 0x8fff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x9000, 0x901f) AM_WRITE(pengo_sound_w) AM_BASE(&pengo_soundregs)
+	AM_RANGE(0x9020, 0x902f) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram_2)
+	AM_RANGE(0x9040, 0x9040) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0x9041, 0x9041) AM_WRITE(pengo_sound_enable_w)
+	AM_RANGE(0x9042, 0x9042) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0x9043, 0x9043) AM_WRITE(pengo_flipscreen_w)
+	AM_RANGE(0x9044, 0x9046) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0x9047, 0x9047) AM_WRITE(pengo_gfxbank_w)
+	AM_RANGE(0x9070, 0x9070) AM_WRITE(MWA8_NOP)
+ADDRESS_MAP_END
 
 
 
@@ -270,7 +270,7 @@ static MACHINE_DRIVER_START( pengo )
 									/* accurate emulation speed (time for two attract mode */
 									/* cycles after power up, until the high score list appears */
 									/* for the second time: 3'39") */
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
 
 	MDRV_FRAMES_PER_SECOND(60.606060)
@@ -457,58 +457,6 @@ ROM_START( penta )
 	ROM_LOAD( "pr1636.70",		0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )	/* timing - not used */
 ROM_END
 
-ROM_START( vecpengo )
-	ROM_REGION( 2*0x10000, REGION_CPU1, 0 )     /* 64k for code + 64k for decrypted opcodes */
-	ROM_LOAD( "ic8",          0x0000, 0x1000, CRC(f37066a8) )
-	ROM_LOAD( "ic7",          0x1000, 0x1000, CRC(baf48143) )
-	ROM_LOAD( "ic15",         0x2000, 0x1000, CRC(adf0eba0) )
-	ROM_LOAD( "ic14",         0x3000, 0x1000, CRC(a086d60f) )
-	ROM_LOAD( "ic21",         0x4000, 0x1000, CRC(b72084ec) )
-	ROM_LOAD( "ic20",         0x5000, 0x1000, CRC(94194a89) )
-	ROM_LOAD( "ic32",         0x6000, 0x1000, CRC(af7b12c4) )
-	ROM_LOAD( "ic31",         0x7000, 0x1000, CRC(933950fe) )
-
-	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "ic92",         0x0000, 0x2000, CRC(57c5e53c) )
-
-	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "ic105",        0x0000, 0x2000, CRC(b93588b0) )
-
-	ROM_REGION( 0x0420, REGION_PROMS, 0 )
-	ROM_LOAD( "pr1633.078",   0x0000, 0x0020, CRC(3a5844ec) )
-	ROM_LOAD( "pr1634.088",   0x0020, 0x0400, CRC(766b139b) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
-	ROM_LOAD( "pr1635.051",   0x0000, 0x0100, CRC(c29dea27) )
-	ROM_LOAD( "pr1636.070",   0x0100, 0x0100, CRC(77245b66) )	/* timing - not used */
-ROM_END
-
-ROM_START( pengopop )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "pengo.u8",     0x0000, 0x1000, CRC(3dfeb20e) )
-	ROM_LOAD( "pengo.u7",     0x1000, 0x1000, CRC(1db341bd) )
-	ROM_LOAD( "pengo.u15",    0x2000, 0x1000, CRC(7c2842d5) )
-	ROM_LOAD( "pengo.u14",    0x3000, 0x1000, CRC(6e3c1f2f) )
-	ROM_LOAD( "pengo.u21",    0x4000, 0x1000, CRC(95f354ff) )
-	ROM_LOAD( "pengo.u20",    0x5000, 0x1000, CRC(0fdb04b8) )
-	ROM_LOAD( "pengo.u32",    0x6000, 0x1000, CRC(e5920728) )
-	ROM_LOAD( "pengopc.u31",  0x7000, 0x1000, CRC(1ede8569) )
-
-	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "ic92",         0x0000, 0x2000, CRC(d7eec6cd) )
-
-	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "ic105",        0x0000, 0x2000, CRC(5bfd26e9) )
-
-	ROM_REGION( 0x0420, REGION_PROMS, 0 )
-	ROM_LOAD( "pr1633.078",   0x0000, 0x0020, CRC(3a5844ec) )
-	ROM_LOAD( "pr1634.088",   0x0020, 0x0400, CRC(766b139b) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
-	ROM_LOAD( "pr1635.051",   0x0000, 0x0100, CRC(c29dea27) )
-	ROM_LOAD( "pr1636.070",   0x0100, 0x0100, CRC(77245b66) )	/* timing - not used */
-ROM_END
-
 
 
 /*************************************
@@ -612,5 +560,3 @@ GAME( 1982, pengo2u, pengo, pengo, pengo, 0,     ROT90, "Sega", "Pengo (set 2 no
 GAME( 1982, pengo3u, pengo, pengo, pengo, 0,     ROT90, "Sega", "Pengo (set 3 not encrypted)" )
 GAME( 1982, pengob,  pengo, pengo, pengo, penta, ROT90, "bootleg", "Pengo (bootleg)" )
 GAME( 1982, penta,   pengo, pengo, pengo, penta, ROT90, "bootleg", "Penta" )
-GAME( 2000, vecpengo, pengo, pengo, pengo, pengo, ROT90, "T-Bone hack", "Pengo (Vector sim)")
-GAME( 1997, pengopop, pengo, pengo, pengo, 0,    ROT90, "Sega", "Pengo (Popcorn Music)" )

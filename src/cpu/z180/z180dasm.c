@@ -577,6 +577,8 @@ static int offs(INT8 offset)
 	return offset;
 }
 
+static unsigned z180_get_reg(int reg) { union cpuinfo info; z180_get_info(CPUINFO_INT_REGISTER + (reg), &info); return info.i; }
+
 /****************************************************************************
  * Disassemble opcode at PC and return number of bytes it takes
  ****************************************************************************/
@@ -614,7 +616,7 @@ unsigned DasmZ180( char *buffer, unsigned pc )
 		if( op1 == 0xcb )
 		{
 			offset = (INT8) cpu_readmemz180(pc++);
-			op1 = cpu_readmemz180(pc++); /* fourth byte from OP_RAM! */
+			op1 = cpu_readmemz180(pc++); /* fourth byte from opcode_arg_base! */
 			xy = z180_get_reg( Z180_IX );
 			ea = (xy + offset) & 0xffff;
 			d = &mnemonic_xx_cb[op1];
@@ -627,7 +629,7 @@ unsigned DasmZ180( char *buffer, unsigned pc )
 		if( op1 == 0xcb )
 		{
 			offset = (INT8) cpu_readmemz180(pc++);
-			op1 = cpu_readmemz180(pc++); /* fourth byte from OP_RAM! */
+			op1 = cpu_readmemz180(pc++); /* fourth byte from opcode_arg_base! */
 			xy = z180_get_reg( Z180_IY );
 			ea = (ea + offset) & 0xffff;
 			d = &mnemonic_xx_cb[op1];

@@ -295,6 +295,10 @@ int run_game(int game)
 	Machine->drv = &internal_drv;
 	Machine->refresh_rate = Machine->drv->frames_per_second;
 
+	/* initialize the CPU interfaces first */
+	if (cpuintrf_init())
+		return 1;
+
 	/* initialize the game options */
 	if (init_game_options())
 		return 1;
@@ -526,17 +530,16 @@ void run_machine_core(void)
 {
 	/* disable artwork for the start */
 	artwork_enable(0);
-#ifndef NAG
+
 	/* if we didn't find a settings file, show the disclaimer */
 	if (settingsloaded || options.skip_disclaimer || showcopyright(artwork_get_ui_bitmap()) == 0)
 	{
 		/* show info about incorrect behaviour (wrong colors etc.) */
-		if (options.skip_gamewarnings || showgamewarnings(artwork_get_ui_bitmap()) == 0)
+		if (options.skip_warnings || showgamewarnings(artwork_get_ui_bitmap()) == 0)
 		{
 			/* show info about the game */
 			if (options.skip_gameinfo || showgameinfo(artwork_get_ui_bitmap()) == 0)
 			{
-#endif
 				init_user_interface();
 
 				/* enable artwork now */
@@ -579,11 +582,9 @@ void run_machine_core(void)
 
 				/* save input ports settings */
 				save_input_port_settings();
-#ifndef NAG
 			}
 		}
 	}
-#endif
 }
 
 
@@ -730,7 +731,7 @@ static int vh_open(void)
 			Machine->drv->default_visible_area.max_x,
 			Machine->drv->default_visible_area.min_y,
 			Machine->drv->default_visible_area.max_y);
-	
+
 	/* create spriteram buffers if necessary */
 	if (Machine->drv->video_attributes & VIDEO_BUFFERS_SPRITERAM)
 		if (init_buffered_spriteram())
@@ -1113,10 +1114,10 @@ void set_refresh_rate(float fps)
 	/* bail if already equal */
 	if (Machine->refresh_rate == fps)
 		return;
-	
+
 	/* "dirty" the rate for the next display update */
 	refresh_rate_changed = 1;
-	
+
 	/* set the new values in the Machine struct */
 	Machine->refresh_rate = fps;
 
@@ -1861,231 +1862,70 @@ static int validitychecks(void)
 			{
 				if (drv.cpu[cpu].cpu_type)
 				{
-					int alignunit,databus_width;
-
-
-					alignunit = cputype_align_unit(drv.cpu[cpu].cpu_type);
-					databus_width = cputype_databus_width(drv.cpu[cpu].cpu_type);
-
-					if (drv.cpu[cpu].memory_read)
-					{
-						const struct Memory_ReadAddress *mra = drv.cpu[cpu].memory_read;
-
-						if (!IS_MEMPORT_MARKER(mra) || (mra->end & MEMPORT_DIRECTION_MASK) != MEMPORT_DIRECTION_READ)
+					int space,mapnum;
+					for (space = 0;space < ADDRESS_SPACES;space++)
+						for (mapnum = 0;mapnum < 2;mapnum++)
 						{
-							printf("%s: %s wrong MEMPORT_READ_START\n",drivers[i]->source_file,drivers[i]->name);
-							error = 1;
-						}
+							int alignunit,databus_width,addr_shift;
 
-						switch (databus_width)
-						{
-							case 8:
-								if ((mra->end & MEMPORT_WIDTH_MASK) != MEMPORT_WIDTH_8)
-								{
-									printf("%s: %s cpu #%d uses wrong data width memory handlers! (width = %d, memory = %08x)\n",drivers[i]->source_file,drivers[i]->name,cpu,databus_width,mra->end);
-									error = 1;
-								}
-								break;
-							case 16:
-								if ((mra->end & MEMPORT_WIDTH_MASK) != MEMPORT_WIDTH_16)
-								{
-									printf("%s: %s cpu #%d uses wrong data width memory handlers! (width = %d, memory = %08x)\n",drivers[i]->source_file,drivers[i]->name,cpu,databus_width,mra->end);
-									error = 1;
-								}
-								break;
-							case 32:
-								if ((mra->end & MEMPORT_WIDTH_MASK) != MEMPORT_WIDTH_32)
-								{
-									printf("%s: %s cpu #%d uses wrong data width memory handlers! (width = %d, memory = %08x)\n",drivers[i]->source_file,drivers[i]->name,cpu,databus_width,mra->end);
-									error = 1;
-								}
-								break;
-						}
+							databus_width = cputype_databus_width(drv.cpu[cpu].cpu_type, space);
+							addr_shift = cputype_addrbus_shift(drv.cpu[cpu].cpu_type, space);
+							alignunit = databus_width/8;
 
-						while (!IS_MEMPORT_END(mra))
-						{
-							if (!IS_MEMPORT_MARKER(mra))
+#define SPACE_SHIFT(a)		((addr_shift < 0) ? ((a) << -addr_shift) : ((a) >> addr_shift))
+#define SPACE_SHIFT_END(a)	((addr_shift < 0) ? (((a) << -addr_shift) | ((1 << -addr_shift) - 1)) : ((a) >> addr_shift))
+
+							if (drv.cpu[cpu].construct_map[space][mapnum])
 							{
-								if (mra->end < mra->start)
+								struct address_map_t address_map[MAX_ADDRESS_MAP_SIZE];
+								const struct address_map_t *map = address_map;
+								UINT32 flags, val;
+
+								memset(address_map, 0, sizeof(address_map));
+								(*drv.cpu[cpu].construct_map[space][mapnum])(address_map);
+
+								if (IS_AMENTRY_END(map))
+									continue;
+								if (!IS_AMENTRY_EXTENDED(map))
 								{
-									printf("%s: %s wrong memory read handler start = %08x > end = %08x\n",drivers[i]->source_file,drivers[i]->name,mra->start,mra->end);
+									printf("%s: %s wrong MEMORY_READ_START\n",drivers[i]->source_file,drivers[i]->name);
 									error = 1;
 								}
-								if ((mra->start & (alignunit-1)) != 0 || (mra->end & (alignunit-1)) != (alignunit-1))
+
+								flags = AM_EXTENDED_FLAGS(map);
+								if (flags & AMEF_SPECIFIES_DBITS)
 								{
-									printf("%s: %s wrong memory read handler start = %08x, end = %08x ALIGN = %d\n",drivers[i]->source_file,drivers[i]->name,mra->start,mra->end,alignunit);
-									error = 1;
+									val = (flags & AMEF_DBITS_MASK) >> AMEF_DBITS_SHIFT;
+									val = (val + 1) * 8;
+									if (val != databus_width)
+									{
+										printf("%s: %s cpu #%d uses wrong data width memory handlers! (width = %d, memory = %08x)\n",drivers[i]->source_file,drivers[i]->name,cpu,databus_width,AM_EXTENDED_FLAGS(map));
+										error = 1;
+									}
+								}
+
+								while (!IS_AMENTRY_END(map))
+								{
+									if (!IS_AMENTRY_EXTENDED(map))
+									{
+										if (!IS_AMENTRY_MATCH_MASK(map))
+										{
+											if (map->end < map->start)
+											{
+												printf("%s: %s wrong memory read handler start = %08x > end = %08x\n",drivers[i]->source_file,drivers[i]->name,map->start,map->end);
+												error = 1;
+											}
+											if ((SPACE_SHIFT(map->start) & (alignunit-1)) != 0 || (SPACE_SHIFT_END(map->end) & (alignunit-1)) != (alignunit-1))
+											{
+												printf("%s: %s wrong memory read handler start = %08x, end = %08x ALIGN = %d\n",drivers[i]->source_file,drivers[i]->name,map->start,map->end,alignunit);
+												error = 1;
+											}
+										}
+									}
+									map++;
 								}
 							}
-							mra++;
 						}
-					}
-					if (drv.cpu[cpu].memory_write)
-					{
-						const struct Memory_WriteAddress *mwa = drv.cpu[cpu].memory_write;
-
-						if (mwa->start != MEMPORT_MARKER ||
-								(mwa->end & MEMPORT_DIRECTION_MASK) != MEMPORT_DIRECTION_WRITE)
-						{
-							printf("%s: %s wrong MEMPORT_WRITE_START\n",drivers[i]->source_file,drivers[i]->name);
-							error = 1;
-						}
-
-						switch (databus_width)
-						{
-							case 8:
-								if ((mwa->end & MEMPORT_WIDTH_MASK) != MEMPORT_WIDTH_8)
-								{
-									printf("%s: %s cpu #%d uses wrong data width memory handlers! (width = %d, memory = %08x)\n",drivers[i]->source_file,drivers[i]->name,cpu,databus_width,mwa->end);
-									error = 1;
-								}
-								break;
-							case 16:
-								if ((mwa->end & MEMPORT_WIDTH_MASK) != MEMPORT_WIDTH_16)
-								{
-									printf("%s: %s cpu #%d uses wrong data width memory handlers! (width = %d, memory = %08x)\n",drivers[i]->source_file,drivers[i]->name,cpu,databus_width,mwa->end);
-									error = 1;
-								}
-								break;
-							case 32:
-								if ((mwa->end & MEMPORT_WIDTH_MASK) != MEMPORT_WIDTH_32)
-								{
-									printf("%s: %s cpu #%d uses wrong data width memory handlers! (width = %d, memory = %08x)\n",drivers[i]->source_file,drivers[i]->name,cpu,databus_width,mwa->end);
-									error = 1;
-								}
-								break;
-						}
-
-						while (!IS_MEMPORT_END(mwa))
-						{
-							if (!IS_MEMPORT_MARKER(mwa))
-							{
-								if (mwa->end < mwa->start)
-								{
-									printf("%s: %s wrong memory write handler start = %08x > end = %08x\n",drivers[i]->source_file,drivers[i]->name,mwa->start,mwa->end);
-									error = 1;
-								}
-								if ((mwa->start & (alignunit-1)) != 0 || (mwa->end & (alignunit-1)) != (alignunit-1))
-								{
-									printf("%s: %s wrong memory write handler start = %08x, end = %08x ALIGN = %d\n",drivers[i]->source_file,drivers[i]->name,mwa->start,mwa->end,alignunit);
-									error = 1;
-								}
-							}
-							mwa++;
-						}
-					}
-
-					if (drv.cpu[cpu].port_read)
-					{
-						const struct IO_ReadPort *pra = drv.cpu[cpu].port_read;
-
-						if (!IS_MEMPORT_MARKER(pra) || (pra->end & MEMPORT_DIRECTION_MASK) != MEMPORT_DIRECTION_READ)
-						{
-							printf("%s: %s wrong PORT_READ_START\n",drivers[i]->source_file,drivers[i]->name);
-							error = 1;
-						}
-
-						switch (databus_width)
-						{
-							case 8:
-								if ((pra->end & MEMPORT_WIDTH_MASK) != MEMPORT_WIDTH_8)
-								{
-									printf("%s: %s cpu #%d uses wrong data width port handlers! (width = %d, port = %08x)\n",drivers[i]->source_file,drivers[i]->name,cpu,databus_width,pra->end);
-									error = 1;
-								}
-								break;
-							case 16:
-								if ((pra->end & MEMPORT_WIDTH_MASK) != MEMPORT_WIDTH_16)
-								{
-									printf("%s: %s cpu #%d uses wrong data width port handlers! (width = %d, port = %08x)\n",drivers[i]->source_file,drivers[i]->name,cpu,databus_width,pra->end);
-									error = 1;
-								}
-								break;
-							case 32:
-								if ((pra->end & MEMPORT_WIDTH_MASK) != MEMPORT_WIDTH_32)
-								{
-									printf("%s: %s cpu #%d uses wrong data width port handlers! (width = %d, port = %08x)\n",drivers[i]->source_file,drivers[i]->name,cpu,databus_width,pra->end);
-									error = 1;
-								}
-								break;
-						}
-
-						while (!IS_MEMPORT_END(pra))
-						{
-							if (!IS_MEMPORT_MARKER(pra))
-							{
-								if (pra->end < pra->start)
-								{
-									printf("%s: %s wrong port read handler start = %08x > end = %08x\n",drivers[i]->source_file,drivers[i]->name,pra->start,pra->end);
-									error = 1;
-								}
-								if ((pra->start & (alignunit-1)) != 0 || (pra->end & (alignunit-1)) != (alignunit-1))
-								{
-									printf("%s: %s wrong port read handler start = %08x, end = %08x ALIGN = %d\n",drivers[i]->source_file,drivers[i]->name,pra->start,pra->end,alignunit);
-									error = 1;
-								}
-
-							}
-							pra++;
-						}
-					}
-
-					if (drv.cpu[cpu].port_write)
-					{
-						const struct IO_WritePort *pwa = drv.cpu[cpu].port_write;
-
-						if (pwa->start != MEMPORT_MARKER ||
-								(pwa->end & MEMPORT_DIRECTION_MASK) != MEMPORT_DIRECTION_WRITE)
-						{
-							printf("%s: %s wrong PORT_WRITE_START\n",drivers[i]->source_file,drivers[i]->name);
-							error = 1;
-						}
-
-						switch (databus_width)
-						{
-							case 8:
-								if ((pwa->end & MEMPORT_WIDTH_MASK) != MEMPORT_WIDTH_8)
-								{
-									printf("%s: %s cpu #%d uses wrong data width port handlers! (width = %d, port = %08x)\n",drivers[i]->source_file,drivers[i]->name,cpu,databus_width,pwa->end);
-									error = 1;
-								}
-								break;
-							case 16:
-								if ((pwa->end & MEMPORT_WIDTH_MASK) != MEMPORT_WIDTH_16)
-								{
-									printf("%s: %s cpu #%d uses wrong data width port handlers! (width = %d, port = %08x)\n",drivers[i]->source_file,drivers[i]->name,cpu,databus_width,pwa->end);
-									error = 1;
-								}
-								break;
-							case 32:
-								if ((pwa->end & MEMPORT_WIDTH_MASK) != MEMPORT_WIDTH_32)
-								{
-									printf("%s: %s cpu #%d uses wrong data width port handlers! (width = %d, port = %08x)\n",drivers[i]->source_file,drivers[i]->name,cpu,databus_width,pwa->end);
-									error = 1;
-								}
-								break;
-						}
-
-						while (!IS_MEMPORT_END(pwa))
-						{
-							if (!IS_MEMPORT_MARKER(pwa))
-							{
-								if (pwa->end < pwa->start)
-								{
-									printf("%s: %s wrong port write handler start = %08x > end = %08x\n",drivers[i]->source_file,drivers[i]->name,pwa->start,pwa->end);
-									error = 1;
-								}
-								if ((pwa->start & (alignunit-1)) != 0 || (pwa->end & (alignunit-1)) != (alignunit-1))
-								{
-									printf("%s: %s wrong port write handler start = %08x, end = %08x ALIGN = %d\n",drivers[i]->source_file,drivers[i]->name,pwa->start,pwa->end,alignunit);
-									error = 1;
-								}
-
-							}
-							pwa++;
-						}
-					}
-
 				}
 			}
 

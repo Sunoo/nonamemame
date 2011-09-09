@@ -485,7 +485,7 @@ void jaguar_set_palette(UINT16 vmode)
 
 static UINT8 *get_jaguar_memory(UINT32 offset)
 {
-	return memory_get_read_ptr(1, offset);
+	return memory_get_read_ptr(1, ADDRESS_SPACE_PROGRAM, offset);
 }
 
 
@@ -717,21 +717,19 @@ READ32_HANDLER( cojag_gun_input_r )
 	switch (offset)
 	{
 		case 0:
-			if (!(readinputport(8) & 0x04))  return 0;
 			get_crosshair_xy(1, &beamx, &beamy);
 			beamx += 52;
 			beamy += 17;
 			return (beamy << 16) | (beamx ^ 0x1ff);
 
 		case 1:
-			if (!(readinputport(8) & 0x08)) return 0;
 			get_crosshair_xy(0, &beamx, &beamy);
 			beamx += 52;
 			beamy += 17;
 			return (beamy << 16) | (beamx ^ 0x1ff);
 
 		case 2:
-			return (readinputport(7) & readinputport(8)) << 16;
+			return readinputport(7) << 16;
 	}
 	return 0;
 }

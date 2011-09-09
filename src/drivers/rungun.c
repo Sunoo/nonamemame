@@ -211,47 +211,47 @@ static INTERRUPT_GEN(rng_interrupt)
 		cpu_set_irq_line(0, MC68000_IRQ_5, ASSERT_LINE);
 }
 
-static MEMORY_READ16_START( rngreadmem )
-	{ 0x000000, 0x2fffff, MRA16_ROM },		// main program + data
-	{ 0x300000, 0x3007ff, MRA16_RAM },		// palette RAM
-	{ 0x380000, 0x39ffff, MRA16_RAM },		// work RAM
-	{ 0x400000, 0x43ffff, MRA16_NOP },		// K053936_0_rom_r }, // '936 ROM readback window
-	{ 0x480000, 0x48001f, rng_sysregs_r },
-	{ 0x4c0000, 0x4c001f, K053252_word_r },	// CCU (for scanline and vblank polling)
-	{ 0x580014, 0x580015, sound_status_msb_r },
-	{ 0x580000, 0x58001f, MRA16_RAM },		// sound regs read fall-through
-	{ 0x5c0000, 0x5c000d, K053246_word_r },	// 246A ROM readback window
-	{ 0x600000, 0x600fff, K053247_word_r },	// OBJ RAM
-	{ 0x601000, 0x601fff, MRA16_RAM },		// communication? second monitor buffer?
-	{ 0x6c0000, 0x6cffff, MRA16_RAM },		// PSAC2 render RAM
-	{ 0x700000, 0x7007ff, MRA16_RAM },		// PSAC2 line effect
-	{ 0x740000, 0x741fff, ttl_ram_r },		// text plane RAM
+static ADDRESS_MAP_START( rngreadmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x2fffff) AM_READ(MRA16_ROM)		// main program + data
+	AM_RANGE(0x300000, 0x3007ff) AM_READ(MRA16_RAM)		// palette RAM
+	AM_RANGE(0x380000, 0x39ffff) AM_READ(MRA16_RAM)		// work RAM
+	AM_RANGE(0x400000, 0x43ffff) AM_READ(MRA16_NOP)		// K053936_0_rom_r }, // '936 ROM readback window
+	AM_RANGE(0x480000, 0x48001f) AM_READ(rng_sysregs_r)
+	AM_RANGE(0x4c0000, 0x4c001f) AM_READ(K053252_word_r)	// CCU (for scanline and vblank polling)
+	AM_RANGE(0x580014, 0x580015) AM_READ(sound_status_msb_r)
+	AM_RANGE(0x580000, 0x58001f) AM_READ(MRA16_RAM)		// sound regs read fall-through
+	AM_RANGE(0x5c0000, 0x5c000d) AM_READ(K053246_word_r)	// 246A ROM readback window
+	AM_RANGE(0x600000, 0x600fff) AM_READ(K053247_word_r)	// OBJ RAM
+	AM_RANGE(0x601000, 0x601fff) AM_READ(MRA16_RAM)		// communication? second monitor buffer?
+	AM_RANGE(0x6c0000, 0x6cffff) AM_READ(MRA16_RAM)		// PSAC2 render RAM
+	AM_RANGE(0x700000, 0x7007ff) AM_READ(MRA16_RAM)		// PSAC2 line effect
+	AM_RANGE(0x740000, 0x741fff) AM_READ(ttl_ram_r)		// text plane RAM
 #if RNG_DEBUG
-	{ 0x5c0010, 0x5c001f, K053247_reg_word_r },
-	{ 0x640000, 0x640007, K053246_reg_word_r },
+	AM_RANGE(0x5c0010, 0x5c001f) AM_READ(K053247_reg_word_r)
+	AM_RANGE(0x640000, 0x640007) AM_READ(K053246_reg_word_r)
 #endif
-MEMORY_END
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( rngwritemem )
-	{ 0x000000, 0x2fffff, MWA16_ROM },
-	{ 0x300000, 0x3007ff, paletteram16_xBBBBBGGGGGRRRRR_word_w, &paletteram16 },
-	{ 0x380000, 0x39ffff, MWA16_RAM },		// work RAM
-	{ 0x480000, 0x48001f, rng_sysregs_w, &rng_sysreg },
-	{ 0x4c0000, 0x4c001f, K053252_word_w },	// CCU
-	{ 0x540000, 0x540001, sound_irq_w },
-	{ 0x58000c, 0x58000d, sound_cmd1_w },
-	{ 0x58000e, 0x58000f, sound_cmd2_w },
-	{ 0x580000, 0x58001f, MWA16_RAM },		// sound regs write fall-through
-	{ 0x5c0010, 0x5c001f, K053247_reg_word_w },
-	{ 0x600000, 0x600fff, K053247_word_w },	// OBJ RAM
-	{ 0x601000, 0x601fff, MWA16_RAM },		// communication? second monitor buffer?
-	{ 0x640000, 0x640007, K053246_word_w },	// '246A registers
-	{ 0x680000, 0x68001f, MWA16_RAM, &K053936_0_ctrl },				// '936 registers
-	{ 0x6c0000, 0x6cffff, rng_936_videoram_w, &rng_936_videoram },	// PSAC2 ('936) RAM (34v + 35v)
-	{ 0x700000, 0x7007ff, MWA16_RAM, &K053936_0_linectrl },			// "Line RAM"
-	{ 0x740000, 0x741fff, ttl_ram_w },		// text plane RAM
-	{ 0x7c0000, 0x7c0001, MWA16_NOP },		// watchdog
-MEMORY_END
+static ADDRESS_MAP_START( rngwritemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x2fffff) AM_WRITE(MWA16_ROM)
+	AM_RANGE(0x300000, 0x3007ff) AM_WRITE(paletteram16_xBBBBBGGGGGRRRRR_word_w) AM_BASE(&paletteram16)
+	AM_RANGE(0x380000, 0x39ffff) AM_WRITE(MWA16_RAM)		// work RAM
+	AM_RANGE(0x480000, 0x48001f) AM_WRITE(rng_sysregs_w) AM_BASE(&rng_sysreg)
+	AM_RANGE(0x4c0000, 0x4c001f) AM_WRITE(K053252_word_w)	// CCU
+	AM_RANGE(0x540000, 0x540001) AM_WRITE(sound_irq_w)
+	AM_RANGE(0x58000c, 0x58000d) AM_WRITE(sound_cmd1_w)
+	AM_RANGE(0x58000e, 0x58000f) AM_WRITE(sound_cmd2_w)
+	AM_RANGE(0x580000, 0x58001f) AM_WRITE(MWA16_RAM)		// sound regs write fall-through
+	AM_RANGE(0x5c0010, 0x5c001f) AM_WRITE(K053247_reg_word_w)
+	AM_RANGE(0x600000, 0x600fff) AM_WRITE(K053247_word_w)	// OBJ RAM
+	AM_RANGE(0x601000, 0x601fff) AM_WRITE(MWA16_RAM)		// communication? second monitor buffer?
+	AM_RANGE(0x640000, 0x640007) AM_WRITE(K053246_word_w)	// '246A registers
+	AM_RANGE(0x680000, 0x68001f) AM_WRITE(MWA16_RAM) AM_BASE(&K053936_0_ctrl)				// '936 registers
+	AM_RANGE(0x6c0000, 0x6cffff) AM_WRITE(rng_936_videoram_w) AM_BASE(&rng_936_videoram)	// PSAC2 ('936) RAM (34v + 35v)
+	AM_RANGE(0x700000, 0x7007ff) AM_WRITE(MWA16_RAM) AM_BASE(&K053936_0_linectrl)			// "Line RAM"
+	AM_RANGE(0x740000, 0x741fff) AM_WRITE(ttl_ram_w)		// text plane RAM
+	AM_RANGE(0x7c0000, 0x7c0001) AM_WRITE(MWA16_NOP)		// watchdog
+ADDRESS_MAP_END
 
 /**********************************************************************************/
 
@@ -279,29 +279,29 @@ static INTERRUPT_GEN(audio_interrupt)
 
 /* sound (this should be split into sndhrdw/xexex.c or pregx.c or so someday) */
 
-static MEMORY_READ_START( sound_readmem )
-	{ 0x0000, 0x7fff, MRA_ROM },
-	{ 0x8000, 0xbfff, MRA_BANK2 },
-	{ 0xc000, 0xdfff, MRA_RAM },
-	{ 0xe000, 0xe22f, K054539_0_r },
-	{ 0xe230, 0xe3ff, MRA_RAM },
-	{ 0xe400, 0xe62f, K054539_1_r },
-	{ 0xe630, 0xe7ff, MRA_RAM },
-	{ 0xf002, 0xf002, soundlatch_r },
-	{ 0xf003, 0xf003, soundlatch2_r },
-MEMORY_END
+static ADDRESS_MAP_START( sound_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0xbfff) AM_READ(MRA8_BANK2)
+	AM_RANGE(0xc000, 0xdfff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xe000, 0xe22f) AM_READ(K054539_0_r)
+	AM_RANGE(0xe230, 0xe3ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xe400, 0xe62f) AM_READ(K054539_1_r)
+	AM_RANGE(0xe630, 0xe7ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xf002, 0xf002) AM_READ(soundlatch_r)
+	AM_RANGE(0xf003, 0xf003) AM_READ(soundlatch2_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( sound_writemem )
-	{ 0x0000, 0xbfff, MWA_ROM },
-	{ 0xc000, 0xdfff, MWA_RAM },
-	{ 0xe000, 0xe22f, K054539_0_w },
-	{ 0xe230, 0xe3ff, MWA_RAM },
-	{ 0xe400, 0xe62f, K054539_1_w },
-	{ 0xe630, 0xe7ff, MWA_RAM },
-	{ 0xf000, 0xf000, sound_status_w },
-	{ 0xf800, 0xf800, z80ctrl_w },
-	{ 0xfff0, 0xfff3, MWA_NOP },
-MEMORY_END
+static ADDRESS_MAP_START( sound_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xbfff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xc000, 0xdfff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xe000, 0xe22f) AM_WRITE(K054539_0_w)
+	AM_RANGE(0xe230, 0xe3ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xe400, 0xe62f) AM_WRITE(K054539_1_w)
+	AM_RANGE(0xe630, 0xe7ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xf000, 0xf000) AM_WRITE(sound_status_w)
+	AM_RANGE(0xf800, 0xf800) AM_WRITE(z80ctrl_w)
+	AM_RANGE(0xfff0, 0xfff3) AM_WRITE(MWA8_NOP)
+ADDRESS_MAP_END
 
 static struct K054539interface k054539_interface =
 {
@@ -337,12 +337,12 @@ static MACHINE_DRIVER_START( rng )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main", M68000, 16000000)
-	MDRV_CPU_MEMORY(rngreadmem,rngwritemem)
+	MDRV_CPU_PROGRAM_MAP(rngreadmem,rngwritemem)
 	MDRV_CPU_VBLANK_INT(rng_interrupt,1)
 
 	MDRV_CPU_ADD_TAG("sound", Z80, 10000000) // 8Mhz (10Mhz is much safer in self-test due to heavy sync)
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
-	MDRV_CPU_MEMORY(sound_readmem,sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(sound_readmem,sound_writemem)
 	MDRV_CPU_PERIODIC_INT(audio_interrupt, 480)
 
 	MDRV_INTERLEAVE(100) // higher if sound stutters

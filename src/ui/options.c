@@ -29,6 +29,7 @@
 #include <sys/stat.h>
 #include <malloc.h>
 #include <math.h>
+#include <direct.h>
 #include <driver.h>
 
 #include "screenshot.h"
@@ -42,7 +43,11 @@
 #include "dijoystick.h"
 #include "audit.h"
 #include "options.h"
+#include "windows/config.h"
 
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
 /***************************************************************************
     Internal function prototypes
  ***************************************************************************/
@@ -66,6 +71,9 @@ static void WriteOptionToFile(FILE *fptr,REG_OPTION *regOpt);
 
 static void  ColumnEncodeString(void* data, char* str);
 static void  ColumnDecodeString(const char* str, void* data);
+
+static void  KeySeqEncodeString(void *data, char* str);
+static void  KeySeqDecodeString(const char *str, void* data);
 
 static void  JoyInfoEncodeString(void *data, char* str);
 static void  JoyInfoDecodeString(const char *str, void* data);
@@ -99,12 +107,16 @@ static void FolderFlagsDecodeString(const char *str,void *data);
 static void TabFlagsEncodeString(void *data,char *str);
 static void TabFlagsDecodeString(const char *str,void *data);
 
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
+
 /***************************************************************************
     Internal defines
  ***************************************************************************/
 
-#define UI_INI_FILENAME "noname32ui.ini"
-#define DEFAULT_OPTIONS_INI_FILENAME "noname32.ini"
+#define UI_INI_FILENAME MAME32NAME "ui.ini"
+#define DEFAULT_OPTIONS_INI_FILENAME MAME32NAME ".ini"
 
 /***************************************************************************
     Internal structures
@@ -126,6 +138,7 @@ static options_type gOpts;  // Used in conjunction with regGameOpts
 
 static options_type global; // Global 'default' options
 static options_type *game_options;  // Array of Game specific options
+static options_type *folder_options;  // Array of Folder specific options
 static game_variables_type *game_variables;  // Array of game specific extra data
 
 // UI options in mame32ui.ini
@@ -134,7 +147,7 @@ static REG_OPTION regSettings[] =
 	{"default_game",       RO_STRING,  &settings.default_game,      0, 0},
 	{"default_folder_id",  RO_INT,     &settings.folder_id,        0, 0},
 	{"show_image_section", RO_BOOL,    &settings.show_screenshot,  0, 0},
-	{"current_tab",          RO_ENCODE,&settings.current_tab,
+	{"current_tab",        RO_ENCODE,  &settings.current_tab,
 	 CurrentTabEncodeString, CurrentTabDecodeString },
 	{"show_tool_bar",      RO_BOOL,    &settings.show_toolbar,     0, 0},
 	{"show_status_bar",    RO_BOOL,    &settings.show_statusbar,   0, 0},
@@ -148,6 +161,7 @@ static REG_OPTION regSettings[] =
 
 	{"check_game",         RO_BOOL,    &settings.game_check,       0, 0},
 	{"joystick_in_interface",RO_BOOL,&settings.use_joygui,     0, 0},
+	{"keyboard_in_interface",RO_BOOL,&settings.use_keygui,     0, 0},
 	{"broadcast_game_name",RO_BOOL,    &settings.broadcast,        0, 0},
 	{"random_background",  RO_BOOL,    &settings.random_bg,        0, 0},
 
@@ -168,6 +182,41 @@ static REG_OPTION regSettings[] =
 	{"column_widths",      RO_ENCODE,  &settings.column_width,     ColumnEncodeString,   ColumnDecodeWidths},
 	{"column_order",       RO_ENCODE,  &settings.column_order,     ColumnEncodeString,   ColumnDecodeString},
 	{"column_shown",       RO_ENCODE,  &settings.column_shown,     ColumnEncodeString,   ColumnDecodeString},
+
+	{"ui_key_up",          RO_ENCODE,  &settings.ui_key_up,        KeySeqEncodeString,   KeySeqDecodeString},
+	{"ui_key_down",        RO_ENCODE,  &settings.ui_key_down,      KeySeqEncodeString,   KeySeqDecodeString},
+	{"ui_key_left",        RO_ENCODE,  &settings.ui_key_left,      KeySeqEncodeString,   KeySeqDecodeString},
+	{"ui_key_right",       RO_ENCODE,  &settings.ui_key_right,     KeySeqEncodeString,   KeySeqDecodeString},
+	{"ui_key_start",       RO_ENCODE,  &settings.ui_key_start,     KeySeqEncodeString,   KeySeqDecodeString},
+	{"ui_key_pgup",        RO_ENCODE,  &settings.ui_key_pgup,      KeySeqEncodeString,   KeySeqDecodeString},
+	{"ui_key_pgdwn",       RO_ENCODE,  &settings.ui_key_pgdwn,     KeySeqEncodeString,   KeySeqDecodeString},
+	{"ui_key_home",        RO_ENCODE,  &settings.ui_key_home,      KeySeqEncodeString,   KeySeqDecodeString},
+	{"ui_key_end",         RO_ENCODE,  &settings.ui_key_end,       KeySeqEncodeString,   KeySeqDecodeString},
+	{"ui_key_ss_change",   RO_ENCODE,  &settings.ui_key_ss_change, KeySeqEncodeString,   KeySeqDecodeString},
+	{"ui_key_history_up",  RO_ENCODE,  &settings.ui_key_history_up, KeySeqEncodeString,  KeySeqDecodeString},
+	{"ui_key_history_down",RO_ENCODE,  &settings.ui_key_history_down, KeySeqEncodeString,  KeySeqDecodeString},
+
+    {"ui_key_context_filters",    RO_ENCODE,  &settings.ui_key_context_filters,  KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_select_random",      RO_ENCODE,  &settings.ui_key_select_random,    KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_game_audit",         RO_ENCODE,  &settings.ui_key_game_audit,       KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_game_properties",    RO_ENCODE,  &settings.ui_key_game_properties,  KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_help_contents",      RO_ENCODE,  &settings.ui_key_help_contents,    KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_update_gamelist",    RO_ENCODE,  &settings.ui_key_update_gamelist,  KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_view_folders",       RO_ENCODE,  &settings.ui_key_view_folders,     KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_view_fullscreen",    RO_ENCODE,  &settings.ui_key_view_fullscreen,  KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_view_pagetab",       RO_ENCODE,  &settings.ui_key_view_pagetab,     KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_view_picture_area",  RO_ENCODE,  &settings.ui_key_view_picture_area, KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_view_status",        RO_ENCODE,  &settings.ui_key_view_status,      KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_view_toolbars",      RO_ENCODE,  &settings.ui_key_view_toolbars,    KeySeqEncodeString,  KeySeqDecodeString},
+
+    {"ui_key_view_tab_cabinet",   RO_ENCODE,  &settings.ui_key_view_tab_cabinet, KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_view_tab_cpanel",    RO_ENCODE,  &settings.ui_key_view_tab_cpanel,  KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_view_tab_flyer",     RO_ENCODE,  &settings.ui_key_view_tab_flyer,   KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_view_tab_history",   RO_ENCODE,  &settings.ui_key_view_tab_history, KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_view_tab_marquee",   RO_ENCODE,  &settings.ui_key_view_tab_marquee, KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_view_tab_screenshot",RO_ENCODE,  &settings.ui_key_view_tab_screenshot, KeySeqEncodeString,  KeySeqDecodeString},
+    {"ui_key_view_tab_title",     RO_ENCODE,  &settings.ui_key_view_tab_title,   KeySeqEncodeString,  KeySeqDecodeString},
+
 	{"ui_joy_up",          RO_ENCODE,  &settings.ui_joy_up,        JoyInfoEncodeString,  JoyInfoDecodeString},
 	{"ui_joy_down",        RO_ENCODE,  &settings.ui_joy_down,      JoyInfoEncodeString,  JoyInfoDecodeString},
 	{"ui_joy_left",        RO_ENCODE,  &settings.ui_joy_left,      JoyInfoEncodeString,  JoyInfoDecodeString},
@@ -187,6 +236,8 @@ static REG_OPTION regSettings[] =
 	{"full_screen",        RO_BOOL,    &settings.full_screen,  0, 0},
 	{"cycle_screenshot",   RO_INT,     &settings.cycle_screenshot,  0, 0},
 	{"stretch_screenshot_larger", RO_BOOL, &settings.stretch_screenshot_larger,  0, 0},
+	{"inherit_filter",     RO_BOOL,    &settings.inherit_filter,   0, 0},
+	{"offset_clones",      RO_BOOL,    &settings.offset_clones,    0, 0},
 
 	{"language",           RO_STRING,  &settings.language,         0, 0},
 	{"flyer_directory",    RO_STRING,  &settings.flyerdir,         0, 0},
@@ -249,6 +300,8 @@ static REG_OPTION regGameOpts[] =
 	{ "a2d",                    RO_DOUBLE,  &gOpts.f_a2d,             0, 0},
 	{ "steadykey",              RO_BOOL,    &gOpts.steadykey,         0, 0},
 	{ "lightgun",               RO_BOOL,    &gOpts.lightgun,          0, 0},
+	{ "dual_lightgun",          RO_BOOL,    &gOpts.dual_lightgun,     0, 0},
+	{ "offscreen_reload",       RO_BOOL,    &gOpts.offscreen_reload,  0, 0},
 	{ "ctrlr",                  RO_STRING,  &gOpts.ctrlr,             0, 0},
 
 	// core video
@@ -294,16 +347,8 @@ static REG_OPTION regGameOpts[] =
 	{ "sleep",                  RO_BOOL,    &gOpts.sleep,             0, 0},
 	{ "rdtsc",                  RO_BOOL,    &gOpts.old_timing,        0, 0},
 	{ "leds",                   RO_BOOL,    &gOpts.leds,              0, 0},
+	{ "led_mode",               RO_STRING,  &gOpts.ledmode,            0, 0},
 	{ "bios",                   RO_INT,     &gOpts.bios,              0, 0},
- 
-	// Analog+
-	{ "singlemouse",            RO_BOOL,    &gOpts.singlemouse,       0, 0},
-	{ "switchablemice",         RO_BOOL,    &gOpts.switchmice,        0, 0},
-	{ "switchmiceaxes",         RO_BOOL,    &gOpts.switchaxes,        0, 0},
-	{ "splitmouseaxes",         RO_BOOL,    &gOpts.splitmouse,        0, 0},
-	{ "resetmouseaxes",         RO_BOOL,    &gOpts.resetmouse,        0, 0},
-	{ "lightgun2a",             RO_BOOL,    &gOpts.use_lightgun2a,    0, 0},
-	{ "lightgun2b",             RO_BOOL,    &gOpts.use_lightgun2b,    0, 0},
 
 };
 #define NUM_GAME_OPTIONS (sizeof(regGameOpts) / sizeof(regGameOpts[0]))
@@ -497,6 +542,40 @@ folder_filter_type *folder_filters;
 int size_folder_filters;
 int num_folder_filters;
 
+
+/***************************************************************************
+	Consistency checking functions
+ ***************************************************************************/
+
+#ifdef MAME_DEBUG
+BOOL CheckOptions(REG_OPTION *reg_options, int option_count)
+{
+	struct rc_struct *rc;
+	int i;
+	int nBadOptions = 0;
+
+	rc = cli_rc_create();
+
+	for (i = 0; i < option_count; i++)
+	{
+		if ((reg_options[i].ini_name[0] != '#') || (reg_options[i].ini_name[1] != '*'))
+		{
+			if (!rc_get_option(rc, reg_options[i].ini_name))
+			{
+				dprintf("CheckOptions(): Option '%s' is not represented in the MAME core\n", reg_options[i].ini_name);
+				nBadOptions++;
+			}
+		}
+	}
+
+	assert(nBadOptions == 0);
+
+	rc_destroy(rc);
+	return nBadOptions == 0;
+}
+#endif /* MAME_DEBUG */
+
+
 /***************************************************************************
     External functions  
  ***************************************************************************/
@@ -506,6 +585,13 @@ BOOL OptionsInit()
 	int i;
 
 	extern const char g_szDefaultGame[];
+
+#ifdef MAME_DEBUG
+	if (!CheckOptions(regGameOpts, sizeof(regGameOpts) / sizeof(regGameOpts[0])))
+		return FALSE;
+	if (!CheckOptions(global_game_options, sizeof(global_game_options) / sizeof(global_game_options[0])))
+		return FALSE;
+#endif /* MAME_DEBUG */
 
 	num_games = GetNumGames();
 
@@ -524,6 +610,7 @@ BOOL OptionsInit()
 		| (1 << TAB_CABINET) | (1 << TAB_MARQUEE) | (1 << TAB_TITLE) | (1 << TAB_CONTROL_PANEL);
 	settings.game_check      = TRUE;
 	settings.use_joygui      = FALSE;
+	settings.use_keygui      = FALSE;
 	settings.broadcast       = FALSE;
 	settings.random_bg       = FALSE;
 
@@ -543,6 +630,74 @@ BOOL OptionsInit()
 	settings.windowstate = 1;
 	settings.splitter[0] = 152;
 	settings.splitter[1] = 362;
+
+	settings.ui_key_up.seq_string     = strdup("KEYCODE_UP");
+	settings.ui_key_down.seq_string   = strdup("KEYCODE_DOWN");
+	settings.ui_key_left.seq_string   = strdup("KEYCODE_LEFT");
+	settings.ui_key_right.seq_string  = strdup("KEYCODE_RIGHT");
+	settings.ui_key_start.seq_string  = strdup("KEYCODE_ENTER ! KEYCODE_LALT");			/* ENTER without ALT */
+	settings.ui_key_pgup.seq_string   = strdup("KEYCODE_PGUP");
+	settings.ui_key_pgdwn.seq_string  = strdup("KEYCODE_PGDN");
+	settings.ui_key_home.seq_string   = strdup("KEYCODE_HOME");
+	settings.ui_key_end.seq_string    = strdup("KEYCODE_END");
+	settings.ui_key_history_up.seq_string   = strdup("KEYCODE_INSERT");
+	settings.ui_key_history_down.seq_string = strdup("KEYCODE_DEL");
+	settings.ui_key_ss_change.seq_string    = strdup("KEYCODE_LALT KEYCODE_0");			/* ALT 0 */
+
+	KeySeqDecodeString(settings.ui_key_up.seq_string, (void *)(&settings.ui_key_up));
+	KeySeqDecodeString(settings.ui_key_down.seq_string, (void *)(&settings.ui_key_down));
+	KeySeqDecodeString(settings.ui_key_left.seq_string, (void *)(&settings.ui_key_left));
+	KeySeqDecodeString(settings.ui_key_right.seq_string, (void *)(&settings.ui_key_right));
+	KeySeqDecodeString(settings.ui_key_start.seq_string, (void *)(&settings.ui_key_start));
+	KeySeqDecodeString(settings.ui_key_pgup.seq_string, (void *)(&settings.ui_key_pgup));
+	KeySeqDecodeString(settings.ui_key_pgdwn.seq_string, (void *)(&settings.ui_key_pgdwn));
+	KeySeqDecodeString(settings.ui_key_home.seq_string, (void *)(&settings.ui_key_home));
+	KeySeqDecodeString(settings.ui_key_end.seq_string, (void *)(&settings.ui_key_end));
+	KeySeqDecodeString(settings.ui_key_history_up.seq_string, (void *)(&settings.ui_key_history_up));
+	KeySeqDecodeString(settings.ui_key_history_down.seq_string, (void *)(&settings.ui_key_history_down));
+	KeySeqDecodeString(settings.ui_key_ss_change.seq_string, (void *)(&settings.ui_key_ss_change));
+
+    settings.ui_key_context_filters.seq_string    = strdup("KEYCODE_LCONTROL KEYCODE_F");	/* CTRL F */
+    settings.ui_key_select_random.seq_string      = strdup("KEYCODE_LCONTROL KEYCODE_R");	/* CTRL R */
+    settings.ui_key_game_audit.seq_string         = strdup("KEYCODE_LALT KEYCODE_A");		/* ALT A */
+    settings.ui_key_game_properties.seq_string    = strdup("KEYCODE_LALT KEYCODE_ENTER");	/* ALT VK_RETURN */
+    settings.ui_key_help_contents.seq_string      = strdup("KEYCODE_F1");				/* VK_F1 */
+    settings.ui_key_update_gamelist.seq_string    = strdup("KEYCODE_F5");				/* VK_F5 */
+    settings.ui_key_view_folders.seq_string       = strdup("KEYCODE_LALT KEYCODE_D");	/* ALT D */
+    settings.ui_key_view_fullscreen.seq_string    = strdup("KEYCODE_F11");				/* VK_F11 */
+    settings.ui_key_view_pagetab.seq_string       = strdup("KEYCODE_LALT KEYCODE_B");	/* ALT B */
+    settings.ui_key_view_picture_area.seq_string  = strdup("KEYCODE_LALT KEYCODE_P");	/* ALT P */
+    settings.ui_key_view_status.seq_string        = strdup("KEYCODE_LALT KEYCODE_S");	/* ALT S */
+    settings.ui_key_view_toolbars.seq_string      = strdup("KEYCODE_LALT KEYCODE_T");	/* ALT T */
+
+	KeySeqDecodeString(settings.ui_key_context_filters.seq_string, (void *)(&settings.ui_key_context_filters));
+	KeySeqDecodeString(settings.ui_key_select_random.seq_string, (void *)(&settings.ui_key_select_random));
+	KeySeqDecodeString(settings.ui_key_game_audit.seq_string, (void *)(&settings.ui_key_game_audit));
+	KeySeqDecodeString(settings.ui_key_game_properties.seq_string, (void *)(&settings.ui_key_game_properties));
+	KeySeqDecodeString(settings.ui_key_help_contents.seq_string, (void *)(&settings.ui_key_help_contents));
+	KeySeqDecodeString(settings.ui_key_update_gamelist.seq_string, (void *)(&settings.ui_key_update_gamelist));
+	KeySeqDecodeString(settings.ui_key_view_folders.seq_string, (void *)(&settings.ui_key_view_folders));
+	KeySeqDecodeString(settings.ui_key_view_fullscreen.seq_string, (void *)(&settings.ui_key_view_fullscreen));
+	KeySeqDecodeString(settings.ui_key_view_pagetab.seq_string, (void *)(&settings.ui_key_view_pagetab));
+	KeySeqDecodeString(settings.ui_key_view_picture_area.seq_string, (void *)(&settings.ui_key_view_picture_area));
+	KeySeqDecodeString(settings.ui_key_view_status.seq_string, (void *)(&settings.ui_key_view_status));
+	KeySeqDecodeString(settings.ui_key_view_toolbars.seq_string, (void *)(&settings.ui_key_view_toolbars));
+
+    settings.ui_key_view_tab_cabinet.seq_string   = strdup("KEYCODE_LALT KEYCODE_3");	/* ALT 3 */
+    settings.ui_key_view_tab_cpanel.seq_string    = strdup("KEYCODE_LALT KEYCODE_6");	/* ALT 6 */
+    settings.ui_key_view_tab_flyer.seq_string     = strdup("KEYCODE_LALT KEYCODE_2");	/* ALT 2 */
+    settings.ui_key_view_tab_history.seq_string   = strdup("KEYCODE_LALT KEYCODE_7");	/* ALT 7 */
+    settings.ui_key_view_tab_marquee.seq_string   = strdup("KEYCODE_LALT KEYCODE_4");	/* ALT 4 */
+    settings.ui_key_view_tab_screenshot.seq_string= strdup("KEYCODE_LALT KEYCODE_1");	/* ALT 1 */
+    settings.ui_key_view_tab_title.seq_string     = strdup("KEYCODE_LALT KEYCODE_5");	/* ALT 5 */
+
+	KeySeqDecodeString(settings.ui_key_view_tab_cabinet.seq_string, (void *)(&settings.ui_key_view_tab_cabinet));
+	KeySeqDecodeString(settings.ui_key_view_tab_cpanel.seq_string, (void *)(&settings.ui_key_view_tab_cpanel));
+	KeySeqDecodeString(settings.ui_key_view_tab_flyer.seq_string, (void *)(&settings.ui_key_view_tab_flyer));
+	KeySeqDecodeString(settings.ui_key_view_tab_history.seq_string, (void *)(&settings.ui_key_view_tab_history));
+	KeySeqDecodeString(settings.ui_key_view_tab_marquee.seq_string, (void *)(&settings.ui_key_view_tab_marquee));
+	KeySeqDecodeString(settings.ui_key_view_tab_screenshot.seq_string, (void *)(&settings.ui_key_view_tab_screenshot));
+	KeySeqDecodeString(settings.ui_key_view_tab_title.seq_string, (void *)(&settings.ui_key_view_tab_title));
 
 	settings.ui_joy_up[0] = 1;
 	settings.ui_joy_up[1] = JOYCODE_STICK_AXIS;
@@ -667,7 +822,7 @@ BOOL OptionsInit()
 	settings.high_priority = FALSE;
 
 	/* video */
-	global.autoframeskip     = TRUE;
+	global.autoframeskip     = FALSE;
 	global.frameskip         = 0;
 	global.wait_vsync        = FALSE;
 	global.use_triplebuf     = FALSE;
@@ -709,6 +864,8 @@ BOOL OptionsInit()
 	global.f_a2d             = 0.3;
 	global.steadykey         = FALSE;
 	global.lightgun          = FALSE;
+	global.dual_lightgun     = FALSE;
+	global.offscreen_reload  = FALSE;
 	global.ctrlr             = strdup("Standard");
 
 	/* Core video */
@@ -754,18 +911,20 @@ BOOL OptionsInit()
 	global.sleep             = FALSE;
 	global.old_timing        = TRUE;
 	global.leds				 = FALSE;
+	global.ledmode           = strdup("ps/2");
 	global.bios              = 0;
 
 	// game_options[x] is valid iff game_variables[i].options_loaded == true
 	game_options = (options_type *)malloc(num_games * sizeof(options_type));
 	game_variables = (game_variables_type *)malloc(num_games * sizeof(game_variables_type));
 
+	folder_options = (options_type *)malloc( (MAX_FOLDERS + (MAX_EXTRA_FOLDERS * MAX_EXTRA_SUBFOLDERS) ) * sizeof(options_type));
 	if (!game_options || !game_variables)
 		return FALSE;
 
 	memset(game_options, 0, num_games * sizeof(options_type));
 	memset(game_variables, 0, num_games * sizeof(game_variables_type));
-
+	memset(folder_options, 0, (MAX_FOLDERS + (MAX_EXTRA_FOLDERS * MAX_EXTRA_SUBFOLDERS) ) * sizeof(options_type));
 	for (i = 0; i < num_games; i++)
 	{
 		game_variables[i].play_count = 0;
@@ -806,6 +965,12 @@ void OptionsExit(void)
 	}
 
     free(game_options);
+
+	for (i=0;i<(MAX_FOLDERS + (MAX_EXTRA_FOLDERS *MAX_EXTRA_SUBFOLDERS) );i++)
+	{
+		FreeGameOptions(&folder_options[i]);
+	}
+	free(folder_options);
 
 	FreeGameOptions(&global);
 
@@ -884,25 +1049,167 @@ void CopyGameOptions(options_type *source,options_type *dest)
 	}
 }
 
-options_type * GetDefaultOptions(void)
+// sync in the options specified in filename
+void SyncInGameOptions(options_type *opts, const char *filename)
 {
-	return &global;
+	LoadOptions(filename, opts, FALSE);
 }
 
-options_type * GetGameOptions(int driver_index)
+// sync in the options specified in filename
+void SyncInFolderOptions(options_type *opts, int folder_index)
 {
+	char buffer[512];
+	char title[512];
+	int i;
+	extern FOLDERDATA g_folderData[];
+	extern LPEXFOLDERDATA ExtraFolderData[];
+	extern int numExtraFolders;
+	const char *pParent;
+
+	for( i = 0; i<=folder_index; i++ )
+	{
+		if( folder_index < MAX_FOLDERS)
+		{
+			if( g_folderData[i].m_nFolderId == folder_index )
+			{
+				snprintf(buffer,sizeof(buffer),"%s\\%s.ini",GetIniDir(),g_folderData[i].m_lpTitle );
+				break;
+			}
+		}
+		else if( folder_index < MAX_FOLDERS + numExtraFolders)
+		{
+			
+			if( ExtraFolderData[i] )
+			{
+				if( ExtraFolderData[i]->m_nFolderId == folder_index )
+				{
+					snprintf(buffer,sizeof(buffer),"%s\\%s.ini",GetIniDir(),ExtraFolderData[i]->m_szTitle );
+					break;
+				}
+			}
+		}
+		else
+		{
+			//we jump to the corresponding folderData
+			if( ExtraFolderData[folder_index] )
+			{
+				//SubDirName is ParentFolderName
+				pParent = GetFolderNameByID(ExtraFolderData[folder_index]->m_nParent);
+				if( pParent )
+				{
+					if( ExtraFolderData[folder_index]->m_nParent == FOLDER_SOURCE )
+					{
+						//we have a source ini to create, so remove the ".c" at the end of the title
+						strncpy(title, ExtraFolderData[folder_index]->m_szTitle, strlen(ExtraFolderData[folder_index]->m_szTitle)-2 );
+						title[strlen(ExtraFolderData[folder_index]->m_szTitle)-2] = '\0';
+						snprintf(buffer,sizeof(buffer),"%s\\%s\\%s.ini",GetIniDir(),pParent, title );
+					}
+					else
+					{
+						snprintf(buffer,sizeof(buffer),"%s\\%s\\%s.ini",GetIniDir(),pParent, ExtraFolderData[folder_index]->m_szTitle );
+					}
+					break;
+				}
+			}
+		}
+	}
+	SyncInGameOptions(opts, buffer);
+}
+
+
+options_type * GetDefaultOptions(int iProperty, BOOL bVectorFolder )
+{
+	if( iProperty == -1)
+		return &global;
+	else if( iProperty == -2)
+	{
+		if (bVectorFolder)
+			return &global;
+		else
+			return GetVectorOptions();
+	}
+	else
+	{
+		assert(0 <= iProperty && iProperty < num_games);
+		return GetSourceOptions( iProperty );
+	}
+}
+
+options_type * GetFolderOptions(int folder_index, BOOL bIsVector)
+{
+	if( folder_index >= (MAX_FOLDERS + (MAX_EXTRA_FOLDERS * MAX_EXTRA_SUBFOLDERS) ) )
+	{
+		dprintf("Folder Index out of bounds");
+		return NULL;
+	}
+	CopyGameOptions(&global,&folder_options[folder_index]);
+	LoadFolderOptions(folder_index);
+	if( bIsVector)
+	{
+		SyncInFolderOptions(&folder_options[folder_index], FOLDER_VECTOR);
+		CopyGameOptions(&gOpts, &folder_options[folder_index] );
+	}
+	return &folder_options[folder_index];
+}
+
+options_type * GetVectorOptions(void)
+{
+	//initialize gOpts with global settings, we accumulate all settings there and copy them 
+	//to game_options[driver_index] in the end
+	CopyGameOptions(&global,&gOpts);
+	
+	//If it is a Vector game sync in the Vector.ini settings
+	SyncInFolderOptions(&gOpts, FOLDER_VECTOR);
+
+	return &gOpts;
+}
+
+options_type * GetSourceOptions(int driver_index )
+{
+	char buffer[512];
+	char title[512];
 	assert(0 <= driver_index && driver_index < num_games);
-
-	if (game_variables[driver_index].use_default)
+	//initialize gOpts with global settings, we accumulate all settings there and copy them 
+	//to game_options[driver_index] in the end
+	CopyGameOptions(&global,&gOpts);
+	
+	if( DriverIsVector(driver_index) )
 	{
-		CopyGameOptions(&global,&game_options[driver_index]);
+		//If it is a Vector game sync in the Vector.ini settings
+		SyncInFolderOptions(&game_options[driver_index], FOLDER_VECTOR);
 	}
+	//If it has source folder settings sync in the source\sourcefile.ini settings
+	strcpy(title, GetDriverFilename(driver_index) );
+	title[strlen(title)-2] = '\0';
+	snprintf(buffer,sizeof(buffer),"%s\\Source\\%s.ini",GetIniDir(),title );
+	SyncInGameOptions(&game_options[driver_index], buffer);
+	return &gOpts;
+}
 
-	if (game_variables[driver_index].options_loaded == FALSE)
+options_type * GetGameOptions(int driver_index, int folder_index )
+{
+	char buffer[512];
+	char title[512];
+	assert(0 <= driver_index && driver_index < num_games);
+	//initialize gOpts with global settings, we accumulate all settings there and copy them 
+	//to game_options[driver_index] in the end
+	CopyGameOptions(&global,&gOpts);
+	
+	if( DriverIsVector(driver_index) )
 	{
-		LoadGameOptions(driver_index);
-		game_variables[driver_index].options_loaded = TRUE;
+		//If it is a Vector game sync in the Vector.ini settings
+		SyncInFolderOptions(&game_options[driver_index], FOLDER_VECTOR);
 	}
+	//If it has source folder settings sync in the source\sourcefile.ini settings
+	strcpy(title, GetDriverFilename(driver_index) );
+	title[strlen(title)-2] = '\0';
+	snprintf(buffer,sizeof(buffer),"%s\\Source\\%s.ini",GetIniDir(),title );
+	SyncInGameOptions(&game_options[driver_index], buffer);
+	//last but not least, sync in game specific settings
+	snprintf(buffer,sizeof(buffer),"%s\\%s.ini",GetIniDir(),drivers[driver_index]->name );
+	SyncInGameOptions(&game_options[driver_index], buffer);
+	//now copy the synced up settings in game options
+	CopyGameOptions(&gOpts,&game_options[driver_index]);
 
 	return &game_options[driver_index];
 }
@@ -914,7 +1221,10 @@ BOOL GetGameUsesDefaults(int driver_index)
 		dprintf("got getgameusesdefaults with driver index %i",driver_index);
 		return TRUE;
 	}
-	return game_variables[driver_index].use_default;
+	//This returns always true, because it is not saved in a file just initialized
+	//We use the in mem check for the moment
+	return ! GetGameUsesDefaultsMem(driver_index );
+	//return game_variables[driver_index].use_default;
 }
 
 void SetGameUsesDefaults(int driver_index,BOOL use_defaults)
@@ -1023,6 +1333,16 @@ BOOL GetJoyGUI(void)
 	return settings.use_joygui;
 }
 
+void SetKeyGUI(BOOL use_keygui)
+{
+	settings.use_keygui = use_keygui;
+}
+
+BOOL GetKeyGUI(void)
+{
+	return settings.use_keygui;
+}
+
 void SetCycleScreenshot(int cycle_screenshot)
 {
 	settings.cycle_screenshot = cycle_screenshot;
@@ -1042,6 +1362,25 @@ BOOL GetStretchScreenShotLarger(void)
 {
 	return settings.stretch_screenshot_larger;
 }
+void SetFilterInherit(BOOL inherit)
+{
+	settings.inherit_filter = inherit;
+}
+
+BOOL GetFilterInherit(void)
+{
+	return settings.inherit_filter;
+}
+
+void SetOffsetClones(BOOL offset)
+{
+	settings.offset_clones = offset;
+}
+
+BOOL GetOffsetClones(void)
+{
+	return settings.offset_clones;
+ }
 
 void SetBroadcast(BOOL broadcast)
 {
@@ -1702,7 +2041,7 @@ void ResetGameOptions(int driver_index)
 	assert(0 <= driver_index && driver_index < num_games);
 
 	// make sure it's all loaded up.
-	GetGameOptions(driver_index);
+	GetGameOptions(driver_index, -1);
 
 	if (game_variables[driver_index].use_default == FALSE)
 	{
@@ -1721,11 +2060,24 @@ void ResetGameDefaults(void)
 
 void ResetAllGameOptions(void)
 {
+	extern LPEXFOLDERDATA ExtraFolderData[];
 	int i;
 
 	for (i = 0; i < num_games; i++)
 	{
 		ResetGameOptions(i);
+	}
+
+	//with our new code we also need to delete the Source Folder Options and the Vector Options
+	//Reset the Folder Options, can be done in one step
+	for (i=0;i<(MAX_FOLDERS + (MAX_EXTRA_FOLDERS *MAX_EXTRA_SUBFOLDERS));i++)
+	{
+		if( (i == FOLDER_VECTOR) || (ExtraFolderData[i] &&
+									 (ExtraFolderData[i]->m_nParent == FOLDER_SOURCE) ) )
+		{
+			CopyGameOptions(GetDefaultOptions(-1, FALSE),&folder_options[i]);
+			SaveFolderOptions(i, 0);
+		}
 	}
 }
 
@@ -1774,6 +2126,42 @@ int GetPlayCount(int driver_index)
 	return game_variables[driver_index].play_count;
 }
 
+void ResetPlayCount(int driver_index)
+{
+	int i = 0;
+	assert(driver_index < num_games);
+	if( driver_index < 0 )
+	{
+		//All games
+		for( i= 0; i< num_games; i++ )
+		{
+			game_variables[i].play_count = 0;
+		}
+	}
+	else
+	{
+		game_variables[driver_index].play_count = 0;
+	}
+}
+
+void ResetPlayTime(int driver_index)
+{
+	int i = 0;
+	assert(driver_index < num_games);
+	if( driver_index < 0 )
+	{
+		//All games
+		for( i= 0; i< num_games; i++ )
+		{
+			game_variables[i].play_time = 0;
+		}
+	}
+	else
+	{
+		game_variables[driver_index].play_time = 0;
+	}
+}
+
 int GetPlayTime(int driver_index)
 {
 	assert(0 <= driver_index && driver_index < num_games);
@@ -1804,6 +2192,137 @@ void GetTextPlayTime(int driver_index,char *buf)
 	else
 		sprintf(buf, "%d:%02d:%02d", hour, minute, second );
 }
+
+
+InputSeq* Get_ui_key_up(void)
+{
+	return &settings.ui_key_up.is;
+}
+InputSeq* Get_ui_key_down(void)
+{
+	return &settings.ui_key_down.is;
+}
+InputSeq* Get_ui_key_left(void)
+{
+	return &settings.ui_key_left.is;
+}
+InputSeq* Get_ui_key_right(void)
+{
+	return &settings.ui_key_right.is;
+}
+InputSeq* Get_ui_key_start(void)
+{
+	return &settings.ui_key_start.is;
+}
+InputSeq* Get_ui_key_pgup(void)
+{
+	return &settings.ui_key_pgup.is;
+}
+InputSeq* Get_ui_key_pgdwn(void)
+{
+	return &settings.ui_key_pgdwn.is;
+}
+InputSeq* Get_ui_key_home(void)
+{
+	return &settings.ui_key_home.is;
+}
+InputSeq* Get_ui_key_end(void)
+{
+	return &settings.ui_key_end.is;
+}
+InputSeq* Get_ui_key_ss_change(void)
+{
+	return &settings.ui_key_ss_change.is;
+}
+InputSeq* Get_ui_key_history_up(void)
+{
+	return &settings.ui_key_history_up.is;
+}
+InputSeq* Get_ui_key_history_down(void)
+{
+	return &settings.ui_key_history_down.is;
+}
+
+
+InputSeq* Get_ui_key_context_filters(void)
+{
+	return &settings.ui_key_context_filters.is;
+}
+InputSeq* Get_ui_key_select_random(void)
+{
+	return &settings.ui_key_select_random.is;
+}
+InputSeq* Get_ui_key_game_audit(void)
+{
+	return &settings.ui_key_game_audit.is;
+}
+InputSeq* Get_ui_key_game_properties(void)
+{
+	return &settings.ui_key_game_properties.is;
+}
+InputSeq* Get_ui_key_help_contents(void)
+{
+	return &settings.ui_key_help_contents.is;
+}
+InputSeq* Get_ui_key_update_gamelist(void)
+{
+	return &settings.ui_key_update_gamelist.is;
+}
+InputSeq* Get_ui_key_view_folders(void)
+{
+	return &settings.ui_key_view_folders.is;
+}
+InputSeq* Get_ui_key_view_fullscreen(void)
+{
+	return &settings.ui_key_view_fullscreen.is;
+}
+InputSeq* Get_ui_key_view_pagetab(void)
+{
+	return &settings.ui_key_view_pagetab.is;
+}
+InputSeq* Get_ui_key_view_picture_area(void)
+{
+	return &settings.ui_key_view_picture_area.is;
+}
+InputSeq* Get_ui_key_view_status(void)
+{
+	return &settings.ui_key_view_status.is;
+}
+InputSeq* Get_ui_key_view_toolbars(void)
+{
+	return &settings.ui_key_view_toolbars.is;
+}
+
+InputSeq* Get_ui_key_view_tab_cabinet(void)
+{
+	return &settings.ui_key_view_tab_cabinet.is;
+}
+InputSeq* Get_ui_key_view_tab_cpanel(void)
+{
+	return &settings.ui_key_view_tab_cpanel.is;
+}
+InputSeq* Get_ui_key_view_tab_flyer(void)
+{
+	return &settings.ui_key_view_tab_flyer.is;
+}
+InputSeq* Get_ui_key_view_tab_history(void)
+{
+	return &settings.ui_key_view_tab_history.is;
+}
+InputSeq* Get_ui_key_view_tab_marquee(void)
+{
+	return &settings.ui_key_view_tab_marquee.is;
+}
+InputSeq* Get_ui_key_view_tab_screenshot(void)
+{
+	return &settings.ui_key_view_tab_screenshot.is;
+}
+InputSeq* Get_ui_key_view_tab_title(void)
+{
+	return &settings.ui_key_view_tab_title.is;
+}
+
+
 
 int GetUIJoyUp(int joycodeIndex)
 {
@@ -2082,6 +2601,25 @@ static void ColumnEncodeString(void* data, char *str)
 static void ColumnDecodeString(const char* str, void* data)
 {
 	ColumnDecodeStringWithCount(str, data, COLUMN_MAX);
+}
+
+static void KeySeqEncodeString(void *data, char* str)
+{
+	KeySeq* ks = (KeySeq*)data;
+
+	sprintf(str, "%s", ks->seq_string);
+}
+
+static void KeySeqDecodeString(const char *str, void* data)
+{
+	KeySeq *ks = (KeySeq*)data;
+	InputSeq *is = &(ks->is);
+
+	strcpy(ks->seq_string, str);
+
+	//get the new input sequence
+	seq_set_string (is, str);
+	//dprintf("seq=%s,,,%04i %04i %04i %04i \n",str,(*is)[0],(*is)[1],(*is)[2],(*is)[3]);
 }
 
 static void JoyInfoEncodeString(void* data, char *str)
@@ -2680,6 +3218,120 @@ void LoadGameOptions(int driver_index)
 	}
 }
 
+const char * GetFolderNameByID(UINT nID)
+{
+	UINT i;
+	extern FOLDERDATA g_folderData[];
+	extern LPEXFOLDERDATA ExtraFolderData[];
+
+	for (i = 0; i < MAX_EXTRA_FOLDERS * MAX_EXTRA_SUBFOLDERS; i++)
+	{
+		if( ExtraFolderData[i] )
+		{
+			if (ExtraFolderData[i]->m_nFolderId == nID)
+			{
+				return ExtraFolderData[i]->m_szTitle;
+			}
+		}
+	}
+	for( i = 0; i < MAX_FOLDERS; i++)
+	{
+		if (g_folderData[i].m_nFolderId == nID)
+		{
+			
+			return g_folderData[i].m_lpTitle;
+		}
+	}
+	return NULL;
+}
+
+void LoadFolderOptions(int folder_index )
+{
+	char buffer[512];
+	char title[512];
+	int i;
+	extern FOLDERDATA g_folderData[];
+	extern LPEXFOLDERDATA ExtraFolderData[];
+	extern int numExtraFolders;
+	const char *pParent;
+
+
+	for( i = 0; i<=folder_index; i++ )
+	{
+		if( folder_index < MAX_FOLDERS)
+		{
+			if( g_folderData[i].m_nFolderId == folder_index )
+			{
+				snprintf(buffer,sizeof(buffer),"%s\\%s.ini",GetIniDir(),g_folderData[i].m_lpTitle );
+				break;
+			}
+		}
+		else if( folder_index < MAX_FOLDERS + numExtraFolders)
+		{
+			
+			if( ExtraFolderData[i] )
+			{
+				if( ExtraFolderData[i]->m_nFolderId == folder_index )
+				{
+					snprintf(buffer,sizeof(buffer),"%s\\%s.ini",GetIniDir(),ExtraFolderData[i]->m_szTitle );
+					break;
+				}
+			}
+		}
+		else
+		{
+			//we jump to the corrsponding folderData
+			if( ExtraFolderData[folder_index] )
+			{
+				//SubDirName is ParentFolderName
+				pParent = GetFolderNameByID(ExtraFolderData[folder_index]->m_nParent);
+				if( pParent )
+				{
+					if( ExtraFolderData[folder_index]->m_nParent == FOLDER_SOURCE )
+					{
+						//we have a source ini to create, so remove the ".c" at the end of the title
+						strncpy(title, ExtraFolderData[folder_index]->m_szTitle, strlen(ExtraFolderData[folder_index]->m_szTitle)-2 );
+						title[strlen(ExtraFolderData[folder_index]->m_szTitle)-2] = '\0';
+						snprintf(buffer,sizeof(buffer),"%s\\%s\\%s.ini",GetIniDir(),pParent, title );
+					}
+					else
+					{
+						snprintf(buffer,sizeof(buffer),"%s\\%s\\%s.ini",GetIniDir(),pParent, ExtraFolderData[folder_index]->m_szTitle );
+					}
+					break;
+				}
+			}
+		}
+	}
+	
+/*	if( folder_index <= MAX_FOLDERS )
+		//Subtract 1 because FOLDER_NONE is 0
+		snprintf(buffer,sizeof(buffer),"%s\\%s.ini",GetIniDir(),g_folderData[folder_index-1].m_lpTitle );
+	else if( folder_index < MAX_FOLDERS + numExtraFolders)
+		snprintf(buffer,sizeof(buffer),"%s\\%s.ini",GetIniDir(),ExtraFolderData[numExtraFolders]->m_szTitle );
+	else
+	{
+		//SubDirName is ParentFolderName
+		pParent = GetFolderNameByID(ExtraFolderData[folder_index]->m_nParent);
+		if( pParent )
+			snprintf(buffer,sizeof(buffer),"%s\\%s\\%s.ini",GetIniDir(),pParent, ExtraFolderData[folder_index]->m_szTitle );
+		else
+			return;
+	}	
+*/	CopyGameOptions(&global,&gOpts);
+	if (LoadOptions(buffer,&folder_options[folder_index],FALSE))
+	{
+		// successfully loaded
+		CopyGameOptions(&gOpts, &folder_options[folder_index] );
+	}
+	else
+	{
+		// uses globals
+		CopyGameOptions(&global, &folder_options[folder_index] );
+	}
+}
+
+
 static BOOL LoadOptions(const char *filename,options_type *o,BOOL load_global_game_options)
 {
 	FILE *fptr;
@@ -2698,7 +3350,12 @@ static BOOL LoadOptions(const char *filename,options_type *o,BOOL load_global_ga
 			continue;
 
 		// we're guaranteed that strlen(buffer) >= 1 now
+		// strip new-line
 		buffer[strlen(buffer)-1] = '\0';
+
+		// continue if it was an empty line
+		if (buffer[0] == '\0')
+			continue;
 		
 		// # starts a comment, but #* is a special MAME32 code
 		// saying it's an option for us, but NOT for the main
@@ -2838,6 +3495,61 @@ void SaveOptions(void)
 	}
 }
 
+//returns true if different
+BOOL GetVectorUsesDefaultsMem(void)
+{
+	BOOL options_different = FALSE;
+	options_type Opts;
+	int i;
+	CopyGameOptions( &global, &Opts );
+	for (i=0;i<NUM_GAME_OPTIONS;i++)
+	{
+		if (IsOptionEqual(i,&folder_options[FOLDER_VECTOR], &Opts ) == FALSE)
+		{
+			options_different = TRUE;
+		}
+
+	}
+	return options_different;
+}
+//returns true if different
+BOOL GetFolderUsesDefaultsMem(int folder_index, int driver_index)
+{
+	BOOL options_different = FALSE;
+	options_type Opts;
+	int i;
+	if( DriverIsVector(driver_index) )
+		CopyGameOptions( GetVectorOptions(), &Opts );
+	else
+		CopyGameOptions( &global, &Opts );
+	for (i=0;i<NUM_GAME_OPTIONS;i++)
+	{
+		if (IsOptionEqual(i,&folder_options[folder_index], &Opts ) == FALSE)
+		{
+			options_different = TRUE;
+		}
+
+	}
+	return options_different;
+}
+
+//returns true if different
+BOOL GetGameUsesDefaultsMem(int driver_index)
+{
+	BOOL options_different = FALSE;
+	options_type Opts;
+	int i;
+	CopyGameOptions( GetSourceOptions(driver_index), &Opts );
+	for (i=0;i<NUM_GAME_OPTIONS;i++)
+	{
+		if (IsOptionEqual(i,&game_options[driver_index], &Opts ) == FALSE)
+		{
+			options_different = TRUE;
+		}
+
+	}
+	return options_different;
+}
 
 void SaveGameOptions(int driver_index)
 {
@@ -2845,12 +3557,13 @@ void SaveGameOptions(int driver_index)
 	FILE *fptr;
 	char buffer[512];
 	BOOL options_different = FALSE;
-
+	options_type Opts;
+	CopyGameOptions( GetSourceOptions(driver_index), &Opts );
 	if (game_variables[driver_index].use_default == FALSE)
 	{
 		for (i=0;i<NUM_GAME_OPTIONS;i++)
 		{
-			if (IsOptionEqual(i,&game_options[driver_index],&global) == FALSE)
+			if (IsOptionEqual(i,&game_options[driver_index], &Opts ) == FALSE)
 			{
 				options_different = TRUE;
 			}
@@ -2870,7 +3583,7 @@ void SaveGameOptions(int driver_index)
 
 			for (i=0;i<NUM_GAME_OPTIONS;i++)
 			{
-				if (IsOptionEqual(i,&game_options[driver_index],&global) == FALSE)
+				if (IsOptionEqual(i,&game_options[driver_index],&Opts) == FALSE)
 				{
 					gOpts = game_options[driver_index];
 					WriteOptionToFile(fptr,&regGameOpts[i]);
@@ -2888,6 +3601,143 @@ void SaveGameOptions(int driver_index)
 		}
 	}
 }
+
+void SaveFolderOptions(int folder_index, int game_index)
+{
+	int i;
+	FILE *fptr;
+	char buffer[512];
+	char subdir[512];
+	char title[512];
+	extern FOLDERDATA g_folderData[];
+	extern LPEXFOLDERDATA ExtraFolderData[];
+	extern int numExtraFolders;
+	BOOL options_different = FALSE;
+	const char *pParent;
+	options_type *pOpts;
+	options_type Opts;
+	struct stat file_stat;
+	*buffer = 0;
+	*subdir = 0;
+	if( DriverIsVector(game_index) && folder_index != FOLDER_VECTOR )
+	{
+		//CopyGameOptions(&gOpts,&folder_options[folder_index] );
+		CopyGameOptions( GetVectorOptions(), &Opts );
+		pOpts = &Opts;
+	}
+	else
+		pOpts = &global;
+
+	for (i=0;i<NUM_GAME_OPTIONS;i++)
+	{
+		if (IsOptionEqual(i,&folder_options[folder_index],pOpts) == FALSE)
+		{
+			options_different = TRUE;
+		}
+
+	}
+	//Find the Title
+	for( i = 0; i<=folder_index; i++ )
+	{
+		if( folder_index < MAX_FOLDERS)
+		{
+			if( g_folderData[i].m_nFolderId == folder_index )
+			{
+				snprintf(buffer,sizeof(buffer),"%s\\%s.ini",GetIniDir(),g_folderData[i].m_lpTitle );
+				break;
+			}
+		}
+		else if( folder_index < MAX_FOLDERS + numExtraFolders)
+		{
+			
+			if( ExtraFolderData[i] )
+			{
+				if( ExtraFolderData[i]->m_nFolderId == folder_index )
+				{
+					snprintf(buffer,sizeof(buffer),"%s\\%s.ini",GetIniDir(),ExtraFolderData[i]->m_szTitle );
+					break;
+				}
+			}
+		}
+		else
+		{
+			//we jump to the corrsponding folderData
+			if( ExtraFolderData[folder_index] )
+			{
+				//SubDirName is ParentFolderName
+				pParent = GetFolderNameByID(ExtraFolderData[folder_index]->m_nParent);
+				if( pParent )
+				{
+					if( ExtraFolderData[folder_index]->m_nParent == FOLDER_SOURCE )
+					{
+						//we have a source ini to create, so remove the ".c" at the end of the title
+						strncpy(title, ExtraFolderData[folder_index]->m_szTitle, strlen(ExtraFolderData[folder_index]->m_szTitle)-2 );
+						title[strlen(ExtraFolderData[folder_index]->m_szTitle)-2] = '\0';
+						snprintf(buffer,sizeof(buffer),"%s\\%s\\%s.ini",GetIniDir(),pParent, title );
+					}
+					else
+					{
+						snprintf(buffer,sizeof(buffer),"%s\\%s\\%s.ini",GetIniDir(),pParent, ExtraFolderData[folder_index]->m_szTitle );
+					}
+					snprintf(subdir,sizeof(subdir),"%s\\%s",GetIniDir(),pParent );
+					//need to check if Subdirectory Exists
+					/* Don't allow empty entries. */
+					if (strcmp(subdir, ""))
+					{
+						/* Check validity of edited directory. */
+						if (! (stat(subdir, &file_stat) == 0
+						&&	(file_stat.st_mode & S_IFDIR)) )
+						{
+							//Create it
+							CreateDirectory( subdir, NULL );
+						}
+					}
+					break;
+				}
+			}
+		}
+	}
+	if (options_different)
+	{
+		fptr = fopen(buffer,"wt");
+		if (fptr != NULL)
+		{
+			fprintf(fptr,"### ");
+			if( folder_index < MAX_FOLDERS )
+				fprintf(fptr,"%s",g_folderData[i].m_lpTitle);
+			else
+				fprintf(fptr,"%s",ExtraFolderData[i]->m_szTitle);
+			fprintf(fptr," ###\n\n");
+
+			for (i=0;i<NUM_GAME_OPTIONS;i++)
+			{
+				if (IsOptionEqual(i,&folder_options[folder_index],pOpts) == FALSE)
+				{
+					gOpts = folder_options[folder_index];
+					WriteOptionToFile(fptr,&regGameOpts[i]);
+				}
+			}
+
+			fclose(fptr);
+		}
+	}
+	else
+	{
+		/*No Differences between Standard Options and Folder Options*/
+		if (DeleteFile(buffer) == 0)
+		{
+			dprintf("error deleting %s; error %d\n",buffer, GetLastError());
+		}
+		//Check if SubDir
+		if( subdir )
+		{
+			//we just call rmdir on the subdir, if it is empty, it gets deleted, 
+			//otherwise it just stays as is
+			_rmdir( subdir );
+ 		}
+ 	}
+ }
+
 
 void SaveDefaultOptions(void)
 {
@@ -3003,7 +3853,7 @@ static BOOL IsOptionEqual(int option_index,options_type *o1,options_type *o2)
 	}
 	case RO_ENCODE:
 	{
-		char a[500],b[500];
+		char a[1000],b[1000];
 		gOpts = *o1;
 		regGameOpts[option_index].encode(regGameOpts[option_index].m_vpData,a);
 		gOpts = *o2;
@@ -3026,7 +3876,7 @@ static void WriteOptionToFile(FILE *fptr,REG_OPTION *regOpt)
 	char*	pString;
 	double* pDouble;
 	const char *key = regOpt->ini_name;
-	char	cTemp[80];
+	char	cTemp[1000];
 	
 	switch (regOpt->m_iType)
 	{

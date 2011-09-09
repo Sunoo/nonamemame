@@ -1,8 +1,125 @@
-#include "driver.h"
 #include "state.h"
+#include "driver.h"
 #include "vidhrdw/generic.h"
-#include "namcos2.h"	/* for game-specific hacks */
+#include "namcos2.h" /* for game-specific hacks */
 #include "namcoic.h"
+
+static void zdrawgfxzoom(
+		struct mame_bitmap *dest_bmp,const struct GfxElement *gfx,
+		unsigned int code,unsigned int color,int flipx,int flipy,int sx,int sy,
+		const struct rectangle *clip,int transparency,int transparent_color,
+		int scalex, int scaley, int zpos )
+{
+	if (!scalex || !scaley) return;
+	if (dest_bmp->depth == 15 || dest_bmp->depth == 16)
+	{
+		if( gfx && gfx->colortable )
+		{
+			int shadow_offset = (Machine->drv->video_attributes&VIDEO_HAS_SHADOWS)?Machine->drv->total_colors:0;
+			const pen_t *pal = &gfx->colortable[gfx->color_granularity * (color % gfx->total_colors)];
+			UINT8 *source_base = gfx->gfxdata + (code % gfx->total_elements) * gfx->char_modulo;
+			int sprite_screen_height = (scaley*gfx->height+0x8000)>>16;
+			int sprite_screen_width = (scalex*gfx->width+0x8000)>>16;
+			if (sprite_screen_width && sprite_screen_height)
+			{
+				/* compute sprite increment per screen pixel */
+				int dx = (gfx->width<<16)/sprite_screen_width;
+				int dy = (gfx->height<<16)/sprite_screen_height;
+
+				int ex = sx+sprite_screen_width;
+				int ey = sy+sprite_screen_height;
+
+				int x_index_base;
+				int y_index;
+
+				if( flipx )
+				{
+					x_index_base = (sprite_screen_width-1)*dx;
+					dx = -dx;
+				}
+				else
+				{
+					x_index_base = 0;
+				}
+
+				if( flipy )
+				{
+					y_index = (sprite_screen_height-1)*dy;
+					dy = -dy;
+				}
+				else
+				{
+					y_index = 0;
+				}
+
+				if( clip )
+				{
+					if( sx < clip->min_x)
+					{ /* clip left */
+						int pixels = clip->min_x-sx;
+						sx += pixels;
+						x_index_base += pixels*dx;
+					}
+					if( sy < clip->min_y )
+					{ /* clip top */
+						int pixels = clip->min_y-sy;
+						sy += pixels;
+						y_index += pixels*dy;
+					}
+					if( ex > clip->max_x+1 )
+					{ /* clip right */
+						int pixels = ex-clip->max_x-1;
+						ex -= pixels;
+					}
+					if( ey > clip->max_y+1 )
+					{ /* clip bottom */
+						int pixels = ey-clip->max_y-1;
+						ey -= pixels;
+					}
+				}
+
+				if( ex>sx )
+				{ /* skip if inner loop doesn't draw anything */
+					int y;
+					if (transparency == TRANSPARENCY_PEN)
+					{
+						if( priority_bitmap )
+						{
+							for( y=sy; y<ey; y++ )
+							{
+								UINT8 *source = source_base + (y_index>>16) * gfx->line_modulo;
+								UINT16 *dest = (UINT16 *)dest_bmp->line[y];
+								UINT8 *pri = priority_bitmap->line[y];
+								int x, x_index = x_index_base;
+								for( x=sx; x<ex; x++ )
+								{
+									int c = source[x_index>>16];
+									if( c != transparent_color )
+									{
+										if( pri[x]<=zpos )
+										{
+											if( c==0xfe && shadow_offset )
+											{
+												dest[x] |= shadow_offset;
+											}
+											else
+											{
+												dest[x] = pal[c];
+											}
+											pri[x] = zpos;
+										}
+									}
+									x_index += dx;
+								}
+								y_index += dy;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
 static data16_t mSpritePos[4];
 
@@ -86,6 +203,7 @@ static int mPalXOR;		/* XOR'd with palette select register; needed for System21 
 /**
  * 0x00000 sprite attr (page0)
  * 0x02000 sprite list (page0)
+ *
  * 0x02400 window attributes
  * 0x04000 format
  * 0x08000 tile
@@ -93,11 +211,11 @@ static int mPalXOR;		/* XOR'd with palette select register; needed for System21 
  * 0x14000 sprite list (page1)
  */
 static void
-draw_spriteC355( int page, struct mame_bitmap *bitmap, const struct rectangle *cliprect, const data16_t *pSource, int pri, int zpos )
+draw_spriteC355( struct mame_bitmap *bitmap, const struct rectangle *cliprect, const data16_t *pSource, int pri, int zpos )
 {
 	unsigned screen_height_remaining, screen_width_remaining;
 	unsigned source_height_remaining, source_width_remaining;
-	INT32 hpos,vpos;
+	int hpos,vpos;
 	data16_t hsize,vsize;
 	data16_t palette;
 	data16_t linkno;
@@ -113,10 +231,11 @@ draw_spriteC355( int page, struct mame_bitmap *bitmap, const struct rectangle *c
 	int tile_screen_width;
 	int tile_screen_height;
 	const data16_t *spriteformat16 = &spriteram16[0x4000/2];
-	const data16_t *spritetile16 = &spriteram16[0x8000/2];
+	const data16_t *spritetile16   = &spriteram16[0x8000/2];
 	int color;
-
+	const data16_t *pWinAttr;
 	struct rectangle clip;
+	int xscroll, yscroll;
 
 	/**
 	 * ----xxxx-------- window select
@@ -148,75 +267,46 @@ draw_spriteC355( int page, struct mame_bitmap *bitmap, const struct rectangle *c
 	/* pSource[6] contains priority/palette */
 	/* pSource[7] is used in Lucky & Wild, possibly for sprite-road priority */
 
-	if( linkno*4>=0x4000/2 ) return; /* avoid garbage memory read */
+	if( linkno*4>=0x4000/2 ) return; /* avoid garbage memory reads */
 
-	switch( namcos2_gametype )
-	{
-	case NAMCOS21_SOLVALOU: /* hack */
-		hpos -= 0x80;
-		vpos -= 0x40;
-		clip = Machine->visible_area;
-		break;
+	xscroll = (INT16)mSpritePos[1];
+	yscroll = (INT16)mSpritePos[0];
 
-	case NAMCOS21_CYBERSLED: /* hack */
-		hpos -= 0x110;
-		vpos -= 2+32;
-		clip = Machine->visible_area;
-		break;
+	xscroll &= 0x1ff; if( xscroll & 0x100 ) xscroll |= ~0x1ff;
+	yscroll &= 0x1ff; if( yscroll & 0x100 ) yscroll |= ~0x1ff;
 
-	case NAMCOS21_AIRCOMBAT: /* hack */
-		vpos -= 0x22;
-		hpos -= 0x02;
-		clip = Machine->visible_area;
-		break;
-
-	case NAMCOS21_STARBLADE: /* hack */
-		if( page )
+	if( bitmap->width > 288 )
+	{ /* Medium Resolution: System21 adjust */
+		if( namcos2_gametype == NAMCOS21_CYBERSLED )
 		{
-			hpos -= 0x80;
-			vpos -= 0x20;
+			xscroll -= 0x04;
+			yscroll += 0x1d;
 		}
-		clip = Machine->visible_area;
-		break;
-
-	case NAMCONB1_NEBULRAY:
-	case NAMCONB1_GUNBULET:
-	case NAMCONB1_GSLGR94U:
-	case NAMCONB1_SWS95:
-	case NAMCONB1_SWS96:
-	case NAMCONB1_SWS97:
-	case NAMCONB2_OUTFOXIES:
-	case NAMCONB2_MACH_BREAKERS:
-	case NAMCONB1_VSHOOT:
-	case NAMCOS2_SUZUKA_8_HOURS_2:
-	case NAMCOS2_SUZUKA_8_HOURS:
-	case NAMCOS2_LUCKY_AND_WILD:
-	case NAMCOS2_STEEL_GUNNER_2:
-	default:
-		{
-			int dh = mSpritePos[1];
-			int dv = mSpritePos[0];
-			const data16_t *pWinAttr = &spriteram16[0x2400/2+((palette>>8)&0xf)*4];
-
-			dh &= 0x1ff; if( dh&0x100 ) dh |= ~0x1ff;
-			dv &= 0x1ff; if( dv&0x100 ) dv |= ~0x1ff;
-			vpos&=0x7ff; if( vpos&0x400 ) vpos |= ~0x7ff;
-			hpos&=0x7ff; if( hpos&0x400 ) hpos |= ~0x7ff;
-			hpos += -0x26 - dh;
-			vpos += -0x19 - dv;
-			// 0026 0145 0019 00f8 (lucky&wild)
-			// 0025 0145 0019 00f8 (point blank)
-			clip.min_x = pWinAttr[0] - 0x26 - dh;
-			clip.max_x = pWinAttr[1] - 0x26 - dh;
-			clip.min_y = pWinAttr[2] - 0x19 - dv;
-			clip.max_y = pWinAttr[3] - 0x19 - dv;
-			if( clip.min_x < cliprect->min_x ) clip.min_x = cliprect->min_x;
-			if( clip.min_y < cliprect->min_y ) clip.min_y = cliprect->min_y;
-			if( clip.max_x > cliprect->max_x ) clip.max_x = cliprect->max_x;
-			if( clip.max_y > cliprect->max_y ) clip.max_y = cliprect->max_y;
+		else
+		{ /* Starblade */
+			yscroll += 0x10;
 		}
-		break;
 	}
+	else
+	{ /* Namco NB1, Namco System 2 */
+		xscroll += 0x26;
+		yscroll += 0x19;
+	}
+	
+	hpos -= xscroll;
+	vpos -= yscroll;
+	pWinAttr = &spriteram16[0x2400/2+((palette>>8)&0xf)*4];
+	clip.min_x = pWinAttr[0] - xscroll;
+	clip.max_x = pWinAttr[1] - xscroll;
+	clip.min_y = pWinAttr[2] - yscroll;
+	clip.max_y = pWinAttr[3] - yscroll;
+	if( clip.min_x < cliprect->min_x ){ clip.min_x = cliprect->min_x; }
+	if( clip.min_y < cliprect->min_y ){ clip.min_y = cliprect->min_y; }
+	if( clip.max_x > cliprect->max_x ){ clip.max_x = cliprect->max_x; }
+	if( clip.max_y > cliprect->max_y ){ clip.max_y = cliprect->max_y; }
+	hpos&=0x7ff; if( hpos&0x400 ) hpos |= ~0x7ff; /* sign extend */
+	vpos&=0x7ff; if( vpos&0x400 ) vpos |= ~0x7ff; /* sign extend */
+
 	tile_index		= spriteformat16[linkno*4+0];
 	format			= spriteformat16[linkno*4+1];
 	dx				= spriteformat16[linkno*4+2];
@@ -226,9 +316,8 @@ draw_spriteC355( int page, struct mame_bitmap *bitmap, const struct rectangle *c
 
 	if( num_cols == 0 ) num_cols = 0x10;
 	flipx = (hsize&0x8000)?1:0;
-	hsize &= 0x1ff;
+	hsize &= 0x3ff;//0x1ff;
 	if( hsize == 0 ) return;
-
 	zoomx = (hsize<<16)/(num_cols*16);
 	dx = (dx*zoomx+0x8000)>>16;
 	if( flipx )
@@ -242,9 +331,8 @@ draw_spriteC355( int page, struct mame_bitmap *bitmap, const struct rectangle *c
 
 	if( num_rows == 0 ) num_rows = 0x10;
 	flipy = (vsize&0x8000)?1:0;
-	vsize&=0x1ff;
+	vsize &= 0x3ff;
 	if( vsize == 0 ) return;
-
 	zoomy = (vsize<<16)/(num_rows*16);
 	dy = (dy*zoomy+0x8000)>>16;
 	if( flipy )
@@ -283,14 +371,15 @@ draw_spriteC355( int page, struct mame_bitmap *bitmap, const struct rectangle *c
 			tile = spritetile16[tile_index++];
 			if( (tile&0x8000)==0 )
 			{
-				/*z*/drawgfxzoom(bitmap,Machine->gfx[mGfxC355],
+				zdrawgfxzoom(
+					bitmap,Machine->gfx[mGfxC355],
 					mpCodeToTile(tile) + offset,
 					color,
 					flipx,flipy,
 					sx,sy,
 					&clip,
 					TRANSPARENCY_PEN,0xff,
-					zoomx, zoomy/*, zpos*/ );
+					zoomx, zoomy, zpos );
 			}
 			if( !flipx )
 			{
@@ -314,7 +403,8 @@ static int DefaultCodeToTile( int code )
 	return code;
 }
 
-void namco_obj_init( int gfxbank, int palXOR, int (*codeToTile)( int code ) )
+void
+namco_obj_init( int gfxbank, int palXOR, int (*codeToTile)( int code ) )
 {
 	mGfxC355 = gfxbank;
 	mPalXOR = palXOR;
@@ -326,7 +416,7 @@ void namco_obj_init( int gfxbank, int palXOR, int (*codeToTile)( int code ) )
 	{
 		mpCodeToTile = DefaultCodeToTile;
 	}
-	spriteram16 = auto_malloc(0x14200);
+	spriteram16 = auto_malloc(0x20000);
 	memset( mSpritePos,0x00,sizeof(mSpritePos) );
 } /* namcosC355_init */
 
@@ -336,8 +426,7 @@ DrawObjectList(
 		const struct rectangle *cliprect,
 		int pri,
 		const data16_t *pSpriteList16,
-		const data16_t *pSpriteTable,
-		int n )
+		const data16_t *pSpriteTable )
 {
 	data16_t which;
 	int i;
@@ -353,15 +442,19 @@ DrawObjectList(
 	for( i=0; i<count; i++ )
 	{
 		which = pSpriteList16[i];
-		draw_spriteC355( n, bitmap, cliprect, &pSpriteTable[(which&0xff)*8], pri, i );
+		draw_spriteC355( bitmap, cliprect, &pSpriteTable[(which&0xff)*8], pri, i );
 	}
 } /* DrawObjectList */
 
 void
 namco_obj_draw( struct mame_bitmap *bitmap, const struct rectangle *cliprect, int pri )
 {
-	DrawObjectList( bitmap,cliprect,pri,&spriteram16[0x02000/2], &spriteram16[0x00000/2],0 );
-	DrawObjectList( bitmap,cliprect,pri,&spriteram16[0x14000/2], &spriteram16[0x10000/2],1 );
+	if( pri==0 )
+	{
+		fillbitmap( priority_bitmap, 0, cliprect );
+	}
+	DrawObjectList( bitmap,cliprect,pri,&spriteram16[0x02000/2], &spriteram16[0x00000/2] );
+	DrawObjectList( bitmap,cliprect,pri,&spriteram16[0x14000/2], &spriteram16[0x10000/2] );
 } /* namco_obj_draw */
 
 WRITE16_HANDLER( namco_obj16_w )
@@ -404,22 +497,37 @@ static data16_t *rozcontrol16;
 static int mRozGfxBank;
 static int mRozMaskRegion;
 static struct tilemap *mRozTilemap[2];
-static int mRozPage[2];		/* base addr for tilemap */
+static int mRozPage[2]; /* base addr for tilemap */
 
-/* It looks like the ROZ tilemap attributes also encode
- * the source size.  Right now, the implementation assumes ROZ
- * layers are always 128x128 tiles.
+/* RozMask and RozSize are used to dynamically construct a smaller ROZ tilemap, mirroring
+ * the upper left quadrant.
+ *
+ * The ROZ tilemaps normally contain a full 128x128 tiles, but occasionally need to be
+ * rendered as smaller (i.e. 16x16) tilemaps, with wrapping.
+ *
+ * The exact mapping of control registers for this purpose is not yet understood.
  */
+static int mRozMask[2];
+static int mRozSize[2]; /* 32, 64, or 128 */
+
+static void
+SetRozSize( int which, int size )
+{
+	if( mRozSize[which]!=size )
+	{
+		mRozSize[which] = size;
+		mRozMask[which] = (size-1);
+		mRozMask[which] |= (mRozMask[which]<<7);
+		tilemap_mark_all_tiles_dirty( mRozTilemap[which] );
+	}
+}
+
 static void
 roz_get_info( int tile_index,int which )
 {
-	data16_t tile;
+	data16_t tile = rozvideoram16[mRozPage[which]+(tile_index&mRozMask[which])];
 	int bank;
 	int mangle;
-	/* when size control is understood, we can simulate it by masking column and row, which will
-	 * mirror the contents of the ROZ tilemap.
-	 */
-	tile = rozvideoram16[mRozPage[which]+tile_index];
 
 	switch( namcos2_gametype )
 	{
@@ -474,11 +582,13 @@ roz_get_info( int tile_index,int which )
 	tile_info.mask_data = 32*tile + (UINT8 *)memory_region( mRozMaskRegion );
 } /* roz_get_info */
 
-static void roz_get_info0( int tile_index )
+static void
+roz_get_info0( int tile_index )
 {
 	roz_get_info( tile_index,0 );
 }
-static void roz_get_info1( int tile_index )
+static void
+roz_get_info1( int tile_index )
 {
 	roz_get_info( tile_index,1 );
 }
@@ -505,6 +615,8 @@ namco_roz_init( int gfxbank, int maskregion )
 				TILEMAP_BITMASK,16,16,128,128 );
 
 			if( mRozTilemap[i] == NULL ) return 1; /* error */
+	
+			SetRozSize( i,128 );
 		}
 		return 0;
 	}
@@ -514,7 +626,7 @@ namco_roz_init( int gfxbank, int maskregion )
 /**
  * ROZ control attributes:
  *
- * unk  attr   xx   xy   yx   yy   x0   y0
+ * unk  attr  xx   xy   yx   yy   x0   y0
  *
  * Lucky & Wild:
  * 0000 080e 2100 0000 0000 0100 38e0 fde0	0:badge
@@ -530,17 +642,23 @@ namco_roz_init( int gfxbank, int maskregion )
  * 0000 0252 0101 4000 0000 0101 0fc4 d6d7 (stage)
  *
  * Mach Breakers:
- * 1000 0871 4100 0000 0000 0100 f4d0 f8e0
- * 0000 0210 0100 0000 0000 0100 40d0 38e0
- * 0000 0000 0100 0000 0000 0100 f4d0 f8e0 // charsel (512x512)
+ * 0000 0000 0100 0000 0000 0100 f4d0 f8e0 // character select
  * 0000 0020 0100 0000 0000 0100 f4d0 f8e0 // map
+ * 1000 0871 40b5 8f4a 00b6 00b5 7804 0994 // (pri=4) skater
+ * 0000 0210 0100 0000 0000 0100 40d0 38e0 // (pri=3) ramp
+ * 0000 0377 0100 0000 0000 0100 fdd0 c0e0 // monsterpull floor
+ * 1000 0370 0100 0000 0000 0100 fdd0 26e0 // (pri=1) shooting gallery
+ * 8000 0a30 4080 0000 0000 0080 a268 42f1 // steel earth dive
+ * 0000 0210 0100 0000 0000 0100 f4d0 f8e0 // dirt earth dive
+ *
+ * unk  attr  xx   xy   yx   yy   x0   y0
  */
 void namco_roz_draw(
 	struct mame_bitmap *bitmap,
 	const struct rectangle *cliprect,
 	int pri )
 {
-	const int xoffset = 38-2,yoffset = 3;
+	const int xoffset = 36,yoffset = 3;
 	int which;
 	for( which=0; which<2; which++ )
 	{
@@ -551,7 +669,6 @@ void namco_roz_draw(
 			int color = attrs&0xf;
 			int page;
 			int roz_pri;
-			//int roz_size = 128;
 			switch( namcos2_gametype )
 			{
 			case NAMCONB2_OUTFOXIES:
@@ -563,6 +680,39 @@ void namco_roz_draw(
 			case NAMCONB2_MACH_BREAKERS:
 				roz_pri = 4-which; /* ? */
 				page = (pSource[2]&0x6000)*2;
+
+				if( (pSource[0]==0x1000 && pSource[1]==0x0871) || /* hyper glide: player */
+					(pSource[0]==0x8000 && pSource[1]==0x0887) )  /* monster pull: monster */
+				{
+					SetRozSize( which, 64 );
+				}
+				else if( (pSource[0] == 0x8000 && pSource[1] == 0x0a30) || /* dirt dive */
+					     (pSource[0] == 0x8000 && pSource[1] == 0x0a90)    /* bomb's away */ )
+				{
+					roz_pri = 5;
+				}
+				else if( pSource[0] == 0x1000 && pSource[1] == 0x0370 )
+				{ /* shooting gallery */
+					roz_pri = 1;
+				}
+				else if( pSource[0] == 0x0000 &&
+				   (pSource[1] == 0x0000 || pSource[1]==0x0020) &&
+					pSource[2] == 0x0100 &&
+					pSource[3] == 0x0000 &&
+					pSource[4] == 0x0000 &&
+					pSource[5] == 0x0100 &&
+					pSource[6] == 0xf4d0 &&
+					pSource[7] == 0xf8e0 )
+				{ /* backdrop for character select screen */
+					SetRozSize( which, 32 );
+					roz_pri = 1; /* or 2? */
+				}
+				else
+				{
+					SetRozSize( which,128 );
+				}
+				//if( keyboard_pressed(KEYCODE_LSHIFT) )
+				//	roz_pri = pSource[0]&0xf;
 				break;
 
 			case NAMCOS2_LUCKY_AND_WILD:
@@ -611,9 +761,18 @@ void namco_roz_draw(
 					mRozPage[which] = page;
 					bDirty = 1;
 				}
+
 				if( bDirty )
 				{
 					tilemap_mark_all_tiles_dirty( mRozTilemap[which] );
+				}
+
+				if( mRozSize[which]==32 )
+				{ /* hack */
+					incxx<<=1;
+					incyy<<=1;
+					startx>>=1; if( startx&0x4000 ) startx|=0x8000;
+					starty>>=1; if( starty&0x4000 ) starty|=0x8000;
 				}
 
 				tilemap_draw_roz(bitmap,cliprect,mRozTilemap[which],
@@ -625,7 +784,7 @@ void namco_roz_draw(
 					incyy << 8,
 					1,	/* copy with wraparound */
 					0,0);
-			}
+			} /* roz_pri==pri */
 		}
 	}
 } /* namco_roz_draw */
@@ -668,7 +827,21 @@ static void writerozvideo( int offset, data16_t data )
 		{
 			if( mRozPage[i]==(offset&0xc000) )
 			{
-				tilemap_mark_tile_dirty( mRozTilemap[i], offset&0x3fff );
+				int col,row;
+				col = offset&0x7f;
+				row = (offset/0x80)&0x7f;
+				if( col<mRozSize[i] && row<mRozSize[i] )
+				{
+					while( row<128 )
+					{
+						int c;
+						for( c=col; c<128; c+=mRozSize[i] )
+						{
+							tilemap_mark_tile_dirty( mRozTilemap[i], row*128+c );
+						}
+						row += mRozSize[i];
+					}
+				}
 			}
 		}
 	}

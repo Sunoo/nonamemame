@@ -99,47 +99,47 @@ static INTERRUPT_GEN( c1942_interrupt )
 
 
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x7fff, MRA_ROM },
-	{ 0x8000, 0xbfff, MRA_BANK1 },
-	{ 0xc000, 0xc000, input_port_0_r },	/* IN0 */
-	{ 0xc001, 0xc001, input_port_1_r },	/* IN1 */
-	{ 0xc002, 0xc002, input_port_2_r },	/* IN2 */
-	{ 0xc003, 0xc003, input_port_3_r },	/* DSW0 */
-	{ 0xc004, 0xc004, input_port_4_r },	/* DSW1 */
-	{ 0xd000, 0xdbff, MRA_RAM },
-	{ 0xe000, 0xefff, MRA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0xbfff) AM_READ(MRA8_BANK1)
+	AM_RANGE(0xc000, 0xc000) AM_READ(input_port_0_r)	/* IN0 */
+	AM_RANGE(0xc001, 0xc001) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0xc002, 0xc002) AM_READ(input_port_2_r)	/* IN2 */
+	AM_RANGE(0xc003, 0xc003) AM_READ(input_port_3_r)	/* DSW0 */
+	AM_RANGE(0xc004, 0xc004) AM_READ(input_port_4_r)	/* DSW1 */
+	AM_RANGE(0xd000, 0xdbff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xe000, 0xefff) AM_READ(MRA8_RAM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0xbfff, MWA_ROM },
-	{ 0xc800, 0xc800, soundlatch_w },
-	{ 0xc802, 0xc803, c1942_scroll_w },
-	{ 0xc804, 0xc804, c1942_c804_w },
-	{ 0xc805, 0xc805, c1942_palette_bank_w },
-	{ 0xc806, 0xc806, c1942_bankswitch_w },
-	{ 0xcc00, 0xcc7f, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0xd000, 0xd7ff, c1942_fgvideoram_w, &c1942_fgvideoram },
-	{ 0xd800, 0xdbff, c1942_bgvideoram_w, &c1942_bgvideoram },
-	{ 0xe000, 0xefff, MWA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xbfff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xc800, 0xc800) AM_WRITE(soundlatch_w)
+	AM_RANGE(0xc802, 0xc803) AM_WRITE(c1942_scroll_w)
+	AM_RANGE(0xc804, 0xc804) AM_WRITE(c1942_c804_w)
+	AM_RANGE(0xc805, 0xc805) AM_WRITE(c1942_palette_bank_w)
+	AM_RANGE(0xc806, 0xc806) AM_WRITE(c1942_bankswitch_w)
+	AM_RANGE(0xcc00, 0xcc7f) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0xd000, 0xd7ff) AM_WRITE(c1942_fgvideoram_w) AM_BASE(&c1942_fgvideoram)
+	AM_RANGE(0xd800, 0xdbff) AM_WRITE(c1942_bgvideoram_w) AM_BASE(&c1942_bgvideoram)
+	AM_RANGE(0xe000, 0xefff) AM_WRITE(MWA8_RAM)
+ADDRESS_MAP_END
 
 
 
-static MEMORY_READ_START( sound_readmem )
-	{ 0x0000, 0x3fff, MRA_ROM },
-	{ 0x4000, 0x47ff, MRA_RAM },
-	{ 0x6000, 0x6000, soundlatch_r },
-MEMORY_END
+static ADDRESS_MAP_START( sound_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x4000, 0x47ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x6000, 0x6000) AM_READ(soundlatch_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( sound_writemem )
-	{ 0x0000, 0x3fff, MWA_ROM },
-	{ 0x4000, 0x47ff, MWA_RAM },
-	{ 0x8000, 0x8000, AY8910_control_port_0_w },
-	{ 0x8001, 0x8001, AY8910_write_port_0_w },
-	{ 0xc000, 0xc000, AY8910_control_port_1_w },
-	{ 0xc001, 0xc001, AY8910_write_port_1_w },
-MEMORY_END
+static ADDRESS_MAP_START( sound_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x4000, 0x47ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x8000, 0x8000) AM_WRITE(AY8910_control_port_0_w)
+	AM_RANGE(0x8001, 0x8001) AM_WRITE(AY8910_write_port_0_w)
+	AM_RANGE(0xc000, 0xc000) AM_WRITE(AY8910_control_port_1_w)
+	AM_RANGE(0xc001, 0xc001) AM_WRITE(AY8910_write_port_1_w)
+ADDRESS_MAP_END
 
 
 
@@ -288,12 +288,12 @@ static MACHINE_DRIVER_START( 1942 )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 4000000)	/* 4 MHz (?) */
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
 	MDRV_CPU_VBLANK_INT(c1942_interrupt,2)
 
 	MDRV_CPU_ADD(Z80, 3000000)
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)	/* 3 MHz ??? */
-	MDRV_CPU_MEMORY(sound_readmem,sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(sound_readmem,sound_writemem)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,4)
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -446,46 +446,8 @@ ROM_START( 1942b )
 	ROM_LOAD( "01m_sb-9.bin", 0x0900, 0x0100, CRC(4921635c) SHA1(aee37d6cdc36acf0f11ff5f93e7b16e4b12f6c39) )	/* video timing? (not used) */
 ROM_END
 
-ROM_START( galagax )
-	ROM_REGION( 0x1c000, REGION_CPU1, 0 )	/* 64k for code + 3*16k for the banked ROMs images */
-	ROM_LOAD( "1-n3.bin",     0x00000, 0x4000, CRC(c78cdc46) )
-	ROM_LOAD( "1-n4.bin",     0x04000, 0x4000, CRC(863f2f49) )
-	ROM_LOAD( "1-n5.bin",     0x10000, 0x4000, CRC(0da115f9) )
-	ROM_LOAD( "1-n6.bin",     0x14000, 0x2000, CRC(821c6481) )
-	ROM_LOAD( "1-n7.bin",     0x18000, 0x4000, CRC(5df525e1) )
-
-	ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
-	ROM_LOAD( "1-c11.bin",    0x0000, 0x4000, CRC(bd87f06b) )
-
-	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "1-f2.bin",     0x00000, 0x2000, CRC(b3e1862b) )/* characters */
-
-	ROM_REGION( 0xc000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "2-a1.bin",     0x00000, 0x2000, CRC(21f3fee2) )	/* tiles */
-	ROM_LOAD( "2-a2.bin",     0x02000, 0x2000, CRC(5542beae) )
-	ROM_LOAD( "2-a3.bin",     0x04000, 0x2000, CRC(118e87ec) )
-	ROM_LOAD( "2-a4.bin",     0x06000, 0x2000, CRC(fc3db895) )
-	ROM_LOAD( "2-a5.bin",     0x08000, 0x2000, CRC(4a336de1) )
-	ROM_LOAD( "2-a6.bin",     0x0a000, 0x2000, CRC(1d4a69c9) )
-
-	ROM_REGION( 0x10000, REGION_GFX3, ROMREGION_DISPOSE )
-	ROM_LOAD( "2-l1.bin",     0x00000, 0x4000, CRC(8408b932) )	/* sprites */
-	ROM_LOAD( "2-l2.bin",     0x04000, 0x4000, CRC(2218cb80) )
-	ROM_LOAD( "2-n1.bin",     0x08000, 0x4000, CRC(4d5ed5e5) )
-	ROM_LOAD( "2-n2.bin",     0x0c000, 0x4000, CRC(8f4a1688) )
-
-	ROM_REGION( 0x0600, REGION_PROMS, 0 )
- 	ROM_LOAD( "08e_sb-5.bin", 0x0000, 0x0100, CRC(93ab8153) )	/* red */
-	ROM_LOAD( "09e_sb-6.bin", 0x0100, 0x0100, CRC(8ab44f7d) )	/* green*/
-	ROM_LOAD( "10e_sb-7.bin", 0x0200, 0x0100, CRC(f4ade9a4) )	/* blue*/
-	ROM_LOAD( "f01_sb-0.bin", 0x0300, 0x0100, CRC(6047d91b) )	/* char lookup table */
-	ROM_LOAD( "06d_sb-4.bin", 0x0400, 0x0100, CRC(4858968d) )	/* tile lookup table */
-	ROM_LOAD( "03k_sb-8.bin", 0x0500, 0x0100, CRC(f6fad943) )	/* sprite lookup table */
-ROM_END
-
 
 
 GAME( 1984, 1942,  0,    1942, 1942, 0, ROT270, "Capcom", "1942 (set 1)" )
 GAME( 1984, 1942a, 1942, 1942, 1942, 0, ROT270, "Capcom", "1942 (set 2)" )
 GAME( 1984, 1942b, 1942, 1942, 1942, 0, ROT270, "Capcom", "1942 (set 3)" )
-GAME( 1984, galagax, 1942, 1942, 1942, 0, ROT270, "Capcom - Jerky and Chris Moore hack", "Galaga X (1942 hack)" )

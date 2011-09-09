@@ -13,6 +13,10 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#include "osd_cpu.h"
+#include "input.h" /* for InputSeq definition */
+
+
 enum 
 {
 	COLUMN_GAMES = 0,
@@ -117,6 +121,12 @@ typedef struct
 
 typedef struct
 {
+	char *seq_string;	/* KEYCODE_LALT KEYCODE_A, etc... */
+	InputSeq is;		/* sequence definition in MAME's internal keycodes */
+} KeySeq;
+
+typedef struct
+{
 	/* video */
 	BOOL   autoframeskip;
 	int    frameskip;
@@ -164,6 +174,8 @@ typedef struct
 	double f_a2d;
 	BOOL   steadykey;
 	BOOL   lightgun;
+	BOOL   dual_lightgun;
+	BOOL   offscreen_reload;
 	char *ctrlr;
 
 	/* Core video */
@@ -192,7 +204,7 @@ typedef struct
 	BOOL   use_filter;
 	BOOL   enable_sound;
 	int    attenuation;
-	int audio_latency;
+	int    audio_latency;
 
 	/* Misc artwork options */
 	BOOL   use_artwork;
@@ -209,16 +221,9 @@ typedef struct
 	BOOL   sleep;
 	BOOL   old_timing;
 	BOOL   leds;
+	char   *ledmode;
 	int bios;
 
-	/* Analog+ */
-	BOOL   singlemouse;
-	BOOL   switchmice;
-	BOOL   switchaxes;
-	BOOL   splitmouse;
-	BOOL   resetmouse;
-	BOOL   use_lightgun2a;
-	BOOL   use_lightgun2b;
 } options_type;
 
 // per-game data we store, not to pass to mame, but for our own use.
@@ -254,19 +259,22 @@ typedef struct
     INT      folder_id;
     BOOL     view;
     BOOL     show_folderlist;
-	LPBITS show_folder_flags;
+	LPBITS   show_folder_flags;
     BOOL     show_toolbar;
     BOOL     show_statusbar;
     BOOL     show_screenshot;
     BOOL     show_tabctrl;
-	int show_tab_flags;
-    int current_tab;
+	int      show_tab_flags;
+    int      current_tab;
     BOOL     game_check;        /* Startup GameCheck */
     BOOL     use_joygui;
+	BOOL     use_keygui;
     BOOL     broadcast;
     BOOL     random_bg;
     int      cycle_screenshot;
-	BOOL stretch_screenshot_larger;
+	BOOL     stretch_screenshot_larger;
+	BOOL     inherit_filter;
+	BOOL     offset_clones;
 
     char     *default_game;
     int      column_width[COLUMN_MAX];
@@ -280,9 +288,44 @@ typedef struct
     LOGFONT  list_font;
     COLORREF list_font_color;
     COLORREF list_clone_color;
-    BOOL skip_disclaimer;
-    BOOL skip_gameinfo;
-    BOOL high_priority;
+    BOOL     skip_disclaimer;
+    BOOL     skip_gameinfo;
+    BOOL     high_priority;
+
+	// Keyboard control of ui
+    KeySeq   ui_key_up;
+    KeySeq   ui_key_down;
+    KeySeq   ui_key_left;
+    KeySeq   ui_key_right;
+    KeySeq   ui_key_start;
+    KeySeq   ui_key_pgup;
+    KeySeq   ui_key_pgdwn;
+    KeySeq   ui_key_home;
+    KeySeq   ui_key_end;
+    KeySeq   ui_key_ss_change;
+    KeySeq   ui_key_history_up;
+    KeySeq   ui_key_history_down;
+
+    KeySeq   ui_key_context_filters;	/* CTRL F */
+    KeySeq   ui_key_select_random;		/* CTRL R */
+    KeySeq   ui_key_game_audit;			/* ALT A */
+    KeySeq   ui_key_game_properties;	/* ALT VK_RETURN */
+    KeySeq   ui_key_help_contents;		/* VK_F1 */
+    KeySeq   ui_key_update_gamelist;	/* VK_F5 */
+    KeySeq   ui_key_view_folders;		/* ALT D */
+    KeySeq   ui_key_view_fullscreen;	/* VK_F11 */
+    KeySeq   ui_key_view_pagetab;		/* ALT B */
+    KeySeq   ui_key_view_picture_area;	/* ALT P */
+    KeySeq   ui_key_view_status;		/* ALT S */
+    KeySeq   ui_key_view_toolbars;		/* ALT T */
+
+    KeySeq   ui_key_view_tab_cabinet;	/* ALT 3 */
+    KeySeq   ui_key_view_tab_cpanel;	/* ALT 6 */
+    KeySeq   ui_key_view_tab_flyer;		/* ALT 2 */
+    KeySeq   ui_key_view_tab_history;	/* ALT 7 */
+    KeySeq   ui_key_view_tab_marquee;	/* ALT 4 */
+    KeySeq   ui_key_view_tab_screenshot;/* ALT 1 */
+    KeySeq   ui_key_view_tab_title;		/* ALT 5 */
 
     // Joystick control of ui
 	// array of 4 is joystick index, stick or button, etc.
@@ -339,13 +382,25 @@ void OptionsExit(void);
 
 void FreeGameOptions(options_type *o);
 void CopyGameOptions(options_type *source,options_type *dest);
-options_type * GetDefaultOptions(void);
-options_type * GetGameOptions(int driver_index);
+void SyncInGameOptions(options_type *opts, const char *filename);
+void SyncInFolderOptions(options_type *opts, int folder_index);
+options_type * GetDefaultOptions(int iProperty, BOOL bVectorFolder);
+options_type * GetFolderOptions(int folder_index, BOOL bIsVector);
+options_type * GetVectorOptions(void);
+options_type * GetSourceOptions(int driver_index );
+options_type * GetGameOptions(int driver_index, int folder_index );
+BOOL GetVectorUsesDefaultsMem(void);
+BOOL GetFolderUsesDefaultsMem(int folder_index, int driver_index);
+BOOL GetGameUsesDefaultsMem(int driver_index);
 BOOL GetGameUsesDefaults(int driver_index);
 void SetGameUsesDefaults(int driver_index,BOOL use_defaults);
 void LoadGameOptions(int driver_index);
+void LoadFolderOptions(int folder_index);
+
+const char* GetFolderNameByID(UINT nID);
 
 void SaveOptions(void);
+void SaveFolderOptions(int folder_index, int game_index);
 
 void ResetGUI(void);
 void ResetGameDefaults(void);
@@ -377,11 +432,20 @@ BOOL GetVersionCheck(void);
 void SetJoyGUI(BOOL use_joygui);
 BOOL GetJoyGUI(void);
 
+void SetKeyGUI(BOOL use_keygui);
+BOOL GetKeyGUI(void);
+
 void SetCycleScreenshot(int cycle_screenshot);
 int GetCycleScreenshot(void);
 
 void SetStretchScreenShotLarger(BOOL stretch);
 BOOL GetStretchScreenShotLarger(void);
+
+void SetFilterInherit(BOOL inherit);
+BOOL GetFilterInherit(void);
+
+void SetOffsetClones(BOOL inherit);
+BOOL GetOffsetClones(void);
 
 void SetBroadcast(BOOL broadcast);
 BOOL GetBroadcast(void);
@@ -550,15 +614,54 @@ void SetSampleAuditResults(int driver_index, int audit_results);
 
 void IncrementPlayCount(int driver_index);
 int GetPlayCount(int driver_index);
+void ResetPlayCount(int driver_index);
 
 void IncrementPlayTime(int driver_index,int playtime);
 int GetPlayTime(int driver_index);
 void GetTextPlayTime(int driver_index,char *buf);
+void ResetPlayTime(int driver_index);
 
 char * GetVersionString(void);
 
 void SaveGameOptions(int driver_index);
 void SaveDefaultOptions(void);
+
+
+// Keyboard control of ui
+InputSeq* Get_ui_key_up(void);
+InputSeq* Get_ui_key_down(void);
+InputSeq* Get_ui_key_left(void);
+InputSeq* Get_ui_key_right(void);
+InputSeq* Get_ui_key_start(void);
+InputSeq* Get_ui_key_pgup(void);
+InputSeq* Get_ui_key_pgdwn(void);
+InputSeq* Get_ui_key_home(void);
+InputSeq* Get_ui_key_end(void);
+InputSeq* Get_ui_key_ss_change(void);
+InputSeq* Get_ui_key_history_up(void);
+InputSeq* Get_ui_key_history_down(void);
+
+InputSeq* Get_ui_key_context_filters(void);
+InputSeq* Get_ui_key_select_random(void);
+InputSeq* Get_ui_key_game_audit(void);
+InputSeq* Get_ui_key_game_properties(void);
+InputSeq* Get_ui_key_help_contents(void);
+InputSeq* Get_ui_key_update_gamelist(void);
+InputSeq* Get_ui_key_view_folders(void);
+InputSeq* Get_ui_key_view_fullscreen(void);
+InputSeq* Get_ui_key_view_pagetab(void);
+InputSeq* Get_ui_key_view_picture_area(void);
+InputSeq* Get_ui_key_view_status(void);
+InputSeq* Get_ui_key_view_toolbars(void);
+
+InputSeq* Get_ui_key_view_tab_cabinet(void);
+InputSeq* Get_ui_key_view_tab_cpanel(void);
+InputSeq* Get_ui_key_view_tab_flyer(void);
+InputSeq* Get_ui_key_view_tab_history(void);
+InputSeq* Get_ui_key_view_tab_marquee(void);
+InputSeq* Get_ui_key_view_tab_screenshot(void);
+InputSeq* Get_ui_key_view_tab_title(void);
+
 
 int GetUIJoyUp(int joycodeIndex);
 void SetUIJoyUp(int joycodeIndex, int val);

@@ -20,8 +20,6 @@
 #include "rc.h"
 #include "input.h"
 
-//#include <stdlib.h>
-//int snprintf (char *str, size_t count, const char *fmt, ...);	// from snprintf.c
 
 
 //============================================================
@@ -39,10 +37,8 @@ extern int win_window_mode;
 //============================================================
 
 #define MAX_KEYBOARDS		1
-/*start MAME:analog+*/
-#define MAX_MICE			9		// one of which is the "system mouse"
+#define MAX_MICE			8
 #define MAX_JOYSTICKS		8
-/*end MAME:analog+  */
 
 #define MAX_KEYS			256
 
@@ -93,6 +89,7 @@ static int					use_lightgun;
 static int					use_lightgun_dual;
 static int					use_lightgun_reload;
 static int					use_keyboard_leds;
+static const char *			ledmode;
 static int					steadykey;
 static const char*			ctrlrtype;
 static const char*			ctrlrname;
@@ -108,28 +105,6 @@ static struct ipd 			*ipddef_ptr = NULL;
 
 static int					num_osd_ik = 0;
 static int					size_osd_ik = 0;
-
-/*start MAME:analog+*/
-#ifdef ANALOGPEDALON
-int							analog_pedal;
-#endif	/* ANALOGPEDALON */
-
-static int					singlemouse;
-int							switchmice;
-int							switchaxes;
-int							splitmouse;
-int							resetmouse;
-
-// testing options
-static int					use_lightgun2a;
-static int					use_lightgun2b;
-
-// debug, should be moved back to function after debugging finished
-static int initlightgun2[]= {2,2,2,2};
-static int maxdeltax[]={1,1,1,1}, maxdeltay[]={1,1,1,1};
-//static int minmx[4], minmy[4], maxmx[4], maxmy[4];
-static int lg_center_x[4], lg_center_y[4];
-/*end MAME:analog+  */
 
 // keyboard states
 static int					keyboard_count;
@@ -161,37 +136,17 @@ static DIDEVCAPS			joystick_caps[MAX_JOYSTICKS];
 static DIJOYSTATE			joystick_state[MAX_JOYSTICKS];
 static DIPROPRANGE			joystick_range[MAX_JOYSTICKS][MAX_AXES];
 
-
-/*start MAME:analog+*/
-// mappable mouse axes stuff
-struct Mouse_Axes
-{
-	int xmouse;
-	int xaxis;
-	int ymouse;
-	int yaxis;
-};
-
-// analog tables for the mice
-static struct Mouse_Axes os_player_mouse_axes[MAX_PLAYERS];
-
-// set with following const, edit them as needed
-// TODO: do this in the UI
-const int mouse_map_default[]	= {0,1,2,3};	// default mame mapping
-const int mouse_map_split[]		= {1,1,2,2};	// split mice default mapping
-const int mouse_map_usbs[]		= {1,2,3,0};	// if usb is present, map it to p1 and "system mouse" to p4
-const int mouse_map_4usbs[]		= {1,2,3,4};	// 4 usb present, map only to them and no "system mouse"
-/*end MAME:analog+  */
-
 // led states
 static int original_leds;
 static HANDLE hKbdDev;
-static OSVERSIONINFO osinfo = { sizeof(OSVERSIONINFO) };
-
+static int ledmethod;
 
 //============================================================
 //	OPTIONS
 //============================================================
+
+// prototypes
+static int decode_ledmode(struct rc_option *option, const char *arg, int priority);
 
 // global input options
 struct rc_option input_opts[] =
@@ -207,21 +162,9 @@ struct rc_option input_opts[] =
 	{ "offscreen_reload", "reload", rc_bool, &use_lightgun_reload, "0", 0, 0, NULL, "offscreen shots reload" },				
 	{ "steadykey", "steady", rc_bool, &steadykey, "0", 0, 0, NULL, "enable steadykey support" },
 	{ "keyboard_leds", "leds", rc_bool, &use_keyboard_leds, "1", 0, 0, NULL, "enable keyboard LED emulation" },
+	{ "led_mode", NULL, rc_string, &ledmode, "ps/2", 0, 0, decode_ledmode, "LED mode (ps/2|usb)" },
 	{ "a2d_deadzone", "a2d", rc_float, &a2d_deadzone, "0.3", 0.0, 1.0, NULL, "minimal analog value for digital input" },
 	{ "ctrlr", NULL, rc_string, &ctrlrtype, 0, 0, 0, NULL, "preconfigure for specified controller" },
-/*start MAME:analog+*/
-	{ "Analog+ options", NULL, rc_seperator, NULL, NULL, 0, 0, NULL, NULL },
-#ifdef ANALOGPEDALON
-	{ "analogpedal", "anapedal", rc_bool, &analog_pedal, "1", 0, 0, NULL, "enable analog pedal" },
-#endif	/* ANALOGPEDALON */
-	{ "singlemouse", "onemouse", rc_bool, &singlemouse, "0", 0, 0, NULL, "allow only one mouse device" },
-	{ "switchablemice", "switchmice", rc_bool, &switchmice, "0", 0, 0, NULL, "enable switching mouse -> player" },
-	{ "switchmiceaxes", "switchaxes", rc_bool, &switchaxes, "0", 0, 0, NULL, "enable assigning mouse axis -> player axis" },
-	{ "splitmouseaxes", "splitmouse", rc_bool, &splitmouse, "0", 0, 0, NULL, "automatically map one mouse axis per player from commandline/ini" },
-	{ "resetmouseaxes", "resetmouse", rc_bool, &resetmouse, "0", 0, 0, NULL, "reset analog+ mouse settings for this game" },
-	{ "lightgun2a", "gun2a", rc_bool, &use_lightgun2a, "0", 0, 0, NULL, "alpha code: use 2 USB mouse lightguns relative" },
-	{ "lightgun2b", "gun2b", rc_bool, &use_lightgun2b, "0", 0, 0, NULL, "alpha code: use 2 USB mouse lightguns absolute" },
-/*end MAME:analog+  */
 	{ NULL,	NULL, rc_end, NULL, NULL, 0, 0,	NULL, NULL }
 };
 
@@ -242,6 +185,22 @@ struct rc_option ctrlr_input_opts2[] =
 
 
 //============================================================
+//	decode_cleanstretch
+//============================================================
+
+static int decode_ledmode(struct rc_option *option, const char *arg, int priority)
+{
+	if( strcmp( arg, "ps/2" ) != 0 &&
+		strcmp( arg, "usb" ) != 0 )
+	{
+		fprintf(stderr, "error: invalid value for led_mode: %s\n", arg);
+		return -1;
+	}
+	option->priority = priority;
+	return 0;
+}
+
+//============================================================
 //	PROTOTYPES
 //============================================================
 
@@ -249,10 +208,6 @@ static void updatekeyboard(void);
 static void init_keylist(void);
 static void init_joylist(void);
 
-/*start MAME:analog+*/
-//static void init_analogjoy_arrays(void);
-static void init_mouse_arrays(const int playermousedefault[]);
-/*end MAME:analog+  */
 
 
 //============================================================
@@ -596,25 +551,12 @@ static BOOL CALLBACK enum_mouse_callback(LPCDIDEVICEINSTANCE instance, LPVOID re
 	if (result != DI_OK)
 		goto cant_get_caps;
 
-	// set relative or absolute mode
-	// note: does not have effect in winMe!!! 
-	// hacked it into pause function, where it does take effect
+	// set relative mode
 	value.diph.dwSize = sizeof(DIPROPDWORD);
 	value.diph.dwHeaderSize = sizeof(value.diph);
 	value.diph.dwObj = 0;
 	value.diph.dwHow = DIPH_DEVICE;
-	if (use_lightgun || use_lightgun2b)
-	{
-		if (verbose)
-			printf("mouse/lightgun absolute mode\n");
-		value.dwData = DIPROPAXISMODE_ABS;
-	}
-	else
-	{
-		if (verbose)
-			printf("mouse/lightgun relative mode\n");
-		value.dwData = DIPROPAXISMODE_REL;
-	}
+	value.dwData = DIPROPAXISMODE_REL;
 	result = IDirectInputDevice_SetProperty(mouse_device[mouse_count], DIPROP_AXISMODE, &value.diph);
 	if (result != DI_OK)
 		goto cant_set_axis_mode;
@@ -625,9 +567,7 @@ static BOOL CALLBACK enum_mouse_callback(LPCDIDEVICEINSTANCE instance, LPVOID re
 		goto cant_set_format;
 
 	// set the cooperative level
-/*start MAME:analog+*/
-	if ( use_lightgun && !(use_lightgun2a) && !(use_lightgun2b) )
-/*end MAME:analog+  */
+	if (use_lightgun)
 		result = IDirectInputDevice_SetCooperativeLevel(mouse_device[mouse_count], win_video_window,
 					DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
 	else
@@ -638,15 +578,10 @@ static BOOL CALLBACK enum_mouse_callback(LPCDIDEVICEINSTANCE instance, LPVOID re
 		goto cant_set_coop_level;
 
 	// increment the count
-	if (use_lightgun||use_lightgun2a||use_lightgun2b)
+	if (use_lightgun)
 		lightgun_count++;
 	mouse_count++;
-/*start MAME:analog+*/
-	if (singlemouse)		// Assuming the first mouse enum'ed always is the sysmouse:
-		return DIENUM_STOP;	// why continue looking for more mice if you only want one?
-	else
-/*end MAME:analog+  */
-		return DIENUM_CONTINUE;
+	return DIENUM_CONTINUE;
 
 cant_set_coop_level:
 cant_set_format:
@@ -672,7 +607,7 @@ static BOOL CALLBACK enum_joystick_callback(LPCDIDEVICEINSTANCE instance, LPVOID
 	HRESULT result = DI_OK;
 	DWORD flags;
 
-	// if we're not out of joysticks, log this one
+	// if we're not out of mice, log this one
 	if (joystick_count >= MAX_JOYSTICKS)
 		goto out_of_joysticks;
 
@@ -754,7 +689,6 @@ int win_init_input(void)
 		if (result != DI_OK)
 			goto cant_create_dinput;
 	}
-
 	if (verbose)
 		fprintf(stderr, "Using DirectInput %d\n", dinput_version >> 8);
 
@@ -772,16 +706,6 @@ int win_init_input(void)
 	result = IDirectInput_EnumDevices(dinput, DIDEVTYPE_MOUSE, enum_mouse_callback, 0, DIEDFL_ATTACHEDONLY);
 	if (result != DI_OK)
 		goto cant_init_mouse;
-/*start MAME:analog+*/
-	if (splitmouse)
-		init_mouse_arrays(mouse_map_split);		// handle split mice
-	else if (mouse_count >= 5)
-		init_mouse_arrays(mouse_map_4usbs);		// handle 4 usb mice
-	else if (mouse_count >= 2)
-		init_mouse_arrays(mouse_map_usbs);		// handle 1-3 usb mice
-	else
-		init_mouse_arrays(mouse_map_default);	// else do the normal mapping
-/*end MAME:analog+  */
 
 	// initialize joystick devices
 	joystick_count = 0;
@@ -797,13 +721,7 @@ int win_init_input(void)
 
 	// print the results
 	if (verbose)
-/*start MAME:analog+*/
-	{
-		if (singlemouse)
-			fprintf(stderr, "Single Mouse option set\n");
 		fprintf(stderr, "Keyboards=%d  Mice=%d  Joysticks=%d Lightguns=%d\n", keyboard_count, mouse_count, joystick_count, lightgun_count);
-	}
-/*end MAME:analog+  */
 	return 0;
 
 cant_init_joystick:
@@ -825,52 +743,9 @@ void win_shutdown_input(void)
 {
 	int i;
 
-/* lightgun2a/b debug */
-	DIPROPDWORD value;
-	HRESULT result = DI_OK;
-	
-	if (verbose)
-	{
-		if (use_lightgun2a || use_lightgun2b)
-		{
-			if (use_lightgun2a)
-			{
-				fprintf (stdout, "alpha text final values for -lightgun2a (relative directX)\n");
-				for (i = 0; i < 4; i++) 
-					fprintf (stdout, "Player %d max delta x,y ( %d , %d )\n", i, maxdeltax[i], maxdeltay[i]);
-			}
-			else if (use_lightgun2b)
-			{
-				fprintf (stdout, "alpha text final values for -lightgun2b (absolute directX)\n");
-				for (i = 0; i < 4; i++) 
-					fprintf (stdout, "Player %d center x,y ( %d , %d )\n", i, lg_center_x[i], lg_center_y[i]);
-			}
-			for (i = 0; i<mouse_count; i++)
-			{
-				// get relative or absolute mode
-				value.diph.dwSize = sizeof(DIPROPDWORD);
-				value.diph.dwHeaderSize = sizeof(value.diph);
-				value.diph.dwObj = 0;
-				value.diph.dwHow = DIPH_DEVICE;
-				result = IDirectInputDevice_GetProperty(mouse_device[i], DIPROP_AXISMODE, &value.diph);
-				if (result == DI_OK)
-				{
-					fprintf(stdout, "Player %d mouse type %s\n", i, (value.dwData == DIPROPAXISMODE_REL) ? "Relative" : "Absolute");
-	//				if (value.dwData == DIPROPAXISMODE_REL)
-	//					fprintf(stdout, "Player %d mouse type Relative\n", i);
-	//				else if (value.dwData == DIPROPAXISMODE_ABS)
-	//					fprintf(stdout, "Player %d mouse type Absolute\n", i);
-	//				else
-	//					fprintf(stdout, "player %i mouse unknown rel/abs type", i);
-				}
-			}
-		}
-	}
-/* end lightgun2a/b debug output */
 
 	// release all our keyboards
-	for (i = 0; i < keyboard_count; i++)
-	{
+	for (i = 0; i < keyboard_count; i++) {
 		IDirectInputDevice_Release(keyboard_device[i]);
 		if (keyboard_device2[i])
 			IDirectInputDevice_Release(keyboard_device2[i]);
@@ -878,8 +753,7 @@ void win_shutdown_input(void)
 	}
 
 	// release all our joysticks
-	for (i = 0; i < joystick_count; i++)
-	{
+	for (i = 0; i < joystick_count; i++) {
 		IDirectInputDevice_Release(joystick_device[i]);
 		if (joystick_device2[i])
 			IDirectInputDevice_Release(joystick_device2[i]);
@@ -887,8 +761,7 @@ void win_shutdown_input(void)
 	}
 
 	// release all our mice
-	for (i = 0; i < mouse_count; i++)
-	{
+	for (i = 0; i < mouse_count; i++) {
 		IDirectInputDevice_Release(mouse_device[i]);
 		if (mouse_device2[i])
 			IDirectInputDevice_Release(mouse_device2[i]);
@@ -932,35 +805,8 @@ void win_pause_input(int paused)
 
 		// acquire all our mice if active
 		if (mouse_active && !win_has_menu())
-		{
-/*start MAME:analog+*/
-			for (i = 0; i < mouse_count && (use_mouse||use_lightgun||use_lightgun2a||use_lightgun2b); i++)
-			{
-				if (use_lightgun2b)		// set abs mode not working in enum location
-				{						// placement here is a hack, but seems to work
-					DIPROPDWORD value;
-					
-					IDirectInputDevice_Unacquire(mouse_device[i]);
-					
-					// set absolute mode
-					value.diph.dwSize = sizeof(DIPROPDWORD);
-					value.diph.dwHeaderSize = sizeof(value.diph);
-					value.diph.dwObj = 0;
-					value.diph.dwHow = DIPH_DEVICE;
-					value.dwData = DIPROPAXISMODE_ABS;
-					
-					IDirectInputDevice_SetProperty(mouse_device[i], DIPROP_AXISMODE, &value.diph);
-				}
-/*end MAME:analog+  */
+			for (i = 0; i < mouse_count && (use_mouse||use_lightgun); i++)
 				IDirectInputDevice_Acquire(mouse_device[i]);
-			}
-
-/*start MAME:analog+*/
-// according to MS dX SDK help, need to init directX lightguns after every pause
-			for (i = 0; i<4 && (use_lightgun2a||use_lightgun2b);i++)
-				if (!initlightgun2[i]) initlightgun2[i] = 1;
-/*end MAME:analog+  */
-		}
 	}
 
 	// set the paused state
@@ -1057,8 +903,8 @@ void win_poll_input(void)
 	}
 
 	// poll all our mice if active
-	if (mouse_active && (use_mouse||use_lightgun||use_lightgun2a||use_lightgun2b) && !win_has_menu())
-		for (i = 0; i < mouse_count; i++)
+	if (mouse_active && !win_has_menu())
+		for (i = 0; i < mouse_count && (use_mouse||use_lightgun); i++)
 		{
 			// first poll the device
 			if (mouse_device2[i])
@@ -1085,7 +931,7 @@ void win_poll_input(void)
 
 int win_is_mouse_captured(void)
 {
-	return (!input_paused && mouse_active && (mouse_count > 0) && (use_mouse||use_lightgun||use_lightgun2a||use_lightgun2b) && !win_has_menu());
+	return (!input_paused && mouse_active && mouse_count > 0 && use_mouse && !win_has_menu());
 }
 
 
@@ -1193,7 +1039,7 @@ int osd_readkey_unicode(int flush)
 
 
 //============================================================
-//	init_keylist
+//	init_joylist
 //============================================================
 
 static void init_keylist(void)
@@ -1388,7 +1234,6 @@ static void init_joylist(void)
 	int joycount = 0;
 
 	// first of all, map mouse buttons
-//	for (mouse = 0; (mouse < mouse_count) && (use_mouse || use_lightgun||use_lightgun2a||use_lightgun2b); mouse++)
 	for (mouse = 0; mouse < mouse_count; mouse++)
 		for (button = 0; button < 4; button++)
 		{
@@ -1402,7 +1247,7 @@ static void init_joylist(void)
 			{
 				// add mouse number to the name
 				if (mouse_count > 1)
-					sprintf(tempname, "Mouse %d %s", mouse, instance.tszName);
+					sprintf(tempname, "Mouse %d %s", mouse + 1, instance.tszName);
 				else
 					sprintf(tempname, "Mouse %s", instance.tszName);
 				add_joylist_entry(tempname, JOYCODE(mouse, JOYTYPE_MOUSEBUTTON, button), &joycount);
@@ -1410,8 +1255,7 @@ static void init_joylist(void)
 		}
 
 	// now map joysticks
-//	for (stick = 0; (stick < joystick_count) && use_joystick; stick++)	// loop over all joystick deviceses
-	for (stick = 0; stick < joystick_count; stick++)	// loop over all joystick devices
+	for (stick = 0; stick < joystick_count; stick++)
 	{
 		// loop over all axes
 		for (axis = 0; axis < MAX_AXES; axis++)
@@ -1486,11 +1330,6 @@ static void init_joylist(void)
 				add_joylist_entry(tempname, JOYCODE(stick, JOYTYPE_POV_RIGHT, pov), &joycount);
 			}
 		}
-
-/*start MAME:analog+*/
-		/* init analog_post_player to default */
-//		init_analogjoy_arrays();
-/*end MAME:analog+  */
 	}
 
 	// terminate array
@@ -1616,7 +1455,7 @@ void osd_analogjoy_read(int player, int analog_axis[], InputCode analogjoy_input
 
 	for (i=0; i<MAX_ANALOG_AXES; i++)
 	{
-		int joyindex, joynum;
+		int joyindex, joytype, joynum;
 
 		analog_axis[i] = 0;
 
@@ -1624,6 +1463,7 @@ void osd_analogjoy_read(int player, int analog_axis[], InputCode analogjoy_input
 			continue;
 
 		joyindex = JOYINDEX( analogjoy_input[i] );
+		joytype = JOYTYPE( analogjoy_input[i] );
 		joynum = JOYNUM( analogjoy_input[i] );
 
 		top = joystick_range[joynum][joyindex].lMax;
@@ -1632,7 +1472,7 @@ void osd_analogjoy_read(int player, int analog_axis[], InputCode analogjoy_input
 		analog_axis[i] = (((LONG *)&joystick_state[joynum].lX)[joyindex] - middle) * 257 / (top - bottom);
 		if (analog_axis[i] < -128) analog_axis[i] = -128;
 		if (analog_axis[i] >  128) analog_axis[i] =  128;
-		if (!osd_isNegativeSemiAxis(analogjoy_input[i]))
+		if (joytype == JOYTYPE_AXIS_POS)
 			analog_axis[i] = -analog_axis[i];
 	}
 }
@@ -1679,12 +1519,6 @@ void input_mouse_button_up(int button)
 void osd_lightgun_read(int player,int *deltax,int *deltay)
 {
 	POINT point;
-
-	if (use_lightgun2b)
-	{
-		osd_lightgun_read2b(player,deltax,deltay);
-		return;
-	}
 
 	// if the mouse isn't yet active, make it so
 	if (!mouse_active && (use_mouse||use_lightgun) && !win_has_menu())
@@ -1777,459 +1611,22 @@ void osd_lightgun_read(int player,int *deltax,int *deltay)
 	if (*deltay > 128) *deltay = 128;
 }
 
-
-//============================================================
-//	osd_lightgun_read2a
-//============================================================
-
-	// This is an alpha test for using directX relative mouse values
-	// mame core should treat deltax & deltay values like 
-	// a normal mouse delta values
-	// Compare to osd_trackball_read() function
-
-void osd_lightgun_read2a(int player,int *deltax,int *deltay)
-{
-//	static int maxdeltax[]={1,1,1,1}, maxdeltay[]={1,1,1,1};  //currently global for debug
-//	static int sxpre=0, sypre=0;
-	int sx=0, sy=0;							// temp raw mouse vaules
-	int mousex,mousey;				
-	int axisx, axisy;					
-
-	*deltax = 0;
-	*deltay = 0;
-	
-	if (!use_lightgun2a )
-		return ;
-
-	// if the mouse isn't yet active, make it so
-	if (!mouse_active)
-	{
-		mouse_active = 1;
-		win_pause_input(0);
-	}
-
-	// init values to get center
-	if (initlightgun2[player])
-	{								// resetting maxdelta 
-		maxdeltax[player] = 1;
-		maxdeltay[player] = 1;
-if (verbose)						// debugging output
-{
-fprintf (stdout, "p%d init delta (%d,%d)\n", player, maxdeltax[player], maxdeltay[player]);
-if (player == 3) fprintf (stdout, "\n");
-}
-		initlightgun2[player]--;
-	}
-
-	// for switchable mice and switch mouse axis
-	mousex = os_player_mouse_axes[player].xmouse;
-	mousey = os_player_mouse_axes[player].ymouse;
-	axisx = os_player_mouse_axes[player].xaxis;
-	axisy = os_player_mouse_axes[player].yaxis;
-
-	// get the latest lightgun/mouse info if mouse exists
-	if ((mousex >= 0) && (mousex < mouse_count))
-	{
-		sx = axisx ? mouse_state[mousex].lY : mouse_state[mousex].lX;	// assumes only two axes!!!
-	}
-	if ((mousey >= 0) && (mousey < mouse_count))
-	{
-		sy = axisy ? mouse_state[mousey].lY : mouse_state[mousey].lX;	// assumes only two axes!!!
-	}
-
-	// need max delta to scale correctly
-	if (abs(sx)>maxdeltax[player])
-	{
-		maxdeltax[player] = abs(sx);
-	}
-	if (abs(sy)>maxdeltay[player])
-	{
-		maxdeltay[player] = abs(sy);
-	}
-	
-	// Map reletive pixel values for mame
-	// I think it should be -256 to 256, corner to corner. I need to check up on this
-//	*deltax=sx*256/maxdeltax[player];
-//	*deltay=sy*256/maxdeltay[player];
-	*deltax=sx*512/0x7fff;				// max delta ~32000 (0x7fff), so testing constant number
-	*deltay=sy*512/0x7fff;
-}
-
-#if 0
-void osd_lightgun_read2a(int player,int *deltax,int *deltay)
-{
-//	static int maxdeltax[]={1,1,1,1}, maxdeltay[]={1,1,1,1};  //currently global for debug
-//	static int sxpre=0, sypre=0;
-	int sx=0, sy=0;							// temp raw mouse vaules
-	int mousex,mousey;				
-	int axisx, axisy;					
-
-	*deltax = 0;
-	*deltay = 0;
-	
-	if (!use_lightgun2a )
-		return ;
-
-	// if the mouse isn't yet active, make it so
-	if (!mouse_active)
-	{
-		mouse_active = 1;
-		win_pause_input(0);
-	}
-
-	// init values to get center
-	if (initlightgun2[player])
-	{								// resetting maxdelta 
-		maxdeltax[player] = 1;
-		maxdeltay[player] = 1;
-if (verbose)						// debugging output
-{
-fprintf (stdout, "p%d init center (%d,%d)\n", player, maxdeltax[player], maxdeltay[player]);
-if (player == 3) fprintf (stdout, "\n");
-}
-		initlightgun2[player] = 0;
-	}
-
-	// for switchable mice and switch mouse axis
-	mousex = os_player_mouse_axes[player].xmouse;
-	mousey = os_player_mouse_axes[player].ymouse;
-	axisx = os_player_mouse_axes[player].xaxis;
-	axisy = os_player_mouse_axes[player].yaxis;
-
-	// get the latest lightgun/mouse info if mouse exists
-	if ((mousex >= 0) && (mousex < mouse_count))
-	{
-		sx = axisx ? mouse_state[mousex].lY : mouse_state[mousex].lX;	// assumes only two axes!!!
-	}
-	if ((mousey >= 0) && (mousey < mouse_count))
-	{
-		sy = axisy ? mouse_state[mousey].lY : mouse_state[mousey].lX;	// assumes only two axes!!!
-	}
-
-	// need max delta to scale correctly
-	if (abs(sx)>maxdeltax[player])
-	{
-		maxdeltax[player] = abs(sx);
-	}
-	if (abs(sy)>maxdeltay[player])
-	{
-		maxdeltay[player] = abs(sy);
-	}
-	
-	// Map absolute pixel values into 0 to 512 range for mame
-	// Why 512 you ask?  I haven't a clue, except maybe it's game related. :-/
-	// I think it should be -256 to 256. I need to check up on this
-	*deltax=sx*512/maxdeltax[player];
-	*deltay=sy*512/maxdeltay[player];
-}
-#endif		// old way, should remove if new relative way, above, works
-
-//============================================================
-//	osd_lightgun_read2b
-//============================================================
-
-	// This is an alpha test for using directX absolute mouse values
-	// mame core should treat deltax & deltay values like 
-	// a lightgun's delta values
-	// Compare to osd_lightgun_read() function
-
-void osd_lightgun_read2b(int player,int *deltax,int *deltay)
-{
-//	static int initlightgun2[]= {1,1,1,1};  // global for debugging
-//	static int lg_center_x[4], lg_center_y[4];	// global for debug
-	static int minmx[4], minmy[4], maxmx[4], maxmy[4];		//remove this after debugging
-	static int presx[4], presy[4];		// saving last value to skip repeating math
-	const int rangemx=0xFFFF, rangemy=0xFFFF;	// total range (x,y), works on my winME
-	int p=0;							// debug boolean
-	int sx=0, sy=0, changed=0;			// temp raw mouse vaules, and if different from last time boolean
-	int mousex,mousey;					// mouse # that controls this game axis
-	int axisx, axisy;					// mouse axis # that controls this game axis
-	
-	if (!use_lightgun2b)
-		return ;			// don't really need this ATM, but leaving it in for error protection
-	
-	// if the mouse isn't yet active, make it so
-	if (!mouse_active)
-	{
-		mouse_active = 1;
-		win_pause_input(0);
-	}
-
-	// for switchable mice and switch mouse axis
-	mousex = os_player_mouse_axes[player].xmouse;
-	mousey = os_player_mouse_axes[player].ymouse;
-	axisx = os_player_mouse_axes[player].xaxis;
-	axisy = os_player_mouse_axes[player].yaxis;
-
-	// get the latest lightgun/mouse info if mouse exists
-	if ((mousex >= 0) && (mousex < mouse_count))
-	{								// assumes only two axes!!!
-		sx = (axisx ? mouse_state[mousex].lY : mouse_state[mousex].lX); // && 0x0fffff;
-	}
-	if ((mousey >= 0) && (mousey < mouse_count))
-	{								// assumes only two axes!!!
-		sy = (axisy ? mouse_state[mousey].lY : mouse_state[mousey].lX); // && 0x0fffff;
-	}
-
-	// init values to get center
-	if (initlightgun2[player])
-	{																// get default center values, I hope
-		lg_center_x[player] = (mousex == 0) ? sx : rangemx/2;		// system mouse has unknown center
-		lg_center_y[player] = (mousey == 0) ? sy : rangemy/2;		// USB mice in winMe center = 0x7FFF
-if (verbose)						// debugging output
-{
-fprintf (stdout, "p%d init center (%d,%d)\n", player, lg_center_x[player], lg_center_y[player]);
-if (player == 3) fprintf (stdout, "\n");
-}
-		presx[player] = sx+1; presy[player] = sy+1;
-		minmx[player]=maxmx[player]=sx;
-		minmy[player]=maxmy[player]=sy;
-		initlightgun2[player]--;
-	}
-
-// debug: store old value so only fprintfs when changed
-//	doesn't seem to be working ?
-	if ( (sx == presx[player]) && (sy == presy[player]) )
-		return ;
-		
-	presx[player] = sx; presy[player] = sy;
-	*deltax = 0;
-	*deltay = 0;
-
-	if (minmx[player] > sx) minmx[player] = sx;			//storing min & max for debugging
-	else if (maxmx[player] < sx) maxmx[player] = sx;
-	if (minmy[player] > sy) minmy[player] = sy;
-	else if (maxmy[player] < sy) maxmy[player] = sy;
-
-	changed = 1;		// old code.  leaving in because may need later
-	
-/*
-if(p || (changed && (player == 0)))	// debug output
-{
-fprintf (stdout, "p%d center (%d,%d)\trange (%d,%d)\n", player, lg_center_y[player], lg_center_y[player], rangemx, rangemy);
-fprintf (stdout, "s# (%d,%d)\tdelta (%d,%d)\n", sx, sy, *deltax, *deltay);
-}
-*/
-	// Map absolute pixel values into -128 -> 128 range
-	// I hope that's what I'm doing
-	sx = sx - ( lg_center_x[player] - (rangemx / 2) );
-	sy = sy - ( lg_center_y[player] - (rangemy / 2) );
-/*	
-if(p || (changed && (player == 0)))	// debug output
-{
-fprintf (stdout, "p%d center (%d,%d)\trange (%d,%d)\n", player, lg_center_y[player], lg_center_y[player], rangemx, rangemy);
-fprintf (stdout, "s# (%d,%d)\tdelta (%d,%d)\n", sx, sy, *deltax, *deltay);
-}
-*/
-// this should be combined with last two lines on sy & sx, but separated for debugging for now
-	*deltax=((sx*257)/rangemx) - 128;
-	*deltay=((sy*257)/rangemy) - 128;
-
-	if (*deltax > 128) *deltax=128;
-	if (*deltax < -128) *deltay=-128;
-	if (*deltay > 128) *deltay=128;
-	if (*deltay < -128) *deltay=-128;
-
-if (verbose && (p || (changed && (player == 0))))	// debug output
-{
-fprintf (stdout, "p%d center (%d,%d)\t min, max x (%d - %d)  y (%d - %d)\t", player, \
-				lg_center_x[player], lg_center_y[player], \
-				minmx[player], maxmx[player],minmy[player], maxmy[player]);
-fprintf (stdout, "p%d range (%d,%d)\ns# (%d,%d)\t", player, rangemx, rangemy, sx, sy);
-fprintf (stdout, "p%d delta (%d,%d)\n\n", player, *deltax, *deltay);
-}
-}
-
-#if 0	// old way, should remove if new absolute way, above, works
-void osd_lightgun_read2b(int player,int *deltax,int *deltay)
-{
-//	static int initlightgun2[]= {1,1,1,1};  // currently global for debug
-//	static int minmx[4], minmy[4], maxmx[4], maxmy[4];	// currently global for debug
-	static int presx[4], presy[4];		// lightgun seems to return to a certain point, trying to save that value
-	int rangemx=1,rangemy=1, p=0;		// total range (x,y), p is debugging boolean
-	int sx=0, sy=0, changed=0;			// temp raw mouse vaules, and if different for default point
-	int mousex,mousey;					// mouse # that controls this game axis
-	int axisx, axisy;					// mouse axis # that controls this game axis
-	
-//	if (!use_lightgun2b)
-//		return ;
-	
-	// if the mouse isn't yet active, make it so
-	if (!mouse_active)
-	{
-		mouse_active = 1;
-		win_pause_input(0);
-	}
-
-	// for switchable mice and switch mouse axis
-	mousex = os_player_mouse_axes[player].xmouse;
-	mousey = os_player_mouse_axes[player].ymouse;
-	axisx = os_player_mouse_axes[player].xaxis;
-	axisy = os_player_mouse_axes[player].yaxis;
-
-	// get the latest lightgun/mouse info if mouse exists
-	if ((mousex >= 0) && (mousex < mouse_count))
-	{								// assumes only two axes!!!
-		sx = (axisx ? mouse_state[mousex].lY : mouse_state[mousex].lX); // && 0x0fffff;
-	}
-	if ((mousey >= 0) && (mousey < mouse_count))
-	{								// assumes only two axes!!!
-		sy = (axisy ? mouse_state[mousey].lY : mouse_state[mousey].lX); // && 0x0fffff;
-	}
-
-	// init values to prevent divide by zero error
-	if (initlightgun2[player])
-	{
-		maxmx[player] = minmx[player] = sx;  maxmx[player]++;  minmx[player]--;
-		maxmy[player] = minmy[player] = sy;  maxmy[player]++;  minmy[player]--;
-if (verbose)						// debugging output
-{
-fprintf (stdout, "p%d init min (%d,%d) max (%d,%d)\n", player, minmx[player], minmy[player], maxmx[player], maxmy[player]);
-if (player == 3) fprintf (stdout, "\n");
-}
-		initlightgun2[player]=0;
-		presx[player] = sx; presy[player] = sy;  // get default values, I hope
-	}
-
-// debug: store old value so only fprintfs when changed
-//	if ((sx == 0) && (sy == 0))
-	if ( (sx == presx[player]) && (sy == presy[player]) )
-		return ;
-		
-	presx[player] = sx; presy[player] = sy;
-	*deltax = 0;
-	*deltay = 0;
-
-	changed = 1;		// sort of old code.  leaving in because may need later
-	
-// check if gun has new min or max.  also output values for debugging
-	if (sx)
-	{
-		if ((sx < minmx[player]) || (minmx[player] == -1))
-		{
-			minmx[player] = sx;
-if (verbose)						// debugging output
-fprintf (stdout, "p%d new minX min (%d,%d) max (%d,%d)\n", player, minmx[player], minmy[player], maxmx[player], maxmy[player]);
-p=1;
-		}
-		if ((sx > maxmx[player]) || (maxmx[player] == 1))
-		{
-			maxmx[player] = sx;
-if (verbose)						// debugging output
-fprintf (stdout, "p%d new maxX min (%d,%d) max (%d,%d)\n", player, minmx[player], minmy[player], maxmx[player], maxmy[player]);
-p=1;
-		}
-	}
-	if (sy)
-	{
-		if ((sy < minmy[player]) || (minmy[player] == -1))
-		{
-			minmy[player] = sy;
-if (verbose)						// debugging output
-fprintf (stdout, "p%d new minY min (%d,%d) max (%d,%d)\n", player, minmx[player], minmy[player], maxmx[player], maxmy[player]);
-p=1;
-		}
-		if ((sy > maxmy[player]) || (maxmy[player] == 1))
-		{
-			maxmy[player] = sy;
-if (verbose)						// debugging output
-fprintf (stdout, "p%d new maxY min(%d,%d) max (%d,%d)\n", player, minmx[player], minmy[player], maxmx[player], maxmy[player]);
-p=1;
-		}
-	}
-
-	// Map absolute pixel values into -128 -> 128 range
-	// I hope that's what I'm doing
-	rangemx = maxmx[player]-minmx[player];
-	rangemy = maxmy[player]-minmy[player];
-	if (rangemx < 10) rangemx = 10;			// range should be > 10, this is error prevention
-	if (rangemy < 10) rangemy = 10;			// range should be > 10, this is error prevention
-
-if(verbose && (p || (changed && (player == 0))))	// debug output
-{
-fprintf (stdout, "p%d range (%d,%d)\ts# (%d,%d)\t", player, rangemx, rangemy, sx, sy);
-fprintf (stdout, "p%d delta (%d,%d)\n", player, *deltax, *deltay);
-}
-// these should be equiv to lines 2107-2110, so commented out.  left here for debugging
-//	if (sx> rangemx2)  sx=rangemx;
-//	if (sx<-rangemx2)  sx=-rangemx;
-//	if (sy> rangemy2)  sy=rangemy;
-//	if (sy<-rangemy2)  sy=-rangemy;
-
-	sx=sx-minmx[player];
-	sy=sy-minmy[player];
-	
-if(verbose && (p || (changed && (player == 0))))	// debug output
-{
-fprintf (stdout, "p%d range (%d,%d)\ts# (%d,%d)\t", player, rangemx, rangemy, sx, sy);
-fprintf (stdout, "p%d delta (%d,%d)\n", player, *deltax, *deltay);
-}
-
-// this should be combined with last two lines on sy & sx, but separated for debugging for now
-	*deltax=((sx*257)/rangemx) - 128;
-	*deltay=((sy*257)/rangemy) - 128;
-
-	if (*deltax > 128) *deltax=128;
-	if (*deltax < -128) *deltay=-128;
-	if (*deltay > 128) *deltay=128;
-	if (*deltay < -128) *deltay=-128;
-
-if (verbose && (p || (changed && (player == 0))))	// debug output
-{
-fprintf (stdout, "p%d min (%d,%d) max (%d,%d)\n", player, minmx[player], minmy[player], maxmx[player], maxmy[player]);
-fprintf (stdout, "p%d range (%d,%d)\ts# (%d,%d)\t", player, rangemx, rangemy, sx, sy);
-fprintf (stdout, "p%d delta (%d,%d)\n\n", player, *deltax, *deltay);
-}
-}
-#endif
-/*end Mame:Analog+*/
-
 //============================================================
 //	osd_trak_read
 //============================================================
 
 void osd_trak_read(int player, int *deltax, int *deltay)
 {
-/*start MAME:analog+*/
-	int mousex,mousey;
-	int axisx, axisy;
-
-	if (use_lightgun2a)
-	{
-		osd_lightgun_read2a(player,deltax,deltay);
-		return;
-	}
-/*end MAME:analog+  */
-
-	*deltax = 0;
-	*deltay = 0;
-	
-	if (!use_mouse)
-		return ;
-
 	// if the mouse isn't yet active, make it so
-	if (!mouse_active && !win_has_menu())
+	if (!mouse_active && use_mouse && !win_has_menu())
 	{
 		mouse_active = 1;
 		win_pause_input(0);
 	}
 
-/*start MAME:analog+*/
-	mousex = os_player_mouse_axes[player].xmouse;
-	mousey = os_player_mouse_axes[player].ymouse;
-	axisx = os_player_mouse_axes[player].xaxis;
-	axisy = os_player_mouse_axes[player].yaxis;
-
-	// return the latest mouse info if mouse exists
-	if ((mousex >= 0) && (mousex < mouse_count))
-	{								// assumes only two axes!!!
-		*deltax = axisx ? mouse_state[mousex].lY : mouse_state[mousex].lX;
-	}
-	if ((mousey >= 0) && (mousey < mouse_count))
-	{								// assumes only two axes!!!
-		*deltay = axisy ? mouse_state[mousey].lY : mouse_state[mousey].lX;
-	}
-/*end MAME:analog+  */
+	// return the latest mouse info
+	*deltax = mouse_state[player].lX;
+	*deltay = mouse_state[player].lY;
 }
 
 
@@ -2336,88 +1733,6 @@ void process_ctrlr_game(struct rc_struct *iptrc, const char *ctype, const struct
 	// now process this game
 	if (drv->name && *(drv->name) != 0)
 		process_ctrlr_file (iptrc, ctype, drv->name);
-}
-
-void process_ctrlr_orient(struct rc_struct *iptrc, const char *ctype, const struct GameDriver *drv)
-{
-	/* if this is a vertical game, parse vertical.ini else horizont.ini */	
-	if (drv->flags & ORIENTATION_SWAP_XY) {		
-		process_ctrlr_file (iptrc, ctype, "vertical");
-	} else {		
-		process_ctrlr_file (iptrc, ctype, "horizont");
-	}
-}
-
-void process_ctrlr_players(struct rc_struct *iptrc, const char *ctype, const struct GameDriver *drv)
-{
-	char buffer[128];
-	const struct InputPortTiny *input = drv->input_ports;
-	int nplayer=0;
-
-	while ((input->type & ~IPF_MASK) != IPT_END)
-	{
-		switch (input->type & IPF_PLAYERMASK)
-		{
-			case IPF_PLAYER1:
-				if (nplayer<1) nplayer = 1;
-				break;
-			case IPF_PLAYER2:
-				if (nplayer<2) nplayer = 2;
-				break;
-			case IPF_PLAYER3:
-				if (nplayer<3) nplayer = 3;
-				break;
-			case IPF_PLAYER4:
-				if (nplayer<4) nplayer = 4;
-				break;
-		}
-		++input;
-	}
-	sprintf(buffer, "player%d", nplayer);
-	process_ctrlr_file (iptrc, ctype, buffer);
-}
-
-void process_ctrlr_buttons(struct rc_struct *iptrc, const char *ctype, const
-struct GameDriver *drv)
-{
- char buffer[128];
- const struct InputPortTiny *input = drv->input_ports;
- int no_buttons=0;
-
- while ((input->type & ~IPF_MASK) != IPT_END)
- {
-  switch (input->type & ~IPF_MASK)
-  {
-  case IPT_BUTTON1:
-   if (no_buttons<1) no_buttons = 1;
-   break;
-  case IPT_BUTTON2:
-   if (no_buttons<2) no_buttons = 2;
-   break;
-  case IPT_BUTTON3:
-   if (no_buttons<3) no_buttons = 3;
-   break;
-  case IPT_BUTTON4:
-   if (no_buttons<4) no_buttons = 4;
-   break;
-  case IPT_BUTTON5:
-   if (no_buttons<5) no_buttons = 5;
-   break;
-  case IPT_BUTTON6:
-   if (no_buttons<6) no_buttons = 6;
-   break;
-  case IPT_BUTTON7:
-   if (no_buttons<7) no_buttons = 7;
-   break;
-  case IPT_BUTTON8:
-   if (no_buttons<8) no_buttons = 8;
-   break;
-  }
-  input++;
- }
-
- sprintf(buffer, "button%d", no_buttons);
- process_ctrlr_file (iptrc, ctype, buffer);
 }
 
 // nice hack: load source_file.ini (omit if referenced later any)
@@ -2669,14 +1984,6 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 		// process the game-specific files for this controller
 		process_ctrlr_game (rc, ctrlrtype, Machine->gamedrv);
 
-		// process the orientation-specific files for this controller
-		process_ctrlr_orient (rc, ctrlrtype, Machine->gamedrv);
-
-		// process the player-specific files for this controller
-		process_ctrlr_players (rc, ctrlrtype, Machine->gamedrv);
-
-		// process the button-specific files for this controller
-		process_ctrlr_buttons (rc, ctrlrtype, Machine->gamedrv);
 
 		while ((input->type & ~IPF_MASK) != IPT_END)
 		{
@@ -2714,7 +2021,6 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 
 				case IPT_AD_STICK_X:
 				case IPT_AD_STICK_Y:
-				case IPT_AD_STICK_Z:
 					if (!adstick)
 					{
 						if ((ad_stick_ini != NULL) && (*ad_stick_ini != 0))
@@ -2734,7 +2040,6 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 					break;
 
 				case IPT_PEDAL:
-				case IPT_PEDAL2:
 					if (!pedal)
 					{
 						if ((pedal_ini != NULL) && (*pedal_ini != 0))
@@ -2756,16 +2061,11 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 
 		fprintf(stderr, "Mouse support %sabled\n",use_mouse ? "en" : "dis");
 		fprintf(stderr, "Joystick support %sabled\n",use_joystick ? "en" : "dis");
-		fprintf(stderr, "Keyboards=%d  Mice=%d  Joysticks=%d Lightguns=%d(%d,%d)\n",
+		fprintf(stderr, "Keyboards=%d  Mice=%d  Joysticks=%d\n",
 			keyboard_count,
 			use_mouse ? mouse_count : 0,
-			use_joystick ? joystick_count : 0,
-			use_lightgun ? lightgun_count : 0,
-			use_lightgun2a ? lightgun_count : 0,
-			use_lightgun2b ? lightgun_count : 0);
+			use_joystick ? joystick_count : 0);
 	}
-	
-	init_analog_seq();
 }
 
 
@@ -2782,7 +2082,19 @@ int osd_get_leds(void)
 		return 0;
 
 	// if we're on Win9x, use GetKeyboardState
-	if (osinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
+	if( ledmethod == 0 )
+	{
+		BYTE key_states[256];
+
+		// get the current state
+		GetKeyboardState(&key_states[0]);
+
+		// set the numlock bit
+		result |= (key_states[VK_NUMLOCK] & 1);
+		result |= (key_states[VK_CAPITAL] & 1) << 1;
+		result |= (key_states[VK_SCROLL] & 1) << 2;
+	}
+	else if( ledmethod == 1 ) // WinNT/2K/XP, use GetKeyboardState
 	{
 		BYTE key_states[256];
 
@@ -2829,7 +2141,7 @@ void osd_set_leds(int state)
 		return;
 
 	// if we're on Win9x, use SetKeyboardState
-	if (osinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
+	if( ledmethod == 0 )
 	{
 		// thanks to Lee Taylor for the original version of this code
 		BYTE key_states[256];
@@ -2843,6 +2155,26 @@ void osd_set_leds(int state)
 		key_states[VK_SCROLL] = (key_states[VK_SCROLL] & ~1) | ((state >> 2) & 1);
 
 		SetKeyboardState(&key_states[0]);
+	}
+	else if( ledmethod == 1 ) // WinNT/2K/XP, use keybd_event()
+	{
+		int k;
+		BYTE keyState[ 256 ];
+		const BYTE vk[ 3 ] = { VK_NUMLOCK, VK_CAPITAL, VK_SCROLL };
+
+		GetKeyboardState( (LPBYTE)&keyState );
+		for( k = 0; k < 3; k++ )
+		{
+			if( (  ( ( state >> k ) & 1 ) && !( keyState[ vk[ k ] ] & 1 ) ) ||
+				( !( ( state >> k ) & 1 ) &&  ( keyState[ vk[ k ] ] & 1 ) ) )
+			{
+				// Simulate a key press
+				keybd_event( vk[ k ], 0x45, KEYEVENTF_EXTENDEDKEY | 0, 0 );
+
+				// Simulate a key release
+				keybd_event( vk[ k ], 0x45, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0 );
+			}
+		}
 	}
 	else // WinNT/2K/XP, use DeviceIoControl
 	{
@@ -2877,16 +2209,30 @@ void osd_set_leds(int state)
 
 void start_led(void)
 {
+	OSVERSIONINFO osinfo = { sizeof(OSVERSIONINFO) };
+
 	if (!use_keyboard_leds)
 		return;
 
 	// retrive windows version
 	GetVersionEx(&osinfo);
 
-	// nt/2k/xp
-	if (!(osinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS))
+	if ( osinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS )
 	{
+		// 98
+		ledmethod = 0;
+	}
+	else if( strcmp( ledmode, "usb" ) == 0 )
+	{
+		// nt/2k/xp
+		ledmethod = 1;
+	}
+	else
+	{
+		// nt/2k/xp
 		int error_number;
+
+		ledmethod = 2;
 
 		if (!DefineDosDevice (DDD_RAW_TARGET_PATH, "Kbd",
 					"\\Device\\KeyboardClass0"))
@@ -2929,9 +2275,15 @@ void stop_led(void)
 	// restore the initial LED states
 	osd_set_leds(original_leds);
 
-	// nt/2k/xp
-	if (!(osinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS))
+	if( ledmethod == 0 )
 	{
+	}
+	else if( ledmethod == 1 )
+	{
+	}
+	else
+	{
+		// nt/2k/xp
 		if (!DefineDosDevice (DDD_REMOVE_DEFINITION, "Kbd", NULL))
 		{
 			error_number = GetLastError();
@@ -2949,206 +2301,3 @@ void stop_led(void)
 
 	return;
 }
-
-
-/*start MAME:analog+*/
-// init's os_player_mouse_axes
-static void init_mouse_arrays(const int playermousedefault[])
-{
-	int i;
-
-	for (i = 0; i < MAX_PLAYERS; i++)
-	{
-		os_player_mouse_axes[i].xmouse = playermousedefault[i];
-		os_player_mouse_axes[i].ymouse = playermousedefault[i];
-		if (splitmouse)
-		{
-			os_player_mouse_axes[i].xaxis = i % 2;
-			os_player_mouse_axes[i].yaxis = i % 2;	// Y axis should not be used, but mapped same axis as X
-		}
-		else
-		{
-			os_player_mouse_axes[i].xaxis = 0;
-			os_player_mouse_axes[i].yaxis = 1;
-		}
-	}
-}
-
-
-/* osd UI input functions */
-/* trackballs / mice */
-int osd_numbermice(void)	// return # of mice connected
-{
-	return mouse_count;		// mouse[0] is sysmouse
-}
-
-char *osd_getmousename(char *name, int mouse)	// gets name to be displayed
-{												// note mouse, !player's mouse
-	if ((mouse < mouse_count) && (mouse > 0))
-		sprintf(name, "mouse %d", mouse);
-	else if (mouse == 0)
-		sprintf(name, "sysmouse");
-	else
-		sprintf(name, "no mouse");
-
-	return name;
-}
-
-int osd_getplayer_mouse(int player)				// returns mouse # of player
-{
-	return os_player_mouse_axes[player].xmouse;
-}
-
-int osd_setplayer_mouse(int player, int mouse)	// sets player's mouse
-{
-	if (mouse >= mouse_count)
-		return 1;								// returns 1 if error
-
-	os_player_mouse_axes[player].xmouse = mouse;
-	os_player_mouse_axes[player].ymouse = mouse;
-	return 0;
-}
-
-/* returns mouse # used for player and game axis */
-int osd_getplayer_mousesplit(int player, int axis)
-{
-	if (axis == 0)
-		return os_player_mouse_axes[player].xmouse;
-	else
-		return os_player_mouse_axes[player].ymouse;
-}
-
-int osd_setplayer_mousesplit(int player, int playeraxis, int mouse)
-{												// sets player's mouse
-	if (mouse >= mouse_count)
-		return 1;								// returns 1 if error
-
-	if (playeraxis == 0)
-		os_player_mouse_axes[player].xmouse = mouse;
-	else
-		os_player_mouse_axes[player].ymouse = mouse;
-	return 0;
-}
-
-/* mouse axes settings */
-int osd_getnummouseaxes(void)			// returns number of mappable axes
-{
-	return 2;							// defaults to 2 right now
-}
-
-
-int osd_getplayer_mouseaxis(int player, int gameaxis)
-{
-	if (gameaxis == 0)
-		return os_player_mouse_axes[player].xaxis;
-	else
-		return os_player_mouse_axes[player].yaxis;
-}
-
-int osd_setplayer_mouseaxis(int player, int playeraxis, int mouse, int axis)
-{
-	switch (playeraxis)	/* switch in case add z-axis */
-	{
-		case 0:
-			os_player_mouse_axes[player].xmouse = mouse;
-			os_player_mouse_axes[player].xaxis  = axis;
-			break;
-		case 1:
-			os_player_mouse_axes[player].ymouse = mouse;
-			os_player_mouse_axes[player].yaxis  = axis;
-			break;
-		default:
-			/* error */
-			break;
-	}
-	return 0;
-}
-
-#if 0 //notused?
-int osd_getplayermouseXaxis(int player)
-{
-	return osd_getplayer_mouseaxis(player, 0);
-}
-int osd_getplayermouseYaxis(int player)
-{
-	return osd_getplayer_mouseaxis(player, 1);
-}
-#endif
-
-
-int osd_isNegativeSemiAxis(InputCode code)
-{
-	return ( JOYTYPE( code ) == JOYTYPE_AXIS_NEG );
-//	return (is_joycode(code) && JOYTYPE(code) == JOYTYPE_AXIS_NEG);
-}
-
-char* osd_getjoyaxisname(char *name, int joynum, int axis)
-#define MAX_LENGTH 40
-{
-	if ((joynum < joystick_count) && (joynum >= 0))
-	{
-		DIDEVICEOBJECTINSTANCE instance = { 0 };
-		HRESULT result;
-
-		// attempt to get the object info
-		instance.dwSize = STRUCTSIZE(DIDEVICEOBJECTINSTANCE);
-#if 0
-//#if(DIRECTINPUT_VERSION >= 0x0800)
-		result = IDirectInputDevice8_GetObjectInfo(joystick_device[joynum], &instance, offsetof(DIJOYSTATE, lX) + axis * sizeof(LONG), DIPH_BYOFFSET);
-#else
-		result = IDirectInputDevice_GetObjectInfo(joystick_device[joynum], &instance, offsetof(DIJOYSTATE, lX) + axis * sizeof(LONG), DIPH_BYOFFSET);
-#endif  //#if(DIRECTINPUT_VERSION >= 0x0800)
-
-		if (result == DI_OK)
-			snprintf(name, 10, "%s ", instance.tszName);
-//			strncpy(name, instance.tszName, 10);
-		else
-			sprintf(name, " ");
-	}
-	else
-	{
-		sprintf(name, " ");
-	}
-	return name;
-}
-
-char *osd_getjoyname(char *name, int joynum)	// gets name to be displayed
-{
-	if ((joynum < joystick_count) && (joynum >= 0))
-	{
-		DIDEVICEINSTANCE instance = { 0 };
-		HRESULT result;
-
-		// attempt to get the object info
-		instance.dwSize = STRUCTSIZE(DIDEVICEINSTANCE);
-#if 0
-//#if(DIRECTINPUT_VERSION >= 0x0800)
-		result = IDirectInputDevice8_GetDeviceInfo(joystick_device[joynum], &instance);
-#else
-		result = IDirectInputDevice_GetDeviceInfo(joystick_device[joynum], &instance);
-#endif  //#if(DIRECTINPUT_VERSION >= 0x0800)
-
-		if (FAILED(result))
-			sprintf(name, "Joystick %d", joynum+1);
-		else
-			snprintf(name, 28, "%s ", instance.tszProductName);
-//			strncpy(name, instance.tszInstanceName, 25);
-	}
-	else
-	{
-		sprintf(name, "No joystick");
-	}
-	return name;
-}
-
-#if 0
-int ui_inputtoanalogsettings()
-{
-}
-
-int ui_analogtoinputsettings()
-{
-}
-#endif
-/*end MAME:analog+  */
-

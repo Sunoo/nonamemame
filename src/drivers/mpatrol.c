@@ -85,38 +85,38 @@ READ_HANDLER( mpatrol_input_port_3_r )
 }
 
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x3fff, MRA_ROM },
-	{ 0x8000, 0x87ff, MRA_RAM },
-	{ 0x8800, 0x8800, mpatrol_protection_r },
-	{ 0xd000, 0xd000, input_port_0_r },          /* IN0 */
-	{ 0xd001, 0xd001, input_port_1_r },          /* IN1 */
-	{ 0xd002, 0xd002, input_port_2_r },          /* IN2 */
-	{ 0xd003, 0xd003, mpatrol_input_port_3_r },  /* DSW1 */
-	{ 0xd004, 0xd004, input_port_4_r },          /* DSW2 */
-	{ 0xe000, 0xe7ff, MRA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0x87ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x8800, 0x8800) AM_READ(mpatrol_protection_r)
+	AM_RANGE(0xd000, 0xd000) AM_READ(input_port_0_r)          /* IN0 */
+	AM_RANGE(0xd001, 0xd001) AM_READ(input_port_1_r)          /* IN1 */
+	AM_RANGE(0xd002, 0xd002) AM_READ(input_port_2_r)          /* IN2 */
+	AM_RANGE(0xd003, 0xd003) AM_READ(mpatrol_input_port_3_r)  /* DSW1 */
+	AM_RANGE(0xd004, 0xd004) AM_READ(input_port_4_r)          /* DSW2 */
+	AM_RANGE(0xe000, 0xe7ff) AM_READ(MRA8_RAM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x3fff, MWA_ROM },
-	{ 0x8000, 0x83ff, mpatrol_videoram_w, &videoram },
-	{ 0x8400, 0x87ff, mpatrol_colorram_w, &colorram },
-	{ 0xc800, 0xc8ff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0xd000, 0xd000, irem_sound_cmd_w },
-	{ 0xd001, 0xd001, mpatrol_flipscreen_w },	/* + coin counters */
-	{ 0xe000, 0xe7ff, MWA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x8000, 0x83ff) AM_WRITE(mpatrol_videoram_w) AM_BASE(&videoram)
+	AM_RANGE(0x8400, 0x87ff) AM_WRITE(mpatrol_colorram_w) AM_BASE(&colorram)
+	AM_RANGE(0xc800, 0xc8ff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0xd000, 0xd000) AM_WRITE(irem_sound_cmd_w)
+	AM_RANGE(0xd001, 0xd001) AM_WRITE(mpatrol_flipscreen_w)	/* + coin counters */
+	AM_RANGE(0xe000, 0xe7ff) AM_WRITE(MWA8_RAM)
+ADDRESS_MAP_END
 
 
 
-static PORT_WRITE_START( writeport )
-	{ 0x10, 0x1f, mpatrol_scroll_w },
-	{ 0x40, 0x40, mpatrol_bg1xpos_w },
-	{ 0x60, 0x60, mpatrol_bg1ypos_w },
-	{ 0x80, 0x80, mpatrol_bg2xpos_w },
-	{ 0xa0, 0xa0, mpatrol_bg2ypos_w },
-	{ 0xc0, 0xc0, mpatrol_bgcontrol_w },
-PORT_END
+static ADDRESS_MAP_START( writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x10, 0x1f) AM_WRITE(mpatrol_scroll_w)
+	AM_RANGE(0x40, 0x40) AM_WRITE(mpatrol_bg1xpos_w)
+	AM_RANGE(0x60, 0x60) AM_WRITE(mpatrol_bg1ypos_w)
+	AM_RANGE(0x80, 0x80) AM_WRITE(mpatrol_bg2xpos_w)
+	AM_RANGE(0xa0, 0xa0) AM_WRITE(mpatrol_bg2ypos_w)
+	AM_RANGE(0xc0, 0xc0) AM_WRITE(mpatrol_bgcontrol_w)
+ADDRESS_MAP_END
 
 
 
@@ -309,7 +309,7 @@ INPUT_PORTS_START( mpatrolw )
 	PORT_DIPSETTING(    0x02, DEF_STR( 1C_7C ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( 1C_8C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	PORT_DIPNAME( 0x30, 0x30, "Coin A  Mode 2" )   /* mapped on coin mode 2 */
+ 	PORT_DIPNAME( 0x30, 0x30, "Coin A  Mode 2" )   /* mapped on coin mode 2 */
 	PORT_DIPSETTING(    0x10, DEF_STR( 3C_1C ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( 2C_1C ) )
 	PORT_DIPSETTING(    0x30, DEF_STR( 1C_1C ) )
@@ -416,8 +416,8 @@ static MACHINE_DRIVER_START( mpatrol )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 3072000)        /* 3.072 MHz ? */
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(0,writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(0,writeport)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
 
 	MDRV_FRAMES_PER_SECOND(57)
@@ -517,42 +517,7 @@ ROM_START( mpatrolw )
 	ROM_LOAD( "mpc-2.2h",     0x0240, 0x0100, CRC(7ae4cd97) SHA1(bc0662fac82ffe65f02092d912b2c2b0c7a8ac2b) ) /* sprite lookup table */
 ROM_END
 
-ROM_START( mranger )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code */
-	ROM_LOAD( "mr-a.3m",      0x0000, 0x1000, CRC(5873a860) )
-	ROM_LOAD( "mr-a.3l",      0x1000, 0x1000, CRC(217dd431) )
-	ROM_LOAD( "mr-a.3k",      0x2000, 0x1000, CRC(9f0af7b2) )
-	ROM_LOAD( "mr-a.3j",      0x3000, 0x1000, CRC(7fe8e2cd) )
-
-	ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for code */
-	ROM_LOAD( "mr-snd.1a",    0xf000, 0x1000, CRC(561d3108) )
-
-	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "mr-e.3e",      0x0000, 0x1000, CRC(e3ee7f75) )       /* chars */
-	ROM_LOAD( "mr-e.3f",      0x1000, 0x1000, CRC(cca6d023) )
-
-	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "mr-b.3m",      0x0000, 0x1000, CRC(707ace5e) )       /* sprites */
-	ROM_LOAD( "mr-b.3n",      0x1000, 0x1000, CRC(9b72133a) )
-
-	ROM_REGION( 0x1000, REGION_GFX3, ROMREGION_DISPOSE )
-	ROM_LOAD( "mr-e.3l",      0x0000, 0x1000, CRC(c46a7f72) )       /* background graphics */
-
-	ROM_REGION( 0x1000, REGION_GFX4, ROMREGION_DISPOSE )
-	ROM_LOAD( "mr-e.3k",      0x0000, 0x1000, CRC(c7aa1fb0) )
-
-	ROM_REGION( 0x1000, REGION_GFX5, ROMREGION_DISPOSE )
-	ROM_LOAD( "mr-e.3h",      0x0000, 0x1000, CRC(a0919392) )
-
-	ROM_REGION( 0x0240, REGION_PROMS, 0 )
-	ROM_LOAD( "2a",           0x0000, 0x0100, CRC(0f193a50) ) /* character palette */
-	ROM_LOAD( "1m",           0x0100, 0x0020, CRC(6a57eff2) ) /* background palette */
-	ROM_LOAD( "1c1j",         0x0120, 0x0020, CRC(26979b13) ) /* sprite palette */
-	ROM_LOAD( "2hx",          0x0140, 0x0100, CRC(7ae4cd97) ) /* sprite lookup table */
-ROM_END
-
 
 
 GAME( 1982, mpatrol,  0,       mpatrol, mpatrol,  0, ROT0, "Irem", "Moon Patrol" )
 GAME( 1982, mpatrolw, mpatrol, mpatrol, mpatrolw, 0, ROT0, "Irem (Williams license)", "Moon Patrol (Williams)" )
-GAME( 1982, mranger,  mpatrol, mpatrol, mpatrol,  0, ROT0, "bootleg", "Moon Ranger" )

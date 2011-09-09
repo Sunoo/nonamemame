@@ -204,42 +204,42 @@ WRITE16_HANDLER( pgm_calendar_w )
 
 /*** Memory Maps *************************************************************/
 
-static MEMORY_READ16_START( pgm_readmem )
-	{ 0x000000, 0x01ffff, MRA16_ROM },   /* BIOS ROM */
-	{ 0x100000, 0x5fffff, MRA16_BANK1 }, /* Game ROM */
+static ADDRESS_MAP_START( pgm_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x01ffff) AM_READ(MRA16_ROM)   /* BIOS ROM */
+	AM_RANGE(0x100000, 0x5fffff) AM_READ(MRA16_BANK1) /* Game ROM */
 
-	{ 0x800000, 0x81ffff, MRA16_RAM }, /* Main Ram, Sprites, SRAM? */
-	{ 0x820000, 0x8fffff, pgm_mirror_r },
+	AM_RANGE(0x800000, 0x81ffff) AM_READ(MRA16_RAM) /* Main Ram, Sprites, SRAM? */
+	AM_RANGE(0x820000, 0x8fffff) AM_READ(pgm_mirror_r)
 
-	{ 0x900000, 0x903fff, MRA16_RAM }, /* Backgrounds */
-	{ 0x904000, 0x905fff, MRA16_RAM }, /* Text Layer */
-	{ 0x907000, 0x9077ff, MRA16_RAM },
-	{ 0xa00000, 0xa011ff, MRA16_RAM }, /* Palette */
-	{ 0xb00000, 0xb0ffff, MRA16_RAM }, /* Video Regs inc. Zoom Table */
-	{ 0xc10000, 0xC1ffff, MRA16_RAM }, /* Z80 Program? */
+	AM_RANGE(0x900000, 0x903fff) AM_READ(MRA16_RAM) /* Backgrounds */
+	AM_RANGE(0x904000, 0x905fff) AM_READ(MRA16_RAM) /* Text Layer */
+	AM_RANGE(0x907000, 0x9077ff) AM_READ(MRA16_RAM)
+	AM_RANGE(0xa00000, 0xa011ff) AM_READ(MRA16_RAM) /* Palette */
+	AM_RANGE(0xb00000, 0xb0ffff) AM_READ(MRA16_RAM) /* Video Regs inc. Zoom Table */
+	AM_RANGE(0xc10000, 0xC1ffff) AM_READ(MRA16_RAM) /* Z80 Program? */
 
-//	{ 0xc00004, 0xc00005, input_port_4_word_r }, // ?
-	{ 0xc00006, 0xc00007, pgm_calendar_r },
+//	AM_RANGE(0xc00004, 0xc00005) AM_READ(input_port_4_word_r) // ?
+	AM_RANGE(0xc00006, 0xc00007) AM_READ(pgm_calendar_r)
 
-	{ 0xC08000, 0xC08001, input_port_0_word_r }, // p1+p2 controls
-	{ 0xC08002, 0xC08003, input_port_1_word_r }, // p3+p4 controls
-	{ 0xC08004, 0xC08005, input_port_2_word_r }, // extra controls
-	{ 0xC08006, 0xC08007, input_port_3_word_r }, // dipswitches
-MEMORY_END
+	AM_RANGE(0xC08000, 0xC08001) AM_READ(input_port_0_word_r) // p1+p2 controls
+	AM_RANGE(0xC08002, 0xC08003) AM_READ(input_port_1_word_r) // p3+p4 controls
+	AM_RANGE(0xC08004, 0xC08005) AM_READ(input_port_2_word_r) // extra controls
+	AM_RANGE(0xC08006, 0xC08007) AM_READ(input_port_3_word_r) // dipswitches
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( pgm_writemem )
-	{ 0x000000, 0x01ffff, MWA16_ROM },   /* BIOS ROM */
-	{ 0x100000, 0x5fffff, MWA16_BANK1 }, /* Game ROM */
+static ADDRESS_MAP_START( pgm_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x01ffff) AM_WRITE(MWA16_ROM)   /* BIOS ROM */
+	AM_RANGE(0x100000, 0x5fffff) AM_WRITE(MWA16_BANK1) /* Game ROM */
 
-	{ 0x800000, 0x81ffff, MWA16_RAM, &pgm_mainram },
-	{ 0x820000, 0x8fffff, pgm_mirror_w },
-	{ 0x900000, 0x903fff, pgm_bg_videoram_w, &pgm_bg_videoram },
-	{ 0x904000, 0x905fff, pgm_tx_videoram_w, &pgm_tx_videoram },
-	{ 0x907000, 0x9077ff, MWA16_RAM, &pgm_rowscrollram },
+	AM_RANGE(0x800000, 0x81ffff) AM_WRITE(MWA16_RAM) AM_BASE(&pgm_mainram)
+	AM_RANGE(0x820000, 0x8fffff) AM_WRITE(pgm_mirror_w)
+	AM_RANGE(0x900000, 0x903fff) AM_WRITE(pgm_bg_videoram_w) AM_BASE(&pgm_bg_videoram)
+	AM_RANGE(0x904000, 0x905fff) AM_WRITE(pgm_tx_videoram_w) AM_BASE(&pgm_tx_videoram)
+	AM_RANGE(0x907000, 0x9077ff) AM_WRITE(MWA16_RAM) AM_BASE(&pgm_rowscrollram)
 
-	{ 0xa00000, 0xa011ff, paletteram16_xRRRRRGGGGGBBBBB_word_w, &paletteram16 },
+	AM_RANGE(0xa00000, 0xa011ff) AM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE(&paletteram16)
 
-	{ 0xb00000, 0xb0ffff, MWA16_RAM, &pgm_videoregs },
+	AM_RANGE(0xb00000, 0xb0ffff) AM_WRITE(MWA16_RAM) AM_BASE(&pgm_videoregs)
 	/* 0xb01000 sprite zoom table */
 		/*
 		32 bit per level
@@ -251,10 +251,10 @@ static MEMORY_WRITE16_START( pgm_writemem )
 	/* 0xb05000 tx y scroll */
 	/* 0xb06000 tx x scroll */
 
-	{ 0xc00006, 0xc00007, pgm_calendar_w },
+	AM_RANGE(0xc00006, 0xc00007) AM_WRITE(pgm_calendar_w)
 
-	{ 0xc10000, 0xC1ffff, MWA16_RAM }, // z80
-MEMORY_END
+	AM_RANGE(0xc10000, 0xC1ffff) AM_WRITE(MWA16_RAM) // z80
+ADDRESS_MAP_END
 
 
 /*** Input Ports *************************************************************/
@@ -493,7 +493,7 @@ static MACHINE_DRIVER_START( pgm )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(M68000, 20000000) /* 20 mhz! verified on real board */
-	MDRV_CPU_MEMORY(pgm_readmem,pgm_writemem)
+	MDRV_CPU_PROGRAM_MAP(pgm_readmem,pgm_writemem)
 	MDRV_CPU_VBLANK_INT(pgm_interrupt,2)
 
 	/* theres also a z80, program is uploaded by the 68k */

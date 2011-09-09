@@ -50,8 +50,6 @@ enum
 	UI_vectorintensity,
 	UI_overclock,
 	UI_allcpus,
-	UI_mameinfomissing,
-	UI_drivinfomissing,
 	UI_historymissing,
 
 	/* special characters */
@@ -83,35 +81,16 @@ enum
 	UI_bookkeeping,
 	UI_inputspecific,
 	UI_gameinfo,
-	UI_mameinfo,
-	UI_drivinfo,
 	UI_history,
-	UI_statistics,
 	UI_resetgame,
 	UI_returntogame,
 	UI_cheat,
 	UI_memorycard,
-	UI_mousecontrols,
-	UI_mouseaxescontrols,
-	UI_analogjoycntls,
 
-	/* analog input stuff */
+	/* input stuff */
 	UI_keyjoyspeed,
 	UI_reverse,
 	UI_sensitivity,
-
-	/* analog+ input stuff */
-	UI_switchmouse,
-	UI_mouse,
-	UI_ajoy,
-	UI_Xaxis,
-	UI_Yaxis,
-	UI_Zaxis,
-#if 0
-	UI_rXaxis,
-	UI_rYaxis,
-	UI_rZaxis,
-#endif
 
 	/* stats */
 	UI_tickets,

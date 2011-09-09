@@ -17,28 +17,7 @@ enum {
 	GS_256V, GS_512V
 };
 
-extern int gensync_ICount;
-
-extern void gensync_init(void);
-extern void gensync_reset(void *param);
-extern void gensync_exit(void);
-extern int gensync_execute(int cycles);
-extern unsigned gensync_get_context(void *reg);
-extern void gensync_set_context(void *reg);
-extern unsigned gensync_get_pc(void);
-extern void gensync_set_pc(unsigned val);
-extern unsigned gensync_get_sp(void);
-extern void gensync_set_sp(unsigned val);
-extern unsigned gensync_get_reg(int regnum);
-extern void gensync_set_reg(int regnum, unsigned val);
-extern void gensync_set_nmi_line(int linestate);
-extern void gensync_set_irq_line(int irqline, int linestate);
-extern void gensync_set_irq_callback(int(*callback)(int irqline));
-extern void gensync_internal_interrupt(int type);
-extern void gensync_state_save(void *file);
-extern void gensync_state_load(void *file);
-extern const char *gensync_info(void *context,int regnum);
-extern unsigned gensync_dasm(char *buffer,unsigned pc);
+extern void gensync_get_info(UINT32 state, union cpuinfo *info);
 
 #ifdef MAME_DEBUG
 extern unsigned gensyncd(char *dst, unsigned PC);

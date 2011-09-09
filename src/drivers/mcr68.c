@@ -170,67 +170,31 @@ static WRITE16_HANDLER( spyhunt2_control_w )
 
 static READ16_HANDLER( archrivl_port_1_r )
 {
-	/* each axis of the 49-way joystick is mapped like this:*/
-	/*    0111  (4 5 6 7)  = full left/up                         */
-	/*    0011  (2 3)      = middle left/up                       */
-	/*    0001  (1)        = slightly left/up                     */
-	/*    1000  (0 8)      = neutral                              */
-	/*    1100  (C)        = slightly right/down                  */
-	/*    1110  (A E)      = middle right/down                    */
-	/*    1111  (9 B D F)  = full right/down                      */
-
-	int joy_x, joy_y;
-	int bits_x, bits_y;
+	int joystick = readinputport(3);
 	int result = 0;
-	static int dstickmem = 0;
-	int dstick = readinputport(3);
 
-	/* the values set are the complement of the number that will be returned */
-	/* the first two ifs handle a digital input for an axis                  */
-	/* the third if handles a just centered digital input for that axis      */
-	/* the final else handles input from analog devices, and only is used if */
-	/*    there is no digital input for that axis                            */
-	if (dstick & 0x0001)      { result |= 0x0090; dstickmem |= 0x0001; }
-	else if (dstick & 0x0002) { result |= 0x0040; dstickmem |= 0x0002; }
-	else if (dstickmem & 0x0003) { result |= (0xF << 4); dstickmem &= ~0x0003; }
-	else
-	{
-		joy_y = readinputport(5) >> 4;	/* 0 = down 3 = center 6 = up */
-		bits_y = (0x70 >> (7 - joy_y)) & 0x0f;
-		result |= bits_y << 4;
-	}
+	/* each axis of the 49-way joystick is mapped like this:*/
+	/*      0 8      = neutral                              */
+	/*      1        = slightly left/up                     */
+	/*      2 3      = middle left/up                       */
+	/*      4 5 6 7  = full left/up                         */
+	/*      C        = slightly right/down                  */
+	/*      A E      = middle right/down                    */
+	/*      9 B D F  = full right/down                      */
 
-	if (dstick & 0x0004)      { result |= 0x0009; dstickmem |= 0x0004; }
-	else if (dstick & 0x0008) { result |= 0x0004; dstickmem |= 0x0008; }
-	else if (dstickmem & 0x000C) { result |= 0xF; dstickmem &= ~0x000C; }
-	else
-	{
-		joy_x = readinputport(4) >> 4;	/* 0 = left 3 = center 6 = right */
-		bits_x = (0x70 >> (7 - joy_x)) & 0x0f;
-		result |= bits_x;
-	}
+	if (joystick & 0x0001) result |= 0x0040;
+	else if (joystick & 0x0002) result |= 0x0090;
 
-	if (dstick & 0x0010)      { result |= 0x9000; dstickmem |= 0x0010; }
-	else if (dstick & 0x0020) { result |= 0x4000; dstickmem |= 0x0020; }
-	else if (dstickmem & 0x0030) { result |= (0xF << 12); dstickmem &= ~0x0030; }
-	else
-	{
-		joy_y = readinputport(7) >> 4;	/* 0 = down 3 = center 6 = up */
-		bits_y = (0x70 >> (7 - joy_y)) & 0x0f;
-		result |= bits_y << 12;
-	}
+	if (joystick & 0x0004) result |= 0x0004;
+	else if (joystick & 0x0008) result |= 0x0009;
 
-	if (dstick & 0x0040)      { result |= 0x0900; dstickmem |= 0x0040; }
-	else if (dstick & 0x0080) { result |= 0x0400; dstickmem |= 0x0080; }
-	else if (dstickmem & 0x00C0) { result |= (0xF << 8); dstickmem &= ~0x00C0; }
-	else
-	{
-		joy_x = readinputport(6) >> 4;	/* 0 = left 3 = center 6 = right */
-		bits_x = (0x70 >> (7 - joy_x)) & 0x0f;
-		result |= bits_x << 8;
-	}
+	if (joystick & 0x0010) result |= 0x4000;
+	else if (joystick & 0x0020) result |= 0x9000;
 
-	return ~result;
+	if (joystick & 0x0040) result |= 0x0400;
+	else if (joystick & 0x0080) result |= 0x0900;
+
+	return result;
 }
 
 
@@ -289,33 +253,16 @@ static READ16_HANDLER( pigskin_protection_r )
 
 static READ16_HANDLER( pigskin_port_1_r )
 {
-	int joy_x, joy_y;
-	int bits_x, bits_y;
-	static int dstickmem = 0;
-	int dstick = readinputport(3);
+	int joystick = readinputport(3);
 	int result = readinputport(1);
-	
+
 	/* see archrivl_port_1_r for 49-way joystick description */
 
-	if (dstick & 0x0001)      { result |= 0x4000;  dstickmem |= 0x0001; }
-	else if (dstick & 0x0002) { result |= 0x9000;  dstickmem |= 0x0002; }
-	else if (dstickmem & 0x0003) { result |= (0x0f << 12); dstickmem &= ~0x0003; }
-	else
-	{
-		joy_x = readinputport(4) >> 4;	/* 0 = down 3 = center 6 = up */
-		bits_x = (0x70 >> (7 - joy_x)) & 0x0f;
-		result |= (~bits_x & 0x0f) << 12;
-	}
+	if (joystick & 0x0001) result |= 0x4000;
+	else if (joystick & 0x0002) result |= 0x9000;
 
-	if (dstick & 0x0004)      { result |= 0x0400; dstickmem |= 0x0004; }
-	else if (dstick & 0x0008) { result |= 0x0900; dstickmem |= 0x0008; }
-	else if (dstickmem & 0x000C) { result |= (0x0f << 8); dstickmem &= ~0x000C; }
-	else
-	{
-		joy_y = readinputport(5) >> 4;	/* 0 = down 3 = center 6 = up */
-		bits_y = (0x70 >> (7 - joy_y)) & 0x0f;
-		result |= (~bits_y & 0x0f) << 8;
-	}
+	if (joystick & 0x0004) result |= 0x0400;
+	else if (joystick & 0x0008) result |= 0x0900;
 
 	return result;
 }
@@ -323,34 +270,16 @@ static READ16_HANDLER( pigskin_port_1_r )
 
 static READ16_HANDLER( pigskin_port_2_r )
 {
-	int joy_x, joy_y;
-	int bits_x, bits_y;
-	static int dstickmem = 0;
-	int dstick = readinputport(3);
+	int joystick = readinputport(3);
 	int result = readinputport(2);
 
 	/* see archrivl_port_1_r for 49-way joystick description */
 
-	if (dstick & 0x0010)      { result |= 0x4000; dstickmem |= 0x0010; }
-	else if (dstick & 0x0020) { result |= 0x9000; dstickmem |= 0x0020; }
-	else if (dstickmem & 0x0030) { result |= (0x0f << 12); dstickmem &= ~0x0030; }
-	else
-	{
-		joy_x = readinputport(6) >> 4;	/* 0 = down 3 = center 6 = up */
-		bits_x = (0x70 >> (7 - joy_x)) & 0x0f;
-		result |= (~bits_x & 0x0f) << 12;
-	}
+	if (joystick & 0x0010) result |= 0x4000;
+	else if (joystick & 0x0020) result |= 0x9000;
 
-
-	if (dstick & 0x0040)      { result |= 0x0400; dstickmem |= 0x0040; }
-	else if (dstick & 0x0080) { result |= 0x0900; dstickmem |= 0x0080; }
-	else if (dstickmem & 0x00C0) { result |= (0x0f << 8); dstickmem &= ~0x00C0; }
-	else
-	{
-		joy_y = readinputport(7) >> 4;	/* 0 = down 3 = center 6 = up */
-		bits_y = (0x70 >> (7 - joy_y)) & 0x0f;
-		result |= (~bits_y & 0x0f) << 8;
-	}
+	if (joystick & 0x0040) result |= 0x0400;
+	else if (joystick & 0x0080) result |= 0x0900;
 
 	return result;
 }
@@ -383,29 +312,29 @@ static READ16_HANDLER( trisport_port_1_r )
  *
  *************************************/
 
-static MEMORY_READ16_START( mcr68_readmem )
-	{ 0x000000, 0x03ffff, MRA16_ROM },
-	{ 0x060000, 0x063fff, MRA16_RAM },
-	{ 0x070000, 0x070fff, MRA16_RAM },
-	{ 0x071000, 0x071fff, MRA16_RAM },
-	{ 0x080000, 0x080fff, MRA16_RAM },
-	{ 0x0a0000, 0x0a000f, mcr68_6840_upper_r },
-	{ 0x0d0000, 0x0dffff, input_port_0_word_r },
-	{ 0x0e0000, 0x0effff, input_port_1_word_r },
-	{ 0x0f0000, 0x0fffff, input_port_2_word_r },
-MEMORY_END
+static ADDRESS_MAP_START( mcr68_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM)
+	AM_RANGE(0x060000, 0x063fff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x070000, 0x070fff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x071000, 0x071fff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x080000, 0x080fff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x0a0000, 0x0a000f) AM_READ(mcr68_6840_upper_r)
+	AM_RANGE(0x0d0000, 0x0dffff) AM_READ(input_port_0_word_r)
+	AM_RANGE(0x0e0000, 0x0effff) AM_READ(input_port_1_word_r)
+	AM_RANGE(0x0f0000, 0x0fffff) AM_READ(input_port_2_word_r)
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE16_START( mcr68_writemem )
-	{ 0x000000, 0x03ffff, MWA16_ROM },
-	{ 0x060000, 0x063fff, MWA16_RAM },
-	{ 0x070000, 0x070fff, mcr68_videoram_w, &videoram16, &videoram_size },
-	{ 0x071000, 0x071fff, MWA16_RAM },
-	{ 0x080000, 0x080fff, MWA16_RAM, &spriteram16, &spriteram_size },
-	{ 0x090000, 0x09007f, mcr68_paletteram_w, &paletteram16 },
-	{ 0x0a0000, 0x0a000f, mcr68_6840_upper_w },
-	{ 0x0b0000, 0x0bffff, watchdog_reset16_w },
-MEMORY_END
+static ADDRESS_MAP_START( mcr68_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM)
+	AM_RANGE(0x060000, 0x063fff) AM_WRITE(MWA16_RAM)
+	AM_RANGE(0x070000, 0x070fff) AM_WRITE(mcr68_videoram_w) AM_BASE(&videoram16) AM_SIZE(&videoram_size)
+	AM_RANGE(0x071000, 0x071fff) AM_WRITE(MWA16_RAM)
+	AM_RANGE(0x080000, 0x080fff) AM_WRITE(MWA16_RAM) AM_BASE(&spriteram16) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x090000, 0x09007f) AM_WRITE(mcr68_paletteram_w) AM_BASE(&paletteram16)
+	AM_RANGE(0x0a0000, 0x0a000f) AM_WRITE(mcr68_6840_upper_w)
+	AM_RANGE(0x0b0000, 0x0bffff) AM_WRITE(watchdog_reset16_w)
+ADDRESS_MAP_END
 
 
 
@@ -415,32 +344,32 @@ MEMORY_END
  *
  *************************************/
 
-static MEMORY_READ16_START( zwackery_readmem )
-	{ 0x000000, 0x037fff, MRA16_ROM },
-	{ 0x080000, 0x080fff, MRA16_RAM },
-	{ 0x084000, 0x084fff, MRA16_RAM },
-	{ 0x100000, 0x10000f, zwackery_6840_r },
-	{ 0x104000, 0x104007, pia_2_msb_r },
-	{ 0x108000, 0x108007, pia_3_lsb_r },
-	{ 0x10c000, 0x10c007, pia_4_lsb_r },
-	{ 0x800000, 0x800fff, MRA16_RAM },
-	{ 0x802000, 0x803fff, MRA16_RAM },
-	{ 0xc00000, 0xc00fff, MRA16_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( zwackery_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x037fff) AM_READ(MRA16_ROM)
+	AM_RANGE(0x080000, 0x080fff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x084000, 0x084fff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x100000, 0x10000f) AM_READ(zwackery_6840_r)
+	AM_RANGE(0x104000, 0x104007) AM_READ(pia_2_msb_r)
+	AM_RANGE(0x108000, 0x108007) AM_READ(pia_3_lsb_r)
+	AM_RANGE(0x10c000, 0x10c007) AM_READ(pia_4_lsb_r)
+	AM_RANGE(0x800000, 0x800fff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x802000, 0x803fff) AM_READ(MRA16_RAM)
+	AM_RANGE(0xc00000, 0xc00fff) AM_READ(MRA16_RAM)
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE16_START( zwackery_writemem )
-	{ 0x000000, 0x037fff, MWA16_ROM },
-	{ 0x080000, 0x080fff, MWA16_RAM },
-	{ 0x084000, 0x084fff, MWA16_RAM },
-	{ 0x100000, 0x10000f, mcr68_6840_upper_w },
-	{ 0x104000, 0x104007, pia_2_msb_w },
-	{ 0x108000, 0x108007, pia_3_lsb_w },
-	{ 0x10c000, 0x10c007, pia_4_lsb_w },
-	{ 0x800000, 0x800fff, zwackery_videoram_w, &videoram16, &videoram_size },
-	{ 0x802000, 0x803fff, zwackery_paletteram_w, &paletteram16 },
-	{ 0xc00000, 0xc00fff, zwackery_spriteram_w, &spriteram16, &spriteram_size },
-MEMORY_END
+static ADDRESS_MAP_START( zwackery_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x037fff) AM_WRITE(MWA16_ROM)
+	AM_RANGE(0x080000, 0x080fff) AM_WRITE(MWA16_RAM)
+	AM_RANGE(0x084000, 0x084fff) AM_WRITE(MWA16_RAM)
+	AM_RANGE(0x100000, 0x10000f) AM_WRITE(mcr68_6840_upper_w)
+	AM_RANGE(0x104000, 0x104007) AM_WRITE(pia_2_msb_w)
+	AM_RANGE(0x108000, 0x108007) AM_WRITE(pia_3_lsb_w)
+	AM_RANGE(0x10c000, 0x10c007) AM_WRITE(pia_4_lsb_w)
+	AM_RANGE(0x800000, 0x800fff) AM_WRITE(zwackery_videoram_w) AM_BASE(&videoram16) AM_SIZE(&videoram_size)
+	AM_RANGE(0x802000, 0x803fff) AM_WRITE(zwackery_paletteram_w) AM_BASE(&paletteram16)
+	AM_RANGE(0xc00000, 0xc00fff) AM_WRITE(zwackery_spriteram_w) AM_BASE(&spriteram16) AM_SIZE(&spriteram_size)
+ADDRESS_MAP_END
 
 
 
@@ -450,30 +379,30 @@ MEMORY_END
  *
  *************************************/
 
-static MEMORY_READ16_START( pigskin_readmem )
-	{ 0x000000, 0x03ffff, MRA16_ROM },
-	{ 0x080000, 0x08ffff, pigskin_port_1_r },
-	{ 0x0a0000, 0x0affff, pigskin_port_2_r },
-	{ 0x100000, 0x100fff, MRA16_RAM },
-	{ 0x120000, 0x120001, pigskin_protection_r },
-	{ 0x140000, 0x143fff, MRA16_RAM },
-	{ 0x160000, 0x1607ff, MRA16_RAM },
-	{ 0x180000, 0x18000f, mcr68_6840_upper_r },
-	{ 0x1e0000, 0x1effff, input_port_0_word_r },
-MEMORY_END
+static ADDRESS_MAP_START( pigskin_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM)
+	AM_RANGE(0x080000, 0x08ffff) AM_READ(pigskin_port_1_r)
+	AM_RANGE(0x0a0000, 0x0affff) AM_READ(pigskin_port_2_r)
+	AM_RANGE(0x100000, 0x100fff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x120000, 0x120001) AM_READ(pigskin_protection_r)
+	AM_RANGE(0x140000, 0x143fff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x160000, 0x1607ff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x180000, 0x18000f) AM_READ(mcr68_6840_upper_r)
+	AM_RANGE(0x1e0000, 0x1effff) AM_READ(input_port_0_word_r)
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE16_START( pigskin_writemem )
-	{ 0x000000, 0x03ffff, MWA16_ROM },
-	{ 0x0c0000, 0x0c007f, mcr68_paletteram_w, &paletteram16 },
-	{ 0x0e0000, 0x0effff, watchdog_reset16_w },
-	{ 0x100000, 0x100fff, mcr68_videoram_w, &videoram16, &videoram_size },
-	{ 0x120000, 0x120001, pigskin_protection_w },
-	{ 0x140000, 0x143fff, MWA16_RAM },
-	{ 0x160000, 0x1607ff, MWA16_RAM, &spriteram16, &spriteram_size },
-	{ 0x180000, 0x18000f, mcr68_6840_upper_w },
-	{ 0x1a0000, 0x1affff, archrivl_control_w },
-MEMORY_END
+static ADDRESS_MAP_START( pigskin_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM)
+	AM_RANGE(0x0c0000, 0x0c007f) AM_WRITE(mcr68_paletteram_w) AM_BASE(&paletteram16)
+	AM_RANGE(0x0e0000, 0x0effff) AM_WRITE(watchdog_reset16_w)
+	AM_RANGE(0x100000, 0x100fff) AM_WRITE(mcr68_videoram_w) AM_BASE(&videoram16) AM_SIZE(&videoram_size)
+	AM_RANGE(0x120000, 0x120001) AM_WRITE(pigskin_protection_w)
+	AM_RANGE(0x140000, 0x143fff) AM_WRITE(MWA16_RAM)
+	AM_RANGE(0x160000, 0x1607ff) AM_WRITE(MWA16_RAM) AM_BASE(&spriteram16) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x180000, 0x18000f) AM_WRITE(mcr68_6840_upper_w)
+	AM_RANGE(0x1a0000, 0x1affff) AM_WRITE(archrivl_control_w)
+ADDRESS_MAP_END
 
 
 
@@ -483,28 +412,28 @@ MEMORY_END
  *
  *************************************/
 
-static MEMORY_READ16_START( trisport_readmem )
-	{ 0x000000, 0x03ffff, MRA16_ROM },
-	{ 0x080000, 0x08ffff, trisport_port_1_r },
-	{ 0x0a0000, 0x0affff, input_port_2_word_r },
-	{ 0x100000, 0x103fff, MRA16_RAM },
-	{ 0x140000, 0x1407ff, MRA16_RAM },
-	{ 0x160000, 0x160fff, MRA16_RAM },
-	{ 0x180000, 0x18000f, mcr68_6840_upper_r },
-	{ 0x1e0000, 0x1effff, input_port_0_word_r },
-MEMORY_END
+static ADDRESS_MAP_START( trisport_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM)
+	AM_RANGE(0x080000, 0x08ffff) AM_READ(trisport_port_1_r)
+	AM_RANGE(0x0a0000, 0x0affff) AM_READ(input_port_2_word_r)
+	AM_RANGE(0x100000, 0x103fff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x140000, 0x1407ff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x160000, 0x160fff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x180000, 0x18000f) AM_READ(mcr68_6840_upper_r)
+	AM_RANGE(0x1e0000, 0x1effff) AM_READ(input_port_0_word_r)
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE16_START( trisport_writemem )
-	{ 0x000000, 0x03ffff, MWA16_ROM },
-	{ 0x100000, 0x103fff, MWA16_RAM, (data16_t **)&generic_nvram, &generic_nvram_size },
-	{ 0x120000, 0x12007f, mcr68_paletteram_w, &paletteram16 },
-	{ 0x140000, 0x1407ff, MWA16_RAM, &spriteram16, &spriteram_size },
-	{ 0x160000, 0x160fff, mcr68_videoram_w, &videoram16, &videoram_size },
-	{ 0x180000, 0x18000f, mcr68_6840_upper_w },
-	{ 0x1a0000, 0x1affff, archrivl_control_w },
-	{ 0x1c0000, 0x1cffff, watchdog_reset16_w },
-MEMORY_END
+static ADDRESS_MAP_START( trisport_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM)
+	AM_RANGE(0x100000, 0x103fff) AM_WRITE(MWA16_RAM) AM_BASE((data16_t **)&generic_nvram) AM_SIZE(&generic_nvram_size)
+	AM_RANGE(0x120000, 0x12007f) AM_WRITE(mcr68_paletteram_w) AM_BASE(&paletteram16)
+	AM_RANGE(0x140000, 0x1407ff) AM_WRITE(MWA16_RAM) AM_BASE(&spriteram16) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x160000, 0x160fff) AM_WRITE(mcr68_videoram_w) AM_BASE(&videoram16) AM_SIZE(&videoram_size)
+	AM_RANGE(0x180000, 0x18000f) AM_WRITE(mcr68_6840_upper_w)
+	AM_RANGE(0x1a0000, 0x1affff) AM_WRITE(archrivl_control_w)
+	AM_RANGE(0x1c0000, 0x1cffff) AM_WRITE(watchdog_reset16_w)
+ADDRESS_MAP_END
 
 
 
@@ -797,7 +726,7 @@ INPUT_PORTS_START( archrivl )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START	/* 49-way joystick simulator, for keyboard (& d-pads), converted by archrivl_port_1_r() */
+	PORT_START	/* 49-way joystick simulator */
 	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_8WAY | IPF_PLAYER1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_PLAYER1 )
 	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_PLAYER1 )
@@ -806,22 +735,6 @@ INPUT_PORTS_START( archrivl )
 	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_PLAYER2 )
 	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_PLAYER2 )
 	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-
-	PORT_START	/* 49-way simulator, for analog joysticks, converted by archrivl_port_1_r() */
-	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_X | IPF_REVERSE | IPF_CENTER, 100, 100, 0x00, 0x6f, \
-	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_1_LEFT, JOYCODE_1_RIGHT )
-
-	PORT_START	/* 49-way simulator, for analog joysticks, converted by archrivl_port_1_r() */
-	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_Y | IPF_REVERSE | IPF_CENTER, 100, 100, 0x00, 0x6f, \
-	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_1_UP, JOYCODE_1_DOWN )
-
-	PORT_START	/* 49-way simulator, for analog joysticks, converted by archrivl_port_1_r() */
-	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_X | IPF_REVERSE | IPF_CENTER | IPF_PLAYER2, 100, 100, 0x00, 0x6f, \
-	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_2_LEFT, JOYCODE_2_RIGHT )
-
-	PORT_START	/* 49-way simulator, for analog joysticks, converted by archrivl_port_1_r() */
-	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_Y | IPF_REVERSE | IPF_CENTER | IPF_PLAYER2, 100, 100, 0x00, 0x6f, \
-	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_2_UP, JOYCODE_2_DOWN )
 INPUT_PORTS_END
 
 
@@ -877,7 +790,7 @@ INPUT_PORTS_START( pigskin )
 	PORT_DIPSETTING(      0x0000, "Rotated" )
 	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_UNUSED )	/* player 2 joystick goes here */
 
-	PORT_START	/* 49-way joystick simulator, for keyboard (& d-pads) */
+	PORT_START	/* 49-way joystick simulator */
 	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_PLAYER1 )
 	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_8WAY | IPF_PLAYER1 )
@@ -886,22 +799,6 @@ INPUT_PORTS_START( pigskin )
 	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_PLAYER2 )
 	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_8WAY | IPF_PLAYER2 )
 	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_PLAYER2 )
-
-	PORT_START	/* 49-way simulator, for analog joysticks, converted by pigskin_port_1_r() */
-	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_X | IPF_CENTER, 100, 100, 0x00, 0x6f, \
-	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_1_LEFT, JOYCODE_1_RIGHT )
-
-	PORT_START	/* 49-way simulator, for analog joysticks, converted by pigskin_port_1_r() */
-	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_Y | IPF_REVERSE | IPF_CENTER, 100, 100, 0x00, 0x6f, \
-	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_1_UP, JOYCODE_1_DOWN )
-
-	PORT_START	/* 49-way simulator, for analog joysticks, converted by pigskin_port_2_r() */
-	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_X | IPF_CENTER | IPF_PLAYER2, 100, 100, 0x00, 0x6f, \
-	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_2_LEFT, JOYCODE_2_RIGHT )
-
-	PORT_START	/* 49-way simulator, for analog joysticks, converted by pigskin_port_2_r() */
-	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_Y | IPF_REVERSE | IPF_CENTER | IPF_PLAYER2, 100, 100, 0x00, 0x6f, \
-	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_2_UP, JOYCODE_2_DOWN )
 INPUT_PORTS_END
 
 
@@ -1033,7 +930,7 @@ static MACHINE_DRIVER_START( zwackery )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(M68000, 7652400)
-	MDRV_CPU_MEMORY(zwackery_readmem,zwackery_writemem)
+	MDRV_CPU_PROGRAM_MAP(zwackery_readmem,zwackery_writemem)
 	MDRV_CPU_VBLANK_INT(mcr68_interrupt,1)
 
 	MDRV_FRAMES_PER_SECOND(30)
@@ -1060,7 +957,7 @@ static MACHINE_DRIVER_START( mcr68 )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main", M68000, 7723800)
-	MDRV_CPU_MEMORY(mcr68_readmem,mcr68_writemem)
+	MDRV_CPU_PROGRAM_MAP(mcr68_readmem,mcr68_writemem)
 	MDRV_CPU_VBLANK_INT(mcr68_interrupt,1)
 
 	MDRV_FRAMES_PER_SECOND(30)
@@ -1112,7 +1009,7 @@ static MACHINE_DRIVER_START( pigskin )
 	MDRV_IMPORT_FROM(williams_cvsd_sound)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(pigskin_readmem,pigskin_writemem)
+	MDRV_CPU_PROGRAM_MAP(pigskin_readmem,pigskin_writemem)
 MACHINE_DRIVER_END
 
 
@@ -1123,7 +1020,7 @@ static MACHINE_DRIVER_START( trisport )
 	MDRV_IMPORT_FROM(williams_cvsd_sound)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(trisport_readmem,trisport_writemem)
+	MDRV_CPU_PROGRAM_MAP(trisport_readmem,trisport_writemem)
 
 	MDRV_NVRAM_HANDLER(generic_0fill)
 MACHINE_DRIVER_END

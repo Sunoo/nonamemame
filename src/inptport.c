@@ -43,16 +43,6 @@ extern unsigned int coins[COIN_COUNTERS];
 extern unsigned int lastcoin[COIN_COUNTERS];
 extern unsigned int coinlockedout[COIN_COUNTERS];
 
-/*start MAME:analog+*/
-extern int switchmice, switchaxes;			// from OS/input.c
-extern int splitmouse, resetmouse;			// from OS/input.c
-#ifdef ANALOGPEDALON
-extern int analog_pedal;					// from OS/input.c
-#endif	/* ANALOGPEDALON */
-
-static int joymouse;  // option to simulate trackball with analog joystick
-/*end MAME:analog+  */
-
 static unsigned short input_port_value[MAX_INPUT_PORTS];
 static unsigned short input_vblank[MAX_INPUT_PORTS];
 
@@ -717,15 +707,6 @@ struct ipd inputport_defaults[] =
 	{ IPT_SELECT | IPF_PLAYER8, "P8 Select",      SEQ_DEF_0 },
 #endif
 
- 	{ IPT_AD_STICK_Z | IPF_PLAYER1, "AD Stick Z",   SEQ_DEF_0 },
- 	{ (IPT_AD_STICK_Z | IPF_PLAYER1)+IPT_EXTENSION,                "AD Stick Z",   SEQ_DEF_0 },
- 	{ IPT_AD_STICK_Z | IPF_PLAYER2, "AD Stick Z 2", SEQ_DEF_0 },
- 	{ (IPT_AD_STICK_Z | IPF_PLAYER2)+IPT_EXTENSION,                "AD Stick Z 2", SEQ_DEF_0 },
- 	{ IPT_AD_STICK_Z | IPF_PLAYER3, "AD Stick Z 3", SEQ_DEF_0 },
- 	{ (IPT_AD_STICK_Z | IPF_PLAYER3)+IPT_EXTENSION,                "AD Stick Z 3", SEQ_DEF_0 },
- 	{ IPT_AD_STICK_Z | IPF_PLAYER4, "AD Stick Z 4", SEQ_DEF_0 },
- 	{ (IPT_AD_STICK_Z | IPF_PLAYER4)+IPT_EXTENSION,                "AD Stick Z 4", SEQ_DEF_0 },
-
 	{ IPT_UNKNOWN,             "UNKNOWN",         SEQ_DEF_0 },
 	{ IPT_OSD_RESERVED,        "",                SEQ_DEF_0 },
 	{ IPT_OSD_RESERVED,        "",                SEQ_DEF_0 },
@@ -1255,15 +1236,6 @@ struct ik input_keywords[] =
 	{ "P3_PEDAL2_EXT",			IKT_IPT_EXT,	IPF_PLAYER3 | IPT_PEDAL2 },
 	{ "P4_PEDAL2",				IKT_IPT,		IPF_PLAYER4 | IPT_PEDAL2 },
 	{ "P4_PEDAL2_EXT",			IKT_IPT_EXT,	IPF_PLAYER4 | IPT_PEDAL2 },
-
-	{ "P1_PEDAL2",				IKT_IPT,		IPF_PLAYER1 | IPT_PEDAL2 },
-	{ "P1_PEDAL2_EXT",			IKT_IPT_EXT,	IPF_PLAYER1 | IPT_PEDAL2 },
-	{ "P2_PEDAL2",				IKT_IPT,		IPF_PLAYER2 | IPT_PEDAL2 },
-	{ "P2_PEDAL2_EXT",			IKT_IPT_EXT,	IPF_PLAYER2 | IPT_PEDAL2 },
-	{ "P3_PEDAL2",				IKT_IPT,		IPF_PLAYER3 | IPT_PEDAL2 },
-	{ "P3_PEDAL2_EXT",			IKT_IPT_EXT,	IPF_PLAYER3 | IPT_PEDAL2 },
-	{ "P4_PEDAL2",				IKT_IPT,		IPF_PLAYER4 | IPT_PEDAL2 },
-	{ "P4_PEDAL2_EXT",			IKT_IPT_EXT,	IPF_PLAYER4 | IPT_PEDAL2 },
 	{ "P5_PEDAL2",				IKT_IPT,		IPF_PLAYER5 | IPT_PEDAL2 },
 	{ "P5_PEDAL2_EXT",			IKT_IPT_EXT,	IPF_PLAYER5 | IPT_PEDAL2 },
 	{ "P6_PEDAL2",				IKT_IPT,		IPF_PLAYER6 | IPT_PEDAL2 },
@@ -1513,15 +1485,6 @@ struct ik input_keywords[] =
 	{ "P8_SELECT",				IKT_IPT,		IPF_PLAYER8 | IPT_SELECT },
 #endif /* MESS */
 
-	{ "P1_AD_STICK_Z",			IKT_IPT,		IPF_PLAYER1 | IPT_AD_STICK_Z },
-	{ "P1_AD_STICK_Z_EXT",		IKT_IPT_EXT,	IPF_PLAYER1 | IPT_AD_STICK_Z },
-	{ "P2_AD_STICK_Z",			IKT_IPT,		IPF_PLAYER2 | IPT_AD_STICK_Z },
-	{ "P2_AD_STICK_Z_EXT",		IKT_IPT_EXT,	IPF_PLAYER2 | IPT_AD_STICK_Z },
-	{ "P3_AD_STICK_Z",			IKT_IPT,		IPF_PLAYER3 | IPT_AD_STICK_Z },
-	{ "P3_AD_STICK_Z_EXT",		IKT_IPT_EXT,	IPF_PLAYER3 | IPT_AD_STICK_Z },
-	{ "P4_AD_STICK_Z",			IKT_IPT,		IPF_PLAYER4 | IPT_AD_STICK_Z },
-	{ "P4_AD_STICK_Z_EXT",		IKT_IPT_EXT,	IPF_PLAYER4 | IPT_AD_STICK_Z },
-
 	{ "OSD_1",					IKT_IPT,		IPT_OSD_1 },
 	{ "OSD_2",					IKT_IPT,		IPT_OSD_2 },
 	{ "OSD_3",					IKT_IPT,		IPT_OSD_3 },
@@ -1608,6 +1571,8 @@ static void writeword(mame_file *f,UINT16 num)
 	}
 }
 
+
+
 /***************************************************************************/
 /* Load */
 
@@ -1644,9 +1609,6 @@ static void save_default_keys(void)
 int load_input_port_settings(void)
 {
 	config_file *cfg;
-/*start MAME:analog+*/
-//	config_file *fa;		// different var then *f so "OK' screen is correctly displayed
-/*end MAME:analog+  */
 	int err;
 	struct mixer_config mixercfg;
 #ifdef MAME_NET
@@ -1677,90 +1639,6 @@ int load_input_port_settings(void)
 getout:
 		config_close(cfg);
 	}
-
-/*start MAME:analog+*/
-// load MAME:analog+ settings
-//	if (!resetmouse && !splitmouse && (fa = mame_fopen(Machine->gamedrv->name,0,FILETYPE_CONFIG_ANALOGPLUS,0)) != 0)
-//	{
-//		char buf[8];
-//		int p, a;
-//		unsigned int tmp[MAX_PLAYERS][2*2];
-//		/* read header */
-//		if (mame_fread(fa,buf,8) != 8)
-//			goto getoutanalogplus;
-////		if (!memcmp(buf,MAMECFGSTRING_V8,8) == 0)
-////			goto getoutanalogplus;	/* header invalid */
-//
-//		// read mouse settings
-//		for (p=0; p<MAX_PLAYERS; p++)
-//		{
-//			for (a=0; a<2*2; a++)
-//				if (readint(fa, &tmp[p][a]) != 0)
-//					goto getoutanalogplus;
-//		}
-//
-//		if (switchaxes)
-//		{
-//			for (p=0; p<MAX_PLAYERS; p++)
-//				for (a=0; a<2; a++)
-//				{
-//					osd_setplayer_mousesplit(p,a,(int)tmp[p][a*2]);
-//					osd_setplayer_mouseaxis(p,a,(int)tmp[p][a*2],(int)tmp[p][a*2+1]);
-//				}
-//		}
-//		else if (switchmice)
-//		{
-//			for (p=0; p<MAX_PLAYERS; p++)
-//			{
-//				osd_setplayer_mouse(p, (int)tmp[p][0]);	// use the X axis settings for mouse
-//			}
-//		}
-//
-//	getoutanalogplus:
-//		mame_fclose(fa);
-//	}
-//	/* if no game specific .ana file, read the global default.ana */
-//	/* default.ana is (will be) in text format for easier editing by hand */
-//	else if ((fa = mame_fopen("default",0,FILETYPE_CONFIG_ANALOGPLUS,0)) != 0)
-//	{
-//		char buf[8];
-//		int p, a;
-//		unsigned int tmp[MAX_PLAYERS][2*2];
-//		/* read header */
-//		if (mame_fread(fa,buf,8) != 8)
-//			goto getoutanalogplusdef;
-////		if (!memcmp(buf,MAMECFGSTRING_V8,8) == 0)
-////			goto getoutanalogplusdef;	/* header invalid */
-//
-//		// read mouse settings
-//		for (p=0; p<MAX_PLAYERS; p++)
-//		{
-//			for (a=0; a<2*2; a++)
-//				if (readint(fa, &tmp[p][a]) != 0)
-//					goto getoutanalogplus;
-//		}
-//
-//		if (switchaxes)
-//		{
-//			for (p=0; p<MAX_PLAYERS; p++)
-//				for (a=0; a<2; a++)
-//				{
-//					osd_setplayer_mousesplit(p,a,(int)tmp[p][a*2]);
-//					osd_setplayer_mouseaxis(p,a,(int)tmp[p][a*2],(int)tmp[p][a*2+1]);
-//				}
-//		}
-//		else if (switchmice)
-//		{
-//			for (p=0; p<MAX_PLAYERS; p++)
-//			{
-//				osd_setplayer_mouse(p, tmp[p][0]);		// only use the first mouse
-//			}
-//		}
-//
-//	getoutanalogplusdef:
-//		mame_fclose(fa);
-//	}
-/*end MAME:analog+  */
 
 	/* All analog ports need initialization */
 	{
@@ -2039,24 +1917,6 @@ void save_input_port_settings(void)
 		config_write_mixer_config(cfg, &mixercfg);
 		config_close(cfg);
 	}
-
-/*start MAME:analog+*/
-//	if ((f = mame_fopen(Machine->gamedrv->name,0,FILETYPE_CONFIG_ANALOGPLUS,1)) != 0)
-//	{
-//		int p, a;
-//		/* write header */
-//		mame_fwrite(f,MAMECFGSTRING_V8,8);
-//
-//		for (p=0; p<MAX_PLAYERS; p++)
-//			for (a=0; a<2; a++)			// max of two analog axes, for now
-//			{
-//				writeint(f, osd_getplayer_mousesplit(p,a));		// player p's mouse for axis a
-//				writeint(f, osd_getplayer_mouseaxis(p,a));		// player p's mouse axis for axis a
-//			}
-//
-//		mame_fclose(f);
-//	}
-/*end MAME:analog+  */
 }
 
 
@@ -2218,9 +2078,7 @@ void update_analog_port(int port)
 
 	player = IP_GET_PLAYER(in);
 
-/*start MAME:analog+*/
-	delta = mouse_delta_axis[player][axis] + (analog_current_axis[player][axis] >> 3);
-/*end MAME:analog+*/
+	delta = mouse_delta_axis[player][axis];
 
 	if (seq_pressed(decseq)) delta -= keydelta;
 
@@ -2295,7 +2153,7 @@ void update_analog_port(int port)
 		{
 			delta=0;
 
-			/* for pedals, need to change to positive number */
+			/* for pedals, need to change to possitive number */
 			/* and, if needed, reverse pedal input */
 			if (type == IPT_PEDAL || type == IPT_PEDAL2)
 			{
@@ -2370,13 +2228,6 @@ void update_analog_port(int port)
 		}
 	}
 
-/*start MAME:analog+*/
-	if (joymouse)
-	{
-		//special handling for using a joystick as a mouse
-	}
-/*end MAME:analog+  */
-
 	input_analog_current_value[port] = current;
 }
 
@@ -2422,9 +2273,7 @@ profiler_mark(PROFILER_END);
 }
 
 #define MAX_JOYSTICKS 3
-/*start MAME:analog+*/
-//#define MAX_PLAYERS 4	/* defined in inptport.h */
-/*end MAME:analog+  */
+#define MAX_PLAYERS 8
 static int mJoyCurrent[MAX_JOYSTICKS*MAX_PLAYERS];
 static int mJoyPrevious[MAX_JOYSTICKS*MAX_PLAYERS];
 static int mJoy4Way[MAX_JOYSTICKS*MAX_PLAYERS];
@@ -3255,6 +3104,6 @@ void init_analog_seq()
 
 		in++;
 	}
-	
+
 	return;
 }

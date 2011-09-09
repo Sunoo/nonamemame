@@ -122,7 +122,7 @@
 
 ****************************************************************************/
 
-#include <math.h>
+
 #include "driver.h"
 #include "cpu/t11/t11.h"
 #include "machine/atarigen.h"
@@ -308,7 +308,7 @@ static WRITE16_HANDLER( bankselect_w )
 	base = &memory_region(REGION_CPU1)[bankoffset[(newword >> 10) & 0x3f]];
 
 	cpu_setbank(1 + offset, base);
-	activecpu_set_reg(T11_BANK2 + offset, base - OP_RAM);
+	activecpu_set_reg(T11_BANK2 + offset, base - opcode_arg_base);
 }
 
 
@@ -376,94 +376,15 @@ static READ16_HANDLER( adc_r )
 	return readinputport(3 + which_adc) | 0xff00;
 }
 
+
 static READ_HANDLER( leta_r )
 {
     if (pedal_count == -1)   /* 720 */
 	{
-		const int pos_values[]={0x00,0x12,0x24,0x34,0x48,0x5a,0x6c,0x7c };	// 8 dpad directions
-		static int old_position = 0, old_angle = 90;
-		static int num_rotations = 0;
-		int current_angle = 0, current_position = 0;
-		int aj_x, aj_y, aj_delta = 0;
-		int dial_val;
-		int djoy_val;
-		
 		switch (offset & 3)
 		{
-			case 0:
-				// return readinputport(7) >> 8; // ORIGINAL LINE
-				// <jake>
-				// dial_val = readinputport(8) & 0xff;
-				// </jake>
-				/* check spinner (original controller) */
-				if ( (dial_val = readinputport(8) & 0xff) )
-				{											// once dial is used, you almost need to restart
-					return dial_val;						// mame to not use dial!!!
-				}
-				if ( (djoy_val = readinputport(15)) )
-				{
-					return (djoy_val == 1) ? 0xff : 0;		// returns 0 if djoy_val <> 1
-				}
-
-				aj_x = (readinputport(13) & 0xff) - 128;
-				aj_y = (readinputport(14) & 0xff) - 128;
-				if ( aj_x || aj_y )
-					current_angle = atan2(aj_x,aj_y) * 360 / (2*M_PI);	// dang radians!
-				else													// 0 degrees is straight up
-					current_angle = old_angle;
-
-				/* original controller had two gaps 10 degrees apart, each 2.5 degrees wide */
-				if ( ((current_angle > -6)&&(current_angle < 6)) && ((current_angle < -2)||(current_angle > 2)) )
-					return 0xff;
-				// else
-				return 0;
-			case 1:
-				/* check original controller (spinner) */
-				if ( (dial_val = readinputport(7) & 0xff) )
-				{											// once dial is used, you almost need to restart
-					return dial_val;						// mame to not use dial!!!
-				}
-				/* if no spinner data, check 8way controller */
-				if ( (djoy_val = readinputport(15)) )
-				{
-					switch (djoy_val)						// not sure if this will "360"
-					{
-						case 0x01: return pos_values[0];
-						case 0x03: return pos_values[1];
-						case 0x02: return pos_values[2];
-						case 0x06: return pos_values[3];
-						case 0x04: return pos_values[4];
-						case 0x0c: return pos_values[5];
-						case 0x08: return pos_values[6];
-						case 0x09: return pos_values[7];
-					}
-				}
-				/* if no spinner or 8way data, check analog joystick */
-				aj_x = (readinputport(13) & 0xff) - 128;
-				aj_y = (readinputport(14) & 0xff) - 128;
-				if ( aj_x || aj_y )
-					current_angle = atan2(aj_x,aj_y) * 360 / (2*M_PI);	// dang radians!
-				else													// 0 degrees is straight up
-					current_angle = old_angle;
-				
-				// need this to figure the "straight up number"
-				// since 144 == once rotation, and input values range from 0 to 256
-				if (current_angle > 90 && old_angle < -90)
-					num_rotations--;
-				else if (current_angle < -90 && old_angle > 90)
-					num_rotations++;
-				
-				aj_delta = current_angle * 144/360;			/* convert from degrees to one game rotation */
-				current_position = ((144 * num_rotations) + aj_delta) & 0xff;
-											/* part before "+" figures the "straight up number" */
-		 									/* part after "+" adds/subs the angle from zero then masks */
-				if (old_position != current_position)
-				{
-					old_position = current_position;
-					old_angle = current_angle;
-				}
-
-				return current_position;
+			case 0: return readinputport(7) >> 8;
+			case 1: return readinputport(7) & 0xff;
 			case 2: return 0xff;
 			case 3: return 0xff;
 		}
@@ -471,6 +392,7 @@ static READ_HANDLER( leta_r )
 
 	return readinputport(7 + (offset & 3));
 }
+
 
 
 /*************************************
@@ -568,39 +490,27 @@ static WRITE_HANDLER( coincount_w )
  *
  *************************************/
 
-static MEMORY_READ16_START( main_readmem )
-	{ 0x0000, 0x0fff, MRA16_RAM },
-	{ 0x1000, 0x11ff, MRA16_RAM },
-	{ 0x1400, 0x1403, adc_r },
-	{ 0x1800, 0x1801, switch_r },
-	{ 0x1c00, 0x1c01, sound_r },
-	{ 0x2000, 0x3fff, atarisy2_videoram_r },
-	{ 0x4000, 0x5fff, MRA16_BANK1 },
-	{ 0x6000, 0x7fff, MRA16_BANK2 },
-	{ 0x8000, 0x81ff, atarisy2_slapstic_r },
-	{ 0x8200, 0xffff, MRA16_ROM },
-MEMORY_END
-
-
-static MEMORY_WRITE16_START( main_writemem )
-	{ 0x0000, 0x0fff, MWA16_RAM },
-	{ 0x1000, 0x11ff, atarisy2_paletteram_w, &paletteram16 },
-	{ 0x1400, 0x1403, bankselect_w, &bankselect },
-	{ 0x1480, 0x148f, adc_strobe_w },
-	{ 0x1580, 0x159f, int0_ack_w },
-	{ 0x15a0, 0x15bf, int1_ack_w },
-	{ 0x15c0, 0x15df, atarigen_scanline_int_ack_w },
-	{ 0x15e0, 0x15ff, atarigen_video_int_ack_w },
-	{ 0x1600, 0x1601, int_enable_w },
-	{ 0x1680, 0x1681, atarigen_sound_w },
-	{ 0x1700, 0x1701, atarisy2_xscroll_w, &atarigen_xscroll },
-	{ 0x1780, 0x1781, atarisy2_yscroll_w, &atarigen_yscroll },
-	{ 0x1800, 0x1801, watchdog_reset16_w },
-	{ 0x2000, 0x3fff, atarisy2_videoram_w },
-	{ 0x4000, 0x7fff, MWA16_ROM },
-	{ 0x8000, 0x81ff, atarisy2_slapstic_w, &atarisy2_slapstic },
-	{ 0x8200, 0xffff, MWA16_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( main_map, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x0000, 0x0fff) AM_RAM
+	AM_RANGE(0x1000, 0x11ff) AM_READWRITE(MRA16_RAM, atarisy2_paletteram_w) AM_BASE(&paletteram16)
+	AM_RANGE(0x1400, 0x1403) AM_READWRITE(adc_r, bankselect_w) AM_BASE(&bankselect)
+	AM_RANGE(0x1480, 0x148f) AM_WRITE(adc_strobe_w)
+	AM_RANGE(0x1580, 0x159f) AM_WRITE(int0_ack_w)
+	AM_RANGE(0x15a0, 0x15bf) AM_WRITE(int1_ack_w)
+	AM_RANGE(0x15c0, 0x15df) AM_WRITE(atarigen_scanline_int_ack_w)
+	AM_RANGE(0x15e0, 0x15ff) AM_WRITE(atarigen_video_int_ack_w)
+	AM_RANGE(0x1600, 0x1601) AM_WRITE(int_enable_w)
+	AM_RANGE(0x1680, 0x1681) AM_WRITE(atarigen_sound_w)
+	AM_RANGE(0x1700, 0x1701) AM_WRITE(atarisy2_xscroll_w) AM_BASE(&atarigen_xscroll)
+	AM_RANGE(0x1780, 0x1781) AM_WRITE(atarisy2_yscroll_w) AM_BASE(&atarigen_yscroll)
+	AM_RANGE(0x1800, 0x1801) AM_READWRITE(switch_r, watchdog_reset16_w)
+	AM_RANGE(0x1c00, 0x1c01) AM_READ(sound_r)
+	AM_RANGE(0x2000, 0x3fff) AM_READWRITE(atarisy2_videoram_r, atarisy2_videoram_w)
+	AM_RANGE(0x4000, 0x5fff) AM_ROMBANK(1)
+	AM_RANGE(0x6000, 0x7fff) AM_ROMBANK(2)
+	AM_RANGE(0x8000, 0x81ff) AM_READWRITE(atarisy2_slapstic_r, atarisy2_slapstic_w) AM_BASE(&atarisy2_slapstic)
+	AM_RANGE(0x8200, 0xffff) AM_ROM
+ADDRESS_MAP_END
 
 
 
@@ -610,36 +520,26 @@ MEMORY_END
  *
  *************************************/
 
-static MEMORY_READ_START( sound_readmem )
-	{ 0x0000, 0x0fff, MRA_RAM },
-	{ 0x1000, 0x17ff, MRA_RAM },
-	{ 0x1800, 0x180f, pokey1_r },
-	{ 0x1810, 0x1813, leta_r },
-	{ 0x1830, 0x183f, pokey2_r },
-	{ 0x1840, 0x1840, switch_6502_r },
-	{ 0x1850, 0x1851, YM2151_status_port_0_r },
-	{ 0x1860, 0x1860, sound_6502_r },
-	{ 0x4000, 0xffff, MRA_ROM },
-MEMORY_END
-
-
-static MEMORY_WRITE_START( sound_writemem )
-	{ 0x0000, 0x0fff, MWA_RAM },
-	{ 0x1000, 0x17ff, MWA_RAM, (data8_t **)&atarigen_eeprom, &atarigen_eeprom_size },
-	{ 0x1800, 0x180f, pokey1_w },
-	{ 0x1830, 0x183f, pokey2_w },
-	{ 0x1850, 0x1850, YM2151_register_port_0_w },
-	{ 0x1851, 0x1851, YM2151_data_port_0_w },
-	{ 0x1870, 0x1870, tms5220_w },
-	{ 0x1872, 0x1873, tms5220_strobe_w },
-	{ 0x1874, 0x1874, sound_6502_w },
-	{ 0x1876, 0x1876, coincount_w },
-	{ 0x1878, 0x1878, atarigen_6502_irq_ack_w },
-	{ 0x187a, 0x187a, mixer_w },
-	{ 0x187c, 0x187c, switch_6502_w },
-	{ 0x187e, 0x187e, sound_enable_w },
-	{ 0x4000, 0xffff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( sound_map, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x0fff) AM_RAM
+	AM_RANGE(0x1000, 0x17ff) AM_RAM AM_BASE((data8_t **)&atarigen_eeprom) AM_SIZE(&atarigen_eeprom_size)
+	AM_RANGE(0x1800, 0x180f) AM_READWRITE(pokey1_r, pokey1_w)
+	AM_RANGE(0x1810, 0x1813) AM_READ(leta_r)
+	AM_RANGE(0x1830, 0x183f) AM_READWRITE(pokey2_r, pokey2_w)
+	AM_RANGE(0x1840, 0x1840) AM_READ(switch_6502_r)
+	AM_RANGE(0x1850, 0x1850) AM_READWRITE(YM2151_status_port_0_r, YM2151_register_port_0_w)
+	AM_RANGE(0x1851, 0x1851) AM_READWRITE(YM2151_status_port_0_r, YM2151_data_port_0_w)
+	AM_RANGE(0x1860, 0x1860) AM_READ(sound_6502_r)
+	AM_RANGE(0x1870, 0x1870) AM_WRITE(tms5220_w)
+	AM_RANGE(0x1872, 0x1873) AM_WRITE(tms5220_strobe_w)
+	AM_RANGE(0x1874, 0x1874) AM_WRITE(sound_6502_w)
+	AM_RANGE(0x1876, 0x1876) AM_WRITE(coincount_w)
+	AM_RANGE(0x1878, 0x1878) AM_WRITE(atarigen_6502_irq_ack_w)
+	AM_RANGE(0x187a, 0x187a) AM_WRITE(mixer_w)
+	AM_RANGE(0x187c, 0x187c) AM_WRITE(switch_6502_w)
+	AM_RANGE(0x187e, 0x187e) AM_WRITE(sound_enable_w)
+	AM_RANGE(0x4000, 0xffff) AM_ROM
+ADDRESS_MAP_END
 
 
 
@@ -788,14 +688,11 @@ INPUT_PORTS_START( 720 )
 	PORT_START	/* ADC3 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START	/* LETA0 */
-	PORT_ANALOG( 0xff, 0x0000, IPT_DIAL | IPF_PLAYER1, 30, 10, 0, 0 )	// mask was 0xffff, but should be 0xff
+	PORT_START	/* LETA0/1 */
+	PORT_ANALOG( 0xffff, 0x0000, IPT_DIAL | IPF_PLAYER1, 30, 10, 0, 0 )
 
-	PORT_START	/* LETA1 */
-	/* <Jake> */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL_V | IPF_PLAYER4, 1, 0, 0, 0 )		// increase sensitivity if you 
-	/* </Jake> */														// have original controller
-	//PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED ) // Original line
+	PORT_START	/* filler */
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* LETA2 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -848,22 +745,6 @@ INPUT_PORTS_START( 720 )
 	PORT_DIPSETTING(    0xc0, "3 to Start, 1 to Continue" )
 	PORT_DIPSETTING(    0x00, "2 to Start, 1 to Continue" )
 	PORT_DIPSETTING(    0x40, "1 to Start, 1 to Continue" )
-	
-	/* fake ports for analog stick control hack */
-	/* listed as player 2 so AD stick and dial inputs aren't mixed */
-	PORT_START
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X | IPF_PLAYER2, 100, 10, 0x00, 0xff)
-
-	PORT_START
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_PLAYER2 | IPF_REVERSE, 100, 10, 0x00, 0xff)
-	
-	/* fake port for digital stick control hack */
-	/* listed as player 3 so AD stick and 8way stick inputs aren't mixed */
-	PORT_START
-	PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER3 )
-	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER3 )
-	PORT_BIT ( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER3 )
-	PORT_BIT ( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER3 )
 INPUT_PORTS_END
 
 
@@ -1277,11 +1158,11 @@ static MACHINE_DRIVER_START( atarisy2 )
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main", T11, ATARI_CLOCK_20MHz/2)
 	MDRV_CPU_CONFIG(t11_data)
-	MDRV_CPU_MEMORY(main_readmem,main_writemem)
+	MDRV_CPU_PROGRAM_MAP(main_map,0)
 	MDRV_CPU_VBLANK_INT(vblank_int,1)
 	
 	MDRV_CPU_ADD_TAG("sound", M6502, ATARI_CLOCK_14MHz/8)
-	MDRV_CPU_MEMORY(sound_readmem,sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(sound_map,0)
 	MDRV_CPU_PERIODIC_INT(atarigen_6502_irq_gen,(UINT32)(1000000000.0/((double)ATARI_CLOCK_20MHz/2/16/16/16/10)))
 	
 	MDRV_FRAMES_PER_SECOND(60)

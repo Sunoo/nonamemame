@@ -21,35 +21,6 @@ static int mouse_button_2; /* OptiMAME mouse extension */
 
 int joystick;
 int steadykey;
- 
-/*start MAME:analog+*/
-/* option variables */
-//static int				singlemouse = 0;
-int							switchmice = 0;
-int							switchaxes = 0;
-int							splitmouse = 0;
-int							resetmouse = 0;
-#ifdef ANALOGPEDALON
-int							analog_pedal = 1;
-#endif	/* ANALOGPEDALON */
-
-// mappable mouse axes stuff
-struct Mouse_Axes
-{
-	int xmouse;
-	int xaxis;
-	int ymouse;
-	int yaxis;
-};
-
-// analog tables for the mice
-static struct Mouse_Axes os_player_mouse_axes[MAX_PLAYERS];		// mame only suports two mice for dos
-const int mouse_map_default[MAX_PLAYERS]	= {0,1,-1,-1};		// like default mame mapping
-
-
-// internal function prototypes
-static void init_mouse_arrays(const int playermousedefault[]);
-/*end MAME:analog+  */
 
 static struct KeyboardInfo keylist[ 256 ];
 
@@ -622,25 +593,10 @@ void osd_lightgun_read(int player,int *deltax,int *deltay)
 
 void osd_trak_read(int player,int *deltax,int *deltay)
 {
-/*start MAME:analog+*/
-	int mousex,mousey;
-	int axisx, axisy;
-
-	mousex = os_player_mouse_axes[player].xmouse;
-	mousey = os_player_mouse_axes[player].ymouse;
-	axisx = os_player_mouse_axes[player].xaxis;
-	axisy = os_player_mouse_axes[player].yaxis;
-
-	*deltax = 0;
-	*deltay = 0;
-
-	if ((mousex == 0 || mousey == 0) && use_mouse && use_mouse_1)
-/*end MAME:analog+  */
+	if (player == 0 && use_mouse && use_mouse_1)
 	{
 		static int skip;
-/*start MAME:analog+*/
-		static int tempValues[2];		// two axis
-/*end MAME:analog+  */
+		static int mx,my;
 
 		/* get_mouse_mickeys() doesn't work when called 60 times per second,
 		   it often returns 0, so I have to call it every other frame and split
@@ -648,35 +604,23 @@ void osd_trak_read(int player,int *deltax,int *deltay)
 		  */
 		if (skip)
 		{
-/*start MAME:analog+*/
-			if (mousex == 0) *deltax = tempValues[axisx];
-			if (mousey == 0) *deltay = tempValues[axisy];
-/*end MAME:analog+  */
+			*deltax = mx;
+			*deltay = my;
 		}
 		else
 		{
-/*start MAME:analog+*/
-			get_mouse_mickeys(&tempValues[0],&tempValues[1]);
-			if (mousex == 0)
-			{
-				*deltax = tempValues[axisx]/2;
-				tempValues[axisx] -= *deltax;
-			}
-			if (mousey == 0)
-			{
-				*deltay = tempValues[axisy]/2;
-				tempValues[axisy] -= *deltay;
-			}
-/*end MAME:analog+  */
+			get_mouse_mickeys(&mx,&my);
+			*deltax = mx/2;
+			*deltay = my/2;
+			mx -= *deltax;
+			my -= *deltay;
 		}
 		skip ^= 1;
 	}
-/*start MAME:analog+*/
-	if ((mousex == 1 || mousey == 1) && use_mouse && use_mouse_2)
-/*end MAME:analog+  */
+	else if (player == 1 && use_mouse && use_mouse_2)
 	{
 		static int skip2;
-		static int tempValues2[2];		// two axis
+		static int mx2,my2;
 		static __dpmi_regs r;
 
 		/* Get mouse button state */
@@ -690,35 +634,28 @@ void osd_trak_read(int player,int *deltax,int *deltay)
 		  */
 		if (skip2)
 		{
-/*start MAME:analog+*/
-			if (mousex == 1) *deltax = tempValues2[axisx];
-			if (mousey == 1) *deltay = tempValues2[axisy];
-/*end MAME:analog+  */
+			*deltax = mx2;
+			*deltay = my2;
 		}
 		else  /* Poll secondary mouse */
 		{
 			r.x.ax = 111;
 			__dpmi_int(0x33, &r);
+			mx2 = (signed short)r.x.cx;
+			my2 = (signed short)r.x.dx;
 
-/*start MAME:analog+*/
-			tempValues2[0] = (signed short)r.x.cx>>1;
-			tempValues2[1] = (signed short)r.x.dx>>1;
-
-			if (mousex == 1)
-			{
-				*deltax = tempValues2[axisy];
-			}
-			if (mousey == 1)
-			{
-				*deltay = tempValues2[axisy];
-			}
-/*end MAME:analog+  */
+			*deltax = mx2/2;
+			*deltay = my2/2;
+			mx2 -= *deltax;
+			my2 -= *deltay;
 		}
 		skip2 ^= 1;
 	}
-/*start MAME:analog+*/
-// moved the default *deltax=0 & *deltay=0 to before this if () statement
-/*end MAME:analog+  */
+	else
+	{
+		*deltax = 0;
+		*deltay = 0;
+	}
 }
 
 
@@ -1019,7 +956,6 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 
 				case IPT_AD_STICK_X:
 				case IPT_AD_STICK_Y:
-				case IPT_AD_STICK_Z:
 					if (!adstick)
 					{
 						if ((ad_stick_ini != NULL) && (*ad_stick_ini != 0))
@@ -1039,7 +975,6 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 					break;
 
 				case IPT_PEDAL:
-				case IPT_PEDAL2:
 					if (!pedal)
 					{
 						if ((pedal_ini != NULL) && (*pedal_ini != 0))
@@ -1073,10 +1008,6 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 
 		if (!use_mouse_1 && !use_mouse_2)
 			use_mouse = 0;
-
-/*start MAME:analog+*/
-		init_mouse_arrays(mouse_map_default);	// do the normal mapping
-/*end MAME:analog+  */
 	}
 	else
 	{
@@ -1155,150 +1086,3 @@ void msdos_shutdown_input(void)
 	}
 	remove_keyboard();
 }
-
-
-/*start MAME:analog+*/
-// init's os_player_mouse_axes
-static void init_mouse_arrays(const int playermousedefault[])
-{
-	int i;
-
-	for (i = 0; i < MAX_PLAYERS; i++)	// dosMame only does 2 mice, but has 4 players
-	{
-		os_player_mouse_axes[i].xmouse = playermousedefault[i];
-		os_player_mouse_axes[i].ymouse = playermousedefault[i];
-		os_player_mouse_axes[i].xaxis = 0;
-		os_player_mouse_axes[i].yaxis = 1;
-	}
-}
-
-/* osd UI input functions */
-/* trackballs / mice */
-int osd_numbermice(void)	// return # of mice connected
-{
-	if (!use_mouse)
-		return 0;
-	else if (use_mouse_1 && use_mouse_2)
-		return 2;
-	else if (use_mouse_1)
-		return 1;
-	else
-		return 0;			// need to check this logic
-}
-
-char *osd_getmousename(char *name, int mouse)	// gets name to be displayed
-{												// note mouse, !player's mouse
-	if ((mouse < 2) && (mouse >= 0))
-		sprintf(name, "mouse %d", mouse+1);
-	else
-		sprintf(name, "no mouse");
-
-	return name;			// need to check this logic
-}
-
-int osd_getplayer_mouse(int player)				// returns mouse # of player
-{
-	return os_player_mouse_axes[player].xmouse;	// need to check this
-}
-
-int osd_setplayer_mouse(int player, int mouse)	// sets player's mouse
-{
-	if (mouse >= 2)
-		return 1;								// returns 1 if error
-
-	os_player_mouse_axes[player].xmouse = mouse;
-	os_player_mouse_axes[player].ymouse = mouse;	// need to check this
-	return 0;
-}
-
-int osd_getplayer_mousesplit(int player, int axis)	// returns mouse # of player
-{
-	if (axis == 0)
-		return os_player_mouse_axes[player].xmouse;
-	else
-		return os_player_mouse_axes[player].ymouse;	// need to check this
-}
-
-int osd_setplayer_mousesplit(int player, int playeraxis, int mouse)
-{												// sets player's mouse
-	if (mouse >= 2)
-		return 1;								// returns 1 if error
-
-	if (playeraxis == 0)
-		os_player_mouse_axes[player].xmouse = mouse;
-	else
-		os_player_mouse_axes[player].ymouse = mouse;	// need to check this
-	return 0;
-}
-
-/* mouse axes settings */
-int osd_getnummouseaxes(void)			// returns number of mappable axes
-{
-	return 2;							// defaults to 2 right now
-}
-
-int osd_getplayer_mouseaxis(int player, int axis)
-{
-	if (axis == 0)
-		return os_player_mouse_axes[player].xaxis;
-	else
-		return os_player_mouse_axes[player].yaxis;
-//	return 0;
-}
-
-int osd_setplayer_mouseaxis(int player, int playeraxis, int mouse, int axis)
-{
-	switch (playeraxis)	/* switch in case add z-axis */
-	{
-		case 0:
-			os_player_mouse_axes[player].xmouse = mouse;
-			os_player_mouse_axes[player].xaxis  = axis;
-			break;
-		case 1:
-			os_player_mouse_axes[player].ymouse = mouse;
-			os_player_mouse_axes[player].yaxis  = axis;
-			break;
-		default:
-			/* error */
-			break;
-	}
-	return 0;
-}
-
-
-/* analog joysticks */
-int osd_numberjoystick(void)		// return # of joy connected
-{
-	return num_joysticks;
-}
-
-int osd_getnumjoyaxes(int joynum)
-{
-	return 2;
-}
-
-int osd_isNegativeSemiAxis(InputCode code)
-{
-	return ( GET_JOYCODE_DIR( code ) == 1 );	/* 1 == neg, 2 == pos */
-}
-
-char* osd_getjoyaxisname(char *name, int joynum, int axis)
-{
-	strncpy(name, joy[joynum].stick[0].axis[axis].name, 10);
-
-	return name;
-}
-
-char *osd_getjoyname(char *name, int joynum)	// gets name to be displayed
-{												// dos mame has something like this, need to check it
-	if ((joynum < num_joysticks) && (joynum >= 0))
-	{
-		sprintf(name, "%s", joynames[joynum]);
-	}
-	else
-	{
-		sprintf(name, "No joystick");
-	}
-	return name;
-}
-/*end MAME:analog+  */

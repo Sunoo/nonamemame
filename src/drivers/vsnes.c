@@ -192,26 +192,6 @@ extern WRITE_HANDLER( vsnes_in0_1_w );
 static UINT8 *work_ram, *work_ram_1;
 static int coin;
 
-static READ_HANDLER( mirror_ram_r )
-{
-	return work_ram[ offset & 0x7ff ];
-}
-
-static READ_HANDLER( mirror_ram_1_r )
-{
-	return work_ram[ offset & 0x7ff ];
-}
-
-static WRITE_HANDLER( mirror_ram_w )
-{
-	work_ram[ offset & 0x7ff ] = data;
-}
-
-static WRITE_HANDLER( mirror_ram_1_w )
-{
-	work_ram[ offset & 0x7ff ] = data;
-}
-
 static WRITE_HANDLER( sprite_dma_w )
 {
 	int source = ( data & 7 ) * 0x100;
@@ -255,52 +235,29 @@ static WRITE_HANDLER( vsnes_coin_counter_1_w )
 }
 /******************************************************************************/
 
-static MEMORY_READ_START (readmem)
-	{ 0x0000, 0x07ff, MRA_RAM },
-	{ 0x0800, 0x1fff, mirror_ram_r },
-	{ 0x2000, 0x3fff, ppu2c03b_0_r },
-	{ 0x4000, 0x4015, NESPSG_0_r },
-	{ 0x4016, 0x4016, vsnes_in0_r },
-	{ 0x4017, 0x4017, vsnes_in1_r },
-	{ 0x4020, 0x4020, vsnes_coin_counter_r },
-	{ 0x8000, 0xffff, MRA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( vsnes_cpu1_map, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x07ff) AM_MIRROR(0x1800) AM_RAM AM_BASE(&work_ram)
+	AM_RANGE(0x2000, 0x3fff) AM_READWRITE(ppu2c03b_0_r, ppu2c03b_0_w)
+	AM_RANGE(0x4011, 0x4011) AM_WRITE(DAC_0_data_w)
+	AM_RANGE(0x4014, 0x4014) AM_WRITE(sprite_dma_w)
+	AM_RANGE(0x4000, 0x4015) AM_READWRITE(NESPSG_0_r, NESPSG_0_w)
+	AM_RANGE(0x4016, 0x4016) AM_READWRITE(vsnes_in0_r, vsnes_in0_w)
+	AM_RANGE(0x4017, 0x4017) AM_READWRITE(vsnes_in1_r, MWA8_NOP) /* in 1 writes ignored */
+	AM_RANGE(0x4020, 0x4020) AM_READWRITE(vsnes_coin_counter_r, vsnes_coin_counter_w)
+	AM_RANGE(0x8000, 0xffff) AM_ROM
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START (writemem)
-	{ 0x0000, 0x07ff, MWA_RAM, &work_ram },
-	{ 0x0800, 0x1fff, mirror_ram_w },
-	{ 0x2000, 0x3fff, ppu2c03b_0_w },
-	{ 0x4011, 0x4011, DAC_0_data_w },
-	{ 0x4014, 0x4014, sprite_dma_w },
-	{ 0x4000, 0x4015, NESPSG_0_w },
-	{ 0x4016, 0x4016, vsnes_in0_w },
-	{ 0x4017, 0x4017, MWA_NOP }, /* in 1 writes ignored */
-	{ 0x4020, 0x4020, vsnes_coin_counter_w },
-	{ 0x8000, 0xffff, MWA_ROM },
-MEMORY_END
-
-static MEMORY_READ_START (readmem_1)
-	{ 0x0000, 0x07ff, MRA_RAM },
-	{ 0x0800, 0x1fff, mirror_ram_1_r },
-	{ 0x2000, 0x3fff, ppu2c03b_1_r },
-	{ 0x4000, 0x4015, NESPSG_0_r },
-	{ 0x4016, 0x4016, vsnes_in0_1_r },
-	{ 0x4017, 0x4017, vsnes_in1_1_r },
-	{ 0x8000, 0xffff, MRA_ROM },
-MEMORY_END
-
-static MEMORY_WRITE_START (writemem_1)
-	{ 0x0000, 0x07ff, MWA_RAM, &work_ram_1 },
-	{ 0x0800, 0x1fff, mirror_ram_1_w },
-	{ 0x2000, 0x3fff, ppu2c03b_1_w },
-	{ 0x4011, 0x4011, DAC_1_data_w },
-	{ 0x4014, 0x4014, sprite_dma_1_w },
-	{ 0x4000, 0x4015, NESPSG_1_w },
-	{ 0x4016, 0x4016, vsnes_in0_1_w },
-	{ 0x4017, 0x4017, MWA_NOP }, /* in 1 writes ignored */
-	{ 0x4020, 0x4020, vsnes_coin_counter_1_w },
-	{ 0x8000, 0xffff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( vsnes_cpu2_map, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x07ff) AM_MIRROR(0x1800) AM_RAM AM_BASE(&work_ram_1)
+	AM_RANGE(0x2000, 0x3fff) AM_READWRITE(ppu2c03b_1_r, ppu2c03b_1_w)
+	AM_RANGE(0x4011, 0x4011) AM_WRITE(DAC_1_data_w)
+	AM_RANGE(0x4014, 0x4014) AM_WRITE(sprite_dma_1_w)
+	AM_RANGE(0x4000, 0x4015) AM_READWRITE(NESPSG_1_r, NESPSG_1_w)
+	AM_RANGE(0x4016, 0x4016) AM_READWRITE(vsnes_in0_1_r, vsnes_in0_1_w)
+	AM_RANGE(0x4017, 0x4017) AM_READWRITE(vsnes_in1_1_r, MWA8_NOP) /* in 1 writes ignored */
+	AM_RANGE(0x4020, 0x4020) AM_WRITE(vsnes_coin_counter_1_w)
+	AM_RANGE(0x8000, 0xffff) AM_ROM
+ADDRESS_MAP_END
 
 /******************************************************************************/
 
@@ -2113,7 +2070,7 @@ static MACHINE_DRIVER_START( vsnes )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(N2A03,N2A03_DEFAULTCLOCK)
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_PROGRAM_MAP(vsnes_cpu1_map,0)
 								/* some carts also trigger IRQs */
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(( ( ( 1.0 / 60.0 ) * 1000000.0 ) / 262 ) * ( 262 - 239 ))
@@ -2142,10 +2099,10 @@ static MACHINE_DRIVER_START( vsdual )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(N2A03,N2A03_DEFAULTCLOCK)
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_PROGRAM_MAP(vsnes_cpu1_map,0)
 								/* some carts also trigger IRQs */
 	MDRV_CPU_ADD(N2A03,N2A03_DEFAULTCLOCK)
-	MDRV_CPU_MEMORY(readmem_1,writemem_1)
+	MDRV_CPU_PROGRAM_MAP(vsnes_cpu2_map,0)
 								/* some carts also trigger IRQs */
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(( ( ( 1.0 / 60.0 ) * 1000000.0 ) / 262 ) * ( 262 - 239 ))
@@ -2176,26 +2133,14 @@ MACHINE_DRIVER_END
 
 ROM_START( suprmrio)
 	ROM_REGION( 0x10000,REGION_CPU1, 0 ) /* 6502 memory */
-	ROM_LOAD( "1d",  0x8000, 0x2000, CRC(be4d5436) SHA1(08162a7c987f1939d09bebdb676f596c86abf465) )
-	ROM_LOAD( "1c",  0xa000, 0x2000, CRC(0011fc5a) SHA1(5c2c49938a12affc03e64e5bdab307998be20020) )
-	ROM_LOAD( "1b",  0xc000, 0x2000, CRC(b1b87893) SHA1(8563ceaca664cf4495ef1020c07179ca7e4af9f3) )
-	ROM_LOAD( "1a",  0xe000, 0x2000, CRC(1abf053c) SHA1(f17db88ce0c9bf1ed88dc16b9650f11d10835cec) )
+	ROM_LOAD( "mds-sm4.1d",  0x8000, 0x2000, CRC(be4d5436) SHA1(08162a7c987f1939d09bebdb676f596c86abf465) )
+	ROM_LOAD( "mds-sm4.1c",  0xa000, 0x2000, CRC(0011fc5a) SHA1(5c2c49938a12affc03e64e5bdab307998be20020) )
+	ROM_LOAD( "mds-sm4.1b",  0xc000, 0x2000, CRC(b1b87893) SHA1(8563ceaca664cf4495ef1020c07179ca7e4af9f3) )
+	ROM_LOAD( "mds-sm4.1a",  0xe000, 0x2000, CRC(1abf053c) SHA1(f17db88ce0c9bf1ed88dc16b9650f11d10835cec) )
 
 	ROM_REGION( 0x4000,REGION_GFX1, 0  ) /* PPU memory */
-	ROM_LOAD( "2b",  0x0000, 0x2000, CRC(42418d40) SHA1(22ab61589742cfa4cc6856f7205d7b4b8310bc4d) )
-	ROM_LOAD( "2a",  0x2000, 0x2000, CRC(15506b86) SHA1(69ecf7a3cc8bf719c1581ec7c0d68798817d416f) )
-ROM_END
-
-ROM_START( mrio2002 )
-	ROM_REGION( 0x10000,REGION_CPU1, 0 ) /* 6502 memory */
-	ROM_LOAD( "1d",  0x8000, 0x2000, CRC(be4d5436) )
-	ROM_LOAD( "1c",  0xa000, 0x2000, CRC(0011fc5a) )
-	ROM_LOAD( "1b",  0xc000, 0x2000, CRC(b1b87893) )
-	ROM_LOAD( "1a",  0xe000, 0x2000, CRC(1abf053c) )
-
-	ROM_REGION( 0x4000,REGION_GFX1, 0  ) /* PPU memory */
-	ROM_LOAD( "2b",  0x0000, 0x2000, CRC(1feda640) )
-	ROM_LOAD( "2a",  0x2000, 0x2000, CRC(15506b86) )
+	ROM_LOAD( "mds-sm4.2b",  0x0000, 0x2000, CRC(42418d40) SHA1(22ab61589742cfa4cc6856f7205d7b4b8310bc4d) )
+	ROM_LOAD( "mds-sm4.2a",  0x2000, 0x2000, CRC(15506b86) SHA1(69ecf7a3cc8bf719c1581ec7c0d68798817d416f) )
 ROM_END
 
 ROM_START( iceclimb )
@@ -2225,14 +2170,14 @@ ROM_END
 /* Gun games */
 ROM_START( duckhunt )
 	ROM_REGION( 0x10000,REGION_CPU1, 0 ) /* 6502 memory */
-	ROM_LOAD( "1d",  0x8000, 0x2000, CRC(3f51f0ed) SHA1(984d8a5cecddde776ffd4f718ee0ca7a9959228b) )
-	ROM_LOAD( "1c",  0xa000, 0x2000, CRC(8bc7376c) SHA1(d90d663c5e5b6d5247089c8ba618912305049b19) )
-	ROM_LOAD( "1b",  0xc000, 0x2000, CRC(a042b6e1) SHA1(df571c31a6a52df56869eda0621f7615a625e66d) )
-	ROM_LOAD( "1a",  0xe000, 0x2000, CRC(1906e3ab) SHA1(bff68829a96e2d251dd12129f84bdf1dbdf61d06) )
+	ROM_LOAD( "mds-dh3.1d",  0x8000, 0x2000, CRC(3f51f0ed) SHA1(984d8a5cecddde776ffd4f718ee0ca7a9959228b) )
+	ROM_LOAD( "mds-dh3.1c",  0xa000, 0x2000, CRC(8bc7376c) SHA1(d90d663c5e5b6d5247089c8ba618912305049b19) )
+	ROM_LOAD( "mds-dh3.1b",  0xc000, 0x2000, CRC(a042b6e1) SHA1(df571c31a6a52df56869eda0621f7615a625e66d) )
+	ROM_LOAD( "mds-dh3.1a",  0xe000, 0x2000, CRC(1906e3ab) SHA1(bff68829a96e2d251dd12129f84bdf1dbdf61d06) )
 
 	ROM_REGION( 0x4000, REGION_GFX1, 0 ) /* PPU memory */
-	ROM_LOAD( "2b",  0x0000, 0x2000, CRC(0c52ec28) SHA1(c8fb6a5d4c13a7075d313326e2da9ce88780a88d) )
-	ROM_LOAD( "2a",  0x2000, 0x2000, CRC(3d238df3) SHA1(e868ef3d5357ef5294e4faeecc9dbf801c5253e8) )
+	ROM_LOAD( "mds-dh3.2b",  0x0000, 0x2000, CRC(0c52ec28) SHA1(c8fb6a5d4c13a7075d313326e2da9ce88780a88d) )
+	ROM_LOAD( "mds-dh3.2a",  0x2000, 0x2000, CRC(3d238df3) SHA1(e868ef3d5357ef5294e4faeecc9dbf801c5253e8) )
 ROM_END
 
 ROM_START( hogalley)
@@ -2310,14 +2255,14 @@ ROM_END
 
 ROM_START( excitebk )
 	ROM_REGION( 0x10000,REGION_CPU1, 0 ) /* 6502 memory */
-	ROM_LOAD( "eb-1d",  0x8000, 0x2000, CRC(7e54df1d) SHA1(38d878041976386e8608c73133040b18d0e4b9cd) )
-	ROM_LOAD( "eb-1c",  0xa000, 0x2000, CRC(89baae91) SHA1(6aebf13c415e3246edf7daa847533b7e3ae0425f) )
-	ROM_LOAD( "eb-1b",  0xc000, 0x2000, CRC(4c0c2098) SHA1(078f24ce02f5fb91d7ed7fa59aec8efbec38aed1) )
-	ROM_LOAD( "eb-1a",  0xe000, 0x2000, CRC(b9ab7110) SHA1(89e3bd5f42b5b5e869ee46afe4f25a1a17d3814d) )
+	ROM_LOAD( "mds-eb4.1d",  0x8000, 0x2000, CRC(7e54df1d) SHA1(38d878041976386e8608c73133040b18d0e4b9cd) )
+	ROM_LOAD( "mds-eb4.1c",  0xa000, 0x2000, CRC(89baae91) SHA1(6aebf13c415e3246edf7daa847533b7e3ae0425f) )
+	ROM_LOAD( "mds-eb4.1b",  0xc000, 0x2000, CRC(4c0c2098) SHA1(078f24ce02f5fb91d7ed7fa59aec8efbec38aed1) )
+	ROM_LOAD( "mds-eb4.1a",  0xe000, 0x2000, CRC(b9ab7110) SHA1(89e3bd5f42b5b5e869ee46afe4f25a1a17d3814d) )
 
 	ROM_REGION( 0x4000,REGION_GFX1, 0 ) /* PPU memory */
-	ROM_LOAD( "eb-2b",  0x0000, 0x2000, CRC(80be1f50) SHA1(d8544b9a0a9d8719ab601fa9c68c4305385b14c7) )
-	ROM_LOAD( "eb-2a",  0x2000, 0x2000, CRC(a9b49a05) SHA1(c14706e6a5524f81e79c101e32deef9f3d60de3f) )
+	ROM_LOAD( "mds-eb4.2b",  0x0000, 0x2000, CRC(80be1f50) SHA1(d8544b9a0a9d8719ab601fa9c68c4305385b14c7) )
+	ROM_LOAD( "mds-eb4.2a",  0x2000, 0x2000, CRC(a9b49a05) SHA1(c14706e6a5524f81e79c101e32deef9f3d60de3f) )
 ROM_END
 
 ROM_START( excitbkj )
@@ -2330,7 +2275,7 @@ ROM_START( excitbkj )
 	ROM_REGION( 0x4000,REGION_GFX1, 0 ) /* PPU memory */
 	ROM_LOAD( "eb4-48ba.bin",  0x0000, 0x2000, CRC(62a76c52) SHA1(7ebd0dac976abe8636f4f75a3b2a473d7a54934d) )
 //	ROM_LOAD( "eb4-48aa.bin",  0x2000, 0x2000, CRC(a9b49a05) SHA1(c14706e6a5524f81e79c101e32deef9f3d60de3f) )
-	ROM_LOAD( "eb-2a",         0x2000, 0x2000, CRC(a9b49a05) SHA1(c14706e6a5524f81e79c101e32deef9f3d60de3f) )
+	ROM_LOAD( "mds-eb4.2a",    0x2000, 0x2000, CRC(a9b49a05) SHA1(c14706e6a5524f81e79c101e32deef9f3d60de3f) )
 ROM_END
 
 ROM_START( jajamaru )
@@ -2715,24 +2660,46 @@ ROM_END
 
 ROM_START( vstennis )
 	ROM_REGION( 0x10000,REGION_CPU1, 0 ) /* 6502 memory */
-	ROM_LOAD( "vst-1d",  0x08000, 0x02000, CRC(f4e9fca0) SHA1(05b91f578bc0a118ab75ce487b14adcd1fb6e714) )
-	ROM_LOAD( "vst-1c",  0x0a000, 0x02000, CRC(7e52df58) SHA1(a5ddebfa1f7f1a2b6b46d4b4a7f2c36477158e7e) )
-	ROM_LOAD( "vst-1b",  0x0c000, 0x02000, CRC(1a0d809a) SHA1(44ce2f9250940bf5f754918b4a2ae63f76181eff) )
-	ROM_LOAD( "vst-1a",  0x0e000, 0x02000, CRC(8483a612) SHA1(c854f72d86fe4e99c4c6426cfc5ea6f2997bfc8c) )
+	ROM_LOAD( "mds-te.1d",  0x08000, 0x02000, CRC(f4e9fca0) SHA1(05b91f578bc0a118ab75ce487b14adcd1fb6e714) )
+	ROM_LOAD( "mds-te.1c",  0x0a000, 0x02000, CRC(7e52df58) SHA1(a5ddebfa1f7f1a2b6b46d4b4a7f2c36477158e7e) )
+	ROM_LOAD( "mds-te.1b",  0x0c000, 0x02000, CRC(1a0d809a) SHA1(44ce2f9250940bf5f754918b4a2ae63f76181eff) )
+	ROM_LOAD( "mds-te.1a",  0x0e000, 0x02000, CRC(8483a612) SHA1(c854f72d86fe4e99c4c6426cfc5ea6f2997bfc8c) )
 
 	ROM_REGION( 0x4000,REGION_GFX1, 0 ) /* PPU memory */
-	ROM_LOAD( "vst-2b",  0x0000, 0x2000, CRC(9de19c9c) SHA1(1cb65e423a6c2d2a56c67ad08ecf7e746551c322) )
-	ROM_LOAD( "vst-2a",  0x2000, 0x2000, CRC(67a5800e) SHA1(7bad1b486d9dac962fa8c87984038be4ac6b699b) )
+	ROM_LOAD( "mds-te.2b",  0x0000, 0x2000, CRC(9de19c9c) SHA1(1cb65e423a6c2d2a56c67ad08ecf7e746551c322) )
+	ROM_LOAD( "mds-te.2a",  0x2000, 0x2000, CRC(67a5800e) SHA1(7bad1b486d9dac962fa8c87984038be4ac6b699b) )
 
 	ROM_REGION( 0x10000,REGION_CPU2, 0 ) /* 6502 memory */
-	ROM_LOAD( "vst-6d",  0x08000, 0x02000, CRC(3131b1bf) SHA1(ed26df260df3a295b5c9747530428efec29676c0) )
-	ROM_LOAD( "vst-6c",  0x0a000, 0x02000, CRC(27195d13) SHA1(a1d6960a194cb048c5c26f9378b49da7d6e7d1af) )
-	ROM_LOAD( "vst-6b",  0x0c000, 0x02000, CRC(4b4e26ca) SHA1(68821357f473a0e1c575b547cc8c67be965fe73a) )
-	ROM_LOAD( "vst-6a",  0x0e000, 0x02000, CRC(b6bfee07) SHA1(658458931efbb260faec3a11ee530326c56e63a9) )
+	ROM_LOAD( "mds-te.6d",  0x08000, 0x02000, CRC(3131b1bf) SHA1(ed26df260df3a295b5c9747530428efec29676c0) )
+	ROM_LOAD( "mds-te.6c",  0x0a000, 0x02000, CRC(27195d13) SHA1(a1d6960a194cb048c5c26f9378b49da7d6e7d1af) )
+	ROM_LOAD( "mds-te.6b",  0x0c000, 0x02000, CRC(4b4e26ca) SHA1(68821357f473a0e1c575b547cc8c67be965fe73a) )
+	ROM_LOAD( "mds-te.6a",  0x0e000, 0x02000, CRC(b6bfee07) SHA1(658458931efbb260faec3a11ee530326c56e63a9) )
 
 	ROM_REGION( 0x4000,REGION_GFX2 , 0) /* PPU memory */
-	ROM_LOAD( "vst-8b",  0x0000, 0x2000, CRC(c81e9260) SHA1(6d4809a05364cc05485ee1add833428529af2be6) )
-	ROM_LOAD( "vst-8a",  0x2000, 0x2000, CRC(d91eb295) SHA1(6b69bcef5421a6bcde89a2d1f514853f9f7992c3) )
+	ROM_LOAD( "mds-te.8b",  0x0000, 0x2000, CRC(c81e9260) SHA1(6d4809a05364cc05485ee1add833428529af2be6) )
+	ROM_LOAD( "mds-te.8a",  0x2000, 0x2000, CRC(d91eb295) SHA1(6b69bcef5421a6bcde89a2d1f514853f9f7992c3) )
+ROM_END
+
+ROM_START( vstennij )
+	ROM_REGION( 0x10000,REGION_CPU1, 0 ) /* 6502 memory */
+	ROM_LOAD( "te_1d_a3.bin", 0x08000, 0x2000, CRC(8d88fbe5) SHA1(1aa172d02d0d47325edf2f5ea4fc3c1c52f1efbe) )
+	ROM_LOAD( "te_1c_a2.bin", 0x0a000, 0x2000, CRC(5f00c129) SHA1(e9954ebedc037be0a177286bbfc2ecdaa9223d85) )
+	ROM_LOAD( "te_1b_a2.bin", 0x0c000, 0x2000, CRC(4b57910c) SHA1(1baeb31e0e9085ac6a9406a1802dfa47952d833e) )
+	ROM_LOAD( "te_1a_a2.bin", 0x0e000, 0x2000, CRC(41097060) SHA1(aec457f7780dcd693dd93076cc185d5db38d5b93) )
+
+	ROM_REGION( 0x4000,REGION_GFX1, 0 ) /* PPU memory */
+	ROM_LOAD( "te_2b_a.bin",  0x0000, 0x2000, CRC(9de19c9c) SHA1(1cb65e423a6c2d2a56c67ad08ecf7e746551c322) )
+	ROM_LOAD( "te_2a_a.bin",  0x2000, 0x2000, CRC(67a5800e) SHA1(7bad1b486d9dac962fa8c87984038be4ac6b699b) )
+
+	ROM_REGION( 0x10000,REGION_CPU2, 0 ) /* 6502 memory */
+	ROM_LOAD( "te_6d_a3.bin", 0x08000, 0x2000, CRC(b18fd769) SHA1(152413e065d1f5af0a70f9272a908dfbd162fe65) )
+	ROM_LOAD( "te_6c_a2.bin", 0x0a000, 0x2000, CRC(315d8178) SHA1(2165c8a42004fb5b1e6b8904a59159cd4157538e) )
+	ROM_LOAD( "te_6b_a2.bin", 0x0c000, 0x2000, CRC(18114f8d) SHA1(351894e0cc791028a43da0ec27d78d669cdeea27) )
+	ROM_LOAD( "te_6a_a2.bin", 0x0e000, 0x2000, CRC(50a2de11) SHA1(3e22e50c9ae2521dc7f4416ac834cdbd3988369e) )
+
+	ROM_REGION( 0x4000,REGION_GFX2 , 0) /* PPU memory */
+	ROM_LOAD( "te_8b_a.bin",  0x0000, 0x2000, CRC(c81e9260) SHA1(6d4809a05364cc05485ee1add833428529af2be6) )
+	ROM_LOAD( "te_8a_a.bin",  0x2000, 0x2000, CRC(d91eb295) SHA1(6b69bcef5421a6bcde89a2d1f514853f9f7992c3) )
 ROM_END
 
 ROM_START( wrecking )
@@ -2800,7 +2767,6 @@ GAMEX(1985, machridj, machridr, vsnes,   machridj, vspinbal, ROT0, "Nintendo",  
 GAME( 1986, rbibb,    0,        vsnes,   rbibb,    rbibb,    ROT0, "Namco",     "Vs. Atari R.B.I. Baseball (set 1)" )
 GAME( 1986, rbibba,	  rbibb,    vsnes,   rbibb,    rbibb,    ROT0, "Namco",     "Vs. Atari R.B.I. Baseball (set 2)" )
 GAME( 1986, suprmrio, 0,        vsnes,   suprmrio, suprmrio, ROT0, "Nintendo",  "Vs. Super Mario Bros." )
-GAME( 2002, mrio2002, suprmrio, vsnes,   suprmrio, suprmrio, ROT0, "Nintendo",  "Vs. Super Mario Bros 2002" )
 GAME( 1985, vsskykid, 0,        vsnes,   vsskykid, MMC3,	 ROT0, "Namco",     "Vs. Super SkyKid"  )
 GAMEX(1987, tkoboxng, 0,        vsnes,   tkoboxng, tkoboxng, ROT0, "Namco LTD.","Vs. TKO Boxing", GAME_WRONG_COLORS | GAME_IMPERFECT_GRAPHICS )
 GAME( 1984, smgolf,   0,        vsnes,   golf4s,   machridr, ROT0, "Nintendo",  "Vs. Stroke and Match Golf (Men Version)" )
@@ -2821,6 +2787,7 @@ GAME( 1988, vsfdf,    0,        vsnes,   vsfdf,    vsfdf,	 ROT0, "Konami",	"Vs. 
 
 /* Dual games */
 GAME( 1984, vstennis, 0,        vsdual,  vstennis, vstennis, ROT0, "Nintendo",  "Vs. Tennis"  )
+GAME( 1984, vstennij, vstennis, vsdual,  vstennis, vstennis, ROT0, "Nintendo",  "Vs. Tennis (Japan)"  )
 GAME( 1984, wrecking, 0,        vsdual,  wrecking, wrecking, ROT0, "Nintendo",  "Vs. Wrecking Crew" )
 GAME( 1984, balonfgt, 0,        vsdual,  balonfgt, balonfgt, ROT0, "Nintendo",  "Vs. Balloon Fight" )
 GAME( 1984, vsmahjng, 0,        vsdual,  vsmahjng, vstennis, ROT0, "Nintendo",  "Vs. Mahjang (Japan)"  )

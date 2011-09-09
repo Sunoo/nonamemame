@@ -28,6 +28,7 @@ INPUT_PORTS_START( pong )
 	PORT_ANALOG( 0x1ff, (PONG_MAX_V-15)/2, IPT_AD_STICK_Y, 100, 5, PONG_VBLANK - 12, 255)
 INPUT_PORTS_END
 
+
 static unsigned short colortable_source[] =
 {
 	0,1,
@@ -52,7 +53,7 @@ static int pong_video[] = {
 
 static PALETTE_INIT( pong )
 {
-	palette_set_color(0,0x00,0x00,0x00); /* black */
+	palette_set_color(0,0x00,0x00,0x00); /* black  */
 	palette_set_color(1,0xff,0xff,0xff); /* white (1k resistor) */
 	palette_set_color(2,0xd4,0xd4,0xd4); /* slightly darker white (1.2k resistor) */
 	memcpy(colortable,colortable_source,sizeof(colortable_source));
@@ -72,7 +73,7 @@ static MACHINE_DRIVER_START( pong )
 	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER)
 	MDRV_SCREEN_SIZE(PONG_MAX_H, PONG_MAX_V)
 	MDRV_VISIBLE_AREA(PONG_HBLANK, PONG_MAX_H-1, PONG_VBLANK, PONG_MAX_V-1)
-	MDRV_PALETTE_LENGTH(3)
+	MDRV_PALETTE_LENGTH(3)	
 	MDRV_COLORTABLE_LENGTH(sizeof(colortable_source)/sizeof(colortable_source[0]))
 
 	MDRV_PALETTE_INIT(pong)

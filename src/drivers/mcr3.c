@@ -443,42 +443,42 @@ static NVRAM_HANDLER( mcr3 )
  *
  *************************************/
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0xdfff, MRA_ROM },
-	{ 0xe000, 0xe9ff, MRA_RAM },
-	{ 0xf000, 0xf7ff, MRA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xdfff) AM_READ(MRA8_ROM)
+	AM_RANGE(0xe000, 0xe9ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xf000, 0xf7ff) AM_READ(MRA8_RAM)
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0xdfff, MWA_ROM },
-	{ 0xe000, 0xe7ff, MWA_RAM },
-	{ 0xe800, 0xe9ff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0xf000, 0xf7ff, mcr3_videoram_w, &videoram, &videoram_size },
-	{ 0xf800, 0xf8ff, mcr3_paletteram_w, &paletteram },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xdfff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xe000, 0xe7ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xe800, 0xe9ff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0xf000, 0xf7ff) AM_WRITE(mcr3_videoram_w) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+	AM_RANGE(0xf800, 0xf8ff) AM_WRITE(mcr3_paletteram_w) AM_BASE(&paletteram)
+ADDRESS_MAP_END
 
 
-static PORT_READ_START( readport )
-	{ 0x00, 0x00, input_port_0_r },
-	{ 0x01, 0x01, input_port_1_r },
-	{ 0x02, 0x02, input_port_2_r },
-	{ 0x03, 0x03, input_port_3_r },
-	{ 0x04, 0x04, input_port_4_r },
-	{ 0x07, 0x07, ssio_status_r },
-	{ 0x10, 0x10, input_port_0_r },
-	{ 0xf0, 0xf3, z80ctc_0_r },
-PORT_END
+static ADDRESS_MAP_START( readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_READ(input_port_0_r)
+	AM_RANGE(0x01, 0x01) AM_READ(input_port_1_r)
+	AM_RANGE(0x02, 0x02) AM_READ(input_port_2_r)
+	AM_RANGE(0x03, 0x03) AM_READ(input_port_3_r)
+	AM_RANGE(0x04, 0x04) AM_READ(input_port_4_r)
+	AM_RANGE(0x07, 0x07) AM_READ(ssio_status_r)
+	AM_RANGE(0x10, 0x10) AM_READ(input_port_0_r)
+	AM_RANGE(0xf0, 0xf3) AM_READ(z80ctc_0_r)
+ADDRESS_MAP_END
 
 
-static PORT_WRITE_START( writeport )
-	{ 0x00, 0x00, mcr_control_port_w },
-	{ 0x1c, 0x1f, ssio_data_w },
-	{ 0x84, 0x86, mcr_scroll_value_w },
-	{ 0xe0, 0xe0, watchdog_reset_w },
-	{ 0xe8, 0xe8, MWA_NOP },
-	{ 0xf0, 0xf3, z80ctc_0_w },
-PORT_END
+static ADDRESS_MAP_START( writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_WRITE(mcr_control_port_w)
+	AM_RANGE(0x1c, 0x1f) AM_WRITE(ssio_data_w)
+	AM_RANGE(0x84, 0x86) AM_WRITE(mcr_scroll_value_w)
+	AM_RANGE(0xe0, 0xe0) AM_WRITE(watchdog_reset_w)
+	AM_RANGE(0xe8, 0xe8) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0xf0, 0xf3) AM_WRITE(z80ctc_0_w)
+ADDRESS_MAP_END
 
 
 
@@ -488,20 +488,20 @@ PORT_END
  *
  *************************************/
 
-static MEMORY_WRITE_START( mcrmono_writemem )
-	{ 0x0000, 0xdfff, MWA_ROM },
-	{ 0xe000, 0xe7ff, MWA_RAM },
-	{ 0xe800, 0xe9ff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0xec00, 0xecff, mcr3_paletteram_w, &paletteram },
-	{ 0xf000, 0xf7ff, mcr3_videoram_w, &videoram, &videoram_size },
-MEMORY_END
+static ADDRESS_MAP_START( mcrmono_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xdfff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xe000, 0xe7ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xe800, 0xe9ff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0xec00, 0xecff) AM_WRITE(mcr3_paletteram_w) AM_BASE(&paletteram)
+	AM_RANGE(0xf000, 0xf7ff) AM_WRITE(mcr3_videoram_w) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+ADDRESS_MAP_END
 
 
-static PORT_WRITE_START( mcrmono_writeport )
-	{ 0x05, 0x05, mcrmono_control_port_w },
-	{ 0x07, 0x07, watchdog_reset_w },
-	{ 0xf0, 0xf3, z80ctc_0_w },
-PORT_END
+static ADDRESS_MAP_START( mcrmono_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x05, 0x05) AM_WRITE(mcrmono_control_port_w)
+	AM_RANGE(0x07, 0x07) AM_WRITE(watchdog_reset_w)
+	AM_RANGE(0xf0, 0xf3) AM_WRITE(z80ctc_0_w)
+ADDRESS_MAP_END
 
 
 
@@ -511,21 +511,21 @@ PORT_END
  *
  *************************************/
 
-static MEMORY_READ_START( spyhunt_readmem )
-	{ 0x0000, 0xdfff, MRA_ROM },
-	{ 0xe000, 0xebff, MRA_RAM },
-	{ 0xf000, 0xffff, MRA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( spyhunt_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xdfff) AM_READ(MRA8_ROM)
+	AM_RANGE(0xe000, 0xebff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xf000, 0xffff) AM_READ(MRA8_RAM)
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( spyhunt_writemem )
-	{ 0x0000, 0xdfff, MWA_ROM },
-	{ 0xe000, 0xe7ff, spyhunt_videoram_w, &videoram, &videoram_size },
-	{ 0xe800, 0xebff, spyhunt_alpharam_w, &spyhunt_alpharam },
-	{ 0xf000, 0xf7ff, MWA_RAM },
-	{ 0xf800, 0xf9ff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0xfa00, 0xfaff, mcr3_paletteram_w, &paletteram },
-MEMORY_END
+static ADDRESS_MAP_START( spyhunt_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xdfff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xe000, 0xe7ff) AM_WRITE(spyhunt_videoram_w) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+	AM_RANGE(0xe800, 0xebff) AM_WRITE(spyhunt_alpharam_w) AM_BASE(&spyhunt_alpharam)
+	AM_RANGE(0xf000, 0xf7ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xf800, 0xf9ff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0xfa00, 0xfaff) AM_WRITE(mcr3_paletteram_w) AM_BASE(&paletteram)
+ADDRESS_MAP_END
 
 
 
@@ -1241,8 +1241,8 @@ static MACHINE_DRIVER_START( mcr3 )
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main", Z80, 5000000)
 	MDRV_CPU_CONFIG(mcr_daisy_chain)
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(readport,writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(readport,writeport)
 	MDRV_CPU_VBLANK_INT(mcr_interrupt,2)
 
 	MDRV_FRAMES_PER_SECOND(30)
@@ -1299,8 +1299,8 @@ static MACHINE_DRIVER_START( mcrmono )
 	MDRV_IMPORT_FROM(mcr3)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(readmem,mcrmono_writemem)
-	MDRV_CPU_PORTS(readport,mcrmono_writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem,mcrmono_writemem)
+	MDRV_CPU_IO_MAP(readport,mcrmono_writeport)
 
 	/* video hardware */
 	MDRV_VIDEO_START(mcrmono)
@@ -1336,7 +1336,7 @@ static MACHINE_DRIVER_START( mcrscroll )
 	MDRV_IMPORT_FROM(mcr3)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(spyhunt_readmem,spyhunt_writemem)
+	MDRV_CPU_PROGRAM_MAP(spyhunt_readmem,spyhunt_writemem)
 
 	/* video hardware */
 	MDRV_SCREEN_SIZE(30*16, 30*16)
@@ -1957,68 +1957,6 @@ ROM_START( turbotag )
 	ROM_LOAD( "ttan.bin",     0x00000, 0x1000, CRC(aa0b1471) SHA1(e3dd69f1a14926c6b709d6b19d9e90a1f0867465) )
 ROM_END
 
-ROM_START( stapper )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "tappg0.bin",   0x00000, 0x4000, CRC(127171d1) )
-	ROM_LOAD( "tappg1.bin",   0x04000, 0x4000, CRC(9d6a47f7) )
-	ROM_LOAD( "tappg2.bin",   0x08000, 0x4000, CRC(3a1f8778) )
-	ROM_LOAD( "tappg3.bin",   0x0c000, 0x2000, CRC(e8dcdaa4) )
-
-	ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
-	ROM_LOAD( "tapsnda7.bin", 0x0000, 0x1000, CRC(0e8bb9d5) )
-	ROM_LOAD( "tapsnda8.bin", 0x1000, 0x1000, CRC(0cf0e29b) )
-	ROM_LOAD( "tapsnda9.bin", 0x2000, 0x1000, CRC(31eb6dc6) )
-	ROM_LOAD( "tapsda10.bin", 0x3000, 0x1000, CRC(01a9be6a) )
-
-	ROM_REGION( 0x08000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "tapbg1.bin",   0x00000, 0x4000, CRC(1326da21) )
-	ROM_LOAD( "tapbg0.bin",   0x04000, 0x4000, CRC(539b93c3) )
-
-	ROM_REGION( 0x20000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "tapfg1.bin",   0x00000, 0x4000, CRC(29dd8e85) )
-	ROM_LOAD( "tapfg0.bin",   0x04000, 0x4000, CRC(a8ba850f) )
-	ROM_LOAD( "tapfg3.bin",   0x08000, 0x4000, CRC(3d9133e4) )
-	ROM_LOAD( "tapfg2.bin",   0x0c000, 0x4000, CRC(9254d87c) )
-	ROM_LOAD( "tapfg5.bin",   0x10000, 0x4000, CRC(5ec2544f) )
-	ROM_LOAD( "tapfg4.bin",   0x14000, 0x4000, CRC(9b970c4b) )
-	ROM_LOAD( "tapfg7.bin",   0x18000, 0x4000, CRC(a2ef5c06) )
-	ROM_LOAD( "tapfg6.bin",   0x1c000, 0x4000, CRC(1baca746) )
-
-	ROM_REGION( 0x0020, REGION_PROMS, 0 )
-	ROM_LOAD( "5784",         0x0000, 0x0020, CRC(e1281ee9) )
-ROM_END
-
-ROM_START( stapper1 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "tappg0.bin",   0x00000, 0x4000, CRC(c915f608) )
-	ROM_LOAD( "tappg1.bin",   0x04000, 0x4000, CRC(9d6a47f7) )
-	ROM_LOAD( "tappg2.bin",   0x08000, 0x4000, CRC(3a1f8778) )
-	ROM_LOAD( "tappg3.bin",   0x0c000, 0x2000, CRC(dd4c785f) )
-
-	ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for the audio CPU */
-	ROM_LOAD( "tapsnda7.bin", 0x0000, 0x1000, CRC(0e8bb9d5) )
-	ROM_LOAD( "tapsnda8.bin", 0x1000, 0x1000, CRC(0cf0e29b) )
-	ROM_LOAD( "tapsnda9.bin", 0x2000, 0x1000, CRC(31eb6dc6) )
-	ROM_LOAD( "tapsda10.bin", 0x3000, 0x1000, CRC(01a9be6a) )
-
-	ROM_REGION( 0x08000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "tapbg1.bin",   0x00000, 0x4000, CRC(1326da21) )
-	ROM_LOAD( "tapbg0.bin",   0x04000, 0x4000, CRC(539b93c3) )
-
-	ROM_REGION( 0x20000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "tapfg1.bin",   0x00000, 0x4000, CRC(29dd8e85) )
-	ROM_LOAD( "tapfg0.bin",   0x04000, 0x4000, CRC(a8ba850f) )
-	ROM_LOAD( "tapfg3.bin",   0x08000, 0x4000, CRC(3d9133e4) )
-	ROM_LOAD( "tapfg2.bin",   0x0c000, 0x4000, CRC(9254d87c) )
-	ROM_LOAD( "tapfg5.bin",   0x10000, 0x4000, CRC(5ec2544f) )
-	ROM_LOAD( "tapfg4.bin",   0x14000, 0x4000, CRC(9b970c4b) )
-	ROM_LOAD( "tapfg7.bin",   0x18000, 0x4000, CRC(a2ef5c06) )
-	ROM_LOAD( "tapfg6.bin",   0x1c000, 0x4000, CRC(1baca746) )
-
-	ROM_REGION( 0x0020, REGION_PROMS, 0 )
-	ROM_LOAD( "5784",         0x0000, 0x0020, CRC(e1281ee9) )
-ROM_END
-
 
 
 /*************************************
@@ -2038,8 +1976,8 @@ static DRIVER_INIT( timber )
 	MCR_CONFIGURE_SOUND(MCR_SSIO);
 
 	/* Timber uses a modified SSIO with RAM in place of one of the ROMs */
-	install_mem_read_handler(1, 0x3000, 0x3fff, MRA_RAM);
-	install_mem_write_handler(1, 0x3000, 0x3fff, MWA_RAM);
+	install_mem_read_handler(1, 0x3000, 0x3fff, MRA8_RAM);
+	install_mem_write_handler(1, 0x3000, 0x3fff, MWA8_RAM);
 }
 
 
@@ -2177,5 +2115,3 @@ GAME( 1987, stargrds, 0,        mono_sg,  stargrds, stargrds, ROT0,  "Bally Midw
 GAME( 1983, spyhunt,  0,        spyhunt,  spyhunt,  spyhunt,  ROT90, "Bally Midway", "Spy Hunter" )
 GAME( 1984, crater,   0,        crater,   crater,   crater,   ORIENTATION_FLIP_X, "Bally Midway", "Crater Raider" )
 GAMEX(1985, turbotag, 0,        turbotag, turbotag, turbotag, ROT90, "Bally Midway", "Turbo Tag (prototype)", GAME_NO_SOUND )
-GAME( 2002, stapper,  tapper,   mcr3_ssio,tapper,   tapper,   ROT0,  "Bally Midway", "Tapper (Simpsons Hack)" ) 
-GAME( 2002, stapper1, tapper,   mcr3_ssio,tapper,   tapper,   ROT0,  "Bally Midway", "Tapper (Simpsons Hack ver.81)" ) 

@@ -184,39 +184,39 @@ static WRITE32_HANDLER( avengrs_sound_w )
 
 /******************************************************************************/
 
-static MEMORY_READ32_START( readmem )
-	{ 0x0000000, 0x00fffff, MRA32_ROM },
-	{ 0x0100000, 0x011ffff, MRA32_RAM },
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 32 )
+	AM_RANGE(0x0000000, 0x00fffff) AM_READ(MRA32_ROM)
+	AM_RANGE(0x0100000, 0x011ffff) AM_READ(MRA32_RAM)
 
-	{ 0x0200000, 0x020000f, MRA32_NOP }, /* IRQ control? */
-	{ 0x0200070, 0x020007f, test2_r }, //vbl in 70 $10
-	{ 0x0200080, 0x02000ff, MRA32_RAM }, //test only.
-	{ 0x0204000, 0x0206fff, MRA32_RAM },
-	{ 0x0200080, 0x02000ff, MRA32_RAM },
-	{ 0x0300000, 0x0307fff, MRA32_RAM },
+	AM_RANGE(0x0200000, 0x020000f) AM_READ(MRA32_NOP) /* IRQ control? */
+	AM_RANGE(0x0200070, 0x020007f) AM_READ(test2_r) //vbl in 70 $10
+	AM_RANGE(0x0200080, 0x02000ff) AM_READ(MRA32_RAM) //test only.
+	AM_RANGE(0x0204000, 0x0206fff) AM_READ(MRA32_RAM)
+	AM_RANGE(0x0200080, 0x02000ff) AM_READ(MRA32_RAM)
+	AM_RANGE(0x0300000, 0x0307fff) AM_READ(MRA32_RAM)
 
-	{ 0x0400000, 0x0400003, avengrs_control_r },
-	{ 0x0440000, 0x044001f, test3_r },
+	AM_RANGE(0x0400000, 0x0400003) AM_READ(avengrs_control_r)
+	AM_RANGE(0x0440000, 0x044001f) AM_READ(test3_r)
 
-	{ 0x2280000, 0x229ffff, MRA32_RAM },
-	{ 0x2600004, 0x2600007, avengrs_sound_r },
-MEMORY_END
+	AM_RANGE(0x2280000, 0x229ffff) AM_READ(MRA32_RAM)
+	AM_RANGE(0x2600004, 0x2600007) AM_READ(avengrs_sound_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE32_START( writemem )
-	{ 0x0000000, 0x00fffff, MWA32_ROM },
-	{ 0x0100000, 0x011ffff, MWA32_RAM, &avengrgs_ram },
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 32 )
+	AM_RANGE(0x0000000, 0x00fffff) AM_WRITE(MWA32_ROM)
+	AM_RANGE(0x0100000, 0x011ffff) AM_WRITE(MWA32_RAM) AM_BASE(&avengrgs_ram)
 
-	{ 0x0200000, 0x020001f, MWA32_NOP }, /* IRQ control? */
-	{ 0x0200080, 0x02000ff, MWA32_RAM },
-	{ 0x0204000, 0x0206fff, MWA32_RAM, &spriteram32, &spriteram_size },
-	{ 0x0300000, 0x0307fff, avengrs_palette_w, &paletteram32 },
-	{ 0x044001c, 0x044001f, MWA32_NOP },
-	{ 0x0500000, 0x0500003, avengrs_eprom_w },
+	AM_RANGE(0x0200000, 0x020001f) AM_WRITE(MWA32_NOP) /* IRQ control? */
+	AM_RANGE(0x0200080, 0x02000ff) AM_WRITE(MWA32_RAM)
+	AM_RANGE(0x0204000, 0x0206fff) AM_WRITE(MWA32_RAM) AM_BASE(&spriteram32) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x0300000, 0x0307fff) AM_WRITE(avengrs_palette_w) AM_BASE(&paletteram32)
+	AM_RANGE(0x044001c, 0x044001f) AM_WRITE(MWA32_NOP)
+	AM_RANGE(0x0500000, 0x0500003) AM_WRITE(avengrs_eprom_w)
 
-	{ 0x2280000, 0x229ffff, MWA32_RAM, &avengrgs_vram },
-	{ 0x2600000, 0x2600007, avengrs_sound_w },
-	{ 0x4200008, 0x420000b, MWA32_NOP }, /* ? */
-MEMORY_END
+	AM_RANGE(0x2280000, 0x229ffff) AM_WRITE(MWA32_RAM) AM_BASE(&avengrgs_vram)
+	AM_RANGE(0x2600000, 0x2600007) AM_WRITE(avengrs_sound_w)
+	AM_RANGE(0x4200008, 0x420000b) AM_WRITE(MWA32_NOP) /* ? */
+ADDRESS_MAP_END
 
 /******************************************************************************/
 
@@ -336,7 +336,7 @@ static MACHINE_DRIVER_START( avengrgs )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(SH2,42000000/2) /* 21 MHz clock confirmed on real board */
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
 	MDRV_CPU_VBLANK_INT(avengrgs_interrupt,1)
 
 	MDRV_FRAMES_PER_SECOND(58)
@@ -367,7 +367,7 @@ static MACHINE_DRIVER_START( mlc )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(ARM,42000000/6) /* 42 MHz -> 7MHz clock confirmed on real board */
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
 //	MDRV_CPU_VBLANK_INT(avengrgs_interrupt,1)
 
 	MDRV_FRAMES_PER_SECOND(58)

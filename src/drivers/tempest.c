@@ -247,41 +247,41 @@ static WRITE_HANDLER( tempest_coin_w )
  *
  *************************************/
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x07ff, MRA_RAM },
-	{ 0x0c00, 0x0c00, tempest_IN0_r },	/* IN0 */
-	{ 0x0d00, 0x0d00, input_port_3_r },	/* DSW1 */
-	{ 0x0e00, 0x0e00, input_port_4_r },	/* DSW2 */
-	{ 0x2000, 0x2fff, MRA_RAM },
-	{ 0x3000, 0x3fff, MRA_ROM },
-	{ 0x6040, 0x6040, mb_status_r },
-	{ 0x6050, 0x6050, atari_vg_earom_r },
-	{ 0x6060, 0x6060, mb_lo_r },
-	{ 0x6070, 0x6070, mb_hi_r },
-	{ 0x60c0, 0x60cf, pokey1_r },
-	{ 0x60d0, 0x60df, pokey2_r },
-	{ 0x9000, 0xdfff, MRA_ROM },
-	{ 0xf000, 0xffff, MRA_ROM },	/* for the reset / interrupt vectors */
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x07ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x0c00, 0x0c00) AM_READ(tempest_IN0_r)	/* IN0 */
+	AM_RANGE(0x0d00, 0x0d00) AM_READ(input_port_3_r)	/* DSW1 */
+	AM_RANGE(0x0e00, 0x0e00) AM_READ(input_port_4_r)	/* DSW2 */
+	AM_RANGE(0x2000, 0x2fff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x3000, 0x3fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x6040, 0x6040) AM_READ(mb_status_r)
+	AM_RANGE(0x6050, 0x6050) AM_READ(atari_vg_earom_r)
+	AM_RANGE(0x6060, 0x6060) AM_READ(mb_lo_r)
+	AM_RANGE(0x6070, 0x6070) AM_READ(mb_hi_r)
+	AM_RANGE(0x60c0, 0x60cf) AM_READ(pokey1_r)
+	AM_RANGE(0x60d0, 0x60df) AM_READ(pokey2_r)
+	AM_RANGE(0x9000, 0xdfff) AM_READ(MRA8_ROM)
+	AM_RANGE(0xf000, 0xffff) AM_READ(MRA8_ROM)	/* for the reset / interrupt vectors */
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x07ff, MWA_RAM },
-	{ 0x0800, 0x080f, tempest_colorram_w },
-	{ 0x2000, 0x2fff, MWA_RAM, &vectorram, &vectorram_size },
-	{ 0x3000, 0x3fff, MWA_ROM },
-	{ 0x4000, 0x4000, tempest_coin_w },
-	{ 0x4800, 0x4800, avgdvg_go_w },
-	{ 0x5000, 0x5000, watchdog_reset_w },
-	{ 0x5800, 0x5800, avgdvg_reset_w },
-	{ 0x6000, 0x603f, atari_vg_earom_w },
-	{ 0x6040, 0x6040, atari_vg_earom_ctrl_w },
-	{ 0x6080, 0x609f, mb_go_w },
-	{ 0x60c0, 0x60cf, pokey1_w },
-	{ 0x60d0, 0x60df, pokey2_w },
-	{ 0x60e0, 0x60e0, tempest_led_w },
-	{ 0x9000, 0xdfff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x07ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x0800, 0x080f) AM_WRITE(tempest_colorram_w)
+	AM_RANGE(0x2000, 0x2fff) AM_WRITE(MWA8_RAM) AM_BASE(&vectorram) AM_SIZE(&vectorram_size)
+	AM_RANGE(0x3000, 0x3fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x4000, 0x4000) AM_WRITE(tempest_coin_w)
+	AM_RANGE(0x4800, 0x4800) AM_WRITE(avgdvg_go_w)
+	AM_RANGE(0x5000, 0x5000) AM_WRITE(watchdog_reset_w)
+	AM_RANGE(0x5800, 0x5800) AM_WRITE(avgdvg_reset_w)
+	AM_RANGE(0x6000, 0x603f) AM_WRITE(atari_vg_earom_w)
+	AM_RANGE(0x6040, 0x6040) AM_WRITE(atari_vg_earom_ctrl_w)
+	AM_RANGE(0x6080, 0x609f) AM_WRITE(mb_go_w)
+	AM_RANGE(0x60c0, 0x60cf) AM_WRITE(pokey1_w)
+	AM_RANGE(0x60d0, 0x60df) AM_WRITE(pokey2_w)
+	AM_RANGE(0x60e0, 0x60e0) AM_WRITE(tempest_led_w)
+	AM_RANGE(0x9000, 0xdfff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
 
 
@@ -423,7 +423,7 @@ static MACHINE_DRIVER_START( tempest )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(M6502, 12096000/8)			/* 1.512 MHz */
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,4)	/* 4.1ms */
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -507,132 +507,6 @@ ROM_START( tempest2 ) /* rev 2 */
 	ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351) SHA1(a30a3662c740810c0f20e3712679606921b8ca06) )
 ROM_END
 
-ROM_START( temped )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(65d61fe7) )
-	ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375) )
-	ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a) )
-	ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9) )
-	ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645) )
-	ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(4825ee42) )
-	ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(a4de050f) )
-	ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648) )
-	ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(73d38e47) )
-	ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3) )
-	ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
-	/* Mathbox ROMs */
-	ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937) )
-	ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351) )
-ROM_END
-
-ROM_START( tempestm )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(65d61fe7) )
-	ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375) )
-	ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a) )
-	ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9) )
-	ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645) )
-	ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(b5e00840) )
-	ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(ed4f2132) )
-	ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648) )
-	ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(73d38e47) )
-	ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3) )
-	ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
-	/* Mathbox ROMs */
-	ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937) )
-	ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351) )
-ROM_END
-
-ROM_START( tempall ) /* rev 3 */
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(a9000137) )
-	ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375) )
-	ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a) )
-	ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9) )
-	ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645) )
-	ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(beb352ab) )
-	ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(a4de050f) )
-	ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648) )
-	ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(73d38e47) )
-	ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3) )
-	ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
-	/* Mathbox ROMs */
-	ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937) )
-	ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351) )
-ROM_END
-
-ROM_START( temptwst ) /* rev 3 */
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(a9000137) )
-	ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375) )
-	ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a) )
-	ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9) )
-	ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645) )
-	ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(f30afe2d) )
-	ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(571b1799) )
-	ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648) )
-	ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(67619e6e) )
-	ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3) )
-	ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
-	/* Mathbox ROMs */
-	ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937) )
-	ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351) )
-ROM_END
-
-ROM_START( tmptwst2 ) /* rev 3 */
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(a9000137) )
-	ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375) )
-	ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a) )
-	ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9) )
-	ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645) )
-	ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(1c6827cb) )
-	ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(571b1799) )
-	ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648) )
-	ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(c1bc4a69) )
-	ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3) )
-	ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
-	/* Mathbox ROMs */
-	ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937) )
-	ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351) )
-ROM_END
-
-ROM_START( tmptwst3 ) /* rev 3 */
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(a9000137) )
-	ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375) )
-	ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a) )
-	ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9) )
-	ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645) )
-	ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(c8e7693f) )
-	ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(571b1799) )
-	ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648) )
-	ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(194b34a9) )
-	ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3) )
-	ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
-	/* Mathbox ROMs */
-	ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937) )
-	ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351) )
-ROM_END
-
-ROM_START( tmptwst4 ) /* rev 3 */
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "136002.113",   0x9000, 0x0800, CRC(a9000137) )
-	ROM_LOAD( "136002.114",   0x9800, 0x0800, CRC(11077375) )
-	ROM_LOAD( "136002.115",   0xa000, 0x0800, CRC(f3e2827a) )
-	ROM_LOAD( "136002.316",   0xa800, 0x0800, CRC(aeb0f7e9) )
-	ROM_LOAD( "136002.217",   0xb000, 0x0800, CRC(ef2eb645) )
-	ROM_LOAD( "136002.118",   0xb800, 0x0800, CRC(2b6fcca4) )
-	ROM_LOAD( "136002.119",   0xc000, 0x0800, CRC(571b1799) )
-	ROM_LOAD( "136002.120",   0xc800, 0x0800, CRC(35619648) )
-	ROM_LOAD( "136002.121",   0xd000, 0x0800, CRC(7fde0be4) )
-	ROM_LOAD( "136002.222",   0xd800, 0x0800, CRC(707bd5c3) )
-	ROM_RELOAD(             0xf800, 0x0800 ) /* for reset/interrupt vectors */
-	/* Mathbox ROMs */
-	ROM_LOAD( "136002.123",   0x3000, 0x0800, CRC(29f7e937) )
-	ROM_LOAD( "136002.124",   0x3800, 0x0800, CRC(c16ec351) )
-ROM_END
-
 
 ROM_START( tempest3 ) /* rev ? */
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
@@ -693,10 +567,3 @@ GAME( 1980, tempest1, tempest, tempest, tempest, 0, ROT270, "Atari", "Tempest (r
 GAME( 1980, tempest2, tempest, tempest, tempest, 0, ROT270, "Atari", "Tempest (rev 2)" )
 GAME( 1980, tempest3, tempest, tempest, tempest, 0, ROT270, "Atari", "Tempest (rev ?)" )
 GAME( 1980, temptube, tempest, tempest, tempest, 0, ROT270, "hack", "Tempest Tubes" )
-GAME( 2000, temped,   tempest, tempest, tempest, 0, ROT270, "hack", "TempEd" )
-GAME( 2000, tempall,  tempest, tempest, tempest, 0, ROT270, "hack", "Tempest All Levels" )
-GAME( 2000, temptwst, tempest, tempest, tempest, 0, ROT270, "hack", "Tempest Twisted" )
-GAME( 2000, tmptwst2, tempest, tempest, tempest, 0, ROT270, "hack", "Tempest Twisty's Revenge" )
-GAME( 2000, tmptwst3, tempest, tempest, tempest, 0, ROT270, "hack", "Tempest Psycho Twist" )
-GAME( 2000, tmptwst4, tempest, tempest, tempest, 0, ROT270, "hack", "Tempest Twisted Maniac" )
-GAME( 2000, tempestm, tempest, tempest, tempest, 0, ROT270, "hack", "Tempest Mark's Hacks" )

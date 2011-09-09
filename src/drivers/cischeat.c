@@ -236,42 +236,42 @@ WRITE16_HANDLER( bigrun_paletteram16_w )
 	if ( (offset >= 0x3600/2) && (offset <= 0x37ff/2) ) { palette_set_color(0xe00 + offset - 0x3600/2, r,g,b ); return;}
 }
 
-static MEMORY_READ16_START( bigrun_readmem )
-	{ 0x000000, 0x07ffff, MRA16_ROM			},	// ROM
-	{ 0x100000, 0x13ffff, rom_1_r			},	// ROM
-	{ 0x0f0000, 0x0fffff, MRA16_RAM			},	// RAM
-	{ 0x080000, 0x083fff, bigrun_vregs_r	},	// Vregs
-	{ 0x084000, 0x087fff, MRA16_RAM			},	// Linking with other units
+static ADDRESS_MAP_START( bigrun_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x07ffff) AM_READ(MRA16_ROM			)	// ROM
+	AM_RANGE(0x100000, 0x13ffff) AM_READ(rom_1_r				)	// ROM
+	AM_RANGE(0x0f0000, 0x0fffff) AM_READ(MRA16_RAM			)	// RAM
+	AM_RANGE(0x080000, 0x083fff) AM_READ(bigrun_vregs_r		)	// Vregs
+	AM_RANGE(0x084000, 0x087fff) AM_READ(MRA16_RAM			)	// Linking with other units
 
 	/* this is the right order of sharedram's */
-	{ 0x088000, 0x08bfff, sharedram2_r		},	// Sharedram with sub CPU#2
-	{ 0x08c000, 0x08ffff, sharedram1_r		},	// Sharedram with sub CPU#1
+	AM_RANGE(0x088000, 0x08bfff) AM_READ(sharedram2_r		)	// Sharedram with sub CPU#2
+	AM_RANGE(0x08c000, 0x08ffff) AM_READ(sharedram1_r		)	// Sharedram with sub CPU#1
 
-	{ 0x090000, 0x093fff, MRA16_RAM			},	// Scroll ram 0
-	{ 0x094000, 0x097fff, MRA16_RAM			},	// Scroll ram 1
-	{ 0x098000, 0x09bfff, MRA16_RAM			},	// Scroll ram 2
+	AM_RANGE(0x090000, 0x093fff) AM_READ(MRA16_RAM			)	// Scroll ram 0
+	AM_RANGE(0x094000, 0x097fff) AM_READ(MRA16_RAM			)	// Scroll ram 1
+	AM_RANGE(0x098000, 0x09bfff) AM_READ(MRA16_RAM			)	// Scroll ram 2
 
-	{ 0x09c000, 0x09ffff, MRA16_RAM			},	// Palettes
-MEMORY_END
+	AM_RANGE(0x09c000, 0x09ffff) AM_READ(MRA16_RAM			)	// Palettes
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( bigrun_writemem )
-	{ 0x000000, 0x07ffff, MWA16_ROM							},	// ROM
-	{ 0x100000, 0x13ffff, MWA16_ROM							},	// ROM
-	{ 0x0f0000, 0x0fffff, MWA16_RAM, &megasys1_ram			},	// RAM
-	{ 0x080000, 0x083fff, bigrun_vregs_w, &megasys1_vregs	},	// Vregs
-	{ 0x084000, 0x087fff, MWA16_RAM							},	// Linking with other units
+static ADDRESS_MAP_START( bigrun_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x07ffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x100000, 0x13ffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x0f0000, 0x0fffff) AM_WRITE(MWA16_RAM) AM_BASE(&megasys1_ram			)	// RAM
+	AM_RANGE(0x080000, 0x083fff) AM_WRITE(bigrun_vregs_w) AM_BASE(&megasys1_vregs	)	// Vregs
+	AM_RANGE(0x084000, 0x087fff) AM_WRITE(MWA16_RAM							)	// Linking with other units
 
-	{ 0x088000, 0x08bfff, sharedram2_w, &sharedram2			},	// Sharedram with sub CPU#2
-	{ 0x08c000, 0x08ffff, sharedram1_w, &sharedram1			},	// Sharedram with sub CPU#1
+	AM_RANGE(0x088000, 0x08bfff) AM_WRITE(sharedram2_w) AM_BASE(&sharedram2			)	// Sharedram with sub CPU#2
+	AM_RANGE(0x08c000, 0x08ffff) AM_WRITE(sharedram1_w) AM_BASE(&sharedram1			)	// Sharedram with sub CPU#1
 
 	/* Only writes to the first 0x40000 bytes affect the tilemaps:             */
 	/* either these games support larger tilemaps or have more ram than needed */
-	{ 0x090000, 0x093fff, megasys1_scrollram_0_w, &megasys1_scrollram_0	},	// Scroll ram 0
-	{ 0x094000, 0x097fff, megasys1_scrollram_1_w, &megasys1_scrollram_1	},	// Scroll ram 1
-	{ 0x098000, 0x09bfff, megasys1_scrollram_2_w, &megasys1_scrollram_2	},	// Scroll ram 2
+	AM_RANGE(0x090000, 0x093fff) AM_WRITE(megasys1_scrollram_0_w) AM_BASE(&megasys1_scrollram_0	)	// Scroll ram 0
+	AM_RANGE(0x094000, 0x097fff) AM_WRITE(megasys1_scrollram_1_w) AM_BASE(&megasys1_scrollram_1	)	// Scroll ram 1
+	AM_RANGE(0x098000, 0x09bfff) AM_WRITE(megasys1_scrollram_2_w) AM_BASE(&megasys1_scrollram_2	)	// Scroll ram 2
 
-	{ 0x09c000, 0x09ffff, bigrun_paletteram16_w, &paletteram16	},	// Palettes
-MEMORY_END
+	AM_RANGE(0x09c000, 0x09ffff) AM_WRITE(bigrun_paletteram16_w) AM_BASE(&paletteram16	)	// Palettes
+ADDRESS_MAP_END
 
 
 /**************************************************************************
@@ -308,12 +308,12 @@ WRITE16_HANDLER( cischeat_paletteram16_w )
 	if ( (offset >= 0x5000/2) && (offset <= 0x5fff/2) ) { palette_set_color(0xe00 + offset - 0x5000/2, r,g,b ); return;}
 }
 
-static MEMORY_READ16_START( cischeat_readmem )
-	{ 0x000000, 0x07ffff, MRA16_ROM			},	// ROM
-	{ 0x100000, 0x17ffff, rom_1_r			},	// ROM
-	{ 0x0f0000, 0x0fffff, MRA16_RAM			},	// RAM
-	{ 0x080000, 0x087fff, cischeat_vregs_r	},	// Vregs
-	{ 0x088000, 0x088fff, MRA16_RAM			},	// Linking with other units
+static ADDRESS_MAP_START( cischeat_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x07ffff) AM_READ(MRA16_ROM			)	// ROM
+	AM_RANGE(0x100000, 0x17ffff) AM_READ(rom_1_r			)	// ROM
+	AM_RANGE(0x0f0000, 0x0fffff) AM_READ(MRA16_RAM			)	// RAM
+	AM_RANGE(0x080000, 0x087fff) AM_READ(cischeat_vregs_r	)	// Vregs
+	AM_RANGE(0x088000, 0x088fff) AM_READ(MRA16_RAM			)	// Linking with other units
 
 /* 	Only the first 0x800 bytes are tested but:
 	CPU #0 PC 0000278c: warning - write 68c0 to unmapped memory address 0009c7fe
@@ -321,34 +321,34 @@ static MEMORY_READ16_START( cischeat_readmem )
 	No mem access error from the other CPU's, though.. */
 
 	/* this is the right order of sharedram's */
-	{ 0x090000, 0x097fff, sharedram2_r		},	// Sharedram with sub CPU#2
-	{ 0x098000, 0x09ffff, sharedram1_r		},	// Sharedram with sub CPU#1
+	AM_RANGE(0x090000, 0x097fff) AM_READ(sharedram2_r		)	// Sharedram with sub CPU#2
+	AM_RANGE(0x098000, 0x09ffff) AM_READ(sharedram1_r		)	// Sharedram with sub CPU#1
 
-	{ 0x0a0000, 0x0a7fff, MRA16_RAM			},	// Scroll ram 0
-	{ 0x0a8000, 0x0affff, MRA16_RAM			},	// Scroll ram 1
-	{ 0x0b0000, 0x0b7fff, MRA16_RAM			},	// Scroll ram 2
+	AM_RANGE(0x0a0000, 0x0a7fff) AM_READ(MRA16_RAM			)	// Scroll ram 0
+	AM_RANGE(0x0a8000, 0x0affff) AM_READ(MRA16_RAM			)	// Scroll ram 1
+	AM_RANGE(0x0b0000, 0x0b7fff) AM_READ(MRA16_RAM			)	// Scroll ram 2
 
-	{ 0x0b8000, 0x0bffff, MRA16_RAM			},	// Palettes
-MEMORY_END
+	AM_RANGE(0x0b8000, 0x0bffff) AM_READ(MRA16_RAM			)	// Palettes
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( cischeat_writemem )
-	{ 0x000000, 0x07ffff, MWA16_ROM							},	// ROM
-	{ 0x100000, 0x17ffff, MWA16_ROM							},	// ROM
-	{ 0x0f0000, 0x0fffff, MWA16_RAM, &megasys1_ram			},	// RAM
-	{ 0x080000, 0x087fff, cischeat_vregs_w, &megasys1_vregs	},	// Vregs
-	{ 0x088000, 0x088fff, MWA16_RAM							},	// Linking with other units
+static ADDRESS_MAP_START( cischeat_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x07ffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x100000, 0x17ffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x0f0000, 0x0fffff) AM_WRITE(MWA16_RAM) AM_BASE(&megasys1_ram			)	// RAM
+	AM_RANGE(0x080000, 0x087fff) AM_WRITE(cischeat_vregs_w) AM_BASE(&megasys1_vregs	)	// Vregs
+	AM_RANGE(0x088000, 0x088fff) AM_WRITE(MWA16_RAM							)	// Linking with other units
 
-	{ 0x090000, 0x097fff, sharedram2_w, &sharedram2			},	// Sharedram with sub CPU#2
-	{ 0x098000, 0x09ffff, sharedram1_w, &sharedram1			},	// Sharedram with sub CPU#1
+	AM_RANGE(0x090000, 0x097fff) AM_WRITE(sharedram2_w) AM_BASE(&sharedram2			)	// Sharedram with sub CPU#2
+	AM_RANGE(0x098000, 0x09ffff) AM_WRITE(sharedram1_w) AM_BASE(&sharedram1			)	// Sharedram with sub CPU#1
 
 	/* Only writes to the first 0x40000 bytes affect the tilemaps:             */
 	/* either these games support larger tilemaps or have more ram than needed */
-	{ 0x0a0000, 0x0a7fff, megasys1_scrollram_0_w, &megasys1_scrollram_0	},	// Scroll ram 0
-	{ 0x0a8000, 0x0affff, megasys1_scrollram_1_w, &megasys1_scrollram_1	},	// Scroll ram 1
-	{ 0x0b0000, 0x0b7fff, megasys1_scrollram_2_w, &megasys1_scrollram_2	},	// Scroll ram 2
+	AM_RANGE(0x0a0000, 0x0a7fff) AM_WRITE(megasys1_scrollram_0_w) AM_BASE(&megasys1_scrollram_0	)	// Scroll ram 0
+	AM_RANGE(0x0a8000, 0x0affff) AM_WRITE(megasys1_scrollram_1_w) AM_BASE(&megasys1_scrollram_1	)	// Scroll ram 1
+	AM_RANGE(0x0b0000, 0x0b7fff) AM_WRITE(megasys1_scrollram_2_w) AM_BASE(&megasys1_scrollram_2	)	// Scroll ram 2
 
-	{ 0x0b8000, 0x0bffff, cischeat_paletteram16_w, &paletteram16	},	// Palettes
-MEMORY_END
+	AM_RANGE(0x0b8000, 0x0bffff) AM_WRITE(cischeat_paletteram16_w) AM_BASE(&paletteram16	)	// Palettes
+ADDRESS_MAP_END
 
 
 /**************************************************************************
@@ -384,41 +384,41 @@ WRITE16_HANDLER( f1gpstar_paletteram16_w )
 	098800-099000
 	0F8000-0F9000	*/
 
-static MEMORY_READ16_START( f1gpstar_readmem )
-	{ 0x000000, 0x07ffff, MRA16_ROM			},	// ROM
-	{ 0x100000, 0x17ffff, rom_1_r			},	// ROM
-	{ 0x0f0000, 0x0fffff, MRA16_RAM			},	// RAM
-	{ 0x080000, 0x087fff, f1gpstar_vregs_r	},	// Vregs
-	{ 0x088000, 0x088fff, MRA16_RAM			},	// Linking with other units
+static ADDRESS_MAP_START( f1gpstar_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x07ffff) AM_READ(MRA16_ROM			)	// ROM
+	AM_RANGE(0x100000, 0x17ffff) AM_READ(rom_1_r			)	// ROM
+	AM_RANGE(0x0f0000, 0x0fffff) AM_READ(MRA16_RAM			)	// RAM
+	AM_RANGE(0x080000, 0x087fff) AM_READ(f1gpstar_vregs_r	)	// Vregs
+	AM_RANGE(0x088000, 0x088fff) AM_READ(MRA16_RAM			)	// Linking with other units
 
-	{ 0x090000, 0x097fff, sharedram2_r		},	// Sharedram with sub CPU#2
-	{ 0x098000, 0x09ffff, sharedram1_r		},	// Sharedram with sub CPU#1
+	AM_RANGE(0x090000, 0x097fff) AM_READ(sharedram2_r		)	// Sharedram with sub CPU#2
+	AM_RANGE(0x098000, 0x09ffff) AM_READ(sharedram1_r		)	// Sharedram with sub CPU#1
 
-	{ 0x0a0000, 0x0a7fff, MRA16_RAM			},	// Scroll ram 0
-	{ 0x0a8000, 0x0affff, MRA16_RAM			},	// Scroll ram 1
-	{ 0x0b0000, 0x0b7fff, MRA16_RAM			},	// Scroll ram 2
+	AM_RANGE(0x0a0000, 0x0a7fff) AM_READ(MRA16_RAM			)	// Scroll ram 0
+	AM_RANGE(0x0a8000, 0x0affff) AM_READ(MRA16_RAM			)	// Scroll ram 1
+	AM_RANGE(0x0b0000, 0x0b7fff) AM_READ(MRA16_RAM			)	// Scroll ram 2
 
-	{ 0x0b8000, 0x0bffff, MRA16_RAM			},	// Palettes
-MEMORY_END
+	AM_RANGE(0x0b8000, 0x0bffff) AM_READ(MRA16_RAM			)	// Palettes
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( f1gpstar_writemem )
-	{ 0x000000, 0x07ffff, MWA16_ROM							},
-	{ 0x100000, 0x17ffff, MWA16_ROM							},
-	{ 0x0f0000, 0x0fffff, MWA16_RAM, &megasys1_ram			},	// RAM
-	{ 0x080000, 0x087fff, f1gpstar_vregs_w, &megasys1_vregs	},	// Vregs
-	{ 0x088000, 0x088fff, MWA16_RAM							},	// Linking with other units
+static ADDRESS_MAP_START( f1gpstar_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x07ffff) AM_WRITE(MWA16_ROM							)
+	AM_RANGE(0x100000, 0x17ffff) AM_WRITE(MWA16_ROM							)
+	AM_RANGE(0x0f0000, 0x0fffff) AM_WRITE(MWA16_RAM) AM_BASE(&megasys1_ram			)	// RAM
+	AM_RANGE(0x080000, 0x087fff) AM_WRITE(f1gpstar_vregs_w) AM_BASE(&megasys1_vregs	)	// Vregs
+	AM_RANGE(0x088000, 0x088fff) AM_WRITE(MWA16_RAM							)	// Linking with other units
 
-	{ 0x090000, 0x097fff, sharedram2_w, &sharedram2			},	// Sharedram with sub CPU#2
-	{ 0x098000, 0x09ffff, sharedram1_w, &sharedram1			},	// Sharedram with sub CPU#1
+	AM_RANGE(0x090000, 0x097fff) AM_WRITE(sharedram2_w) AM_BASE(&sharedram2			)	// Sharedram with sub CPU#2
+	AM_RANGE(0x098000, 0x09ffff) AM_WRITE(sharedram1_w) AM_BASE(&sharedram1			)	// Sharedram with sub CPU#1
 
 	/* Only writes to the first 0x40000 bytes affect the tilemaps:             */
 	/* either these games support larger tilemaps or have more ram than needed */
-	{ 0x0a0000, 0x0a7fff, megasys1_scrollram_0_w, &megasys1_scrollram_0	},	// Scroll ram 0
-	{ 0x0a8000, 0x0affff, megasys1_scrollram_1_w, &megasys1_scrollram_1	},	// Scroll ram 1
-	{ 0x0b0000, 0x0b7fff, megasys1_scrollram_2_w, &megasys1_scrollram_2	},	// Scroll ram 2
+	AM_RANGE(0x0a0000, 0x0a7fff) AM_WRITE(megasys1_scrollram_0_w) AM_BASE(&megasys1_scrollram_0	)	// Scroll ram 0
+	AM_RANGE(0x0a8000, 0x0affff) AM_WRITE(megasys1_scrollram_1_w) AM_BASE(&megasys1_scrollram_1	)	// Scroll ram 1
+	AM_RANGE(0x0b0000, 0x0b7fff) AM_WRITE(megasys1_scrollram_2_w) AM_BASE(&megasys1_scrollram_2	)	// Scroll ram 2
 
-	{ 0x0b8000, 0x0bffff, f1gpstar_paletteram16_w, &paletteram16	},	// Palettes
-MEMORY_END
+	AM_RANGE(0x0b8000, 0x0bffff) AM_WRITE(f1gpstar_paletteram16_w) AM_BASE(&paletteram16	)	// Palettes
+ADDRESS_MAP_END
 
 
 /**************************************************************************
@@ -426,41 +426,41 @@ MEMORY_END
 **************************************************************************/
 
 // Same as f1gpstar, but vregs are slightly different:
-static MEMORY_READ16_START( f1gpstr2_readmem )
-	{ 0x000000, 0x07ffff, MRA16_ROM			},	// ROM
-	{ 0x100000, 0x17ffff, rom_1_r			},	// ROM
-	{ 0x0f0000, 0x0fffff, MRA16_RAM			},	// RAM
-	{ 0x080000, 0x087fff, f1gpstr2_vregs_r	},	// Vregs (slightly different from f1gpstar)
-	{ 0x088000, 0x088fff, MRA16_RAM			},	// Linking with other units
+static ADDRESS_MAP_START( f1gpstr2_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x07ffff) AM_READ(MRA16_ROM			)	// ROM
+	AM_RANGE(0x100000, 0x17ffff) AM_READ(rom_1_r			)	// ROM
+	AM_RANGE(0x0f0000, 0x0fffff) AM_READ(MRA16_RAM			)	// RAM
+	AM_RANGE(0x080000, 0x087fff) AM_READ(f1gpstr2_vregs_r	)	// Vregs (slightly different from f1gpstar)
+	AM_RANGE(0x088000, 0x088fff) AM_READ(MRA16_RAM			)	// Linking with other units
 
-	{ 0x090000, 0x097fff, sharedram2_r		},	// Sharedram with sub CPU#2
-	{ 0x098000, 0x09ffff, sharedram1_r		},	// Sharedram with sub CPU#1
+	AM_RANGE(0x090000, 0x097fff) AM_READ(sharedram2_r		)	// Sharedram with sub CPU#2
+	AM_RANGE(0x098000, 0x09ffff) AM_READ(sharedram1_r		)	// Sharedram with sub CPU#1
 
-	{ 0x0a0000, 0x0a7fff, MRA16_RAM			},	// Scroll ram 0
-	{ 0x0a8000, 0x0affff, MRA16_RAM			},	// Scroll ram 1
-	{ 0x0b0000, 0x0b7fff, MRA16_RAM			},	// Scroll ram 2
+	AM_RANGE(0x0a0000, 0x0a7fff) AM_READ(MRA16_RAM			)	// Scroll ram 0
+	AM_RANGE(0x0a8000, 0x0affff) AM_READ(MRA16_RAM			)	// Scroll ram 1
+	AM_RANGE(0x0b0000, 0x0b7fff) AM_READ(MRA16_RAM			)	// Scroll ram 2
 
-	{ 0x0b8000, 0x0bffff, MRA16_RAM			},	// Palettes
-MEMORY_END
+	AM_RANGE(0x0b8000, 0x0bffff) AM_READ(MRA16_RAM			)	// Palettes
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( f1gpstr2_writemem )
-	{ 0x000000, 0x07ffff, MWA16_ROM							},
-	{ 0x100000, 0x17ffff, MWA16_ROM							},
-	{ 0x0f0000, 0x0fffff, MWA16_RAM, &megasys1_ram			},	// RAM
-	{ 0x080000, 0x087fff, f1gpstr2_vregs_w, &megasys1_vregs	},	// Vregs  (slightly different from f1gpstar)
-	{ 0x088000, 0x088fff, MWA16_RAM							},	// Linking with other units
+static ADDRESS_MAP_START( f1gpstr2_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x07ffff) AM_WRITE(MWA16_ROM							)
+	AM_RANGE(0x100000, 0x17ffff) AM_WRITE(MWA16_ROM							)
+	AM_RANGE(0x0f0000, 0x0fffff) AM_WRITE(MWA16_RAM) AM_BASE(&megasys1_ram			)	// RAM
+	AM_RANGE(0x080000, 0x087fff) AM_WRITE(f1gpstr2_vregs_w) AM_BASE(&megasys1_vregs	)	// Vregs  (slightly different from f1gpstar)
+	AM_RANGE(0x088000, 0x088fff) AM_WRITE(MWA16_RAM							)	// Linking with other units
 
-	{ 0x090000, 0x097fff, sharedram2_w, &sharedram2			},	// Sharedram with sub CPU#2
-	{ 0x098000, 0x09ffff, sharedram1_w, &sharedram1			},	// Sharedram with sub CPU#1
+	AM_RANGE(0x090000, 0x097fff) AM_WRITE(sharedram2_w) AM_BASE(&sharedram2			)	// Sharedram with sub CPU#2
+	AM_RANGE(0x098000, 0x09ffff) AM_WRITE(sharedram1_w) AM_BASE(&sharedram1			)	// Sharedram with sub CPU#1
 
 	/* Only writes to the first 0x40000 bytes affect the tilemaps:             */
 	/* either these games support larger tilemaps or have more ram than needed */
-	{ 0x0a0000, 0x0a7fff, megasys1_scrollram_0_w, &megasys1_scrollram_0	},	// Scroll ram 0
-	{ 0x0a8000, 0x0affff, megasys1_scrollram_1_w, &megasys1_scrollram_1	},	// Scroll ram 1
-	{ 0x0b0000, 0x0b7fff, megasys1_scrollram_2_w, &megasys1_scrollram_2	},	// Scroll ram 2
+	AM_RANGE(0x0a0000, 0x0a7fff) AM_WRITE(megasys1_scrollram_0_w) AM_BASE(&megasys1_scrollram_0	)	// Scroll ram 0
+	AM_RANGE(0x0a8000, 0x0affff) AM_WRITE(megasys1_scrollram_1_w) AM_BASE(&megasys1_scrollram_1	)	// Scroll ram 1
+	AM_RANGE(0x0b0000, 0x0b7fff) AM_WRITE(megasys1_scrollram_2_w) AM_BASE(&megasys1_scrollram_2	)	// Scroll ram 2
 
-	{ 0x0b8000, 0x0bffff, f1gpstar_paletteram16_w, &paletteram16	},	// Palettes
-MEMORY_END
+	AM_RANGE(0x0b8000, 0x0bffff) AM_WRITE(f1gpstar_paletteram16_w) AM_BASE(&paletteram16	)	// Palettes
+ADDRESS_MAP_END
 
 
 /**************************************************************************
@@ -567,37 +567,37 @@ WRITE16_HANDLER( scudhamm_oki_bank_w )
 	}
 }
 
-static MEMORY_READ16_START( readmem_scudhamm )
-	{ 0x000000, 0x07ffff, MRA16_ROM					},	// ROM
-	{ 0x0f0000, 0x0fffff, MRA16_RAM					},	// Work RAM + Spriteram
-	{ 0x082000, 0x082fff, MRA16_RAM					},	// Video Registers + RAM
-	{ 0x0a0000, 0x0a3fff, MRA16_RAM					},	// Scroll RAM 0
-	{ 0x0b0000, 0x0b3fff, MRA16_RAM					},	// Scroll RAM 2
-	{ 0x0b8000, 0x0bffff, MRA16_RAM					},	// Palette
-	{ 0x100008, 0x100009, input_port_0_word_r		},	// Buttons
-	{ 0x100014, 0x100015, OKIM6295_status_0_lsb_r	},	// Sound
-	{ 0x100018, 0x100019, OKIM6295_status_1_lsb_r	},	//
-	{ 0x100040, 0x100041, scudhamm_analog_r			},	// A / D
-	{ 0x100044, 0x100045, scudhamm_motor_pos_r		},	// Motor Position
-	{ 0x100050, 0x100051, scudhamm_motor_status_r	},	// Motor Limit Switches
-	{ 0x10005c, 0x10005d, input_port_2_word_r		},	// 2 x DSW
-MEMORY_END
+static ADDRESS_MAP_START( readmem_scudhamm, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x07ffff) AM_READ(MRA16_ROM					)	// ROM
+	AM_RANGE(0x0f0000, 0x0fffff) AM_READ(MRA16_RAM					)	// Work RAM + Spriteram
+	AM_RANGE(0x082000, 0x082fff) AM_READ(MRA16_RAM					)	// Video Registers + RAM
+	AM_RANGE(0x0a0000, 0x0a3fff) AM_READ(MRA16_RAM					)	// Scroll RAM 0
+	AM_RANGE(0x0b0000, 0x0b3fff) AM_READ(MRA16_RAM					)	// Scroll RAM 2
+	AM_RANGE(0x0b8000, 0x0bffff) AM_READ(MRA16_RAM					)	// Palette
+	AM_RANGE(0x100008, 0x100009) AM_READ(input_port_0_word_r		)	// Buttons
+	AM_RANGE(0x100014, 0x100015) AM_READ(OKIM6295_status_0_lsb_r	)	// Sound
+	AM_RANGE(0x100018, 0x100019) AM_READ(OKIM6295_status_1_lsb_r	)	//
+	AM_RANGE(0x100040, 0x100041) AM_READ(scudhamm_analog_r			)	// A / D
+	AM_RANGE(0x100044, 0x100045) AM_READ(scudhamm_motor_pos_r		)	// Motor Position
+	AM_RANGE(0x100050, 0x100051) AM_READ(scudhamm_motor_status_r	)	// Motor Limit Switches
+	AM_RANGE(0x10005c, 0x10005d) AM_READ(input_port_2_word_r		)	// 2 x DSW
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( writemem_scudhamm )
- 	{ 0x000000, 0x07ffff, MWA16_ROM					},	// ROM
-	{ 0x0f0000, 0x0fffff, MWA16_RAM,				&megasys1_ram			},	// Work RAM + Spriteram
-	{ 0x082000, 0x082fff, scudhamm_vregs_w,			&megasys1_vregs			},	// Video Registers + RAM
-	{ 0x0a0000, 0x0a3fff, megasys1_scrollram_0_w,	&megasys1_scrollram_0	},	// Scroll RAM 0
-	{ 0x0b0000, 0x0b3fff, megasys1_scrollram_2_w,	&megasys1_scrollram_2	},	// Scroll RAM 2
-	{ 0x0b8000, 0x0bffff, scudhamm_paletteram16_w,	&paletteram16			},	// Palette
- 	{ 0x100000, 0x100001, scudhamm_oki_bank_w		},	// Sound
- 	{ 0x100008, 0x100009, scudhamm_leds_w			},	// Leds
-	{ 0x100014, 0x100015, OKIM6295_data_0_lsb_w		},	// Sound
-	{ 0x100018, 0x100019, OKIM6295_data_1_lsb_w		},	//
-	{ 0x10001c, 0x10001d, scudhamm_enable_w			},	// ?
-	{ 0x100040, 0x100041, MWA16_NOP					},	// ? 0 written before reading
-	{ 0x100050, 0x100051, scudhamm_motor_command_w	},	// Move Motor
-MEMORY_END
+static ADDRESS_MAP_START( writemem_scudhamm, ADDRESS_SPACE_PROGRAM, 16 )
+ 	AM_RANGE(0x000000, 0x07ffff) AM_WRITE(MWA16_ROM					)	// ROM
+	AM_RANGE(0x0f0000, 0x0fffff) AM_WRITE(MWA16_RAM) AM_BASE(				&megasys1_ram			)	// Work RAM + Spriteram
+	AM_RANGE(0x082000, 0x082fff) AM_WRITE(scudhamm_vregs_w) AM_BASE(			&megasys1_vregs			)	// Video Registers + RAM
+	AM_RANGE(0x0a0000, 0x0a3fff) AM_WRITE(megasys1_scrollram_0_w) AM_BASE(	&megasys1_scrollram_0	)	// Scroll RAM 0
+	AM_RANGE(0x0b0000, 0x0b3fff) AM_WRITE(megasys1_scrollram_2_w) AM_BASE(	&megasys1_scrollram_2	)	// Scroll RAM 2
+	AM_RANGE(0x0b8000, 0x0bffff) AM_WRITE(scudhamm_paletteram16_w) AM_BASE(	&paletteram16			)	// Palette
+ 	AM_RANGE(0x100000, 0x100001) AM_WRITE(scudhamm_oki_bank_w		)	// Sound
+ 	AM_RANGE(0x100008, 0x100009) AM_WRITE(scudhamm_leds_w			)	// Leds
+	AM_RANGE(0x100014, 0x100015) AM_WRITE(OKIM6295_data_0_lsb_w		)	// Sound
+	AM_RANGE(0x100018, 0x100019) AM_WRITE(OKIM6295_data_1_lsb_w		)	//
+	AM_RANGE(0x10001c, 0x10001d) AM_WRITE(scudhamm_enable_w			)	// ?
+	AM_RANGE(0x100040, 0x100041) AM_WRITE(MWA16_NOP					)	// ? 0 written before reading
+	AM_RANGE(0x100050, 0x100051) AM_WRITE(scudhamm_motor_command_w	)	// Move Motor
+ADDRESS_MAP_END
 
 
 /**************************************************************************
@@ -612,70 +612,70 @@ MEMORY_END
 								Big Run
 **************************************************************************/
 
-static MEMORY_READ16_START( bigrun_readmem2 )
-	{ 0x000000, 0x03ffff, MRA16_ROM		},	// ROM
-	{ 0x0c0000, 0x0c3fff, MRA16_RAM		},	// RAM
-	{ 0x040000, 0x047fff, sharedram1_r	},	// Shared RAM (with Main CPU)
-	{ 0x080000, 0x0807ff, MRA16_RAM		},	// Road RAM
-MEMORY_END
-static MEMORY_WRITE16_START( bigrun_writemem2 )
-	{ 0x000000, 0x03ffff, MWA16_ROM							},	// ROM
-	{ 0x0c0000, 0x0c3fff, MWA16_RAM							},	// RAM
+static ADDRESS_MAP_START( bigrun_readmem2, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM		)	// ROM
+	AM_RANGE(0x0c0000, 0x0c3fff) AM_READ(MRA16_RAM		)	// RAM
+	AM_RANGE(0x040000, 0x047fff) AM_READ(sharedram1_r	)	// Shared RAM (with Main CPU)
+	AM_RANGE(0x080000, 0x0807ff) AM_READ(MRA16_RAM		)	// Road RAM
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( bigrun_writemem2, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x0c0000, 0x0c3fff) AM_WRITE(MWA16_RAM							)	// RAM
 	/* 800 bytes tested: */
-	{ 0x040000, 0x047fff, sharedram1_w						},	// Shared RAM (with Main CPU)
-	{ 0x080000, 0x0807ff, MWA16_RAM, &cischeat_roadram[0]	},	// Road RAM
-MEMORY_END
+	AM_RANGE(0x040000, 0x047fff) AM_WRITE(sharedram1_w						)	// Shared RAM (with Main CPU)
+	AM_RANGE(0x080000, 0x0807ff) AM_WRITE(MWA16_RAM) AM_BASE(&cischeat_roadram[0]	)	// Road RAM
+ADDRESS_MAP_END
 
 
-static MEMORY_READ16_START( bigrun_readmem3 )
-	{ 0x000000, 0x03ffff, MRA16_ROM		},	// ROM
-	{ 0x0c0000, 0x0c3fff, MRA16_RAM		},	// RAM
-	{ 0x040000, 0x047fff, sharedram2_r	},	// Shared RAM (with Main CPU)
-	{ 0x080000, 0x0807ff, MRA16_RAM		},	// Road RAM
-MEMORY_END
-static MEMORY_WRITE16_START( bigrun_writemem3 )
-	{ 0x000000, 0x03ffff, MWA16_ROM							},	// ROM
-	{ 0x0c0000, 0x0c3fff, MWA16_RAM							},	// RAM
-	{ 0x040000, 0x047fff, sharedram2_w						},	// Shared RAM (with Main CPU)
-	{ 0x080000, 0x0807ff, MWA16_RAM, &cischeat_roadram[1]	},	// Road RAM
-MEMORY_END
+static ADDRESS_MAP_START( bigrun_readmem3, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM		)	// ROM
+	AM_RANGE(0x0c0000, 0x0c3fff) AM_READ(MRA16_RAM		)	// RAM
+	AM_RANGE(0x040000, 0x047fff) AM_READ(sharedram2_r	)	// Shared RAM (with Main CPU)
+	AM_RANGE(0x080000, 0x0807ff) AM_READ(MRA16_RAM		)	// Road RAM
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( bigrun_writemem3, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x0c0000, 0x0c3fff) AM_WRITE(MWA16_RAM							)	// RAM
+	AM_RANGE(0x040000, 0x047fff) AM_WRITE(sharedram2_w						)	// Shared RAM (with Main CPU)
+	AM_RANGE(0x080000, 0x0807ff) AM_WRITE(MWA16_RAM) AM_BASE(&cischeat_roadram[1]	)	// Road RAM
+ADDRESS_MAP_END
 
 
 /**************************************************************************
 								Cisco Heat
 **************************************************************************/
 
-static MEMORY_READ16_START( cischeat_readmem2 )
-	{ 0x000000, 0x03ffff, MRA16_ROM		},	// ROM
-	{ 0x200000, 0x23ffff, rom_2_r		},	// ROM
-	{ 0x0c0000, 0x0c3fff, MRA16_RAM		},	// RAM
-	{ 0x040000, 0x047fff, sharedram1_r	},	// Shared RAM (with Main CPU)
-	{ 0x080000, 0x0807ff, MRA16_RAM		},	// Road RAM
-MEMORY_END
-static MEMORY_WRITE16_START( cischeat_writemem2 )
-	{ 0x000000, 0x03ffff, MWA16_ROM							},	// ROM
-	{ 0x200000, 0x23ffff, MWA16_ROM							},	// ROM
-	{ 0x0c0000, 0x0c3fff, MWA16_RAM							},	// RAM
-	{ 0x040000, 0x047fff, sharedram1_w						},	// Shared RAM (with Main CPU)
-	{ 0x080000, 0x0807ff, MWA16_RAM, &cischeat_roadram[0]	},	// Road RAM
-	{ 0x100000, 0x100001, MWA16_NOP							},	// watchdog
-MEMORY_END
+static ADDRESS_MAP_START( cischeat_readmem2, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM		)	// ROM
+	AM_RANGE(0x200000, 0x23ffff) AM_READ(rom_2_r		)	// ROM
+	AM_RANGE(0x0c0000, 0x0c3fff) AM_READ(MRA16_RAM		)	// RAM
+	AM_RANGE(0x040000, 0x047fff) AM_READ(sharedram1_r	)	// Shared RAM (with Main CPU)
+	AM_RANGE(0x080000, 0x0807ff) AM_READ(MRA16_RAM		)	// Road RAM
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( cischeat_writemem2, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x200000, 0x23ffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x0c0000, 0x0c3fff) AM_WRITE(MWA16_RAM							)	// RAM
+	AM_RANGE(0x040000, 0x047fff) AM_WRITE(sharedram1_w						)	// Shared RAM (with Main CPU)
+	AM_RANGE(0x080000, 0x0807ff) AM_WRITE(MWA16_RAM) AM_BASE(&cischeat_roadram[0]	)	// Road RAM
+	AM_RANGE(0x100000, 0x100001) AM_WRITE(MWA16_NOP							)	// watchdog
+ADDRESS_MAP_END
 
-static MEMORY_READ16_START( cischeat_readmem3 )
-	{ 0x000000, 0x03ffff, MRA16_ROM		},	// ROM
-	{ 0x200000, 0x23ffff, rom_3_r		},	// ROM
-	{ 0x0c0000, 0x0c3fff, MRA16_RAM		},	// RAM
-	{ 0x040000, 0x047fff, sharedram2_r	},	// Shared RAM (with Main CPU)
-	{ 0x080000, 0x0807ff, MRA16_RAM		},	// Road RAM
-MEMORY_END
-static MEMORY_WRITE16_START( cischeat_writemem3 )
-	{ 0x000000, 0x03ffff, MWA16_ROM							},	// ROM
-	{ 0x200000, 0x23ffff, MWA16_ROM							},	// ROM
-	{ 0x0c0000, 0x0c3fff, MWA16_RAM							},	// RAM
-	{ 0x040000, 0x047fff, sharedram2_w						},	// Shared RAM (with Main CPU)
-	{ 0x080000, 0x0807ff, MWA16_RAM, &cischeat_roadram[1]	},	// Road RAM
-	{ 0x100000, 0x100001, MWA16_NOP							},	// watchdog
-MEMORY_END
+static ADDRESS_MAP_START( cischeat_readmem3, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM		)	// ROM
+	AM_RANGE(0x200000, 0x23ffff) AM_READ(rom_3_r		)	// ROM
+	AM_RANGE(0x0c0000, 0x0c3fff) AM_READ(MRA16_RAM		)	// RAM
+	AM_RANGE(0x040000, 0x047fff) AM_READ(sharedram2_r	)	// Shared RAM (with Main CPU)
+	AM_RANGE(0x080000, 0x0807ff) AM_READ(MRA16_RAM		)	// Road RAM
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( cischeat_writemem3, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x200000, 0x23ffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x0c0000, 0x0c3fff) AM_WRITE(MWA16_RAM							)	// RAM
+	AM_RANGE(0x040000, 0x047fff) AM_WRITE(sharedram2_w						)	// Shared RAM (with Main CPU)
+	AM_RANGE(0x080000, 0x0807ff) AM_WRITE(MWA16_RAM) AM_BASE(&cischeat_roadram[1]	)	// Road RAM
+	AM_RANGE(0x100000, 0x100001) AM_WRITE(MWA16_NOP							)	// watchdog
+ADDRESS_MAP_END
 
 
 
@@ -683,33 +683,33 @@ MEMORY_END
 							F1 GrandPrix Star
 **************************************************************************/
 
-static MEMORY_READ16_START( f1gpstar_readmem2 )
-	{ 0x000000, 0x03ffff, MRA16_ROM		},	// ROM
-	{ 0x180000, 0x183fff, MRA16_RAM		},	// RAM
-	{ 0x080000, 0x0807ff, sharedram1_r	},	// Shared RAM (with Main CPU)
-	{ 0x100000, 0x1007ff, MRA16_RAM		},	// Road RAM
-MEMORY_END
-static MEMORY_WRITE16_START( f1gpstar_writemem2 )
-	{ 0x000000, 0x03ffff, MWA16_ROM							},	// ROM
-	{ 0x180000, 0x183fff, MWA16_RAM							},	// RAM
-	{ 0x080000, 0x0807ff, sharedram1_w						},	// Shared RAM (with Main CPU)
-	{ 0x100000, 0x1007ff, MWA16_RAM, &cischeat_roadram[0]	},	// Road RAM
-	{ 0x200000, 0x200001, MWA16_NOP							},	// watchdog
-MEMORY_END
+static ADDRESS_MAP_START( f1gpstar_readmem2, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM		)	// ROM
+	AM_RANGE(0x180000, 0x183fff) AM_READ(MRA16_RAM		)	// RAM
+	AM_RANGE(0x080000, 0x0807ff) AM_READ(sharedram1_r	)	// Shared RAM (with Main CPU)
+	AM_RANGE(0x100000, 0x1007ff) AM_READ(MRA16_RAM		)	// Road RAM
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( f1gpstar_writemem2, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x180000, 0x183fff) AM_WRITE(MWA16_RAM							)	// RAM
+	AM_RANGE(0x080000, 0x0807ff) AM_WRITE(sharedram1_w						)	// Shared RAM (with Main CPU)
+	AM_RANGE(0x100000, 0x1007ff) AM_WRITE(MWA16_RAM) AM_BASE(&cischeat_roadram[0]	)	// Road RAM
+	AM_RANGE(0x200000, 0x200001) AM_WRITE(MWA16_NOP							)	// watchdog
+ADDRESS_MAP_END
 
-static MEMORY_READ16_START( f1gpstar_readmem3 )
-	{ 0x000000, 0x03ffff, MRA16_ROM		},	// ROM
-	{ 0x180000, 0x183fff, MRA16_RAM		},	// RAM
-	{ 0x080000, 0x0807ff, sharedram2_r	},	// Shared RAM (with Main CPU)
-	{ 0x100000, 0x1007ff, MRA16_RAM		},	// Road RAM
-MEMORY_END
-static MEMORY_WRITE16_START( f1gpstar_writemem3 )
-	{ 0x000000, 0x03ffff, MWA16_ROM							},	// ROM
-	{ 0x180000, 0x183fff, MWA16_RAM							},	// RAM
-	{ 0x080000, 0x0807ff, sharedram2_w						},	// Shared RAM (with Main CPU)
-	{ 0x100000, 0x1007ff, MWA16_RAM, &cischeat_roadram[1]	},	// Road RAM
-	{ 0x200000, 0x200001, MWA16_NOP							},	// watchdog
-MEMORY_END
+static ADDRESS_MAP_START( f1gpstar_readmem3, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM		)	// ROM
+	AM_RANGE(0x180000, 0x183fff) AM_READ(MRA16_RAM		)	// RAM
+	AM_RANGE(0x080000, 0x0807ff) AM_READ(sharedram2_r	)	// Shared RAM (with Main CPU)
+	AM_RANGE(0x100000, 0x1007ff) AM_READ(MRA16_RAM		)	// Road RAM
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( f1gpstar_writemem3, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x180000, 0x183fff) AM_WRITE(MWA16_RAM							)	// RAM
+	AM_RANGE(0x080000, 0x0807ff) AM_WRITE(sharedram2_w						)	// Shared RAM (with Main CPU)
+	AM_RANGE(0x100000, 0x1007ff) AM_WRITE(MWA16_RAM) AM_BASE(&cischeat_roadram[1]	)	// Road RAM
+	AM_RANGE(0x200000, 0x200001) AM_WRITE(MWA16_NOP							)	// watchdog
+ADDRESS_MAP_END
 
 
 /**************************************************************************
@@ -736,25 +736,25 @@ WRITE16_HANDLER( bigrun_soundbank_w )
 	}
 }
 
-static MEMORY_READ16_START( bigrun_sound_readmem )
-	{ 0x000000, 0x03ffff, MRA16_ROM						},	// ROM
-	{ 0x0f0000, 0x0fffff, MRA16_RAM						},	// RAM
-	{ 0x040000, 0x040001, soundlatch_word_r				},	// From Main CPU
-	{ 0x080002, 0x080003, YM2151_status_port_0_lsb_r	},
-	{ 0x0a0000, 0x0a0001, OKIM6295_status_0_lsb_r		},
-	{ 0x0c0000, 0x0c0001, OKIM6295_status_1_lsb_r		},
-MEMORY_END
+static ADDRESS_MAP_START( bigrun_sound_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM						)	// ROM
+	AM_RANGE(0x0f0000, 0x0fffff) AM_READ(MRA16_RAM						)	// RAM
+	AM_RANGE(0x040000, 0x040001) AM_READ(soundlatch_word_r				)	// From Main CPU
+	AM_RANGE(0x080002, 0x080003) AM_READ(YM2151_status_port_0_lsb_r	)
+	AM_RANGE(0x0a0000, 0x0a0001) AM_READ(OKIM6295_status_0_lsb_r		)
+	AM_RANGE(0x0c0000, 0x0c0001) AM_READ(OKIM6295_status_1_lsb_r		)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( bigrun_sound_writemem )
-	{ 0x000000, 0x03ffff, MWA16_ROM						},	// ROM
-	{ 0x0f0000, 0x0fffff, MWA16_RAM						},	// RAM
-	{ 0x040000, 0x040001, bigrun_soundbank_w			},	// Sample Banking
-	{ 0x060000, 0x060001, soundlatch2_word_w			},	// To Main CPU
-	{ 0x080000, 0x080001, YM2151_register_port_0_lsb_w	},
-	{ 0x080002, 0x080003, YM2151_data_port_0_lsb_w		},
-	{ 0x0a0000, 0x0a0003, OKIM6295_data_0_lsb_w			},
-	{ 0x0c0000, 0x0c0003, OKIM6295_data_1_lsb_w			},
-MEMORY_END
+static ADDRESS_MAP_START( bigrun_sound_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM						)	// ROM
+	AM_RANGE(0x0f0000, 0x0fffff) AM_WRITE(MWA16_RAM						)	// RAM
+	AM_RANGE(0x040000, 0x040001) AM_WRITE(bigrun_soundbank_w			)	// Sample Banking
+	AM_RANGE(0x060000, 0x060001) AM_WRITE(soundlatch2_word_w			)	// To Main CPU
+	AM_RANGE(0x080000, 0x080001) AM_WRITE(YM2151_register_port_0_lsb_w	)
+	AM_RANGE(0x080002, 0x080003) AM_WRITE(YM2151_data_port_0_lsb_w		)
+	AM_RANGE(0x0a0000, 0x0a0003) AM_WRITE(OKIM6295_data_0_lsb_w			)
+	AM_RANGE(0x0c0000, 0x0c0003) AM_WRITE(OKIM6295_data_1_lsb_w			)
+ADDRESS_MAP_END
 
 
 /**************************************************************************
@@ -770,79 +770,79 @@ WRITE16_HANDLER( cischeat_soundbank_1_w )
 	if (ACCESSING_LSB)	OKIM6295_set_bank_base(1, 0x40000 * (data & 1) );
 }
 
-static MEMORY_READ16_START( cischeat_sound_readmem )
-	{ 0x000000, 0x03ffff, MRA16_ROM						},	// ROM
-	{ 0x0f0000, 0x0fffff, MRA16_RAM						},	// RAM
-	{ 0x060004, 0x060005, soundlatch_word_r				},	// From Main CPU
-	{ 0x080002, 0x080003, YM2151_status_port_0_lsb_r	},
-	{ 0x0a0000, 0x0a0001, OKIM6295_status_0_lsb_r		},
-	{ 0x0c0000, 0x0c0001, OKIM6295_status_1_lsb_r		},
-MEMORY_END
+static ADDRESS_MAP_START( cischeat_sound_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM						)	// ROM
+	AM_RANGE(0x0f0000, 0x0fffff) AM_READ(MRA16_RAM						)	// RAM
+	AM_RANGE(0x060004, 0x060005) AM_READ(soundlatch_word_r				)	// From Main CPU
+	AM_RANGE(0x080002, 0x080003) AM_READ(YM2151_status_port_0_lsb_r	)
+	AM_RANGE(0x0a0000, 0x0a0001) AM_READ(OKIM6295_status_0_lsb_r		)
+	AM_RANGE(0x0c0000, 0x0c0001) AM_READ(OKIM6295_status_1_lsb_r		)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( cischeat_sound_writemem )
-	{ 0x000000, 0x03ffff, MWA16_ROM						},	// ROM
-	{ 0x0f0000, 0x0fffff, MWA16_RAM						},	// RAM
-	{ 0x040002, 0x040003, cischeat_soundbank_0_w		},	// Sample Banking
-	{ 0x040004, 0x040005, cischeat_soundbank_1_w		},	// Sample Banking
-	{ 0x060002, 0x060003, soundlatch2_word_w			},	// To Main CPU
-	{ 0x080000, 0x080001, YM2151_register_port_0_lsb_w	},
-	{ 0x080002, 0x080003, YM2151_data_port_0_lsb_w		},
-	{ 0x0a0000, 0x0a0003, OKIM6295_data_0_lsb_w			},
-	{ 0x0c0000, 0x0c0003, OKIM6295_data_1_lsb_w			},
-MEMORY_END
+static ADDRESS_MAP_START( cischeat_sound_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM						)	// ROM
+	AM_RANGE(0x0f0000, 0x0fffff) AM_WRITE(MWA16_RAM						)	// RAM
+	AM_RANGE(0x040002, 0x040003) AM_WRITE(cischeat_soundbank_0_w		)	// Sample Banking
+	AM_RANGE(0x040004, 0x040005) AM_WRITE(cischeat_soundbank_1_w		)	// Sample Banking
+	AM_RANGE(0x060002, 0x060003) AM_WRITE(soundlatch2_word_w			)	// To Main CPU
+	AM_RANGE(0x080000, 0x080001) AM_WRITE(YM2151_register_port_0_lsb_w	)
+	AM_RANGE(0x080002, 0x080003) AM_WRITE(YM2151_data_port_0_lsb_w		)
+	AM_RANGE(0x0a0000, 0x0a0003) AM_WRITE(OKIM6295_data_0_lsb_w			)
+	AM_RANGE(0x0c0000, 0x0c0003) AM_WRITE(OKIM6295_data_1_lsb_w			)
+ADDRESS_MAP_END
 
 
 /**************************************************************************
 							F1 GrandPrix Star
 **************************************************************************/
 
-static MEMORY_READ16_START( f1gpstar_sound_readmem )
-	{ 0x000000, 0x03ffff, MRA16_ROM						},	// ROM
-	{ 0x0e0000, 0x0fffff, MRA16_RAM						},	// RAM				(cischeat: f0000-fffff)
-	{ 0x060000, 0x060001, soundlatch_word_r				},	// From Main CPU	(cischeat: 60004)
-	{ 0x080002, 0x080003, YM2151_status_port_0_lsb_r	},
-	{ 0x0a0000, 0x0a0001, OKIM6295_status_0_lsb_r		},
-	{ 0x0c0000, 0x0c0001, OKIM6295_status_1_lsb_r		},
-MEMORY_END
+static ADDRESS_MAP_START( f1gpstar_sound_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM						)	// ROM
+	AM_RANGE(0x0e0000, 0x0fffff) AM_READ(MRA16_RAM						)	// RAM				(cischeat: f0000-fffff)
+	AM_RANGE(0x060000, 0x060001) AM_READ(soundlatch_word_r				)	// From Main CPU	(cischeat: 60004)
+	AM_RANGE(0x080002, 0x080003) AM_READ(YM2151_status_port_0_lsb_r	)
+	AM_RANGE(0x0a0000, 0x0a0001) AM_READ(OKIM6295_status_0_lsb_r		)
+	AM_RANGE(0x0c0000, 0x0c0001) AM_READ(OKIM6295_status_1_lsb_r		)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( f1gpstar_sound_writemem )
-	{ 0x000000, 0x03ffff, MWA16_ROM						},	// ROM
-	{ 0x0e0000, 0x0fffff, MWA16_RAM						},	// RAM				(cischeat: f0000-fffff)
-	{ 0x040004, 0x040005, cischeat_soundbank_0_w		},	// Sample Banking	(cischeat: 40002)
-	{ 0x040008, 0x040009, cischeat_soundbank_1_w		},	// Sample Banking	(cischeat: 40004)
-	{ 0x060000, 0x060001, soundlatch2_word_w			},	// To Main CPU		(cischeat: 60002)
-	{ 0x080000, 0x080001, YM2151_register_port_0_lsb_w	},
-	{ 0x080002, 0x080003, YM2151_data_port_0_lsb_w		},
-	{ 0x0a0000, 0x0a0003, OKIM6295_data_0_lsb_w			},
-	{ 0x0c0000, 0x0c0003, OKIM6295_data_1_lsb_w			},
-MEMORY_END
+static ADDRESS_MAP_START( f1gpstar_sound_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM						)	// ROM
+	AM_RANGE(0x0e0000, 0x0fffff) AM_WRITE(MWA16_RAM						)	// RAM				(cischeat: f0000-fffff)
+	AM_RANGE(0x040004, 0x040005) AM_WRITE(cischeat_soundbank_0_w		)	// Sample Banking	(cischeat: 40002)
+	AM_RANGE(0x040008, 0x040009) AM_WRITE(cischeat_soundbank_1_w		)	// Sample Banking	(cischeat: 40004)
+	AM_RANGE(0x060000, 0x060001) AM_WRITE(soundlatch2_word_w			)	// To Main CPU		(cischeat: 60002)
+	AM_RANGE(0x080000, 0x080001) AM_WRITE(YM2151_register_port_0_lsb_w	)
+	AM_RANGE(0x080002, 0x080003) AM_WRITE(YM2151_data_port_0_lsb_w		)
+	AM_RANGE(0x0a0000, 0x0a0003) AM_WRITE(OKIM6295_data_0_lsb_w			)
+	AM_RANGE(0x0c0000, 0x0c0003) AM_WRITE(OKIM6295_data_1_lsb_w			)
+ADDRESS_MAP_END
 
 
 /**************************************************************************
 							F1 GrandPrix Star II
 **************************************************************************/
 
-static MEMORY_READ16_START( f1gpstr2_sound_readmem )
-	{ 0x000000, 0x03ffff, MRA16_ROM						},	// ROM
-	{ 0x0e0000, 0x0fffff, MRA16_RAM						},	// RAM
-	{ 0x060004, 0x060005, soundlatch_word_r				},	// From Main CPU	(f1gpstar: 60000)
-	{ 0x080002, 0x080003, YM2151_status_port_0_lsb_r	},
-	{ 0x0a0000, 0x0a0001, OKIM6295_status_0_lsb_r		},
-	{ 0x0c0000, 0x0c0001, OKIM6295_status_1_lsb_r		},
-MEMORY_END
+static ADDRESS_MAP_START( f1gpstr2_sound_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM						)	// ROM
+	AM_RANGE(0x0e0000, 0x0fffff) AM_READ(MRA16_RAM						)	// RAM
+	AM_RANGE(0x060004, 0x060005) AM_READ(soundlatch_word_r				)	// From Main CPU	(f1gpstar: 60000)
+	AM_RANGE(0x080002, 0x080003) AM_READ(YM2151_status_port_0_lsb_r	)
+	AM_RANGE(0x0a0000, 0x0a0001) AM_READ(OKIM6295_status_0_lsb_r		)
+	AM_RANGE(0x0c0000, 0x0c0001) AM_READ(OKIM6295_status_1_lsb_r		)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( f1gpstr2_sound_writemem )
-	{ 0x000000, 0x03ffff, MWA16_ROM						},	// ROM
-	{ 0x0e0000, 0x0fffff, MWA16_RAM						},	// RAM
-	{ 0x040004, 0x040005, cischeat_soundbank_0_w		},	// Sample Banking
-	{ 0x040008, 0x040009, cischeat_soundbank_1_w		},	// Sample Banking
-	{ 0x04000e, 0x04000f, MWA16_NOP						},	// ? 0				(f1gpstar: no)
-	{ 0x060002, 0x060003, soundlatch2_word_w			},	// To Main CPU		(f1gpstar: 60000)
-	{ 0x080000, 0x080001, YM2151_register_port_0_lsb_w	},
-	{ 0x080002, 0x080003, YM2151_data_port_0_lsb_w		},
-	{ 0x0a0000, 0x0a0003, OKIM6295_data_0_lsb_w			},
-	{ 0x0c0000, 0x0c0003, OKIM6295_data_1_lsb_w			},
-MEMORY_END
+static ADDRESS_MAP_START( f1gpstr2_sound_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM						)	// ROM
+	AM_RANGE(0x0e0000, 0x0fffff) AM_WRITE(MWA16_RAM						)	// RAM
+	AM_RANGE(0x040004, 0x040005) AM_WRITE(cischeat_soundbank_0_w		)	// Sample Banking
+	AM_RANGE(0x040008, 0x040009) AM_WRITE(cischeat_soundbank_1_w		)	// Sample Banking
+	AM_RANGE(0x04000e, 0x04000f) AM_WRITE(MWA16_NOP						)	// ? 0				(f1gpstar: no)
+	AM_RANGE(0x060002, 0x060003) AM_WRITE(soundlatch2_word_w			)	// To Main CPU		(f1gpstar: 60000)
+	AM_RANGE(0x080000, 0x080001) AM_WRITE(YM2151_register_port_0_lsb_w	)
+	AM_RANGE(0x080002, 0x080003) AM_WRITE(YM2151_data_port_0_lsb_w		)
+	AM_RANGE(0x0a0000, 0x0a0003) AM_WRITE(OKIM6295_data_0_lsb_w			)
+	AM_RANGE(0x0c0000, 0x0c0003) AM_WRITE(OKIM6295_data_1_lsb_w			)
+ADDRESS_MAP_END
 
 /**************************************************************************
 
@@ -855,19 +855,19 @@ MEMORY_END
 READ16_HANDLER ( f1gpstr2_io_r )	{ return megasys1_vregs[offset + 0x1000/2]; }
 WRITE16_HANDLER( f1gpstr2_io_w )	{ COMBINE_DATA(&megasys1_vregs[offset + 0x1000/2]); }
 
-static MEMORY_READ16_START( f1gpstr2_io_readmem )
-	{ 0x000000, 0x07ffff, MRA16_ROM						},	// ROM
-	{ 0x180000, 0x183fff, MRA16_RAM						},	// RAM
-	{ 0x080000, 0x080fff, f1gpstr2_io_r					},	//
-MEMORY_END
+static ADDRESS_MAP_START( f1gpstr2_io_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x07ffff) AM_READ(MRA16_ROM						)	// ROM
+	AM_RANGE(0x180000, 0x183fff) AM_READ(MRA16_RAM						)	// RAM
+	AM_RANGE(0x080000, 0x080fff) AM_READ(f1gpstr2_io_r					)	//
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( f1gpstr2_io_writemem )
-	{ 0x000000, 0x07ffff, MWA16_ROM						},	// ROM
-	{ 0x180000, 0x183fff, MWA16_RAM						},	// RAM
-	{ 0x080000, 0x080fff, f1gpstr2_io_w					},	//
-	{ 0x100000, 0x100001, MWA16_RAM, &f1gpstr2_ioready	},	//
-	{ 0x200000, 0x200001, MWA16_NOP						},	//
-MEMORY_END
+static ADDRESS_MAP_START( f1gpstr2_io_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x07ffff) AM_WRITE(MWA16_ROM						)	// ROM
+	AM_RANGE(0x180000, 0x183fff) AM_WRITE(MWA16_RAM						)	// RAM
+	AM_RANGE(0x080000, 0x080fff) AM_WRITE(f1gpstr2_io_w					)	//
+	AM_RANGE(0x100000, 0x100001) AM_WRITE(MWA16_RAM) AM_BASE(&f1gpstr2_ioready	)	//
+	AM_RANGE(0x200000, 0x200001) AM_WRITE(MWA16_NOP						)	//
+ADDRESS_MAP_END
 
 
 /***************************************************************************
@@ -1592,20 +1592,20 @@ static MACHINE_DRIVER_START( bigrun )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("cpu1", M68000, 10000000)
-	MDRV_CPU_MEMORY(bigrun_readmem,bigrun_writemem)
+	MDRV_CPU_PROGRAM_MAP(bigrun_readmem,bigrun_writemem)
 	MDRV_CPU_VBLANK_INT(cischeat_interrupt,CISCHEAT_INTERRUPT_NUM)
 
 	MDRV_CPU_ADD_TAG("cpu2", M68000, 10000000)
-	MDRV_CPU_MEMORY(bigrun_readmem2,bigrun_writemem2)
+	MDRV_CPU_PROGRAM_MAP(bigrun_readmem2,bigrun_writemem2)
 	MDRV_CPU_VBLANK_INT(irq4_line_hold,CISCHEAT_SUB_INTERRUPT_NUM)
 
 	MDRV_CPU_ADD_TAG("cpu3", M68000, 10000000)
-	MDRV_CPU_MEMORY(bigrun_readmem3,bigrun_writemem3)
+	MDRV_CPU_PROGRAM_MAP(bigrun_readmem3,bigrun_writemem3)
 	MDRV_CPU_VBLANK_INT(irq4_line_hold,CISCHEAT_SUB_INTERRUPT_NUM)
 
 	MDRV_CPU_ADD_TAG("sound", M68000, 6000000)
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
-	MDRV_CPU_MEMORY(bigrun_sound_readmem,bigrun_sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(bigrun_sound_readmem,bigrun_sound_writemem)
 	MDRV_CPU_VBLANK_INT(irq4_line_hold,CISCHEAT_SOUND_INTERRUPT_NUM)
 
 	MDRV_FRAMES_PER_SECOND(30)
@@ -1634,16 +1634,16 @@ static MACHINE_DRIVER_START( cischeat )
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM(bigrun)
 	MDRV_CPU_MODIFY("cpu1")
-	MDRV_CPU_MEMORY(cischeat_readmem,cischeat_writemem)
+	MDRV_CPU_PROGRAM_MAP(cischeat_readmem,cischeat_writemem)
 
 	MDRV_CPU_MODIFY("cpu2")
-	MDRV_CPU_MEMORY(cischeat_readmem2,cischeat_writemem2)
+	MDRV_CPU_PROGRAM_MAP(cischeat_readmem2,cischeat_writemem2)
 
 	MDRV_CPU_MODIFY("cpu3")
-	MDRV_CPU_MEMORY(cischeat_readmem3,cischeat_writemem3)
+	MDRV_CPU_PROGRAM_MAP(cischeat_readmem3,cischeat_writemem3)
 
 	MDRV_CPU_MODIFY("sound")
-	MDRV_CPU_MEMORY(cischeat_sound_readmem,cischeat_sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(cischeat_sound_readmem,cischeat_sound_writemem)
 
 	/* video hardware */
 	MDRV_VISIBLE_AREA(0, 256-1,	0+16, 256-16-8-1)
@@ -1660,16 +1660,16 @@ static MACHINE_DRIVER_START( f1gpstar )
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM(bigrun)
 	MDRV_CPU_REPLACE("cpu1", M68000, 12000000)
-	MDRV_CPU_MEMORY(f1gpstar_readmem,f1gpstar_writemem)
+	MDRV_CPU_PROGRAM_MAP(f1gpstar_readmem,f1gpstar_writemem)
 
 	MDRV_CPU_REPLACE("cpu2", M68000, 12000000)
-	MDRV_CPU_MEMORY(f1gpstar_readmem2,f1gpstar_writemem2)
+	MDRV_CPU_PROGRAM_MAP(f1gpstar_readmem2,f1gpstar_writemem2)
 
 	MDRV_CPU_REPLACE("cpu3", M68000, 12000000)
-	MDRV_CPU_MEMORY(f1gpstar_readmem3,f1gpstar_writemem3)
+	MDRV_CPU_PROGRAM_MAP(f1gpstar_readmem3,f1gpstar_writemem3)
 
 	MDRV_CPU_MODIFY("sound")
-	MDRV_CPU_MEMORY(f1gpstar_sound_readmem,f1gpstar_sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(f1gpstar_sound_readmem,f1gpstar_sound_writemem)
 
 	/* video hardware */
 	MDRV_GFXDECODE(f1gpstar_gfxdecodeinfo)
@@ -1686,13 +1686,13 @@ static MACHINE_DRIVER_START( f1gpstr2 )
 	MDRV_IMPORT_FROM(f1gpstar)
 
 	MDRV_CPU_MODIFY("cpu1")
-	MDRV_CPU_MEMORY(f1gpstr2_readmem,f1gpstr2_writemem)
+	MDRV_CPU_PROGRAM_MAP(f1gpstr2_readmem,f1gpstr2_writemem)
 
 	MDRV_CPU_MODIFY("sound")
-	MDRV_CPU_MEMORY(f1gpstr2_sound_readmem,f1gpstr2_sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(f1gpstr2_sound_readmem,f1gpstr2_sound_writemem)
 
 	MDRV_CPU_ADD_TAG("cpu5", M68000, 10000000)
-	MDRV_CPU_MEMORY(f1gpstr2_io_readmem,f1gpstr2_io_writemem)
+	MDRV_CPU_PROGRAM_MAP(f1gpstr2_io_readmem,f1gpstr2_io_writemem)
 MACHINE_DRIVER_END
 
 
@@ -1730,7 +1730,7 @@ static MACHINE_DRIVER_START( scudhamm )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(M68000, 12000000)
-	MDRV_CPU_MEMORY(readmem_scudhamm,writemem_scudhamm)
+	MDRV_CPU_PROGRAM_MAP(readmem_scudhamm,writemem_scudhamm)
 	MDRV_CPU_VBLANK_INT(interrupt_scudhamm,INTERRUPT_NUM_SCUDHAMM)
 
 	MDRV_FRAMES_PER_SECOND(30)

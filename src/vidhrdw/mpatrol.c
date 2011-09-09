@@ -319,7 +319,7 @@ static void draw_background(struct mame_bitmap *bitmap, int xpos, int ypos, int 
 	{
 		rect.min_y = ypos + BGHEIGHT;
 		rect.max_y = ypos + 2 * BGHEIGHT - 1;
-	}
+}
 
 	fillbitmap(bitmap, Machine->gfx[image]->colortable[3], &rect);
 }

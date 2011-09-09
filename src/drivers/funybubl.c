@@ -42,7 +42,7 @@ static WRITE_HANDLER ( funybubl_cpurombank_w )
 {
 	unsigned char *rom = memory_region(REGION_CPU1);
 
-	cpu_setbank(2,&rom[0x10000+0x4000*(data&0x3f)]);
+		cpu_setbank(2,&rom[0x10000+0x4000*(data&0x3f)]);
 }
 
 
@@ -59,55 +59,55 @@ WRITE_HANDLER( funybubl_oki_bank_sw )
 }
 
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x7fff, MRA_ROM },
-	{ 0x8000, 0xbfff, MRA_BANK2 },	// banked port 1?
-	{ 0xc400, 0xc7ff, MRA_RAM },
-	{ 0xc800, 0xcfff, MRA_RAM },
-	{ 0xd000, 0xdfff, MRA_BANK1 },	// banked port 0?
-	{ 0xe000, 0xffff, MRA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0xbfff) AM_READ(MRA8_BANK2)	// banked port 1?
+	AM_RANGE(0xc400, 0xc7ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xc800, 0xcfff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xd000, 0xdfff) AM_READ(MRA8_BANK1)	// banked port 0?
+	AM_RANGE(0xe000, 0xffff) AM_READ(MRA8_RAM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x7fff, MWA_ROM },
-	{ 0x8000, 0xbfff, MWA_ROM },
-	{ 0xc400, 0xcfff, funybubl_paldatawrite, &funybubl_paletteram }, // palette
-	{ 0xd000, 0xdfff, MWA_BANK1 },	// banked port 0?
-	{ 0xe000, 0xffff, MWA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x8000, 0xbfff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xc400, 0xcfff) AM_WRITE(funybubl_paldatawrite) AM_BASE(&funybubl_paletteram) // palette
+	AM_RANGE(0xd000, 0xdfff) AM_WRITE(MWA8_BANK1)	// banked port 0?
+	AM_RANGE(0xe000, 0xffff) AM_WRITE(MWA8_RAM)
+ADDRESS_MAP_END
 
-static PORT_READ_START( readport )
-	{ 0x00, 0x00, input_port_0_r },
-	{ 0x01, 0x01, input_port_1_r },
-	{ 0x02, 0x02, input_port_2_r },
-	{ 0x03, 0x03, input_port_3_r },
-	{ 0x06, 0x06, IORP_NOP },		/* Nothing is done with the data read */
-PORT_END
+static ADDRESS_MAP_START( readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_READ(input_port_0_r)
+	AM_RANGE(0x01, 0x01) AM_READ(input_port_1_r)
+	AM_RANGE(0x02, 0x02) AM_READ(input_port_2_r)
+	AM_RANGE(0x03, 0x03) AM_READ(input_port_3_r)
+	AM_RANGE(0x06, 0x06) AM_READ(MRA8_NOP)		/* Nothing is done with the data read */
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( writeport )
-	{ 0x00, 0x00, funybubl_vidram_bank_w },	// vidram bank
-	{ 0x01, 0x01, funybubl_cpurombank_w },		// rom bank?
-	{ 0x03, 0x03, funybubl_soundcommand_w },
-	{ 0x06, 0x06, IOWP_NOP },		/* Written directly after IO port 0 */
-	{ 0x07, 0x07, IOWP_NOP },		/* Reset something on startup - Sound CPU ?? */
-PORT_END
+static ADDRESS_MAP_START( writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_WRITE(funybubl_vidram_bank_w)	// vidram bank
+	AM_RANGE(0x01, 0x01) AM_WRITE(funybubl_cpurombank_w)		// rom bank?
+	AM_RANGE(0x03, 0x03) AM_WRITE(funybubl_soundcommand_w)
+	AM_RANGE(0x06, 0x06) AM_WRITE(MWA8_NOP)		/* Written directly after IO port 0 */
+	AM_RANGE(0x07, 0x07) AM_WRITE(MWA8_NOP)		/* Reset something on startup - Sound CPU ?? */
+ADDRESS_MAP_END
 
 
 /* Sound CPU */
 
-static MEMORY_READ_START( soundreadmem )
-	{ 0x0000, 0x7fff, MRA_ROM },
-	{ 0x8000, 0x87ff, MRA_RAM },
-	{ 0x9800, 0x9800, OKIM6295_status_0_r },
-	{ 0xa000, 0xa000, soundlatch_r },
-MEMORY_END
+static ADDRESS_MAP_START( soundreadmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0x87ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x9800, 0x9800) AM_READ(OKIM6295_status_0_r)
+	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( soundwritemem )
-	{ 0x0000, 0x7fff, MWA_ROM },
-	{ 0x8000, 0x87ff, MWA_RAM },
-	{ 0x9000, 0x9000, funybubl_oki_bank_sw },
-	{ 0x9800, 0x9800, OKIM6295_data_0_w },
-MEMORY_END
+static ADDRESS_MAP_START( soundwritemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x8000, 0x87ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x9000, 0x9000) AM_WRITE(funybubl_oki_bank_sw)
+	AM_RANGE(0x9800, 0x9800) AM_WRITE(OKIM6295_data_0_w)
+ADDRESS_MAP_END
 
 
 
@@ -225,12 +225,12 @@ DRIVER_INIT( funybubl )
 static MACHINE_DRIVER_START( funybubl )
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80,8000000)		 /* ? MHz */
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(readport,writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(readport,writeport)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
 
 	MDRV_CPU_ADD(Z80,8000000)		 /* ? MHz */
-	MDRV_CPU_MEMORY(soundreadmem,soundwritemem)
+	MDRV_CPU_PROGRAM_MAP(soundreadmem,soundwritemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)

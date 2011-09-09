@@ -26,26 +26,26 @@ PALETTE_INIT( truco );
 /***************************************************************************/
 
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x17ff, MRA_RAM },		/* general purpose ram */
-	{ 0x1800, 0x7bff, MRA_RAM },		/* video ram */
-	{ 0x7c00, 0x7fff, MRA_RAM },		/* battery backed ram */
-	{ 0x8000, 0x8000, input_port_0_r },	/* controls (and irq ack?) */
-	{ 0x8001, 0x8001, MRA_NOP },		/* unknown */
-	{ 0x8002, 0x8002, input_port_1_r },	/* dipswitches */
-	{ 0x8003, 0x8007, MRA_NOP },		/* unknown */
-	{ 0x8008, 0xffff, MRA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x17ff) AM_READ(MRA8_RAM)		/* general purpose ram */
+	AM_RANGE(0x1800, 0x7bff) AM_READ(MRA8_RAM)		/* video ram */
+	AM_RANGE(0x7c00, 0x7fff) AM_READ(MRA8_RAM)		/* battery backed ram */
+	AM_RANGE(0x8000, 0x8000) AM_READ(input_port_0_r)	/* controls (and irq ack?) */
+	AM_RANGE(0x8001, 0x8001) AM_READ(MRA8_NOP)		/* unknown */
+	AM_RANGE(0x8002, 0x8002) AM_READ(input_port_1_r)	/* dipswitches */
+	AM_RANGE(0x8003, 0x8007) AM_READ(MRA8_NOP)		/* unknown */
+	AM_RANGE(0x8008, 0xffff) AM_READ(MRA8_ROM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x17ff, MWA_RAM },		/* general purpose ram */
-	{ 0x1800, 0x7bff, MWA_RAM },		/* video ram */
-	{ 0x7c00, 0x7fff, MWA_RAM },		/* battery backed ram */
-	{ 0x8000, 0x8001, MWA_NOP },		/* unknown */
-	{ 0x8002, 0x8002, DAC_0_data_w },
-	{ 0x8003, 0x8007, MWA_NOP },		/* unknown */
-	{ 0x8008, 0xffff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x17ff) AM_WRITE(MWA8_RAM)		/* general purpose ram */
+	AM_RANGE(0x1800, 0x7bff) AM_WRITE(MWA8_RAM)		/* video ram */
+	AM_RANGE(0x7c00, 0x7fff) AM_WRITE(MWA8_RAM)		/* battery backed ram */
+	AM_RANGE(0x8000, 0x8001) AM_WRITE(MWA8_NOP)		/* unknown */
+	AM_RANGE(0x8002, 0x8002) AM_WRITE(DAC_0_data_w)
+	AM_RANGE(0x8003, 0x8007) AM_WRITE(MWA8_NOP)		/* unknown */
+	AM_RANGE(0x8008, 0xffff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
 INPUT_PORTS_START( truco )
 	PORT_START	/* IN0 */
@@ -152,8 +152,8 @@ static struct DACinterface dac_interface =
 static MACHINE_DRIVER_START( truco )
 
 	/* basic machine hardware */
-	MDRV_CPU_ADD(M6809, 750000)       /* ?? guess */
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_ADD(M6809, 750000)        /* ?? guess */
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)

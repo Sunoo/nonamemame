@@ -29,7 +29,6 @@ extern UINT8 *neogeo_memcard;
 extern data8_t *neogeo_game_vectors;
 
 MACHINE_INIT( neogeo );
-MACHINE_INIT( pbobbldx );
 DRIVER_INIT( neogeo );
 
 WRITE16_HANDLER( neogeo_sram16_lock_w );

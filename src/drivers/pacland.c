@@ -25,6 +25,58 @@ c000-cfff Namco Sound ?
 d000-d003 Dip Switches/Joysticks
 f000-ffff MCU internal ROM
 
+
+Pacland
+Namco, 1984
+
+PCB Layout
+----------
+
+2234961101 (2234963101)
+|------------------------------------------------------|
+| PL1-2.1T  2148 2148  PL1-5.5T  PL1-13.6T  6116 6116  |
+|                2148                       6116 6116  |
+| PL1-1.1R                                             |
+|            29         36                  6116       |
+|                                           6116       |
+|      PL1-4.4N   PL6-12.6N                            |
+|                                           6116  0482 |
+|2  DSWA DSWB                                          |
+|2                PL1-3.6L                             |
+|W                                                     |
+|A                                          1371       |
+|Y         2148                                        |
+|          2148                         PL1-6.8J       |
+|                 1179      1275        PL1-5.8H       |
+|          30                                          |
+|                 PL1-9.6F  PL1-11.7F   PL1-4.8F       |
+|            6116                       PL1-3.8E       |
+|   PL1-7.3E      PL1-8.6E  PL1-10.7E                  |
+|                                       PL6-2.8D       |
+|                 27                    PL6-1.8B       |
+|    60A1    49.152MHz                                 |
+|                           34          6809           |
+|------------------------------------------------------|
+Notes:
+      6809 clock :
+      63701 clock:
+      VSync      : 60.606060
+      6116       : 2K x8 SRAM
+      2148       : 1K x4 SRAM
+
+      Namco Customs
+      27   (DIP40)
+      29   (SDIP64)
+      30   (SDIP64, known 63701 MCU)
+      34   (DIP24)
+      36   (SDIP64)
+      0482 (DIP28)
+      1179 (DIP28)
+      1275 (DIP28)
+      1371 (DIP28)
+      60A1 (DIP40)
+
+
 ***************************************************************************/
 
 #include "driver.h"
@@ -101,64 +153,64 @@ static WRITE_HANDLER( pacland_led_w )
 }
 
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x1fff, MRA_RAM },
-	{ 0x2000, 0x37ff, MRA_RAM },
-	{ 0x4000, 0x5fff, MRA_BANK1 },
-	{ 0x6800, 0x68ff, namcos1_wavedata_r },		/* PSG device, shared RAM */
-	{ 0x6800, 0x6bff, sharedram1_r },
-	{ 0x7800, 0x7800, MRA_NOP },	/* ??? */
-	{ 0x8000, 0xffff, MRA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x1fff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x2000, 0x37ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x4000, 0x5fff) AM_READ(MRA8_BANK1)
+	AM_RANGE(0x6800, 0x68ff) AM_READ(namcos1_wavedata_r)		/* PSG device, shared RAM */
+	AM_RANGE(0x6800, 0x6bff) AM_READ(sharedram1_r)
+	AM_RANGE(0x7800, 0x7800) AM_READ(MRA8_NOP)	/* ??? */
+	AM_RANGE(0x8000, 0xffff) AM_READ(MRA8_ROM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x0fff, pacland_videoram_w, &videoram },
-	{ 0x1000, 0x1fff, pacland_videoram2_w, &pacland_videoram2 },
-	{ 0x2000, 0x37ff, MWA_RAM },
-	{ 0x2700, 0x27ff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0x2f00, 0x2fff, MWA_RAM, &spriteram_2 },
-	{ 0x3700, 0x37ff, MWA_RAM, &spriteram_3 },
-	{ 0x3800, 0x3801, pacland_scroll0_w },
-	{ 0x3a00, 0x3a01, pacland_scroll1_w },
-	{ 0x3c00, 0x3c00, pacland_bankswitch_w },
-	{ 0x4000, 0x5fff, MWA_ROM },
-	{ 0x6800, 0x68ff, namcos1_wavedata_w }, /* PSG device, shared RAM */
-	{ 0x6800, 0x6bff, sharedram1_w, &sharedram1 },
-	{ 0x7000, 0x7000, MWA_NOP },	/* ??? */
-	{ 0x7800, 0x7800, MWA_NOP },	/* ??? */
-	{ 0x8000, 0x8800, pacland_halt_mcu_w },
-	{ 0x9000, 0x9800, pacland_flipscreen_w },
-	//{ 0x8000, 0xffff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x0fff) AM_WRITE(pacland_videoram_w) AM_BASE(&videoram)
+	AM_RANGE(0x1000, 0x1fff) AM_WRITE(pacland_videoram2_w) AM_BASE(&pacland_videoram2)
+	AM_RANGE(0x2000, 0x37ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x2700, 0x27ff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x2f00, 0x2fff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram_2)
+	AM_RANGE(0x3700, 0x37ff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram_3)
+	AM_RANGE(0x3800, 0x3801) AM_WRITE(pacland_scroll0_w)
+	AM_RANGE(0x3a00, 0x3a01) AM_WRITE(pacland_scroll1_w)
+	AM_RANGE(0x3c00, 0x3c00) AM_WRITE(pacland_bankswitch_w)
+	AM_RANGE(0x4000, 0x5fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x6800, 0x68ff) AM_WRITE(namcos1_wavedata_w) /* PSG device, shared RAM */
+	AM_RANGE(0x6800, 0x6bff) AM_WRITE(sharedram1_w) AM_BASE(&sharedram1)
+	AM_RANGE(0x7000, 0x7000) AM_WRITE(MWA8_NOP)	/* ??? */
+	AM_RANGE(0x7800, 0x7800) AM_WRITE(MWA8_NOP)	/* ??? */
+	AM_RANGE(0x8000, 0x8800) AM_WRITE(pacland_halt_mcu_w)
+	AM_RANGE(0x9000, 0x9800) AM_WRITE(pacland_flipscreen_w)
+	//AM_RANGE(0x8000, 0xffff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
-static MEMORY_READ_START( mcu_readmem )
-	{ 0x0000, 0x001f, hd63701_internal_registers_r },
-	{ 0x0080, 0x00ff, MRA_RAM },
-	{ 0x1000, 0x10ff, namcos1_wavedata_r },			/* PSG device, shared RAM */
-	{ 0x1100, 0x113f, MRA_RAM }, /* PSG device */
-	{ 0x1000, 0x13ff, sharedram1_r },
-	{ 0x8000, 0x9fff, MRA_ROM },
-	{ 0xc000, 0xc800, MRA_RAM },
-	{ 0xd000, 0xd000, dsw0_r },
-	{ 0xd000, 0xd001, dsw1_r },
-	{ 0xd000, 0xd002, input_port_2_r },
-	{ 0xd000, 0xd003, input_port_3_r },
-	{ 0xf000, 0xffff, MRA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( mcu_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x001f) AM_READ(hd63701_internal_registers_r)
+	AM_RANGE(0x0080, 0x00ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x1000, 0x10ff) AM_READ(namcos1_wavedata_r)			/* PSG device, shared RAM */
+	AM_RANGE(0x1100, 0x113f) AM_READ(MRA8_RAM) /* PSG device */
+	AM_RANGE(0x1000, 0x13ff) AM_READ(sharedram1_r)
+	AM_RANGE(0x8000, 0x9fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0xc000, 0xc800) AM_READ(MRA8_RAM)
+	AM_RANGE(0xd000, 0xd000) AM_READ(dsw0_r)
+	AM_RANGE(0xd000, 0xd001) AM_READ(dsw1_r)
+	AM_RANGE(0xd000, 0xd002) AM_READ(input_port_2_r)
+	AM_RANGE(0xd000, 0xd003) AM_READ(input_port_3_r)
+	AM_RANGE(0xf000, 0xffff) AM_READ(MRA8_ROM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( mcu_writemem )
-	{ 0x0000, 0x001f, hd63701_internal_registers_w },
-	{ 0x0080, 0x00ff, MWA_RAM },
-	{ 0x1000, 0x10ff, namcos1_wavedata_w, &namco_wavedata },		/* PSG device, shared RAM */
-	{ 0x1100, 0x113f, namcos1_sound_w, &namco_soundregs }, /* PSG device */
-	{ 0x1000, 0x13ff, sharedram1_w },
-	{ 0x2000, 0x2000, MWA_NOP }, // ???? (w)
-	{ 0x4000, 0x4000, MWA_NOP }, // ???? (w)
-	{ 0x6000, 0x6000, MWA_NOP }, // ???? (w)
-	{ 0x8000, 0x9fff, MWA_ROM },
-	{ 0xc000, 0xc7ff, MWA_RAM },
-	{ 0xf000, 0xffff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( mcu_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x001f) AM_WRITE(hd63701_internal_registers_w)
+	AM_RANGE(0x0080, 0x00ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x1000, 0x10ff) AM_WRITE(namcos1_wavedata_w) AM_BASE(&namco_wavedata)		/* PSG device, shared RAM */
+	AM_RANGE(0x1100, 0x113f) AM_WRITE(namcos1_sound_w) AM_BASE(&namco_soundregs) /* PSG device */
+	AM_RANGE(0x1000, 0x13ff) AM_WRITE(sharedram1_w)
+	AM_RANGE(0x2000, 0x2000) AM_WRITE(MWA8_NOP) // ???? (w)
+	AM_RANGE(0x4000, 0x4000) AM_WRITE(MWA8_NOP) // ???? (w)
+	AM_RANGE(0x6000, 0x6000) AM_WRITE(MWA8_NOP) // ???? (w)
+	AM_RANGE(0x8000, 0x9fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xc000, 0xc7ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xf000, 0xffff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
 
 static READ_HANDLER( readFF )
@@ -166,15 +218,15 @@ static READ_HANDLER( readFF )
 	return 0xff;
 }
 
-static PORT_READ_START( mcu_readport )
-	{ HD63701_PORT1, HD63701_PORT1, input_port_4_r },
-	{ HD63701_PORT2, HD63701_PORT2, readFF },	/* leds won't work otherwise */
-PORT_END
+static ADDRESS_MAP_START( mcu_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(HD63701_PORT1, HD63701_PORT1) AM_READ(input_port_4_r)
+	AM_RANGE(HD63701_PORT2, HD63701_PORT2) AM_READ(readFF)	/* leds won't work otherwise */
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( mcu_writeport )
-	{ HD63701_PORT1, HD63701_PORT1, pacland_coin_w },
-	{ HD63701_PORT2, HD63701_PORT2, pacland_led_w },
-PORT_END
+static ADDRESS_MAP_START( mcu_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(HD63701_PORT1, HD63701_PORT1) AM_WRITE(pacland_coin_w)
+	AM_RANGE(HD63701_PORT2, HD63701_PORT2) AM_WRITE(pacland_led_w)
+ADDRESS_MAP_END
 
 
 
@@ -308,13 +360,13 @@ static MACHINE_DRIVER_START( pacland )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(M6809, 1500000)	/* 1.500 MHz (?) */
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
 
 	MDRV_CPU_ADD(HD63701, 6000000/3.9)	/* or compatible 6808 with extra instructions */
 //			6000000/4,		/* ??? */
-	MDRV_CPU_MEMORY(mcu_readmem,mcu_writemem)
-	MDRV_CPU_PORTS(mcu_readport,mcu_writeport)
+	MDRV_CPU_PROGRAM_MAP(mcu_readmem,mcu_writemem)
+	MDRV_CPU_IO_MAP(mcu_readport,mcu_writeport)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
 
 	MDRV_FRAMES_PER_SECOND(60.606060)
@@ -488,122 +540,9 @@ ROM_START( paclandm )
 	ROM_LOAD( "pl1-4.bin",    0x1000, 0x0400, CRC(3a7be418) SHA1(475cdc68205e3acce83fe79b00b74c6a7e28dde4) )	/* background lookup table */
 ROM_END
 
-/*PacMAME*/
-ROM_START( paclandb )
-	ROM_REGION( 0x20000, REGION_CPU1, 0 )	/* 128k for code */
-	ROM_LOAD( "PL5_01B.BIN",        0x08000, 0x4000, CRC(b0ea7631) )
-	ROM_LOAD( "PL5_02.BIN",        0x0C000, 0x4000, CRC(d903e84e) )
-	/* all the following are banked at 0x4000-0x5fff */
-	ROM_LOAD( "pl1-3",        0x10000, 0x4000, CRC(aa9fa739) )
-	ROM_LOAD( "pl1-4",        0x14000, 0x4000, CRC(2b895a90) )
-	ROM_LOAD( "pl1-5",        0x18000, 0x4000, CRC(7af66200) )
-	ROM_LOAD( "PL3_06.BIN",        0x1c000, 0x4000, CRC(2ffe3319) )
-
-	ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for code */
-	ROM_LOAD( "pl1-7",        0x8000, 0x2000, CRC(8c5becae) ) /* sub program for the mcu */
-	ROM_LOAD( "pl1-mcu.bin",  0xf000, 0x1000, CRC(6ef08fb3) ) /* microcontroller */
-
-	ROM_REGION( 0x02000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "PL2_12.BIN",       0x00000, 0x2000, CRC(a63c8726) )	/* chars */
-
-	ROM_REGION( 0x02000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "PL4_13.BIN",       0x00000, 0x2000, CRC(3ae582fd) )
-
-	ROM_REGION( 0x08000, REGION_GFX3, ROMREGION_DISPOSE )
-	ROM_LOAD( "pl1-9",        0x00000, 0x4000, CRC(f5d5962b) )	/* sprites */
-	ROM_LOAD( "pl1-10",       0x04000, 0x4000, CRC(c7cf1904) )
-
-	ROM_REGION( 0x08000, REGION_GFX4, ROMREGION_DISPOSE )
-	ROM_LOAD( "pl1-8",        0x00000, 0x4000, CRC(a2ebfa4a) )
-	ROM_LOAD( "pl1-11",       0x04000, 0x4000, CRC(6621361a) )
-
-	ROM_REGION( 0x1400, REGION_PROMS, 0 )
-	ROM_LOAD( "pl1-2.bin",    0x0000, 0x0400, CRC(472885de) )	/* red and green component */
-	ROM_LOAD( "pl1-1.bin",    0x0400, 0x0400, CRC(a78ebdaf) )	/* blue component */
-	ROM_LOAD( "pl1-3.bin",    0x0800, 0x0400, CRC(80558da8) )	/* sprites lookup table */
-	ROM_LOAD( "pl1-5.bin",    0x0c00, 0x0400, CRC(4b7ee712) )	/* foreground lookup table */
-	ROM_LOAD( "pl1-4.bin",    0x1000, 0x0400, CRC(3a7be418) )	/* background lookup table */
-ROM_END
-
-ROM_START( paclandd )
-	ROM_REGION( 0x20000, REGION_CPU1, 0 )	/* 128k for code */
-	ROM_LOAD( "pl5_01b.bin",  0x08000, 0x4000, CRC(b0ea7631) )
-	ROM_LOAD( "pl5_02.bin",   0x0C000, 0x4000, CRC(d903e84e) )
-	/* all the following are banked at 0x4000-0x5fff */
-	ROM_LOAD( "pl1-3",        0x10000, 0x4000, CRC(aa9fa739) )
-	ROM_LOAD( "pl1-4",        0x14000, 0x4000, CRC(2b895a90) )
-	ROM_LOAD( "pl1-5",        0x18000, 0x4000, CRC(7af66200) )
-	ROM_LOAD( "pl3_06.bin",   0x1c000, 0x4000, CRC(2ffe3319) )
-
-	ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for code */
-	ROM_LOAD( "pl1-7",        0x8000, 0x2000, CRC(8c5becae) ) /* sub program for the mcu */
-	ROM_LOAD( "pl1-mcu.bin",  0xf000, 0x1000, CRC(6ef08fb3) ) /* microcontroller */
-
-	ROM_REGION( 0x02000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "pl2_12.bin",   0x00000, 0x2000, CRC(a63c8726) )	/* chars */
-
-	ROM_REGION( 0x02000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "pl4_13.bin",   0x00000, 0x2000, CRC(3ae582fd) )
-
-	ROM_REGION( 0x08000, REGION_GFX3, ROMREGION_DISPOSE )
-	ROM_LOAD( "pl1-9",        0x00000, 0x4000, CRC(3dba9085) )	/* sprites */
-	ROM_LOAD( "pl1-10",       0x04000, 0x4000, CRC(3f4b4d81) )
-
-	ROM_REGION( 0x08000, REGION_GFX4, ROMREGION_DISPOSE )
-	ROM_LOAD( "pl1-8",        0x00000, 0x4000, CRC(7f089223) )
-	ROM_LOAD( "pl1-11",       0x04000, 0x4000, CRC(52c2cb37) )
-
-	ROM_REGION( 0x1400, REGION_PROMS, 0 )
-	ROM_LOAD( "pl1-2.bin",    0x0000, 0x0400, CRC(472885de) )	/* red and green component */
-	ROM_LOAD( "pl1-1.bin",    0x0400, 0x0400, CRC(a78ebdaf) )	/* blue component */
-	ROM_LOAD( "pl1-3.bin",    0x0800, 0x0400, CRC(80558da8) )	/* sprites lookup table */
-	ROM_LOAD( "pl1-5.bin",    0x0c00, 0x0400, CRC(4b7ee712) )	/* foreground lookup table */
-	ROM_LOAD( "pl1-4.bin",    0x1000, 0x0400, CRC(3a7be418) )	/* background lookup table */
-ROM_END
-
-ROM_START( mariopac )
-	ROM_REGION( 0x20000, REGION_CPU1, 0 )	/* 128k for code */
-	ROM_LOAD( "pl5_01b.bin",  0x08000, 0x4000, CRC(b0ea7631) )
-	ROM_LOAD( "pl5_02.bin",   0x0C000, 0x4000, CRC(d903e84e) )
-	/* all the following are banked at 0x4000-0x5fff */
-	ROM_LOAD( "pl1-3",        0x10000, 0x4000, CRC(aa9fa739) )
-	ROM_LOAD( "pl1-4",        0x14000, 0x4000, CRC(2b895a90) )
-	ROM_LOAD( "pl1-5",        0x18000, 0x4000, CRC(7af66200) )
-	ROM_LOAD( "pl3_06.bin",   0x1c000, 0x4000, CRC(2ffe3319) )
-
-	ROM_REGION( 0x10000, REGION_CPU2, 0 )	/* 64k for code */
-	ROM_LOAD( "pl1-7",        0x8000, 0x2000, CRC(8c5becae) ) /* sub program for the mcu */
-	ROM_LOAD( "pl1-mcu.bin",  0xf000, 0x1000, CRC(6ef08fb3) ) /* microcontroller */
-
-	ROM_REGION( 0x02000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "pl2_12.bin",   0x00000, 0x2000, CRC(abba0923) )	/* chars */
-
-	ROM_REGION( 0x02000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "pl4_13.bin",   0x00000, 0x2000, CRC(3ae582fd) )
-
-	ROM_REGION( 0x08000, REGION_GFX3, ROMREGION_DISPOSE )
-	ROM_LOAD( "pl1-9",        0x00000, 0x4000, CRC(98439154) )	/* sprites */
-	ROM_LOAD( "pl1-10",       0x04000, 0x4000, CRC(6005b277) )
-
-	ROM_REGION( 0x08000, REGION_GFX4, ROMREGION_DISPOSE )
-	ROM_LOAD( "pl1-8",        0x00000, 0x4000, CRC(d0c1f225) )
-	ROM_LOAD( "pl1-11",       0x04000, 0x4000, CRC(eeed9880) )
-
-	ROM_REGION( 0x1400, REGION_PROMS, 0 )
-	ROM_LOAD( "pl1-2.bin",    0x0000, 0x0400, CRC(472885de) )	/* red and green component */
-	ROM_LOAD( "pl1-1.bin",    0x0400, 0x0400, CRC(a78ebdaf) )	/* blue component */
-	ROM_LOAD( "pl1-3.bin",    0x0800, 0x0400, CRC(80558da8) )	/* sprites lookup table */
-	ROM_LOAD( "pl1-5.bin",    0x0c00, 0x0400, CRC(4b7ee712) )	/* foreground lookup table */
-	ROM_LOAD( "pl1-4.bin",    0x1000, 0x0400, CRC(3a7be418) )	/* background lookup table */
-ROM_END
-
 
 
 GAME( 1984, pacland,  0,       pacland, pacland, 0, ROT0, "Namco", "Pac-Land (set 1)" )
 GAME( 1984, pacland2, pacland, pacland, pacland, 0, ROT0, "Namco", "Pac-Land (set 2)" )
 GAME( 1984, pacland3, pacland, pacland, pacland, 0, ROT0, "Namco", "Pac-Land (set 3)" )
 GAME( 1984, paclandm, pacland, pacland, pacland, 0, ROT0, "[Namco] (Bally Midway license)", "Pac-Land (Midway)" )
-GAME( 1984, paclandb, 0, pacland, pacland, 0, ROT0, "Namco", "Pac-Land (Benelux Edition)")
-GAME( 2001, mariopac, 0, pacland, pacland, 0, ROT0, "Namco", "Mario in Pac-Land")
-
-GAME( 2000, paclandd, 0, pacland, pacland, 0, ROT0, "BlueJustice", "Pac-Land")

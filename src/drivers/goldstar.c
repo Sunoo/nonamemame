@@ -28,11 +28,11 @@ static size_t nvram_size;
 static NVRAM_HANDLER( goldstar )
 {
 	if (read_or_write)
-                mame_fwrite(file,nvram,nvram_size);
+		mame_fwrite(file,nvram,nvram_size);
 	else
 	{
 		if (file)
-                        mame_fread(file,nvram,nvram_size);
+			mame_fread(file,nvram,nvram_size);
 		else
 			memset(nvram,0xff,nvram_size);
 	}
@@ -54,53 +54,53 @@ READ_HANDLER( protection_r )
 	return data[dataoffset++];
 }
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0xb7ff, MRA_ROM },
-	{ 0xb800, 0xbfff, MRA_RAM },
-	{ 0xc000, 0xc7ff, MRA_ROM },
-	{ 0xc800, 0xd9ff, MRA_RAM },
-	{ 0xe000, 0xe1ff, MRA_RAM },
-	{ 0xd800, 0xd9ff, MRA_RAM },
-	{ 0xf800, 0xf800, input_port_0_r },	/* PLAYER */
-	{ 0xf801, 0xf801, input_port_1_r },	/* Test Mode */
-	{ 0xf802, 0xf802, input_port_2_r },	/* DSW 1 */
-//	{ 0xf803, 0xf803, },
-//	{ 0xf804, 0xf804, },
-	{ 0xf805, 0xf805, input_port_7_r },	/* DSW 4 (also appears in 8910 port) */
-	{ 0xf806, 0xf806, input_port_9_r },	/* (don't know to which one of the */
-										/* service mode dip switches it should map) */
-	{ 0xf810, 0xf810, input_port_3_r },	/* COIN */
-	{ 0xf811, 0xf811, input_port_4_r },	/* TEST */
-	{ 0xf820, 0xf820, input_port_5_r },	/* DSW 2 */
-	{ 0xf830, 0xf830, AY8910_read_port_0_r },
-	{ 0xfb00, 0xfb00, OKIM6295_status_0_r },
-	{ 0xfd00, 0xfdff, MRA_RAM },
-	{ 0xfe00, 0xfe00, protection_r },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xb7ff) AM_READ(MRA8_ROM)
+	AM_RANGE(0xb800, 0xbfff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xc000, 0xc7ff) AM_READ(MRA8_ROM)
+	AM_RANGE(0xc800, 0xd9ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xe000, 0xe1ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xd800, 0xd9ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xf800, 0xf800) AM_READ(input_port_0_r)	/* PLAYER */
+	AM_RANGE(0xf801, 0xf801) AM_READ(input_port_1_r)	/* Test Mode */
+	AM_RANGE(0xf802, 0xf802) AM_READ(input_port_2_r)	/* DSW 1 */
+//	AM_RANGE(0xf803, 0xf803)
+//	AM_RANGE(0xf804, 0xf804)
+	AM_RANGE(0xf805, 0xf805) AM_READ(input_port_7_r)	/* DSW 4 (also appears in 8910 port) */
+	AM_RANGE(0xf806, 0xf806) AM_READ(input_port_9_r)	/* (don't know to which one of the */
+								/* service mode dip switches it should map) */
+	AM_RANGE(0xf810, 0xf810) AM_READ(input_port_3_r)	/* COIN */
+	AM_RANGE(0xf811, 0xf811) AM_READ(input_port_4_r)	/* TEST */
+	AM_RANGE(0xf820, 0xf820) AM_READ(input_port_5_r)	/* DSW 2 */
+	AM_RANGE(0xf830, 0xf830) AM_READ(AY8910_read_port_0_r)
+	AM_RANGE(0xfb00, 0xfb00) AM_READ(OKIM6295_status_0_r)
+	AM_RANGE(0xfd00, 0xfdff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xfe00, 0xfe00) AM_READ(protection_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0xb7ff, MWA_ROM },
-	{ 0xb800, 0xbfff, MWA_RAM, &nvram, &nvram_size },
-	{ 0xc000, 0xc7ff, MWA_ROM },
-	{ 0xc800, 0xcfff, videoram_w, &videoram, &videoram_size },
-	{ 0xd000, 0xd7ff, colorram_w, &colorram },
-	{ 0xd800, 0xd9ff, goldstar_video1_w, &goldstar_video1, &goldstar_video_size },
-	{ 0xe000, 0xe1ff, goldstar_video2_w, &goldstar_video2 },
-	{ 0xe800, 0xe9ff, goldstar_video3_w, &goldstar_video3 },
-	{ 0xf040, 0xf07f, MWA_RAM, &goldstar_scroll1 },
-	{ 0xf080, 0xf0bf, MWA_RAM, &goldstar_scroll2 },
-	{ 0xf0c0, 0xf0ff, MWA_RAM, &goldstar_scroll3 },
-	{ 0xf830, 0xf830, AY8910_write_port_0_w },
-	{ 0xf840, 0xf840, AY8910_control_port_0_w },
-	{ 0xfa00, 0xfa00, goldstar_fa00_w },
-	{ 0xfb00, 0xfb00, OKIM6295_data_0_w },
-	{ 0xfd00, 0xfdff, paletteram_BBGGGRRR_w, &paletteram },
-	{ 0xfe00, 0xfe00, protection_w },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xb7ff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xb800, 0xbfff) AM_WRITE(MWA8_RAM) AM_BASE(&nvram) AM_SIZE(&nvram_size)
+	AM_RANGE(0xc000, 0xc7ff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xc800, 0xcfff) AM_WRITE(videoram_w) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+	AM_RANGE(0xd000, 0xd7ff) AM_WRITE(colorram_w) AM_BASE(&colorram)
+	AM_RANGE(0xd800, 0xd9ff) AM_WRITE(goldstar_video1_w) AM_BASE(&goldstar_video1) AM_SIZE(&goldstar_video_size)
+	AM_RANGE(0xe000, 0xe1ff) AM_WRITE(goldstar_video2_w) AM_BASE(&goldstar_video2)
+	AM_RANGE(0xe800, 0xe9ff) AM_WRITE(goldstar_video3_w) AM_BASE(&goldstar_video3)
+	AM_RANGE(0xf040, 0xf07f) AM_WRITE(MWA8_RAM) AM_BASE(&goldstar_scroll1)
+	AM_RANGE(0xf080, 0xf0bf) AM_WRITE(MWA8_RAM) AM_BASE(&goldstar_scroll2)
+	AM_RANGE(0xf0c0, 0xf0ff) AM_WRITE(MWA8_RAM) AM_BASE(&goldstar_scroll3)
+	AM_RANGE(0xf830, 0xf830) AM_WRITE(AY8910_write_port_0_w)
+	AM_RANGE(0xf840, 0xf840) AM_WRITE(AY8910_control_port_0_w)
+	AM_RANGE(0xfa00, 0xfa00) AM_WRITE(goldstar_fa00_w)
+	AM_RANGE(0xfb00, 0xfb00) AM_WRITE(OKIM6295_data_0_w)
+	AM_RANGE(0xfd00, 0xfdff) AM_WRITE(paletteram_BBGGGRRR_w) AM_BASE(&paletteram)
+	AM_RANGE(0xfe00, 0xfe00) AM_WRITE(protection_w)
+ADDRESS_MAP_END
 
-static PORT_READ_START( readport )
-	{ 0x10, 0x10, input_port_8_r },
-PORT_END
+static ADDRESS_MAP_START( readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x10, 0x10) AM_READ(input_port_8_r)
+ADDRESS_MAP_END
 
 INPUT_PORTS_START( goldstar )
 	PORT_START	/* PLAYER */
@@ -119,7 +119,7 @@ INPUT_PORTS_START( goldstar )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN3 )	/* this is not a coin, not sure what it is */
-												/* maybe it's used to buy tickets. */
+							/* maybe it's used to buy tickets. */
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BITX(0x40, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
 	PORT_BITX(0x80, IP_ACTIVE_LOW, IPT_SERVICE, "Statistics", KEYCODE_F1, IP_JOY_NONE )
@@ -310,8 +310,8 @@ static MACHINE_DRIVER_START( goldstar )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 4000000)	/* 4 MHz (?) */
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(readport,0)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(readport,0)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -339,8 +339,8 @@ static MACHINE_DRIVER_START( goldstbl )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 4000000)	/* 4 MHz (?) */
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(readport,0)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(readport,0)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -373,31 +373,30 @@ MACHINE_DRIVER_END
 
 ROM_START( goldstar )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "gs4-cpu.bin",  0x0000, 0x10000, CRC(73e47d4d) )
+	ROM_LOAD( "gs4-cpu.bin",  0x0000, 0x10000, CRC(73e47d4d) SHA1(df2d8233572dc12e8a4b56e5d4f6c566e4ababc9) )
 
 	ROM_REGION( 0x20000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "gs2.bin",      0x00000, 0x20000, CRC(a2d5b898) )
+	ROM_LOAD( "gs2.bin",      0x00000, 0x20000, CRC(a2d5b898) SHA1(84cca22c91628cfefb67013652b151f034a06159) )
 
 	ROM_REGION( 0x08000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "gs3.bin",      0x00000, 0x08000, CRC(8454ce3c) )
+	ROM_LOAD( "gs3.bin",      0x00000, 0x08000, CRC(8454ce3c) SHA1(74686ebb91f191db8cbc3d0417a5e8112c5b67b1) )
 
 	ROM_REGION( 0x20000, REGION_SOUND1, 0 )	/* Audio ADPCM */
-	ROM_LOAD( "gs1-snd.bin",  0x0000, 0x20000, CRC(9d58960f) )
+	ROM_LOAD( "gs1-snd.bin",  0x0000, 0x20000, CRC(9d58960f) SHA1(c68edf95743e146398aabf6b9617d18e1f9bf25b) )
 ROM_END
-
 
 ROM_START( goldstbl )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "gsb-cpu.bin",  0x0000, 0x10000, CRC(82b238c3) )
+	ROM_LOAD( "gsb-cpu.bin",  0x0000, 0x10000, CRC(82b238c3) SHA1(1306e700e213f423bdd79b182aa11335796f7f38) )
 
 	ROM_REGION( 0x20000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "gs2.bin",      0x00000, 0x20000, CRC(a2d5b898) )
+	ROM_LOAD( "gs2.bin",      0x00000, 0x20000, CRC(a2d5b898) SHA1(84cca22c91628cfefb67013652b151f034a06159) )
 
 	ROM_REGION( 0x08000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "gsb-spr.bin",  0x00000, 0x08000, CRC(52ecd4c7) )
+	ROM_LOAD( "gsb-spr.bin",  0x00000, 0x08000, CRC(52ecd4c7) SHA1(7ef013020521a0c19ecd67db1c00047e78a3c736) )
 
 	ROM_REGION( 0x20000, REGION_SOUND1, 0 )	/* Audio ADPCM */
-	ROM_LOAD( "gs1-snd.bin",  0x0000, 0x20000, CRC(9d58960f) )
+	ROM_LOAD( "gs1-snd.bin",  0x0000, 0x20000, CRC(9d58960f) SHA1(c68edf95743e146398aabf6b9617d18e1f9bf25b) )
 ROM_END
 
 

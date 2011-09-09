@@ -40,29 +40,29 @@ READ_HANDLER( mrdo_SECRE_r )
 
 
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x7fff, MRA_ROM },
-	{ 0x8000, 0x8fff, MRA_RAM },	/* video and color RAM */
-	{ 0x9803, 0x9803, mrdo_SECRE_r },
-	{ 0xa000, 0xa000, input_port_0_r },	/* IN0 */
-	{ 0xa001, 0xa001, input_port_1_r },	/* IN1 */
-	{ 0xa002, 0xa002, input_port_2_r },	/* DSW1 */
-	{ 0xa003, 0xa003, input_port_3_r },	/* DSW2 */
-	{ 0xe000, 0xefff, MRA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0x8fff) AM_READ(MRA8_RAM)	/* video and color RAM */
+	AM_RANGE(0x9803, 0x9803) AM_READ(mrdo_SECRE_r)
+	AM_RANGE(0xa000, 0xa000) AM_READ(input_port_0_r)	/* IN0 */
+	AM_RANGE(0xa001, 0xa001) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0xa002, 0xa002) AM_READ(input_port_2_r)	/* DSW1 */
+	AM_RANGE(0xa003, 0xa003) AM_READ(input_port_3_r)	/* DSW2 */
+	AM_RANGE(0xe000, 0xefff) AM_READ(MRA8_RAM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x7fff, MWA_ROM },
-	{ 0x8000, 0x87ff, mrdo_bgvideoram_w, &mrdo_bgvideoram },
-	{ 0x8800, 0x8fff, mrdo_fgvideoram_w, &mrdo_fgvideoram },
-	{ 0x9000, 0x90ff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0x9800, 0x9800, mrdo_flipscreen_w },	/* screen flip + playfield priority */
-	{ 0x9801, 0x9801, SN76496_0_w },
-	{ 0x9802, 0x9802, SN76496_1_w },
-	{ 0xe000, 0xefff, MWA_RAM },
-	{ 0xf000, 0xf7ff, mrdo_scrollx_w },
-	{ 0xf800, 0xffff, mrdo_scrolly_w },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x8000, 0x87ff) AM_WRITE(mrdo_bgvideoram_w) AM_BASE(&mrdo_bgvideoram)
+	AM_RANGE(0x8800, 0x8fff) AM_WRITE(mrdo_fgvideoram_w) AM_BASE(&mrdo_fgvideoram)
+	AM_RANGE(0x9000, 0x90ff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x9800, 0x9800) AM_WRITE(mrdo_flipscreen_w)	/* screen flip + playfield priority */
+	AM_RANGE(0x9801, 0x9801) AM_WRITE(SN76496_0_w)
+	AM_RANGE(0x9802, 0x9802) AM_WRITE(SN76496_1_w)
+	AM_RANGE(0xe000, 0xefff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xf000, 0xf7ff) AM_WRITE(mrdo_scrollx_w)
+	AM_RANGE(0xf800, 0xffff) AM_WRITE(mrdo_scrolly_w)
+ADDRESS_MAP_END
 
 
 INPUT_PORTS_START( mrdo )
@@ -189,7 +189,7 @@ static MACHINE_DRIVER_START( mrdo )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80,8000000/2)	/* 4 MHz */
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
 
 	MDRV_FRAMES_PER_SECOND(5000000.0/312/262)
@@ -401,110 +401,6 @@ ROM_START( yankeedo )
 	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) SHA1(3ac8e30011c1fcba0ee8f4dc932f82296c3ba143) )	/* timing (not used) */
 ROM_END
 
-ROM_START( mrdigdo )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "d1",           0x0000, 0x2000, CRC(3dcd9359) )
-	ROM_LOAD( "d2",           0x2000, 0x2000, CRC(710058d8) )
-	ROM_LOAD( "d3",           0x4000, 0x2000, CRC(467d12d8) )
-	ROM_LOAD( "d4",           0x6000, 0x2000, CRC(fce9afeb) )
-
-	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "d9",           0x0000, 0x1000, CRC(b83b8a84) )
-	ROM_LOAD( "d10",          0x1000, 0x1000, CRC(061cabb9) )
-
-	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "d8",           0x0000, 0x1000, CRC(dbdc9ffa) )
-	ROM_LOAD( "d7",           0x1000, 0x1000, CRC(4b9973db) )
-
-	ROM_REGION( 0x2000, REGION_GFX3, ROMREGION_DISPOSE )
-	ROM_LOAD( "d5",           0x0000, 0x1000, CRC(401f9fa5) )
-	ROM_LOAD( "d6",           0x1000, 0x1000, CRC(ff401f59) )
-
-	ROM_REGION( 0x0060, REGION_PROMS, 0 )
-	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) )	/* palette (high bits) */
-	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) )	/* palette (low bits) */
-	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) )	/* sprite color lookup table */
-ROM_END
-
-
-ROM_START( newdigdo )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "a4-01.bin",    0x0000, 0x2000, CRC(03dcfba2) )
-	ROM_LOAD( "c4-02.bin",    0x2000, 0x2000, CRC(0ecdd39c) )
-	ROM_LOAD( "e4-03.bin",    0x4000, 0x2000, CRC(358f5dc2) )
-	ROM_LOAD( "f4-04.bin",    0x6000, 0x2000, CRC(f4190cfc) )
-
-	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "s8-09.bin",    0x0000, 0x1000, CRC(48f2bd6d) )
-	ROM_LOAD( "u8-10.bin",    0x1000, 0x1000, CRC(7be2fc3e) )
-
-	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "r8-08.bin",    0x0000, 0x1000, CRC(069a3e35) )
-	ROM_LOAD( "n8-07.bin",    0x1000, 0x1000, CRC(7ef6f5e4) )
-
-	ROM_REGION( 0x2000, REGION_GFX3, ROMREGION_DISPOSE )
-	ROM_LOAD( "h5-05.bin",    0x0000, 0x1000, CRC(4c8f6cf8) )
-	ROM_LOAD( "k5-06.bin",    0x1000, 0x1000, CRC(1a5f18fc) )
-
-	ROM_REGION( 0x0060, REGION_PROMS, 0 )
-	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) )	/* palette (high bits) */
-	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) )	/* palette (low bits) */
-	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) )	/* sprite color lookup table */
-  /*  If someone knows what J10--4.bin (ff7fe284) is for, let me know. */
-ROM_END
-
-ROM_START( stickydo )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "a4-01.bin",    0x0000, 0x2000, CRC(03dcfba2) )
-	ROM_LOAD( "c4-02.bin",    0x2000, 0x2000, CRC(0ecdd39c) )
-	ROM_LOAD( "e4-03.bin",    0x4000, 0x2000, CRC(358f5dc2) )
-	ROM_LOAD( "f4-04.bin",    0x6000, 0x2000, CRC(f4190cfc) )
-
-	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "s8-09.bin",    0x0000, 0x1000, CRC(0becc7bc) )
-	ROM_LOAD( "u8-10.bin",    0x1000, 0x1000, CRC(fc08364e) )
-
-	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "r8-08.bin",    0x0000, 0x1000, CRC(069a3e35) )
-	ROM_LOAD( "n8-07.bin",    0x1000, 0x1000, CRC(7ef6f5e4) )
-
-	ROM_REGION( 0x2000, REGION_GFX3, ROMREGION_DISPOSE )
-	ROM_LOAD( "h5-05.bin",    0x0000, 0x1000, CRC(64d2f54f) )
-	ROM_LOAD( "k5-06.bin",    0x1000, 0x1000, CRC(af9b0d35) )
-
-	ROM_REGION( 0x0060, REGION_PROMS, 0 )
-	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) )	/* palette (high bits) */
-	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) )	/* palette (low bits) */
-	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) )	/* sprite color lookup table */
-  /*  If someone knows what J10--4.bin (ff7fe284) is for, let me know. */
-ROM_END
-
-ROM_START( mrpac )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "a4-01.bin",    0x0000, 0x2000, CRC(03dcfba2) )
-	ROM_LOAD( "c4-02.bin",    0x2000, 0x2000, CRC(0ecdd39c) )
-	ROM_LOAD( "e4-03.bin",    0x4000, 0x2000, CRC(358f5dc2) )
-	ROM_LOAD( "f4-04.bin",    0x6000, 0x2000, CRC(f4190cfc) )
-
-	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "s8-09.bin",    0x0000, 0x1000, CRC(930908e5) )
-	ROM_LOAD( "u8-10.bin",    0x1000, 0x1000, CRC(ead6d3d6) )
-
-	ROM_REGION( 0x2000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "r8-08.bin",    0x0000, 0x1000, CRC(dbdc9ffa) )
-	ROM_LOAD( "n8-07.bin",    0x1000, 0x1000, CRC(4b9973db) )
-
-	ROM_REGION( 0x2000, REGION_GFX3, ROMREGION_DISPOSE )
-	ROM_LOAD( "h5-05.bin",    0x0000, 0x1000, CRC(de213e01) )
-	ROM_LOAD( "k5-06.bin",    0x1000, 0x1000, CRC(c2e376a4) )
-
-	ROM_REGION( 0x0080, REGION_PROMS, 0 )
-	ROM_LOAD( "u02--2.bin",   0x0000, 0x0020, CRC(238a65d7) )	/* palette (high bits) */
-	ROM_LOAD( "t02--3.bin",   0x0020, 0x0020, CRC(ae263dc0) )	/* palette (low bits) */
-	ROM_LOAD( "f10--1.bin",   0x0040, 0x0020, CRC(16ee4ca2) )	/* sprite color lookup table */
-	ROM_LOAD( "j10--4.bin",   0x0060, 0x0020, CRC(ff7fe284) )	/* timing (not used) */
-ROM_END
-
 
 
 GAME( 1982, mrdo,     0,    mrdo, mrdo, 0, ROT270, "Universal", "Mr. Do!" )
@@ -514,7 +410,3 @@ GAME( 1982, mrdofix,  mrdo, mrdo, mrdo, 0, ROT270, "Universal (Taito license)", 
 GAME( 1982, mrlo,     mrdo, mrdo, mrdo, 0, ROT270, "bootleg", "Mr. Lo!" )
 GAME( 1982, mrdu,     mrdo, mrdo, mrdo, 0, ROT270, "bootleg", "Mr. Du!" )
 GAME( 1982, yankeedo, mrdo, mrdo, mrdo, 0, ROT270, "hack", "Yankee DO!" )
-GAME( 1998, mrdigdo, mrdo, mrdo, mrdo, 0, ROT270, "Justin Clark hack", "Mr. Do! (Dig Dug sprites)")
-GAME( 1999, newdigdo, mrdo, mrdo, mrdo, 0, ROT270, "Vic Twenty George, Jerky, Justin Clark hack", "Mr. Do! (Dig Dug sprites, new version)")
-GAME( 2001, stickydo, mrdo, mrdo, mrdo, 0, ROT270, "Marcks Hacks", "Mr. Sticky Do!")
-GAME( 2002, mrpac   , mrdo, mrdo, mrdo, 0, ROT270, "Twisted Hack", "Mr. Pac!")

@@ -25,17 +25,6 @@ endif
 endif
 endif
 
-# analog pedal compile option: if defined, use new analog code
-# uncomment next line to disable, or "ANALOGPEDALON=0" in make commandline
-# ANALOGPEDALON = 0
-ifdef ANALOGPEDALON
-ifeq ($(ANALOGPEDALON),0)
-undef ANALOGPEDALON
-endif
-else
-ANALOGPEDALON = 1
-endif
-
 # uncomment next line to include the debugger
 # DEBUG = 1
 
@@ -46,11 +35,7 @@ endif
 # MAP = 1
 
 # uncomment next line to use Assembler 68000 engine
-ifdef ATHLON
-X86_ASM_68000 = 1
-else
 # X86_ASM_68000 = 1
-endif
 
 # uncomment next line to use Assembler 68020 engine
 # X86_ASM_68020 = 1
@@ -61,11 +46,8 @@ X86_MIPS3_DRC = 1
 # uncomment next line to use cygwin compiler
 # COMPILESYSTEM_CYGWIN	= 1
 
-# uncomment next line to add support for the ZVG board (www.zektor.com)
-ZVG = 1
 
 # set this the operating system you're building for
-# mame:analog+ for dos is missing some features currently
 # MAMEOS = msdos
 # MAMEOS = windows
 ifeq ($(MAMEOS),)
@@ -88,12 +70,9 @@ MD = -mkdir
 RM = @rm -f
 #PERL = @perl -w
 
+
 ifeq ($(MAMEOS),msdos)
-#  ifdef ZVG
-# PREFIX = dv
-#  else
 PREFIX = d
-# endif
 else
 PREFIX =
 endif
@@ -133,47 +112,14 @@ EMULATOR = $(NAME)$(EXE)
 
 DEFS = -DX86_ASM -DLSB_FIRST -DINLINE="static __inline__" -Dasm=__asm__
 
-#ifdef DX_INCPATH
-#DEFS += -I$(DX_INCPATH) -D_MSC_VER=1000
-#endif
-ifdef ANALOGPEDALON
-DEFS += -DANALOGPEDALON
-endif
-
 CFLAGS = -std=gnu99 -Isrc -Isrc/includes -Isrc/$(MAMEOS) -I$(OBJ)/cpu/m68000 -Isrc/cpu/m68000
 
-ifdef ATHLON
 ifdef SYMBOLS
 CFLAGS += -O0 -Werror -Wall -Wno-unused -g
 else
 CFLAGS += -DNDEBUG \
-	$(ARCH) -O2 -fomit-frame-pointer -fstrict-aliasing \
-	-pipe -ffast-math -fprefetch-loop-arrays -minline-all-stringops -fschedule-insns2 -fexpensive-optimizations \
-	-Wall -Wno-sign-compare -Wunused \
-	-Wpointer-arith -Wbad-function-cast -Wcast-align -Waggregate-return \
-	-Wshadow -Wstrict-prototypes -Wundef \
-	-Wformat-security -Wwrite-strings \
-	-Wdisabled-optimization \
-#	-Werror
-#	-Wredundant-decls
-#	-Wfloat-equal
-#	-Wunreachable-code -Wpadded
-#	-W had to remove because of the "missing initializer" warning
-#	-Wlarger-than-262144  \
-#	-Wcast-qual \
-#	-Wwrite-strings \
-#	-Wconversion \
-#	-Wmissing-prototypes \
-#	-Wmissing-declarations
-endif
-endif
-
-ifdef SYMBOLS
-CFLAGS += -O0 -Wall -Wno-error -Wno-unused -g
-else
-CFLAGS += -DNDEBUG \
 	$(ARCH) -O3 -fomit-frame-pointer -fstrict-aliasing \
-	-Wno-error -Wall -Wno-sign-compare -Wunused \
+	-Werror -Wall -Wno-sign-compare -Wunused \
 	-Wpointer-arith -Wbad-function-cast -Wcast-align -Waggregate-return \
 	-Wshadow -Wstrict-prototypes -Wundef \
 	-Wformat-security -Wwrite-strings \
@@ -194,11 +140,7 @@ endif
 CFLAGSOSDEPEND = $(CFLAGS)
 
 # the windows osd code at least cannot be compiled with -pedantic
-ifdef ATHLON
 CFLAGSPEDANTIC = $(CFLAGS) -pedantic
-else
-CFLAGSPEDANTIC = $(CFLAGS) -Werror -pedantic
-endif
 
 ifdef SYMBOLS
 LDFLAGS =
@@ -258,7 +200,6 @@ $(EMULATOR): $(OBJS) $(COREOBJS) $(OSOBJS) $(DRVLIBS)
 	$(CC) $(CDEFS) $(CFLAGSPEDANTIC) -c src/version.c -o $(OBJ)/version.o
 	@echo Linking $@...
 	$(LD) $(LDFLAGS) $(OBJS) $(COREOBJS) $(OSOBJS) $(LIBS) $(DRVLIBS) -o $@ $(MAPFLAGS)
-	upx -9 $(EMULATOR)
 
 romcmp$(EXE): $(OBJ)/romcmp.o $(OBJ)/unzip.o
 	@echo Linking $@...

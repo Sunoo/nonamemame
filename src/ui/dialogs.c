@@ -39,6 +39,10 @@
 #include "properties.h"
 #include "dialogs.h"
 
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
+
 #define FILTERTEXT_LEN 256
 
 static char g_FilterText[FILTERTEXT_LEN];
@@ -53,7 +57,6 @@ DWORD filterExclusion[NUM_EXCLUSIONS] =
 	IDC_FILTER_UNAVAILABLE, IDC_FILTER_AVAILABLE,
 	IDC_FILTER_RASTER,      IDC_FILTER_VECTOR
 };
-
 
 static void DisableFilterControls(HWND hWnd, LPFOLDERDATA lpFilterRecord,
 								  LPFILTER_ITEM lpFilterItem, DWORD dwFlags);
@@ -139,12 +142,14 @@ INT_PTR CALLBACK ResetDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lPar
 INT_PTR CALLBACK InterfaceDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	char pcscreenshot[100];
+	BOOL bRedrawList = FALSE;
 
 	switch (Msg)
 	{
 	case WM_INITDIALOG:
 		Button_SetCheck(GetDlgItem(hDlg,IDC_START_GAME_CHECK),GetGameCheck());
 		Button_SetCheck(GetDlgItem(hDlg,IDC_JOY_GUI),GetJoyGUI());
+		Button_SetCheck(GetDlgItem(hDlg,IDC_KEY_GUI),GetKeyGUI());
 		Button_SetCheck(GetDlgItem(hDlg,IDC_BROADCAST),GetBroadcast());
 		Button_SetCheck(GetDlgItem(hDlg,IDC_RANDOM_BG),GetRandomBackground());
 		Button_SetCheck(GetDlgItem(hDlg,IDC_SKIP_DISCLAIMER),GetSkipDisclaimer());
@@ -170,6 +175,10 @@ INT_PTR CALLBACK InterfaceDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM 
 
 		Button_SetCheck(GetDlgItem(hDlg,IDC_STRETCH_SCREENSHOT_LARGER),
 						GetStretchScreenShotLarger());
+		Button_SetCheck(GetDlgItem(hDlg,IDC_FILTER_INHERIT),
+						GetFilterInherit());
+		Button_SetCheck(GetDlgItem(hDlg,IDC_NOOFFSET_CLONES),
+						GetOffsetClones());
 
 		return TRUE;
 
@@ -198,6 +207,7 @@ INT_PTR CALLBACK InterfaceDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM 
 
 			SetGameCheck(Button_GetCheck(GetDlgItem(hDlg, IDC_START_GAME_CHECK)));
 			SetJoyGUI(Button_GetCheck(GetDlgItem(hDlg, IDC_JOY_GUI)));
+			SetKeyGUI(Button_GetCheck(GetDlgItem(hDlg, IDC_KEY_GUI)));
 			SetBroadcast(Button_GetCheck(GetDlgItem(hDlg, IDC_BROADCAST)));
 			SetRandomBackground(Button_GetCheck(GetDlgItem(hDlg, IDC_RANDOM_BG)));
 			SetSkipDisclaimer(Button_GetCheck(GetDlgItem(hDlg, IDC_SKIP_DISCLAIMER)));
@@ -206,6 +216,16 @@ INT_PTR CALLBACK InterfaceDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM 
 			
 			SetHideMouseOnStartup(Button_GetCheck(GetDlgItem(hDlg,IDC_HIDE_MOUSE)));
 
+			if( Button_GetCheck(GetDlgItem(hDlg,IDC_RESET_PLAYCOUNT ) ) )
+			{
+				ResetPlayCount( -1 );
+				bRedrawList = TRUE;
+			}
+			if( Button_GetCheck(GetDlgItem(hDlg,IDC_RESET_PLAYTIME ) ) )
+			{
+				ResetPlayTime( -1 );
+				bRedrawList = TRUE;
+			}
 			if (Button_GetCheck(GetDlgItem(hDlg,IDC_CYCLE_SCREENSHOT)))
 			{
 				Edit_GetText(GetDlgItem(hDlg, IDC_CYCLETIMESEC),pcscreenshot,sizeof(pcscreenshot));
@@ -222,7 +242,25 @@ INT_PTR CALLBACK InterfaceDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM 
 				SetStretchScreenShotLarger(checked);
 				UpdateScreenShot();
 			}
+			checked = Button_GetCheck(GetDlgItem(hDlg,IDC_FILTER_INHERIT));
+			if (checked != GetFilterInherit())
+			{
+				SetFilterInherit(checked);
+				// LineUpIcons does just a ResetListView(), which is what we want here
+				PostMessage(GetMainWindow(),WM_COMMAND, (WPARAM)ID_VIEW_LINEUPICONS,(LPARAM)NULL);
+ 			}
+			checked = Button_GetCheck(GetDlgItem(hDlg,IDC_NOOFFSET_CLONES));
+			if (checked != GetOffsetClones())
+			{
+				SetOffsetClones(checked);
+				// LineUpIcons does just a ResetListView(), which is what we want here
+				PostMessage(GetMainWindow(),WM_COMMAND, (WPARAM)ID_VIEW_LINEUPICONS,(LPARAM)NULL);
+ 			}
 			EndDialog(hDlg, 0);
+			if( bRedrawList )
+			{
+				UpdateListView();
+			}
 			return TRUE;
 		}
 		case IDCANCEL :
@@ -237,7 +275,9 @@ INT_PTR CALLBACK InterfaceDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM 
 INT_PTR CALLBACK FilterDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	static DWORD			dwFilters;
+	static DWORD			dwpFilters;
 	static LPFOLDERDATA		lpFilterRecord;
+	char strText[250];
 	int 					i;
 
 	switch (Msg)
@@ -245,6 +285,7 @@ INT_PTR CALLBACK FilterDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 	case WM_INITDIALOG:
 	{
 		LPTREEFOLDER folder = GetCurrentFolder();
+		LPTREEFOLDER lpParent = NULL;
 		LPFILTER_ITEM g_lpFilterList = GetFilterList();
 
 		dwFilters = 0;
@@ -255,14 +296,100 @@ INT_PTR CALLBACK FilterDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 			
 			Edit_SetText(GetDlgItem(hDlg, IDC_FILTER_EDIT), g_FilterText);
 			Edit_SetSel(GetDlgItem(hDlg, IDC_FILTER_EDIT), 0, -1);
-
+			// Mask out non filter flags
+			dwFilters = folder->m_dwFlags & F_MASK;
 			// Display current folder name in dialog titlebar
 			snprintf(tmp,sizeof(tmp),"Filters for %s Folder",folder->m_lpTitle);
 			SetWindowText(hDlg, tmp);
-
-			// Mask out non filter flags
-			dwFilters = folder->m_dwFlags & F_MASK;
-
+			if ( GetFilterInherit() )
+			{
+				if( folder )
+				{
+					BOOL bShowExplanation = FALSE;
+					lpParent = GetFolder( folder->m_nParent );
+					if( lpParent )
+					{
+						/* Check the Parent Filters and inherit them on child,
+						 * No need to promote all games to parent folder, works as is */
+						dwpFilters = lpParent->m_dwFlags & F_MASK;
+						/*Check all possible Filters if inherited solely from parent, e.g. not being set explicitly on our folder*/
+						if( (dwpFilters & F_CLONES) && !(dwFilters & F_CLONES) )
+						{
+							/*Add a Specifier to the Checkbox to show it was inherited from the parent*/
+							Edit_GetText(GetDlgItem(hDlg, IDC_FILTER_CLONES), strText, 250);
+							strcat(strText, " (*)");
+							Edit_SetText(GetDlgItem(hDlg, IDC_FILTER_CLONES), strText);
+							bShowExplanation = TRUE;
+						}
+						if( (dwpFilters & F_NONWORKING) && !(dwFilters & F_NONWORKING) )
+						{
+							/*Add a Specifier to the Checkbox to show it was inherited from the parent*/
+							Edit_GetText(GetDlgItem(hDlg, IDC_FILTER_NONWORKING), strText, 250);
+							strcat(strText, " (*)");
+							Edit_SetText(GetDlgItem(hDlg, IDC_FILTER_NONWORKING), strText);
+							bShowExplanation = TRUE;
+						}
+						if( (dwpFilters & F_UNAVAILABLE) && !(dwFilters & F_UNAVAILABLE) )
+						{
+							/*Add a Specifier to the Checkbox to show it was inherited from the parent*/
+							Edit_GetText(GetDlgItem(hDlg, IDC_FILTER_UNAVAILABLE), strText, 250);
+							strcat(strText, " (*)");
+							Edit_SetText(GetDlgItem(hDlg, IDC_FILTER_UNAVAILABLE), strText);
+							bShowExplanation = TRUE;
+						}
+						if( (dwpFilters & F_VECTOR) && !(dwFilters & F_VECTOR) )
+						{
+							/*Add a Specifier to the Checkbox to show it was inherited from the parent*/
+							Edit_GetText(GetDlgItem(hDlg, IDC_FILTER_VECTOR), strText, 250);
+							strcat(strText, " (*)");
+							Edit_SetText(GetDlgItem(hDlg, IDC_FILTER_VECTOR), strText);
+							bShowExplanation = TRUE;
+						}
+						if( (dwpFilters & F_RASTER) && !(dwFilters & F_RASTER) )
+						{
+							/*Add a Specifier to the Checkbox to show it was inherited from the parent*/
+							Edit_GetText(GetDlgItem(hDlg, IDC_FILTER_RASTER), strText, 250);
+							strcat(strText, " (*)");
+							Edit_SetText(GetDlgItem(hDlg, IDC_FILTER_RASTER), strText);
+							bShowExplanation = TRUE;
+						}
+						if( (dwpFilters & F_ORIGINALS) && !(dwFilters & F_ORIGINALS) )
+						{
+							/*Add a Specifier to the Checkbox to show it was inherited from the parent*/
+							Edit_GetText(GetDlgItem(hDlg, IDC_FILTER_ORIGINALS), strText, 250);
+							strcat(strText, " (*)");
+							Edit_SetText(GetDlgItem(hDlg, IDC_FILTER_ORIGINALS), strText);
+							bShowExplanation = TRUE;
+						}
+						if( (dwpFilters & F_WORKING) && !(dwFilters & F_WORKING) )
+						{
+							/*Add a Specifier to the Checkbox to show it was inherited from the parent*/
+							Edit_GetText(GetDlgItem(hDlg, IDC_FILTER_WORKING), strText, 250);
+							strcat(strText, " (*)");
+							Edit_SetText(GetDlgItem(hDlg, IDC_FILTER_WORKING), strText);
+							bShowExplanation = TRUE;
+						}
+						if( (dwpFilters & F_AVAILABLE) && !(dwFilters & F_AVAILABLE) )
+						{
+							/*Add a Specifier to the Checkbox to show it was inherited from the parent*/
+							Edit_GetText(GetDlgItem(hDlg, IDC_FILTER_AVAILABLE), strText, 250);
+							strcat(strText, " (*)");
+							Edit_SetText(GetDlgItem(hDlg, IDC_FILTER_AVAILABLE), strText);
+							bShowExplanation = TRUE;
+						}
+						/*Do not or in the Values of the parent, so that the values of the folder still can be set*/
+						//dwFilters |= dwpFilters;
+					}
+					if( ! bShowExplanation )
+					{
+						ShowWindow(GetDlgItem(hDlg, IDC_INHERITED), FALSE );
+					}
+				}
+			}
+			else
+			{
+				ShowWindow(GetDlgItem(hDlg, IDC_INHERITED), FALSE );
+			}
 			// Find the matching filter record if it exists
 			lpFilterRecord = FindFilter(folder->m_nFolderId);
 

@@ -167,7 +167,6 @@
 #define IDC_PROP_CLONEOF                1080
 #define IDC_TRANSLUCENCY                1081
 #define IDC_VERSION                     1082
-#define IDC_TEMP                        1082
 #define IDC_ARTWORK                     1083
 #define IDC_BRIGHTNESS                  1084
 #define IDC_GAMMADISP                   1085
@@ -289,6 +288,15 @@
 #define IDC_CYCLETIMESEC                1211
 #define IDC_AUDIO_LATENCY_TEXT          1212
 #define IDC_STRETCH_SCREENSHOT_LARGER   1213
+#define IDC_FILTER_INHERIT              1214
+#define IDC_RESET_PLAYTIME              1215
+#define IDC_RESET_PLAYCOUNT             1216
+#define IDC_INHERITED                   1217
+#define IDC_KEY_GUI                     1218
+#define IDC_RELOAD                      1219
+#define IDC_DUAL_LIGHTGUN               1220
+#define IDC_NOOFFSET_CLONES             1221
+#define IDC_LEDMODE                     1222
 #define ID_CONTEXT_SHOW_FOLDER_START    39000
 #define ID_CONTEXT_SHOW_FOLDER_END      39200
 #define ID_FILE_EXIT                    40001
@@ -355,7 +363,22 @@
 #define ID_TOGGLE_TAB_CONTROL_PANEL     40076
 #define ID_TOGGLE_TAB_HISTORY           40077
 #define ID_VIEW_FULLSCREEN              40079
-#define ID_VIEW_PCBINFO                 40080
+#define ID_CONTEXT_RESET_PLAYTIME       40080
+#define ID_CONTEXT_RESET_PLAYCOUNT      40081
+#define ID_FOLDER_PROPERTIES            40082
+#define ID_FOLDER_AUDIT                 40083
+#define ID_UI_UP                        40084
+#define ID_UI_DOWN                      40085
+#define ID_UI_LEFT                      40086
+#define ID_UI_RIGHT                     40087
+#define ID_UI_START                     40088
+#define ID_UI_PGUP                      40089
+#define ID_UI_PGDOWN                    40090
+#define ID_UI_HOME                      40091
+#define ID_UI_END                       40092
+#define ID_UI_HISTORY_UP                40093
+#define ID_UI_HISTORY_DOWN              40094
+#define ID_FILE_LOADSTATE               40095
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -365,8 +388,8 @@
 #define _APS_NO_MFC                     1
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        185
-#define _APS_NEXT_COMMAND_VALUE         40081
-#define _APS_NEXT_CONTROL_VALUE         1214
+#define _APS_NEXT_COMMAND_VALUE         40096
+#define _APS_NEXT_CONTROL_VALUE         1223
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

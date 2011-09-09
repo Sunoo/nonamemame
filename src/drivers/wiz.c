@@ -220,60 +220,60 @@ static WRITE_HANDLER( wiz_coin_counter_w )
 	coin_counter_w(offset,data);
 }
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0xbfff, MRA_ROM },
-	{ 0xc000, 0xc7ff, MRA_RAM },
-	{ 0xd000, 0xd85f, MRA_RAM },
-	{ 0xe000, 0xe85f, MRA_RAM },
-	{ 0xf000, 0xf000, input_port_2_r },	/* DSW0 */
-	{ 0xf008, 0xf008, input_port_3_r },	/* DSW1 */
-	{ 0xf010, 0xf010, input_port_0_r },	/* IN0 */
-	{ 0xf018, 0xf018, input_port_1_r },	/* IN1 */
-	{ 0xf800, 0xf800, watchdog_reset_r },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xbfff) AM_READ(MRA8_ROM)
+	AM_RANGE(0xc000, 0xc7ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xd000, 0xd85f) AM_READ(MRA8_RAM)
+	AM_RANGE(0xe000, 0xe85f) AM_READ(MRA8_RAM)
+	AM_RANGE(0xf000, 0xf000) AM_READ(input_port_2_r)	/* DSW0 */
+	AM_RANGE(0xf008, 0xf008) AM_READ(input_port_3_r)	/* DSW1 */
+	AM_RANGE(0xf010, 0xf010) AM_READ(input_port_0_r)	/* IN0 */
+	AM_RANGE(0xf018, 0xf018) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0xf800, 0xf800) AM_READ(watchdog_reset_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0xbfff, MWA_ROM },
-	{ 0xc000, 0xc7ff, MWA_RAM },
-	{ 0xc800, 0xc801, wiz_coin_counter_w },
-	{ 0xd000, 0xd3ff, MWA_RAM, &wiz_videoram2 },
-	{ 0xd400, 0xd7ff, MWA_RAM, &wiz_colorram2 },
-	{ 0xd800, 0xd83f, MWA_RAM, &wiz_attributesram2 },
-	{ 0xd840, 0xd85f, MWA_RAM, &spriteram_2, &spriteram_size },
-	{ 0xe000, 0xe3ff, videoram_w, &videoram, &videoram_size },
-	{ 0xe400, 0xe7ff, colorram_w, &colorram },
-	{ 0xe800, 0xe83f, wiz_attributes_w, &wiz_attributesram },
-	{ 0xe840, 0xe85f, MWA_RAM, &spriteram },
-	{ 0xf000, 0xf000, MWA_RAM, &wiz_sprite_bank },
-	{ 0xf001, 0xf001, interrupt_enable_w },
-	{ 0xf002, 0xf003, wiz_palettebank_w },
-	{ 0xf004, 0xf005, wiz_char_bank_select_w },
-	{ 0xf006, 0xf006, wiz_flipx_w },
-	{ 0xf007, 0xf007, wiz_flipy_w },
-	{ 0xf008, 0xf00f, MWA_NOP },			// initialized by Stinger/Scion
-	{ 0xf800, 0xf80f, sound_command_w },	// sound registers
-	{ 0xf818, 0xf818, wiz_bgcolor_w },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xbfff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xc000, 0xc7ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xc800, 0xc801) AM_WRITE(wiz_coin_counter_w)
+	AM_RANGE(0xd000, 0xd3ff) AM_WRITE(MWA8_RAM) AM_BASE(&wiz_videoram2)
+	AM_RANGE(0xd400, 0xd7ff) AM_WRITE(MWA8_RAM) AM_BASE(&wiz_colorram2)
+	AM_RANGE(0xd800, 0xd83f) AM_WRITE(MWA8_RAM) AM_BASE(&wiz_attributesram2)
+	AM_RANGE(0xd840, 0xd85f) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram_2) AM_SIZE(&spriteram_size)
+	AM_RANGE(0xe000, 0xe3ff) AM_WRITE(videoram_w) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+	AM_RANGE(0xe400, 0xe7ff) AM_WRITE(colorram_w) AM_BASE(&colorram)
+	AM_RANGE(0xe800, 0xe83f) AM_WRITE(wiz_attributes_w) AM_BASE(&wiz_attributesram)
+	AM_RANGE(0xe840, 0xe85f) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram)
+	AM_RANGE(0xf000, 0xf000) AM_WRITE(MWA8_RAM) AM_BASE(&wiz_sprite_bank)
+	AM_RANGE(0xf001, 0xf001) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0xf002, 0xf003) AM_WRITE(wiz_palettebank_w)
+	AM_RANGE(0xf004, 0xf005) AM_WRITE(wiz_char_bank_select_w)
+	AM_RANGE(0xf006, 0xf006) AM_WRITE(wiz_flipx_w)
+	AM_RANGE(0xf007, 0xf007) AM_WRITE(wiz_flipy_w)
+	AM_RANGE(0xf008, 0xf00f) AM_WRITE(MWA8_NOP)			// initialized by Stinger/Scion
+	AM_RANGE(0xf800, 0xf80f) AM_WRITE(sound_command_w)	// sound registers
+	AM_RANGE(0xf818, 0xf818) AM_WRITE(wiz_bgcolor_w)
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( sound_readmem )
-	{ 0x0000, 0x1fff, MRA_ROM },
-	{ 0x2000, 0x23ff, MRA_RAM },
-	{ 0x3000, 0x3000, soundlatch_r },	/* Stinger/Scion */
-	{ 0x7000, 0x7000, soundlatch_r },	/* Wiz */
-MEMORY_END
+static ADDRESS_MAP_START( sound_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x1fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x2000, 0x23ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x3000, 0x3000) AM_READ(soundlatch_r)	/* Stinger/Scion */
+	AM_RANGE(0x7000, 0x7000) AM_READ(soundlatch_r)	/* Wiz */
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( sound_writemem )
-	{ 0x2000, 0x23ff, MWA_RAM },
-	{ 0x3000, 0x3000, interrupt_enable_w },			/* Stinger/Scion */
-	{ 0x4000, 0x4000, AY8910_control_port_2_w },
-	{ 0x4001, 0x4001, AY8910_write_port_2_w },
-	{ 0x5000, 0x5000, AY8910_control_port_0_w },
-	{ 0x5001, 0x5001, AY8910_write_port_0_w },
-	{ 0x6000, 0x6000, AY8910_control_port_1_w },	/* Wiz only */
-	{ 0x6001, 0x6001, AY8910_write_port_1_w },		/* Wiz only */
-	{ 0x7000, 0x7000, interrupt_enable_w },			/* Wiz */
-MEMORY_END
+static ADDRESS_MAP_START( sound_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x2000, 0x23ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x3000, 0x3000) AM_WRITE(interrupt_enable_w)			/* Stinger/Scion */
+	AM_RANGE(0x4000, 0x4000) AM_WRITE(AY8910_control_port_2_w)
+	AM_RANGE(0x4001, 0x4001) AM_WRITE(AY8910_write_port_2_w)
+	AM_RANGE(0x5000, 0x5000) AM_WRITE(AY8910_control_port_0_w)
+	AM_RANGE(0x5001, 0x5001) AM_WRITE(AY8910_write_port_0_w)
+	AM_RANGE(0x6000, 0x6000) AM_WRITE(AY8910_control_port_1_w)	/* Wiz only */
+	AM_RANGE(0x6001, 0x6001) AM_WRITE(AY8910_write_port_1_w)		/* Wiz only */
+	AM_RANGE(0x7000, 0x7000) AM_WRITE(interrupt_enable_w)			/* Wiz */
+ADDRESS_MAP_END
 
 
 
@@ -786,12 +786,12 @@ static MACHINE_DRIVER_START( wiz )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 18432000/6)	/* 3.072 MHz ??? */
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
 	MDRV_CPU_VBLANK_INT(nmi_line_pulse,1)
 
 	MDRV_CPU_ADD(Z80, 14318000/8)	/* ? */
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
-	MDRV_CPU_MEMORY(sound_readmem,sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(sound_readmem,sound_writemem)
 	MDRV_CPU_VBLANK_INT(nmi_line_pulse,4)	/* ??? */
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -883,6 +883,31 @@ ROM_START( kungfut )
 	ROM_LOAD( "82s129.0", 0x0000, 0x0100, CRC(eb823177) SHA1(a28233dbf87744a9896fe675b76603557e7f596b) )
 	ROM_LOAD( "82s129.1", 0x0100, 0x0100, CRC(6eec5dd9) SHA1(e846209c167b2a7d790faacea082a7edc1338e47) )
 	ROM_LOAD( "82s129.2", 0x0200, 0x0100, CRC(c31eb3e6) SHA1(94fb8c6d83432c5f456510d628971147d373faf5) )
+ROM_END
+
+ROM_START( kungfuta )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )
+	ROM_LOAD( "kungfu.01",  0x0000, 0x4000, CRC(48dada70) SHA1(a90901d2aef73d4fa9d9c80769b82a3fead0a0f9) )
+	ROM_LOAD( "kungfu.02",  0x4000, 0x4000, CRC(c08c5152) SHA1(c5db3ee1ee165708d93d296b51a5bb43265ac75f) )
+	ROM_LOAD( "kungfu.03",  0x8000, 0x4000, CRC(09b8670c) SHA1(170e7cbf87727d940e959fa7a0328b4cc1aba195) )
+
+	ROM_REGION( 0x10000, REGION_CPU2, 0 )
+	ROM_LOAD( "kungfu.04",  0x0000, 0x2000,  CRC(352bff48) SHA1(87d2408d31e1326ec810debcb2c724d1f003ae7b) )
+
+	ROM_REGION( 0x6000,  REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "kungfu.08",  0x0000, 0x2000, CRC(60b91d2f) SHA1(4a3337bb8f475a40b9b7f31d4b42e73179177763) )
+	ROM_LOAD( "kungfu.09",  0x2000, 0x2000, CRC(121ba029) SHA1(4e4375cb9e93af45dd16e2a295fa88753201e6e8) )
+	ROM_LOAD( "kungfu.10",  0x4000, 0x2000, CRC(146df9de) SHA1(8dcc33bc281f1e5b069b52645123de62037261e6) )
+
+	ROM_REGION( 0x6000,  REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "kungfu.07",  0x0000, 0x2000, CRC(1df48de5) SHA1(e620ea55a1ed2dc934878d077d5cd6437e833a6d) )
+	ROM_LOAD( "kungfu.06",  0x2000, 0x2000, CRC(1921d49b) SHA1(fcc5500c8c1605e571b203828d6a7de36ad76fab) )
+	ROM_LOAD( "kungfu.05",  0x4000, 0x2000, CRC(ff9aced4) SHA1(b13f8ea4131b54bdd2888841f52f1482b02b6624) )
+
+	ROM_REGION( 0x0300,  REGION_PROMS, 0 )
+	ROM_LOAD( "82s129.0", 0x0000, 0x0100, CRC(eb823177) SHA1(a28233dbf87744a9896fe675b76603557e7f596b) ) // ic.23
+	ROM_LOAD( "82s129.1", 0x0100, 0x0100, CRC(6eec5dd9) SHA1(e846209c167b2a7d790faacea082a7edc1338e47) ) // ic.24
+	ROM_LOAD( "82s129.2", 0x0200, 0x0100, CRC(c31eb3e6) SHA1(94fb8c6d83432c5f456510d628971147d373faf5) ) // ic.25
 ROM_END
 
 ROM_START( wiz )
@@ -1106,5 +1131,6 @@ GAMEX(1983, stinger2, stinger, stinger, stinger2, stinger, ROT90,  "Seibu Denshi
 GAMEX(1984, scion,    0,       scion,   scion,    0,       ROT0,   "Seibu Denshi", "Scion", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_COLORS )
 GAMEX(1984, scionc,   scion,   scion,   scion,    0,       ROT0,   "Seibu Denshi (Cinematronics license)", "Scion (Cinematronics)", GAME_IMPERFECT_SOUND | GAME_IMPERFECT_COLORS )
 GAME( 1984, kungfut,  0,       kungfut, kungfut,  0,       ROT0,   "Seibu Kaihatsu Inc.", "Kung-Fu Taikun" )
+GAME( 1984, kungfuta, kungfut, kungfut, kungfut,  0,       ROT0,   "Seibu Kaihatsu Inc.", "Kung-Fu Taikun (alt)" ) /* board was a bootleg but set might still be original */
 GAME( 1985, wiz,      0,       wiz,     wiz,      wiz,     ROT270, "Seibu Kaihatsu Inc.", "Wiz" )
 GAME( 1985, wizt,     wiz,     wiz,     wiz,      wiz,     ROT270, "[Seibu] (Taito license)", "Wiz (Taito)" )

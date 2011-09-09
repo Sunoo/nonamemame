@@ -9,7 +9,6 @@
 #include "driver.h"
 #include "common.h"
 #include "vidhrdw/generic.h"
-//#include "led.h"
 
 UINT8 *gottlieb_charram;
 
@@ -90,9 +89,7 @@ WRITE_HANDLER( gottlieb_paletteram_w )
 
 WRITE_HANDLER( gottlieb_video_outputs_w )
 {
-	extern void gottlieb_knocker_on(void);
-	extern void gottlieb_knocker_off(void);
-
+	extern void gottlieb_knocker(void);
 	int last = 0;
 
 	background_priority = data & 0x01;
@@ -112,14 +109,8 @@ WRITE_HANDLER( gottlieb_video_outputs_w )
 	/* in Q*Bert Qubes only, bit 4 controls the sprite bank */
 	spritebank = (data & 0x10) >> 4;
 
-	if (data&0x20) 
-		gottlieb_knocker_on();
-	else
-		gottlieb_knocker_off();
+	if ((last&0x20) && !(data&0x20)) gottlieb_knocker();
 
-
-	//if ((last&0x02) && !(data&0x02)) gottlieb_knocker();
-    
 	last = data;
 }
 

@@ -406,68 +406,68 @@ static NVRAM_HANDLER( playch10 )
 /******************************************************************************/
 
 /* BIOS */
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x3fff, MRA_ROM },
-	{ 0x8000, 0x87ff, MRA_RAM },	/* 8V */
-	{ 0x8800, 0x8fff, ram_8w_r },	/* 8W */
-	{ 0x9000, 0x97ff, MRA_RAM },
-	{ 0xc000, 0xdfff, MRA_ROM },
-	{ 0xe000, 0xffff, pc10_prot_r },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0x87ff) AM_READ(MRA8_RAM)	/* 8V */
+	AM_RANGE(0x8800, 0x8fff) AM_READ(ram_8w_r)	/* 8W */
+	AM_RANGE(0x9000, 0x97ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xc000, 0xdfff) AM_READ(MRA8_ROM)
+	AM_RANGE(0xe000, 0xffff) AM_READ(pc10_prot_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x3fff, MWA_ROM },
-	{ 0x8000, 0x87ff, MWA_RAM }, /* 8V */
-	{ 0x8800, 0x8fff, ram_8w_w, &ram_8w }, /* 8W */
-	{ 0x9000, 0x97ff, playch10_videoram_w, &videoram },
-	{ 0xc000, 0xdfff, MWA_ROM },
-	{ 0xe000, 0xffff, pc10_prot_w },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x8000, 0x87ff) AM_WRITE(MWA8_RAM) /* 8V */
+	AM_RANGE(0x8800, 0x8fff) AM_WRITE(ram_8w_w) AM_BASE(&ram_8w) /* 8W */
+	AM_RANGE(0x9000, 0x97ff) AM_WRITE(playch10_videoram_w) AM_BASE(&videoram)
+	AM_RANGE(0xc000, 0xdfff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xe000, 0xffff) AM_WRITE(pc10_prot_w)
+ADDRESS_MAP_END
 
-static PORT_READ_START( readport )
-	{ 0x00, 0x00, pc10_port_0_r },	/* coins, service */
-	{ 0x01, 0x01, input_port_1_r },	/* dipswitch 1 */
-	{ 0x02, 0x02, input_port_2_r }, /* dipswitch 2 */
-	{ 0x03, 0x03, pc10_detectclr_r },
-PORT_END
+static ADDRESS_MAP_START( readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_READ(pc10_port_0_r)	/* coins, service */
+	AM_RANGE(0x01, 0x01) AM_READ(input_port_1_r)	/* dipswitch 1 */
+	AM_RANGE(0x02, 0x02) AM_READ(input_port_2_r) /* dipswitch 2 */
+	AM_RANGE(0x03, 0x03) AM_READ(pc10_detectclr_r)
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( writeport )
-	{ 0x00, 0x00, pc10_SDCS_w },
-	{ 0x01, 0x01, pc10_CNTRLMASK_w },
-	{ 0x02, 0x02, pc10_DISPMASK_w },
-	{ 0x03, 0x03, pc10_SOUNDMASK_w },
-	{ 0x04, 0x04, pc10_GAMERES_w },
-	{ 0x05, 0x05, pc10_GAMESTOP_w },
-	{ 0x06, 0x07, IOWP_NOP },
-	{ 0x08, 0x08, pc10_NMIENABLE_w },
-	{ 0x09, 0x09, pc10_DOGDI_w },
-	{ 0x0a, 0x0a, pc10_PPURES_w },
-	{ 0x0b, 0x0e, pc10_CARTSEL_w },
-	{ 0x0f, 0x0f, up8w_w },
-PORT_END
+static ADDRESS_MAP_START( writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_WRITE(pc10_SDCS_w)
+	AM_RANGE(0x01, 0x01) AM_WRITE(pc10_CNTRLMASK_w)
+	AM_RANGE(0x02, 0x02) AM_WRITE(pc10_DISPMASK_w)
+	AM_RANGE(0x03, 0x03) AM_WRITE(pc10_SOUNDMASK_w)
+	AM_RANGE(0x04, 0x04) AM_WRITE(pc10_GAMERES_w)
+	AM_RANGE(0x05, 0x05) AM_WRITE(pc10_GAMESTOP_w)
+	AM_RANGE(0x06, 0x07) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0x08, 0x08) AM_WRITE(pc10_NMIENABLE_w)
+	AM_RANGE(0x09, 0x09) AM_WRITE(pc10_DOGDI_w)
+	AM_RANGE(0x0a, 0x0a) AM_WRITE(pc10_PPURES_w)
+	AM_RANGE(0x0b, 0x0e) AM_WRITE(pc10_CARTSEL_w)
+	AM_RANGE(0x0f, 0x0f) AM_WRITE(up8w_w)
+ADDRESS_MAP_END
 
 /* Cart */
-static MEMORY_READ_START( cart_readmem )
-	{ 0x0000, 0x07ff, MRA_RAM },
-	{ 0x0800, 0x1fff, mirror_ram_r },
-	{ 0x2000, 0x3fff, ppu2c03b_0_r },
-	{ 0x4000, 0x4015, NESPSG_0_r },
-	{ 0x4016, 0x4016, pc10_in0_r },
-	{ 0x4017, 0x4017, pc10_in1_r },
-	{ 0x8000, 0xffff, MRA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( cart_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x07ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x0800, 0x1fff) AM_READ(mirror_ram_r)
+	AM_RANGE(0x2000, 0x3fff) AM_READ(ppu2c03b_0_r)
+	AM_RANGE(0x4000, 0x4015) AM_READ(NESPSG_0_r)
+	AM_RANGE(0x4016, 0x4016) AM_READ(pc10_in0_r)
+	AM_RANGE(0x4017, 0x4017) AM_READ(pc10_in1_r)
+	AM_RANGE(0x8000, 0xffff) AM_READ(MRA8_ROM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( cart_writemem )
-	{ 0x0000, 0x07ff, MWA_RAM, &work_ram },
-	{ 0x0800, 0x1fff, mirror_ram_w },
-	{ 0x2000, 0x3fff, ppu2c03b_0_w },
-	{ 0x4011, 0x4011, DAC_0_data_w },
-	{ 0x4014, 0x4014, sprite_dma_w },
-	{ 0x4000, 0x4015, NESPSG_0_w },
-	{ 0x4016, 0x4016, pc10_in0_w },
-	{ 0x4017, 0x4017, MWA_NOP }, /* in 1 writes ignored */
-	{ 0x8000, 0xffff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( cart_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x07ff) AM_WRITE(MWA8_RAM) AM_BASE(&work_ram)
+	AM_RANGE(0x0800, 0x1fff) AM_WRITE(mirror_ram_w)
+	AM_RANGE(0x2000, 0x3fff) AM_WRITE(ppu2c03b_0_w)
+	AM_RANGE(0x4011, 0x4011) AM_WRITE(DAC_0_data_w)
+	AM_RANGE(0x4014, 0x4014) AM_WRITE(sprite_dma_w)
+	AM_RANGE(0x4000, 0x4015) AM_WRITE(NESPSG_0_w)
+	AM_RANGE(0x4016, 0x4016) AM_WRITE(pc10_in0_w)
+	AM_RANGE(0x4017, 0x4017) AM_WRITE(MWA8_NOP) /* in 1 writes ignored */
+	AM_RANGE(0x8000, 0xffff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
 /******************************************************************************/
 
@@ -768,12 +768,12 @@ static struct DACinterface nes_dac_interface =
 static MACHINE_DRIVER_START( playch10 )
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 8000000 / 2)        /* 8 MHz / 2 */
-	MDRV_CPU_MEMORY(readmem, writemem)
-	MDRV_CPU_PORTS(readport, writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem, writemem)
+	MDRV_CPU_IO_MAP(readport, writeport)
 	MDRV_CPU_VBLANK_INT(playch10_interrupt, 1)
 
 	MDRV_CPU_ADD(N2A03, N2A03_DEFAULTCLOCK)
-	MDRV_CPU_MEMORY(cart_readmem, cart_writemem)
+	MDRV_CPU_PROGRAM_MAP(cart_readmem, cart_writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(( ( ( 1.0 / 60.0 ) * 1000000.0 ) / 262 ) * ( 262 - 239 ))
@@ -1660,100 +1660,6 @@ ROM_START( pc_moglf )	/* Mario Open Golf */
     ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(633766d5) SHA1(3a2564f3a2daf3a789e4c4056822f12243c89619) )
 ROM_END
 
-	/* MiSFit Games */
-ROM_START( pc_bb2 ) /* Bubble Bobble Part 2 */
-BIOS_CPU
-ROM_LOAD( "bb2-u3", 0x0c000, 0x2000, CRC(edcc21c6) ) /* extra bios code for this game */
-BIOS_GFX
-
-ROM_REGION( 0x50000, REGION_CPU2, 0 ) /* 64k for code */
-ROM_LOAD( "bb2-u5", 0x10000, 0x20000, CRC(5f7c1d17) ) /* banked */
-ROM_RELOAD( 0x30000, 0x20000 )
-
-ROM_REGION( 0x020000, REGION_GFX2, 0 ) /* cart gfx */
-ROM_LOAD( "bb2-u1", 0x00000, 0x20000, CRC(5e59afae) )
-
-ROM_REGION( 0x0100, REGION_USER1, 0 ) /* rp5h01 data */
-ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(31a05a48) )
-ROM_END
-
-ROM_START( pc_ctfrc ) /* Contra Force */
-BIOS_CPU
-ROM_LOAD( "ctfrc-u3", 0x0c000, 0x2000, CRC(edcc21c6) ) /* extra bios code for this game */
-BIOS_GFX
-
-ROM_REGION( 0x50000, REGION_CPU2, 0 ) /* 64k for code */
-ROM_LOAD( "ctfrc-u5", 0x10000, 0x20000, CRC(1ff7fc0d) ) /* banked */
-ROM_RELOAD( 0x30000, 0x20000 )
-
-ROM_REGION( 0x020000, REGION_GFX2, 0 ) /* cart gfx */
-ROM_LOAD( "ctfrc-u1", 0x00000, 0x20000, CRC(7ff2a7f8) )
-
-ROM_REGION( 0x0100, REGION_USER1, 0 ) /* rp5h01 data */
-ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(31a05a48) )
-ROM_END
-
-ROM_START( pc_digdg )		/* Dig Dug */
-	BIOS_CPU
-	ROM_LOAD( "u3sm",    0x0c000, 0x2000, CRC(4b5f717d) ) /* extra bios code for this game */
-    BIOS_GFX
-
-    ROM_REGION( 0x10000, REGION_CPU2, 0 )  /* 64k for code */
-    ROM_LOAD( "u1sm",    0x08000, 0x8000, CRC(a26ae22e) )
-
-    ROM_REGION( 0x02000, REGION_GFX2, 0 )	/* cart gfx */
-    ROM_LOAD( "u2sm",    0x00000, 0x2000, CRC(2dabc198) )
-
-    ROM_REGION( 0x0100,  REGION_USER1, 0 )	/* rp5h01 data */
-    ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(bd82d775) )
-ROM_END
-
-ROM_START( pc_krsty )	/* Krusty's Funhouse */
-	BIOS_CPU
-	ROM_LOAD( "xu-u3",   0x0c000, 0x2000, CRC(c3984e09) ) /* extra bios code for this game */
-    BIOS_GFX
-
-    ROM_REGION( 0x50000, REGION_CPU2, 0 )  /* 64k for code */
-	ROM_LOAD( "xu-u4",   0x10000, 0x20000, CRC(1f4103e5) )	/* banked */
-	ROM_LOAD( "xu-u5",   0x30000, 0x20000, CRC(778c4115) )	/* banked */
-
-    ROM_REGION( 0x020000, REGION_GFX2, 0 )	/* cart gfx */
-    ROM_LOAD( "xu-u1",    0x00000, 0x20000, CRC(fce8e0ea) )
-
-    ROM_REGION( 0x0100,  REGION_USER1, 0 )	/* rp5h01 data */
-    ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(0fe6e900) )
-ROM_END
-
-ROM_START( pc_mman5 )	/* Megaman 5 */
-	BIOS_CPU
-	ROM_LOAD( "2n-u3",    0x0c000, 0x2000, CRC(65298370) ) /* extra bios code for this game */
-    BIOS_GFX
-
-    ROM_REGION( 0x50000, REGION_CPU2, 0 )  /* 64k for code */
-	ROM_LOAD( "2n-u5",    0x10000, 0x40000, CRC(f3c743aa) )	/* banked */
-
-    ROM_REGION( 0x040000, REGION_GFX2, 0 )	/* cart gfx */
-    ROM_LOAD( "2n-u1",    0x00000, 0x40000, CRC(25e0ae72) )
-
-    ROM_REGION( 0x0100,  REGION_USER1, 0 )	/* rp5h01 data */
-    ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(237e8519) )
-ROM_END
-
-ROM_START( pc_parsl ) /* Parasol Stars - The Story of Bubble Bobble 3 */
-BIOS_CPU
-ROM_LOAD( "parsl-u2", 0x0c000, 0x2000, CRC(7505de96) ) /* extra bios code for this game */
-BIOS_GFX
-
-ROM_REGION( 0x30000, REGION_CPU2, 0 ) /* 64k for code */
-ROM_LOAD( "parsl-u4", 0x10000, 0x20000, CRC(15382139) ) /* banked */
-
-ROM_REGION( 0x020000, REGION_GFX2, 0 ) /* cart gfx */
-ROM_LOAD( "parsl-u1", 0x00000, 0x20000, CRC(af5400dc) ) /* banked */
-
-ROM_REGION( 0x0100, REGION_USER1, 0 ) /* rp5h01 data */
-ROM_LOAD( "security.prm", 0x00000, 0x10, CRC(ec5641d6) )
-ROM_END
-
 /***************************************************************************
 
   BIOS driver(s)
@@ -1854,11 +1760,3 @@ GAME( 1990, pc_sjetm,playch10, playch10, playch10, pciboard, ROT0, "Rare", "Play
 
 /* K-Board Games */
 GAME( 1991, pc_moglf,playch10, playch10, playch10, pckboard, ROT0, "Nintendo", "PlayChoice-10: Mario's Open Golf" )
-
-/* MiSFiT Games */
-GAME( 2002, pc_digdg, playch10,  playch10, playch10, playch10, ROT0, "NES->PC-10", "PlayChoice-10: Dig Dug" )
-GAME( 2002, pc_bb2,   playch10,  playch10, playch10, playch10, ROT0, "NES->PC-10", "PlayChoice-10: Bubble Bobble 2" )
-GAME( 2002, pc_ctfrc, playch10,  playch10, playch10, playch10, ROT0, "NES->PC-10", "PlayChoice-10: Contra Force" )
-GAME( 2002, pc_krsty, playch10,  playch10, playch10, playch10, ROT0, "NES->PC-10", "PlayChoice-10: Krusty's Funhouse" )
-GAME( 2002, pc_mman5, playch10,  playch10, playch10, playch10, ROT0, "NES->PC-10", "PlayChoice-10: Megaman 5" )
-GAME( 2002, pc_parsl, playch10,  playch10, playch10, playch10, ROT0, "NES->PC-10", "PlayChoice-10: Parasol Stars-The Story of Bubble Bobble 3" )

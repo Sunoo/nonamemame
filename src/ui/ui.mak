@@ -47,6 +47,7 @@ OSOBJS += $(OBJ)/ui/mame32.res
 #
 
 DEFS += -DDIRECTSOUND_VERSION=0x0300 \
+        -DDIRECTINPUT_VERSION=0x0500 \
         -DDIRECTDRAW_VERSION=0x0300 \
         -DWINVER=0x0400 \
         -D_WIN32_IE=0x0500 \
@@ -56,7 +57,8 @@ DEFS += -DDIRECTSOUND_VERSION=0x0300 \
 	-DCLIB_DECL=__cdecl \
 	-DDECL_SPEC= \
         -DZEXTERN=extern \
-        -DDIRECTINPUT_VERSION=0x0700 \
+
+#	-DSHOW_UNAVAILABLE_FOLDER
 
 
 #####################################################################

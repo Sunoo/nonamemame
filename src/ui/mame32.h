@@ -16,11 +16,11 @@
 #include "win32ui.h"
 
 #if !defined(MAME32NAME)
-#define MAME32NAME "No Name MAME32"
+#define MAME32NAME "MAME32"
 #endif
 
 #if !defined(MAMENAME)
-#define MAMENAME "noname"
+#define MAMENAME "MAME"
 #endif
 
 #endif

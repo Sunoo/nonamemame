@@ -33,8 +33,8 @@ extern int gbPriorityBitmapIsDirty;
 #define MAX_MEMORY_REGIONS 32
 
 #ifndef MESS
-#define APPNAME					"MAME"
-#define APPLONGNAME				"M.A.M.E."
+#define APPNAME					"No Name MAME"
+#define APPLONGNAME				"No Name M.A.M.E."
 #define GAMENOUN				"game"
 #define GAMESNOUN				"games"
 #else
@@ -86,7 +86,7 @@ struct RunningMachine
 	/* current visible area, and a prerotated one adjusted for orientation */
 	struct rectangle 		visible_area;
 	struct rectangle		absolute_visible_area;
-	
+
 	/* current video refresh rate */
 	float					refresh_rate;
 
@@ -198,8 +198,7 @@ struct GameOptions
 	int 	gui_host;		/* 1 to tweak some UI-related things for better GUI integration */
 	int 	skip_disclaimer;	/* 1 to skip the disclaimer screen at startup */
 	int 	skip_gameinfo;		/* 1 to skip the game info screen at startup */
-	int 	skip_gamewarnings;	/* 1 to skip the driver warning screen at start up */
-	int 	skip_baddumps;		/* 1 to skip the game bad roms at startup */
+	int 	skip_warnings;		/* 1 to skip the warnings screen at startup */
 
 	int		samplerate;		/* sound sample playback rate, in Hz */
 	int		use_samples;	/* 1 to enable external .wav samples */
@@ -222,7 +221,6 @@ struct GameOptions
 	int		use_artwork;	/* bitfield indicating which artwork pieces to use */
 	int		artwork_res;	/* 1 for 1x game scaling, 2 for 2x */
 	int		artwork_crop;	/* 1 to crop artwork to the game screen */
-	int		artwork_fb;	/* 1 to crop artwork to the game screen */
 
 	char	savegame;		/* character representing a savegame to load */
 	int     crc_only;       /* specify if only CRC should be used as checksum */

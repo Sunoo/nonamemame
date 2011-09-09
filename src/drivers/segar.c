@@ -164,40 +164,40 @@ static WRITE_HANDLER( sindbadm_SN76496_1_w )
  *
  *************************************/
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0xc7ff, MRA_ROM },
-	{ 0xc800, 0xcfff, MRA_RAM },	/* Misc RAM */
-	{ 0xe000, 0xe3ff, MRA_RAM },
-	{ 0xe400, 0xe7ff, MRA_RAM },	/* Used by at least Monster Bash? */
-	{ 0xe800, 0xefff, MRA_RAM },
-	{ 0xf000, 0xf03f, MRA_RAM },	/* Dynamic color table */
-	{ 0xf040, 0xf07f, MRA_RAM },	/* Dynamic color table for background (Monster Bash)*/
-	{ 0xf080, 0xf7ff, MRA_RAM },
-	{ 0xf800, 0xffff, MRA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xc7ff) AM_READ(MRA8_ROM)
+	AM_RANGE(0xc800, 0xcfff) AM_READ(MRA8_RAM)	/* Misc RAM */
+	AM_RANGE(0xe000, 0xe3ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xe400, 0xe7ff) AM_READ(MRA8_RAM)	/* Used by at least Monster Bash? */
+	AM_RANGE(0xe800, 0xefff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xf000, 0xf03f) AM_READ(MRA8_RAM)	/* Dynamic color table */
+	AM_RANGE(0xf040, 0xf07f) AM_READ(MRA8_RAM)	/* Dynamic color table for background (Monster Bash)*/
+	AM_RANGE(0xf080, 0xf7ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xf800, 0xffff) AM_READ(MRA8_RAM)
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0xffff, segar_w, &segar_mem },
-	{ 0xe000, 0xe3ff, MWA_RAM, &videoram, &videoram_size },	/* handled by */
-	{ 0xe800, 0xefff, MWA_RAM, &segar_characterram },    	/* the above, */
-	{ 0xf000, 0xf03f, MWA_RAM, &segar_mem_colortable },     /* here only */
-	{ 0xf040, 0xf07f, MWA_RAM, &segar_mem_bcolortable },    /* to initialize */
-	{ 0xf800, 0xffff, MWA_RAM, &segar_characterram2 },    	/* the pointers */
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xffff) AM_WRITE(segar_w) AM_BASE(&segar_mem)
+	AM_RANGE(0xe000, 0xe3ff) AM_WRITE(MWA8_RAM) AM_BASE(&videoram) AM_SIZE(&videoram_size)	/* handled by */
+	AM_RANGE(0xe800, 0xefff) AM_WRITE(MWA8_RAM) AM_BASE(&segar_characterram)    	/* the above, */
+	AM_RANGE(0xf000, 0xf03f) AM_WRITE(MWA8_RAM) AM_BASE(&segar_mem_colortable)     /* here only */
+	AM_RANGE(0xf040, 0xf07f) AM_WRITE(MWA8_RAM) AM_BASE(&segar_mem_bcolortable)    /* to initialize */
+	AM_RANGE(0xf800, 0xffff) AM_WRITE(MWA8_RAM) AM_BASE(&segar_characterram2)    	/* the pointers */
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( sindbadm_writemem )
-	{ 0x0000, 0xc7ff, MWA_ROM },
-	{ 0xc800, 0xcfff, MWA_RAM },
-	{ 0xe000, 0xe3ff, videoram_w, &videoram, &videoram_size },
-	{ 0xe400, 0xe7ff, MWA_RAM },
-	{ 0xe800, 0xefff, segar_characterram_w, &segar_characterram },
-	{ 0xf000, 0xf03f, segar_bcolortable_w, &segar_mem_bcolortable },    /* NOTE, the two color tables are flipped! */
-	{ 0xf040, 0xf07f, segar_colortable_w, &segar_mem_colortable },
-	{ 0xf080, 0xf7ff, MWA_RAM },
-	{ 0xf800, 0xffff, segar_characterram2_w, &segar_characterram2 },
-MEMORY_END
+static ADDRESS_MAP_START( sindbadm_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xc7ff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xc800, 0xcfff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xe000, 0xe3ff) AM_WRITE(videoram_w) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+	AM_RANGE(0xe400, 0xe7ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xe800, 0xefff) AM_WRITE(segar_characterram_w) AM_BASE(&segar_characterram)
+	AM_RANGE(0xf000, 0xf03f) AM_WRITE(segar_bcolortable_w) AM_BASE(&segar_mem_bcolortable)    /* NOTE, the two color tables are flipped! */
+	AM_RANGE(0xf040, 0xf07f) AM_WRITE(segar_colortable_w) AM_BASE(&segar_mem_colortable)
+	AM_RANGE(0xf080, 0xf7ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xf800, 0xffff) AM_WRITE(segar_characterram2_w) AM_BASE(&segar_characterram2)
+ADDRESS_MAP_END
 
 
 
@@ -207,25 +207,25 @@ MEMORY_END
  *
  *************************************/
 
-static PORT_READ_START( readport )
-//{0x3f, 0x3f, MRA_NOP }, /* Pig Newton - read from 1D87 */
-	{ 0x0e, 0x0e, monsterb_audio_8255_r },
-	{ 0x81, 0x81, input_port_8_r },     /* only used by Sindbad Mystery */
-	{ 0xf8, 0xfc, segar_ports_r },
-PORT_END
+static ADDRESS_MAP_START( readport, ADDRESS_SPACE_IO, 8 )
+//AM_RANGE(0x3f, 0x3f) AM_READ(MRA8_NOP) /* Pig Newton - read from 1D87 */
+	AM_RANGE(0x0e, 0x0e) AM_READ(monsterb_audio_8255_r)
+	AM_RANGE(0x81, 0x81) AM_READ(input_port_8_r)     /* only used by Sindbad Mystery */
+	AM_RANGE(0xf8, 0xfc) AM_READ(segar_ports_r)
+ADDRESS_MAP_END
 
 
-static PORT_WRITE_START( writeport )
-	{ 0xbf, 0xbf, segar_video_port_w },
-PORT_END
+static ADDRESS_MAP_START( writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0xbf, 0xbf) AM_WRITE(segar_video_port_w)
+ADDRESS_MAP_END
 
 
-static PORT_WRITE_START( sindbadm_writeport )
-//      { 0x00, 0x00, ???_w }, /* toggles on and off immediately (0x01, 0x00) */
-	{ 0x41, 0x41, sindbadm_back_port_w },
-	{ 0x43, 0x43, segar_video_port_w }, /* bit0=cocktail flip, bit1=write to color RAM, bit2=always on? */
-	{ 0x80, 0x80, sindbadm_soundport_w },    /* sound commands */
-PORT_END
+static ADDRESS_MAP_START( sindbadm_writeport, ADDRESS_SPACE_IO, 8 )
+//      AM_RANGE(0x00, 0x00) AM_WRITE(???_w) /* toggles on and off immediately (0x01, 0x00) */
+	AM_RANGE(0x41, 0x41) AM_WRITE(sindbadm_back_port_w)
+	AM_RANGE(0x43, 0x43) AM_WRITE(segar_video_port_w) /* bit0=cocktail flip, bit1=write to color RAM, bit2=always on? */
+	AM_RANGE(0x80, 0x80) AM_WRITE(sindbadm_soundport_w)    /* sound commands */
+ADDRESS_MAP_END
 
 
 
@@ -235,56 +235,56 @@ PORT_END
  *
  *************************************/
 
-static MEMORY_READ_START( speech_readmem )
-	{ 0x0000, 0x07ff, MRA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( speech_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x07ff) AM_READ(MRA8_ROM)
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( speech_writemem )
-	{ 0x0000, 0x07ff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( speech_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x07ff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( monsterb_7751_readmem )
-	{ 0x0000, 0x03ff, MRA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( monsterb_7751_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x03ff) AM_READ(MRA8_ROM)
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( monsterb_7751_writemem )
-	{ 0x0000, 0x03ff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( monsterb_7751_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x03ff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
 
-static PORT_READ_START( monsterb_7751_readport )
-	{ I8039_t1,  I8039_t1,  monsterb_sh_t1_r },
-	{ I8039_p2,  I8039_p2,  monsterb_sh_command_r },
-	{ I8039_bus, I8039_bus, monsterb_sh_rom_r },
-PORT_END
+static ADDRESS_MAP_START( monsterb_7751_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(I8039_t1, I8039_t1) AM_READ(monsterb_sh_t1_r)
+	AM_RANGE(I8039_p2, I8039_p2) AM_READ(monsterb_sh_command_r)
+	AM_RANGE(I8039_bus, I8039_bus) AM_READ(monsterb_sh_rom_r)
+ADDRESS_MAP_END
 
 
-static PORT_WRITE_START( monsterb_7751_writeport )
-	{ I8039_p1, I8039_p1, monsterb_sh_dac_w },
-	{ I8039_p2, I8039_p2, monsterb_sh_busy_w },
-	{ I8039_p4, I8039_p4, monsterb_sh_offset_a0_a3_w },
-	{ I8039_p5, I8039_p5, monsterb_sh_offset_a4_a7_w },
-	{ I8039_p6, I8039_p6, monsterb_sh_offset_a8_a11_w },
-	{ I8039_p7, I8039_p7, monsterb_sh_rom_select_w },
-PORT_END
+static ADDRESS_MAP_START( monsterb_7751_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(I8039_p1, I8039_p1) AM_WRITE(monsterb_sh_dac_w)
+	AM_RANGE(I8039_p2, I8039_p2) AM_WRITE(monsterb_sh_busy_w)
+	AM_RANGE(I8039_p4, I8039_p4) AM_WRITE(monsterb_sh_offset_a0_a3_w)
+	AM_RANGE(I8039_p5, I8039_p5) AM_WRITE(monsterb_sh_offset_a4_a7_w)
+	AM_RANGE(I8039_p6, I8039_p6) AM_WRITE(monsterb_sh_offset_a8_a11_w)
+	AM_RANGE(I8039_p7, I8039_p7) AM_WRITE(monsterb_sh_rom_select_w)
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( sindbadm_sound_readmem )
-	{ 0x0000, 0x1fff, MRA_ROM },
-	{ 0x8000, 0x87ff, MRA_RAM },
-	{ 0xe000, 0xe000, soundlatch_r },
-MEMORY_END
+static ADDRESS_MAP_START( sindbadm_sound_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x1fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0x87ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xe000, 0xe000) AM_READ(soundlatch_r)
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( sindbadm_sound_writemem )
-	{ 0x0000, 0x1fff, MWA_ROM },
-	{ 0x8000, 0x87ff, MWA_RAM },
-	{ 0xa000, 0xa003, sindbadm_SN76496_0_w },    /* the four addresses are written */
-	{ 0xc000, 0xc003, sindbadm_SN76496_1_w },    /* in sequence */
-MEMORY_END
+static ADDRESS_MAP_START( sindbadm_sound_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x1fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x8000, 0x87ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xa000, 0xa003) AM_WRITE(sindbadm_SN76496_0_w)    /* the four addresses are written */
+	AM_RANGE(0xc000, 0xc003) AM_WRITE(sindbadm_SN76496_1_w)    /* in sequence */
+ADDRESS_MAP_END
 
 
 
@@ -1138,8 +1138,8 @@ static MACHINE_DRIVER_START( segar )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main", Z80, 3867120)
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(readport,writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(readport,writeport)
 	MDRV_CPU_VBLANK_INT(segar_interrupt,1)
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -1166,8 +1166,8 @@ static MACHINE_DRIVER_START( astrob )
 
 	MDRV_CPU_ADD(I8035, 3120000)
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
-	MDRV_CPU_MEMORY(sega_speechboard_readmem, sega_speechboard_writemem)
-	MDRV_CPU_PORTS (sega_speechboard_readport,sega_speechboard_writeport)
+	MDRV_CPU_PROGRAM_MAP(sega_speechboard_readmem, sega_speechboard_writemem)
+	MDRV_CPU_IO_MAP (sega_speechboard_readport,sega_speechboard_writeport)
 	MDRV_SOUND_ADD(SP0250, sega_sp0250_interface)
 
 	/* sound hardware */
@@ -1210,8 +1210,8 @@ static MACHINE_DRIVER_START( monsterb )
 
 	MDRV_CPU_ADD(N7751, 6000000/15)
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
-	MDRV_CPU_MEMORY(monsterb_7751_readmem,monsterb_7751_writemem)
-	MDRV_CPU_PORTS(monsterb_7751_readport,monsterb_7751_writeport)
+	MDRV_CPU_PROGRAM_MAP(monsterb_7751_readmem,monsterb_7751_writemem)
+	MDRV_CPU_IO_MAP(monsterb_7751_readport,monsterb_7751_writeport)
 
 	/* video hardware */
 	MDRV_GFXDECODE(monsterb_gfxdecodeinfo)
@@ -1247,13 +1247,13 @@ static MACHINE_DRIVER_START( sindbadm )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 3072000)	/* 3.072 MHz ? */
-	MDRV_CPU_MEMORY(readmem,sindbadm_writemem)
-	MDRV_CPU_PORTS(readport,sindbadm_writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem,sindbadm_writemem)
+	MDRV_CPU_IO_MAP(readport,sindbadm_writeport)
 	MDRV_CPU_VBLANK_INT(segar_interrupt,1)
 
 	MDRV_CPU_ADD(Z80, 4000000)	/* 4 MHz ? - see system1.c */
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
-	MDRV_CPU_MEMORY(sindbadm_sound_readmem,sindbadm_sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(sindbadm_sound_readmem,sindbadm_sound_writemem)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,4)
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -1589,37 +1589,6 @@ ROM_START( sindbadm )
 	ROM_LOAD( "epr5427.new",  0x6000, 0x2000, CRC(a94f4d41) SHA1(fe4f412ea3680c0e5a6242827eab9e82a841d7c7) )
 ROM_END
 
-ROM_START( astrob2h )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code */
-	ROM_LOAD( "829b",     0x0000, 0x0800, CRC(14ae953c) ) /* U25 */
-	ROM_LOAD( "888",      0x0800, 0x0800, CRC(42601744) ) /* U1 */
-	ROM_LOAD( "889b",     0x1000, 0x0800, CRC(9fcdc62f) ) /* U2 */
-	ROM_LOAD( "890",      0x1800, 0x0800, CRC(26f5b4cf) ) /* U3 */
-	ROM_LOAD( "891b",     0x2000, 0x0800, CRC(74f906dc) ) /* U4 */
-	ROM_LOAD( "892",      0x2800, 0x0800, CRC(2d3c949b) ) /* U5 */
-	ROM_LOAD( "893",      0x3000, 0x0800, CRC(ccdb1a76) ) /* U6 */
-	ROM_LOAD( "894",      0x3800, 0x0800, CRC(66ae5ced) ) /* U7 */
-	ROM_LOAD( "895",      0x4000, 0x0800, CRC(202cf3a3) ) /* U8 */
-	ROM_LOAD( "896",      0x4800, 0x0800, CRC(b603fe23) ) /* U9 */
-	ROM_LOAD( "897",      0x5000, 0x0800, CRC(989198c6) ) /* U10 */
-	ROM_LOAD( "898",      0x5800, 0x0800, CRC(ef2bab04) ) /* U11 */
-	ROM_LOAD( "899",      0x6000, 0x0800, CRC(e0d189ee) ) /* U12 */
-	ROM_LOAD( "900",      0x6800, 0x0800, CRC(682d4604) ) /* U13 */
-	ROM_LOAD( "901",      0x7000, 0x0800, CRC(9ed11c61) ) /* U14 */
-	ROM_LOAD( "902",      0x7800, 0x0800, CRC(b4d6c330) ) /* U15 */
-	ROM_LOAD( "903",      0x8000, 0x0800, CRC(84acc38c) ) /* U16 */
-	ROM_LOAD( "904",      0x8800, 0x0800, CRC(5eba3097) ) /* U17 */
-	ROM_LOAD( "905",      0x9000, 0x0800, CRC(4f08f9f4) ) /* U18 */
-	ROM_LOAD( "906",      0x9800, 0x0800, CRC(58149df1) ) /* U19 */
-
-	ROM_REGION( 0x10000, REGION_CPU2, 0 )     /* 64k for speech code */
-	ROM_LOAD( "808b",     0x0000, 0x0800, CRC(5988c767) ) /* U7 */
-	ROM_LOAD( "809a",     0x0800, 0x0800, CRC(893f228d) ) /* U6 */
-	ROM_LOAD( "810",      0x1000, 0x0800, CRC(ff0163c5) ) /* U5 */
-	ROM_LOAD( "811",      0x1800, 0x0800, CRC(219f3978) ) /* U4 */
-	ROM_LOAD( "812a",     0x2000, 0x0800, CRC(410ad0d2) ) /* U3 */
-ROM_END
-
 
 
 /*************************************
@@ -1676,7 +1645,7 @@ static DRIVER_INIT( pignewt )
 
 	install_port_write_handler(0, 0xb4, 0xb5, pignewt_back_color_w);  /* Just guessing */
 	install_port_write_handler(0, 0xb8, 0xbc, pignewt_back_ports_w);   /* Just guessing */
-	install_port_write_handler(0, 0xbe, 0xbe, MWA_NOP);
+	install_port_write_handler(0, 0xbe, 0xbe, MWA8_NOP);
 }
 
 
@@ -1703,4 +1672,3 @@ GAME( 1981, spaceod,  0,       spaceod,  spaceod,  spaceod,  ROT270, "Sega", "Sp
 GAMEX(1983, pignewt,  0,       pignewt,  pignewt,  pignewt,  ROT270, "Sega", "Pig Newton (version C)", GAME_NO_SOUND )
 GAMEX(1983, pignewta, pignewt, pignewt,  pignewta, pignewt,  ROT270, "Sega", "Pig Newton (version A)", GAME_NO_SOUND )
 GAME( 1983, sindbadm, 0,       sindbadm, sindbadm, sindbadm, ROT270, "Sega", "Sindbad Mystery" )
-GAME( 1981, astrob2h, astrob,  astrob,   astrob2,  astrob,   ROT270, "Sega", "Astro Blaster (ver 2 Hack)" )

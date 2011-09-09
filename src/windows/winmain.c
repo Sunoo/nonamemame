@@ -123,9 +123,10 @@ int main(int argc, char **argv)
 		FILE* fp;
 
   #ifndef MESS
-   #define APPLICATION "No Name MAME"
 		sprintf(message_text, APPLONGNAME " v%s\n"
 							  "\tModified by David Maher (aka TheGatesofBill)\n"
+							  "\n"
+							  APPLONGNAME " is a console application, you should launch it from a command prompt.\n"
 							  "\n"
 							  "Usage:\tNONAME gamename [options]\n"
 							  "\n"
@@ -135,8 +136,10 @@ int main(int argc, char **argv)
 							  "\tNONAME -showconfig\tfor a list of configuration options\n"
 							  "\tNONAME -createconfig\tto create a noname.ini\n"
 							  "\n"
-							  "Copyright (C) 1997-2003 by Nicola Salmoria and the MAME Team\n"
-							  "Would you like to open the documentation now?", build_version);
+							  "Please consult the documentation for more information.\n"
+							  "\n"
+							  "Would you like to open the documentation now?"
+							  , build_version);
   #else
 		sprintf(message_text, APPLONGNAME " is a console application, you should launch it from a command prompt.\n"
 							  "\n"

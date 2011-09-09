@@ -204,62 +204,62 @@ static WRITE32_HANDLER( snd_020_w )
 
 // Lines with empty comment are for debug only
 
-static MEMORY_READ32_START( fuuki32_readmem )
-	{ 0x000000, 0x1fffff, MRA32_ROM },
-	{ 0x400000, 0x40ffff, MRA32_RAM }, // Work RAM
-	{ 0x500000, 0x501fff, MRA32_RAM }, // Tilemap 1
-	{ 0x502000, 0x503fff, MRA32_RAM }, // Tilemap 2
-	{ 0x504000, 0x505fff, MRA32_RAM }, // Tilemap bg
-	{ 0x506000, 0x507fff, MRA32_RAM }, // Tilemap bg2
-	{ 0x508000, 0x517fff, MRA32_RAM }, // More tilemap, or linescroll? Seems to be empty all of the time
-	{ 0x600000, 0x601fff, MRA32_RAM }, // Sprites
+static ADDRESS_MAP_START( fuuki32_readmem, ADDRESS_SPACE_PROGRAM, 32 )
+	AM_RANGE(0x000000, 0x1fffff) AM_READ(MRA32_ROM)
+	AM_RANGE(0x400000, 0x40ffff) AM_READ(MRA32_RAM) // Work RAM
+	AM_RANGE(0x500000, 0x501fff) AM_READ(MRA32_RAM) // Tilemap 1
+	AM_RANGE(0x502000, 0x503fff) AM_READ(MRA32_RAM) // Tilemap 2
+	AM_RANGE(0x504000, 0x505fff) AM_READ(MRA32_RAM) // Tilemap bg
+	AM_RANGE(0x506000, 0x507fff) AM_READ(MRA32_RAM) // Tilemap bg2
+	AM_RANGE(0x508000, 0x517fff) AM_READ(MRA32_RAM) // More tilemap, or linescroll? Seems to be empty all of the time
+	AM_RANGE(0x600000, 0x601fff) AM_READ(MRA32_RAM) // Sprites
 
-	{ 0x700000, 0x703fff, MRA32_RAM }, // Palette
+	AM_RANGE(0x700000, 0x703fff) AM_READ(MRA32_RAM) // Palette
 
-	{ 0x800000, 0x800003, io32_0_r }, // Coin
-	{ 0x810000, 0x810003, io32_1_r }, // Player Inputs
-	{ 0x880000, 0x880003, io32_2_r }, // Service + DIPS
-	{ 0x890000, 0x890003, io32_3_r }, // More DIPS
+	AM_RANGE(0x800000, 0x800003) AM_READ(io32_0_r) // Coin
+	AM_RANGE(0x810000, 0x810003) AM_READ(io32_1_r) // Player Inputs
+	AM_RANGE(0x880000, 0x880003) AM_READ(io32_2_r) // Service + DIPS
+	AM_RANGE(0x890000, 0x890003) AM_READ(io32_3_r) // More DIPS
 
-	{ 0x8c0000, 0x8c001f, MRA32_RAM },// Video Registers
+	AM_RANGE(0x8c0000, 0x8c001f) AM_READ(MRA32_RAM)// Video Registers
 
-/**/{ 0x8d0000, 0x8d0003, MRA32_RAM }, // Flipscreen Related
-/**/{ 0x8e0000, 0x8e0003, MRA32_RAM }, // Controls layer order
+/**/AM_RANGE(0x8d0000, 0x8d0003) AM_READ(MRA32_RAM) // Flipscreen Related
+/**/AM_RANGE(0x8e0000, 0x8e0003) AM_READ(MRA32_RAM) // Controls layer order
 
-	{ 0x903fe0, 0x903fff, snd_020_r }, // Shared with Z80
-//	{ 0x903fe0, 0x903fe3, fuuki32_sound_command_r }, // Shared with Z80
-//	{ 0x903fe4, 0x903fff, MRA32_RAM }, // ??
-MEMORY_END
+	AM_RANGE(0x903fe0, 0x903fff) AM_READ(snd_020_r) // Shared with Z80
+//	AM_RANGE(0x903fe0, 0x903fe3) AM_READ(fuuki32_sound_command_r) // Shared with Z80
+//	AM_RANGE(0x903fe4, 0x903fff) AM_READ(MRA32_RAM) // ??
+ADDRESS_MAP_END
 
-static MEMORY_WRITE32_START( fuuki32_writemem )
-	{ 0x000000, 0x1fffff, MWA32_ROM },
-	{ 0x400000, 0x40ffff, MWA32_RAM }, // Work RAM
-	{ 0x500000, 0x501fff, fuuki32_vram_0_w, &fuuki32_vram_0 }, // Tilemap 1
-	{ 0x502000, 0x503fff, fuuki32_vram_1_w, &fuuki32_vram_1 }, // Tilemap 2
-	{ 0x504000, 0x505fff, fuuki32_vram_2_w, &fuuki32_vram_2 }, // Tilemap bg
-	{ 0x506000, 0x507fff, fuuki32_vram_3_w, &fuuki32_vram_3 }, // Tilemap bg2
-	{ 0x508000, 0x517fff, MWA32_RAM }, // More tilemap, or linescroll? Seems to be empty all of the time
+static ADDRESS_MAP_START( fuuki32_writemem, ADDRESS_SPACE_PROGRAM, 32 )
+	AM_RANGE(0x000000, 0x1fffff) AM_WRITE(MWA32_ROM)
+	AM_RANGE(0x400000, 0x40ffff) AM_WRITE(MWA32_RAM) // Work RAM
+	AM_RANGE(0x500000, 0x501fff) AM_WRITE(fuuki32_vram_0_w) AM_BASE(&fuuki32_vram_0) // Tilemap 1
+	AM_RANGE(0x502000, 0x503fff) AM_WRITE(fuuki32_vram_1_w) AM_BASE(&fuuki32_vram_1) // Tilemap 2
+	AM_RANGE(0x504000, 0x505fff) AM_WRITE(fuuki32_vram_2_w) AM_BASE(&fuuki32_vram_2) // Tilemap bg
+	AM_RANGE(0x506000, 0x507fff) AM_WRITE(fuuki32_vram_3_w) AM_BASE(&fuuki32_vram_3) // Tilemap bg2
+	AM_RANGE(0x508000, 0x517fff) AM_WRITE(MWA32_RAM) // More tilemap, or linescroll? Seems to be empty all of the time
 
-	{ 0x600000, 0x601fff, MWA32_RAM, &spriteram32, &spriteram_size	},	// Sprites
-	{ 0x700000, 0x703fff, paletteram32_xRRRRRGGGGGBBBBB_dword_w, &paletteram32 }, // Palette
+	AM_RANGE(0x600000, 0x601fff) AM_WRITE(MWA32_RAM) AM_BASE(&spriteram32) AM_SIZE(&spriteram_size	)	// Sprites
+	AM_RANGE(0x700000, 0x703fff) AM_WRITE(paletteram32_xRRRRRGGGGGBBBBB_dword_w) AM_BASE(&paletteram32) // Palette
 
-	{ 0x800000, 0x800003, MWA32_NOP }, // Clear buffered inputs
-	{ 0x810000, 0x810003, MWA32_NOP }, // Clear buffered inputs
+	AM_RANGE(0x800000, 0x800003) AM_WRITE(MWA32_NOP) // Clear buffered inputs
+	AM_RANGE(0x810000, 0x810003) AM_WRITE(MWA32_NOP) // Clear buffered inputs
 
-	{ 0x8c0000, 0x8c001f, MWA32_RAM, &fuuki32_vregs },	// Video Registers
+	AM_RANGE(0x8c0000, 0x8c001f) AM_WRITE(MWA32_RAM) AM_BASE(&fuuki32_vregs)	// Video Registers
 
-	{ 0x8d0000, 0x8d0003, MWA32_RAM }, // Flipscreen Related
-	{ 0x8e0000, 0x8e0003, MWA32_RAM, &fuuki32_priority }, // Controls layer order
+	AM_RANGE(0x8d0000, 0x8d0003) AM_WRITE(MWA32_RAM) // Flipscreen Related
+	AM_RANGE(0x8e0000, 0x8e0003) AM_WRITE(MWA32_RAM) AM_BASE(&fuuki32_priority) // Controls layer order
 
-	{ 0x903fe0, 0x903fff, snd_020_w }, // z80 comms
+	AM_RANGE(0x903fe0, 0x903fff) AM_WRITE(snd_020_w) // z80 comms
 
-	{ 0xa00000, 0xa00003, MWA32_RAM, &fuuki32_tilebank },
-MEMORY_END
+	AM_RANGE(0xa00000, 0xa00003) AM_WRITE(MWA32_RAM) AM_BASE(&fuuki32_tilebank)
+ADDRESS_MAP_END
 
 
 /***************************************************************************
 
-Memory Maps - Sound CPU
+							Memory Maps - Sound CPU
 
 ***************************************************************************/
 
@@ -280,34 +280,34 @@ static WRITE_HANDLER( snd_z80_w )
 	fuuki32_shared_ram[offset] = data;
 }
 
-static MEMORY_READ_START( fuuki32_sound_readmem )
-	{ 0x0000, 0x5fff, MRA_ROM		},	// ROM
-	{ 0x6000, 0x6fff, MRA_RAM		},	// RAM
-	{ 0x7ff0, 0x7fff, snd_z80_r },
-	{ 0x8000, 0xffff, MRA_BANK1		},	// ROM
-MEMORY_END
+static ADDRESS_MAP_START( fuuki32_sound_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_READ(MRA8_ROM		)	// ROM
+	AM_RANGE(0x6000, 0x6fff) AM_READ(MRA8_RAM		)	// RAM
+	AM_RANGE(0x7ff0, 0x7fff) AM_READ(snd_z80_r)
+	AM_RANGE(0x8000, 0xffff) AM_READ(MRA8_BANK1		)	// ROM
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( fuuki32_sound_writemem )
-	{ 0x0000, 0x5fff, MWA_ROM		},	// ROM
-	{ 0x6000, 0x6fff, MWA_RAM		},	// RAM
-	{ 0x7ff0, 0x7fff, snd_z80_w  },
-	{ 0x8000, 0xffff, MWA_ROM		},	// ROM
-MEMORY_END
+static ADDRESS_MAP_START( fuuki32_sound_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_WRITE(MWA8_ROM		)	// ROM
+	AM_RANGE(0x6000, 0x6fff) AM_WRITE(MWA8_RAM		)	// RAM
+	AM_RANGE(0x7ff0, 0x7fff) AM_WRITE(snd_z80_w)
+	AM_RANGE(0x8000, 0xffff) AM_WRITE(MWA8_ROM		)	// ROM
+ADDRESS_MAP_END
 
-static PORT_READ_START( fuuki32_sound_readport )
-	{ 0x40, 0x40, YMF262_status_0_r },
-PORT_END
+static ADDRESS_MAP_START( fuuki32_sound_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x40, 0x40) AM_READ(YMF262_status_0_r)
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( fuuki32_sound_writeport )
-	{ 0x00, 0x00, fuuki32_sound_bw_w },
-	{ 0x30, 0x30, MWA_NOP },
-	{ 0x40, 0x40, YMF262_register_A_0_w },
-	{ 0x41, 0x41, YMF262_data_A_0_w },
-	{ 0x42, 0x42, YMF262_register_B_0_w },
-	{ 0x43, 0x43, YMF262_data_B_0_w },
-	{ 0x44, 0x44, YMF278B_control_port_0_C_w },
-	{ 0x45, 0x45, YMF278B_data_port_0_C_w },
-PORT_END
+static ADDRESS_MAP_START( fuuki32_sound_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_WRITE(fuuki32_sound_bw_w)
+	AM_RANGE(0x30, 0x30) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0x40, 0x40) AM_WRITE(YMF262_register_A_0_w)
+	AM_RANGE(0x41, 0x41) AM_WRITE(YMF262_data_A_0_w)
+	AM_RANGE(0x42, 0x42) AM_WRITE(YMF262_register_B_0_w)
+	AM_RANGE(0x43, 0x43) AM_WRITE(YMF262_data_B_0_w)
+	AM_RANGE(0x44, 0x44) AM_WRITE(YMF278B_control_port_0_C_w)
+	AM_RANGE(0x45, 0x45) AM_WRITE(YMF278B_data_port_0_C_w)
+ADDRESS_MAP_END
 
 
 /***************************************************************************
@@ -532,12 +532,12 @@ static MACHINE_DRIVER_START( fuuki32 )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(M68EC020, 20000000) /* verified */
-	MDRV_CPU_MEMORY(fuuki32_readmem,fuuki32_writemem)
+	MDRV_CPU_PROGRAM_MAP(fuuki32_readmem,fuuki32_writemem)
 	MDRV_CPU_VBLANK_INT(fuuki32_interrupt,INTERRUPTS_NUM)
 
 	MDRV_CPU_ADD_TAG("sound", Z80, 6000000) /* verified */
-	MDRV_CPU_MEMORY(fuuki32_sound_readmem,fuuki32_sound_writemem)
-	MDRV_CPU_PORTS(fuuki32_sound_readport,fuuki32_sound_writeport)
+	MDRV_CPU_PROGRAM_MAP(fuuki32_sound_readmem,fuuki32_sound_writemem)
+	MDRV_CPU_IO_MAP(fuuki32_sound_readport,fuuki32_sound_writeport)
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)

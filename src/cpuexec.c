@@ -126,7 +126,7 @@ enum
  *
  *************************************/
 
-struct cpuinfo
+struct cpudata
 {
 	int		suspend;				/* suspend reason mask (0 = not suspended) */
 	int		nextsuspend;			/* pending suspend reason mask */
@@ -157,7 +157,7 @@ struct cpuinfo
  *
  *************************************/
 
-static struct cpuinfo cpu[MAX_CPU];
+static struct cpudata cpu[MAX_CPU];
 
 static int time_to_reset;
 static int time_to_quit;
@@ -177,23 +177,23 @@ static int cycles_stolen;
  *
  *************************************/
 
-static void *vblank_timer;
+static mame_timer *vblank_timer;
 static int vblank_countdown;
 static int vblank_multiplier;
 static double vblank_period;
 
-static void *refresh_timer;
+static mame_timer *refresh_timer;
 static double refresh_period;
 static double refresh_period_inv;
 
-static void *timeslice_timer;
+static mame_timer *timeslice_timer;
 static double timeslice_period;
 
 static double scanline_period;
 static double scanline_period_inv;
 
-static void *interleave_boost_timer;
-static void *interleave_boost_timer_end;
+static mame_timer *interleave_boost_timer;
+static mame_timer *interleave_boost_timer_end;
 static double perfect_interleave;
 
 
@@ -241,10 +241,6 @@ int cpu_init(void)
 {
 	int cpunum;
 	
-	/* initialize the interfaces first */
-	if (cpuintrf_init())
-		return 1;
-
 	/* loop over all our CPUs */
 	for (cpunum = 0; cpunum < MAX_CPU; cpunum++)
 	{
@@ -260,7 +256,7 @@ int cpu_init(void)
 		/* initialize the cpuinfo struct */
 		memset(&cpu[cpunum], 0, sizeof(cpu[cpunum]));
 		cpu[cpunum].suspend = SUSPEND_REASON_RESET;
-		cpu[cpunum].clockscale = cputype_get_interface(cputype)->overclock;
+		cpu[cpunum].clockscale = 1.0;
 
 		/* compute the cycle times */
 		sec_to_cycles[cpunum] = cpu[cpunum].clockscale * Machine->drv->cpu[cpunum].cpu_clock;
@@ -1199,6 +1195,9 @@ int cpu_scalebyfcount(int value)
 
 void cpu_init_refresh_timer(void)
 {
+	/* we rely on this being NULL for the time being */
+	vblank_timer = NULL;
+
 	/* allocate an infinite timer to track elapsed time since the last refresh */
 	refresh_timer = timer_alloc(NULL);
 

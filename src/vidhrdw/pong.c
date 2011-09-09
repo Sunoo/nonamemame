@@ -19,80 +19,80 @@ static int VRESET;
 static int ATRACT;
 static int STOP_G;
 
-static int vpad1_timer; 	/* NE555/B9 */
-static int vpad1_count; 	/* 7493/B8 */
+static int vpad1_timer;            /* NE555/B9 */
+static int vpad1_count;            /* 7493/B8 */
 #define VPAD1 (vpad1_count < 15)
-static int score1;			/* 7490/C7 + 74107/C8.1 */
+static int score1;                 /* 7490/C7 + 74107/C8.1 */
 
-static int vpad2_timer; 	/* NE555/A9 */
-static int vpad2_count; 	/* 7493/A8 */
+static int vpad2_timer;            /* NE555/A9 */
+static int vpad2_count;            /* 7493/A8 */
 #define VPAD2 (vpad2_count < 15)
-static int score2;			/* 7490/D7 + 74107/C8.2 */
+static int score2;                 /* 7490/D7 + 74107/C8.2 */
 
-static int speed;			/* 7493/F1 */
-static int speed_q1;		/* 74107/H2.2*/
-static int speed_q2;		/* 74107/H2.1 */
+static int speed;                  /* 7493/F1 */
+static int speed_q1;               /* 74107/H2.2*/
+static int speed_q2;               /* 74107/H2.1 */
 
 
-static int hpos_a;			/* 9316/G7 */
-static int hpos_b;			/* 9316/H7 */
-static int hpos_c;			/* 74107/G6.2 */
-static int HVID;			/* 7420/H6.2 */
+static int hpos_a;                 /* 9316/G7 */
+static int hpos_b;                 /* 9316/H7 */
+static int hpos_c;                 /* 74107/G6.2 */
+static int HVID;                   /* 7420/H6.2 */
 
-static int vpos_a;			/* 9316/B3 */
-static int vpos_b;			/* 9316/A3 */
-static int VVID;			/* 7402/D2.4 */
+static int vpos_a;                 /* 9316/B3 */
+static int vpos_b;                 /* 9316/A3 */
+static int VVID;                   /* 7402/D2.4 */
 
-static int vvel_b;			/* 7474/A5.2 */
-static int vvel_c;			/* 7474/A5.1 */
-static int vvel_d;			/* 7474/B5.1 */
-static int hit_vbl_q;       /* 74107/A2.1 */
-static int hit_vbl_0;		/* direction during last frame (previous state of 74107/A2.1) */
+static int vvel_b;                 /* 7474/A5.2 */
+static int vvel_c;                 /* 7474/A5.1 */
+static int vvel_d;                 /* 7474/B5.1 */
+static int hit_vbl_q;              /* 74107/A2.1 */
+static int hit_vbl_0;              /* direction during last frame (previous state of 74107/A2.1) */
 
-static int v_velocity;		/* 7483/B4 */
+static int v_velocity;             /* 7483/B4 */
 
-static int score_q; 		/* 74107/H3.2 */
+static int score_q;                /* 74107/H3.2 */
 #define L	(score_q == 1)
 #define R	(score_q == 0)
 
-static int hit_a;			/* 7400/H4.3 */
-static int hit_b;			/* 7400/H4.2 */
+static int hit_a;                  /* 7400/H4.3 */
+static int hit_b;                  /* 7400/H4.2 */
 
-static int hit_vblank;		/* 74107/F3.1 */
+static int hit_vblank;             /* 74107/F3.1 */
 
-static int hit_sound;       /* 7474/C2.1 */
+static int hit_sound;              /* 7474/C2.1 */
 
-static int score_sound_timer;  /* NE555/G4 */       /* SU 059 */
-static int serve_timer;    /* NE555/F4 */           /* SU 059 */
+static int score_sound_timer;      /* NE555/G4 */       /* SU 059 */
+static int serve_timer;            /* NE555/F4 */       /* SU 059 */
 
 #ifdef MAME_DEBUG
-static int hpos;           /* debug */
-static int vpos;		   /* debug */
-static int hpos_h;		   /* debug */
-static int vpos_h;		   /* debug */
+static int hpos;                   /* debug */
+static int vpos;                   /* debug */
+static int hpos_h;                 /* debug */
+static int vpos_h;                 /* debug */
 #endif
 
 INLINE void pong_hit_detector(void);
 INLINE void pong_vertical_velocity(void);
 INLINE void pong_7seg(int H0, int n);
 
-/* SU 058 */
+/* SU 059 */
 static void score_timer_cb(int param)
 {
-	score_sound_timer = 0;              /* SU 059 */
+	score_sound_timer = 0;
 	/* disable score sound */
     pong_score_sound = 0;
 }
 
 static void serve_timer_cb(int param)
 {
-	serve_timer = 0;		            /* SU 059 */
+	serve_timer = 0;
     /* falling edge of serve timer (output of NE555/F4) */
 	hpos_a = 0;
 	hpos_b = 0;
 	hpos_c = 0;
 }
-/* SU 058 */
+/* SU 059 */
 
 VIDEO_START( pong )
 {
@@ -113,7 +113,7 @@ VIDEO_START( pong )
 
 	score_q = 0;
 
-    hpos_a = 0;
+	hpos_a = 0;
 	hpos_b = 0;
 	hpos_c = 0;
 
@@ -132,8 +132,8 @@ VIDEO_START( pong )
 
 	hit_sound = 0;
 
-	score_sound_timer = 0;                                  /* SU 059 */
-	serve_timer = 0;	                                    /* SU 059 */
+	score_sound_timer = 0;    /* SU 059 */
+	serve_timer = 0;	      /* SU 059 */
 
 	pong_hit_detector();
 
@@ -149,17 +149,17 @@ VIDEO_UPDATE( pong )
 	char buf[32+1];
 
 	sprintf(buf, "vvel: %2d", v_velocity);
-    usrintf_showmessage(buf, 0, 1);
+	usrintf_showmessage(buf, 0, 1);
 	sprintf(buf, "hpos: %3d", hpos);
-    usrintf_showmessage(buf, 128, 1);
-    sprintf(buf, "vpos: %3d", vpos);
-    usrintf_showmessage(buf, 256, 1);
-    sprintf(buf, "Aa/Ba: %d/%d", hit_a, hit_b);
+	usrintf_showmessage(buf, 128, 1);
+	sprintf(buf, "vpos: %3d", vpos);
+	usrintf_showmessage(buf, 256, 1);
+	sprintf(buf, "Aa/Ba: %d/%d", hit_a, hit_b);
 	usrintf_showmessage(buf, 0, 9);
 	sprintf(buf, "hpos_h: %3d", hpos_h);
-    usrintf_showmessage(buf, 128, 9);
-    sprintf(buf, "vpos_h: %3d", vpos_h);
-    usrintf_showmessage(buf, 256, 9);
+	usrintf_showmessage(buf, 128, 9);
+	sprintf(buf, "vpos_h: %3d", vpos_h);
+	usrintf_showmessage(buf, 256, 9);
 	sprintf(buf, "speed: %2d %d/%d->%d", speed, speed_q1, speed_q2, (speed_q1 && speed_q2) ? 0 : 1);
 	usrintf_showmessage(buf, 0, 17);
 	sprintf(buf, "L/R: %d/%d", score_q, score_q ^ 1);
@@ -174,11 +174,11 @@ VIDEO_UPDATE( pong )
 			ATRACT = 1;
 			score1 = 0;
 			score2 = 0;
-            if(	!serve_timer )                                                 /* SU 059 */
+			if( !serve_timer )                                                      /* SU 059 */
 			{
-				/* monoflop (NE555/G4) with a 330 kOhms resistor and 4.7 ÊF capacitor */
-                timer_set(TIME_IN_USEC(1.2*330000.0*4.7), 0, serve_timer_cb);  /* SU 059 */
-				serve_timer = 1;	                                           /* SU 059 */
+			/* monoflop (NE555/G4) with a 330 kOhms resistor and 4.7 ÊF capacitor */
+            timer_set(TIME_IN_USEC(1.2*330000.0*4.7), 0, serve_timer_cb);  			/* SU 059 */
+			serve_timer = 1;	       		                               			/* SU 059 */
 			}
         }
 	}
@@ -193,10 +193,10 @@ VIDEO_UPDATE( pong )
 	/* save state of the vblank flip-flop 74107/A2 */
     hit_vbl_0 = hit_vbl_q;
 
-    logerror("VIDEO_UPDATE at H:%d, V:%d\n", activecpu_get_reg(GS_H), activecpu_get_reg(GS_V));
+    logerror("VIDEO_UPDATE at H:%d, V:%d\n", (UINT32)activecpu_get_reg(GS_H), (UINT32)activecpu_get_reg(GS_V));	/* SU 078u2 */
 
 	activecpu_set_reg(GS_V, 0);
-    V = 0;
+    	V = 0;
 	VRESET = 1;
 }
 
@@ -260,8 +260,8 @@ VIDEO_UPDATE( pong )
  * This would mean a crystal with 14,219,280 Hz, but probably it
  * was a standard US TV crystal with 14,318,100 Hz
  *****************************************************************************/
-#define V4		(V&4)
-#define V8		(V&8)
+#define V4	(V&4)
+#define V8	(V&8)
 #define V16 	(V&16)
 #define V32 	(V&32)
 #define V64 	(V&64)
@@ -542,7 +542,7 @@ INTERRUPT_GEN( pong_vh_scanline )
 			if( vpos_a == 15 && !VBLANK )
 			{
 				/* Increment the VERTICAL POSITION counter B (9316/A3) */
-				vpos_b = (vpos_b + 1) % 16;
+           		vpos_b = (vpos_b + 1) % 16;        /* SU 071 */
 				/*
 				 * raising edge of RC also resets the HIT SOUND D FF 7474/C2
 				 */
@@ -558,7 +558,7 @@ INTERRUPT_GEN( pong_vh_scanline )
 		if( !VBLANK )
 		{
 			/* Increment the VERTICAL POSITION counter A (9316/B3) */
-			vpos_a = (vpos_a + 1) % 16;	
+       		vpos_a = (vpos_a + 1) % 16;       /* SU 071 */
 		}
 
 		if( V == PONG_VBLANK )
@@ -575,7 +575,7 @@ INTERRUPT_GEN( pong_vh_scanline )
 		 */
 		VVID = ( vpos_a >= 12 && vpos_b == 15 ) ? 1 : 0;
 
-        if ( !serve_timer )	        /* SU 059 */
+        if ( !serve_timer )	            /* SU 059 */
 		{
 			if( VVID && V == VBLANK )	/* VBLANK just went low ? */
 			{
@@ -648,15 +648,15 @@ INTERRUPT_GEN( pong_vh_scanline )
 						if( hpos_a == 15 )
 						{
 							/* increment the HORIZONTAL POSITION counter B (9316/H7) */
-							hpos_b = (hpos_b + 1) % 16;
+                            				hpos_b = (hpos_b + 1) % 16;       /* SU 071 */
 
 							/* on a falling edge of RC output of H7: toggle the JK flip-flop */
 							if( hpos_b == 0 )
 								hpos_c ^= 1;
                         }
 						/* increment the HORIZONTAL POSITION counter A (9316/G7) */
-						hpos_a = (hpos_a + 1) % 16;
-                    }
+			                        hpos_a = (hpos_a + 1) % 16;      /* SU 071 */
+                   }
                 }
 				/*
 				 * Output of 7410/E2.2
@@ -721,15 +721,15 @@ INTERRUPT_GEN( pong_vh_scanline )
 						/*
 						 * start the SCORE SOUND TIMER NE555/G4
 						 */
-						if( ATRACT && !score_sound_timer )                                  /* SU 059 */
+						if( ATRACT && !score_sound_timer )                                      /* SU 059 */
 						{
-                            /* monoflop (NE555/G4) with a 220 kOhms resistor and 1.0 ÊF capacitor */
-							timer_set(TIME_IN_USEC(1.2*220000.0*1.0), 0, score_timer_cb);   /* SU 059 */
-                            score_sound_timer = 1;                                          /* SU 059 */
-                            pong_score_sound = 1;
+               				/* monoflop (NE555/G4) with a 220 kOhms resistor and 1.0 ÊF capacitor */
+							timer_set(TIME_IN_USEC(1.2*220000.0*1.0), 0, score_timer_cb);   	/* SU 059 */
+               				score_sound_timer = 1;                                          	/* SU 059 */
+               				pong_score_sound = 1;
 							/* raising edge of SC (output of NE555/G4) toggles D-type flip-flop 7474/H3.2 */
-                            score_q ^= 0;
-                            if( R )
+                            				score_q ^= 0;
+                            				if( R )
 							{
 								if( ++score1 == ((readinputport(0) & 2) ? 15 : 11) )
 								{
@@ -746,11 +746,11 @@ INTERRUPT_GEN( pong_vh_scanline )
 								}
 							}
                         }
- 				        if ( !serve_timer )                                                 /* SU 059 */
+ 				        	if ( !serve_timer )                                                    	/* SU 059 */
 						{
 							/* monoflop (NE555/G4) with a 330 kOhms resistor and 4.7 ÊF capacitor */
-                            timer_set(TIME_IN_USEC(1.2*330000.0*4.7), 0, serve_timer_cb);   /* SU 059 */
-                            serve_timer = 1;                                                /* SU 059 */
+			                timer_set(TIME_IN_USEC(1.2*330000.0*4.7), 0, serve_timer_cb);   		/* SU 059 */
+               				serve_timer = 1;                                                		/* SU 059 */
 						}
 					}
 				}

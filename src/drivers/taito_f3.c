@@ -173,64 +173,64 @@ static WRITE32_HANDLER( f3_sound_bankswitch_w )
 
 /******************************************************************************/
 
-static MEMORY_READ32_START( f3_readmem )
-	{ 0x000000, 0x1fffff, MRA32_ROM },
-  	{ 0x400000, 0x43ffff, MRA32_RAM },
-	{ 0x440000, 0x447fff, MRA32_RAM }, /* Palette ram */
-	{ 0x4a0000, 0x4a0017, f3_control_r },
-	{ 0x600000, 0x60ffff, MRA32_RAM }, /* Object data */
-	{ 0x610000, 0x61bfff, MRA32_RAM }, /* Playfield data */
-	{ 0x61c000, 0x61dfff, MRA32_RAM }, /* Text layer */
-	{ 0x61e000, 0x61ffff, MRA32_RAM }, /* Vram */
-	{ 0x620000, 0x62ffff, MRA32_RAM }, /* Line ram */
-	{ 0x630000, 0x63ffff, MRA32_RAM }, /* Pivot ram */
-	{ 0xc00000, 0xc007ff, MRA32_RAM }, /* Sound CPU shared ram */
-MEMORY_END
+static ADDRESS_MAP_START( f3_readmem, ADDRESS_SPACE_PROGRAM, 32 )
+	AM_RANGE(0x000000, 0x1fffff) AM_READ(MRA32_ROM)
+  	AM_RANGE(0x400000, 0x43ffff) AM_READ(MRA32_RAM)
+	AM_RANGE(0x440000, 0x447fff) AM_READ(MRA32_RAM) /* Palette ram */
+	AM_RANGE(0x4a0000, 0x4a0017) AM_READ(f3_control_r)
+	AM_RANGE(0x600000, 0x60ffff) AM_READ(MRA32_RAM) /* Object data */
+	AM_RANGE(0x610000, 0x61bfff) AM_READ(MRA32_RAM) /* Playfield data */
+	AM_RANGE(0x61c000, 0x61dfff) AM_READ(MRA32_RAM) /* Text layer */
+	AM_RANGE(0x61e000, 0x61ffff) AM_READ(MRA32_RAM) /* Vram */
+	AM_RANGE(0x620000, 0x62ffff) AM_READ(MRA32_RAM) /* Line ram */
+	AM_RANGE(0x630000, 0x63ffff) AM_READ(MRA32_RAM) /* Pivot ram */
+	AM_RANGE(0xc00000, 0xc007ff) AM_READ(MRA32_RAM) /* Sound CPU shared ram */
+ADDRESS_MAP_END
 
-static MEMORY_WRITE32_START( f3_writemem )
-	{ 0x000000, 0x1fffff, MWA32_ROM },
-	{ 0x300000, 0x30007f, f3_sound_bankswitch_w },
-	{ 0x400000, 0x43ffff, MWA32_RAM, &f3_ram },
-	{ 0x440000, 0x447fff, f3_palette_24bit_w, &paletteram32 },
-	{ 0x4a0000, 0x4a001f, f3_control_w },
-	{ 0x600000, 0x60ffff, MWA32_RAM, &spriteram32, &spriteram_size },
-	{ 0x610000, 0x61bfff, f3_pf_data_w, &f3_pf_data },
-	{ 0x61c000, 0x61dfff, f3_videoram_w, &videoram32 },
-	{ 0x61e000, 0x61ffff, f3_vram_w, &f3_vram },
-	{ 0x620000, 0x62ffff, f3_lineram_w, &f3_line_ram },
-	{ 0x630000, 0x63ffff, f3_pivot_w, &f3_pivot_ram },
-	{ 0x660000, 0x66000f, f3_control_0_w },
-	{ 0x660010, 0x66001f, f3_control_1_w },
-	{ 0xc00000, 0xc007ff, MWA32_RAM, &f3_shared_ram },
-	{ 0xc80000, 0xc80003, f3_sound_reset_0_w },
-	{ 0xc80100, 0xc80103, f3_sound_reset_1_w },
-MEMORY_END
+static ADDRESS_MAP_START( f3_writemem, ADDRESS_SPACE_PROGRAM, 32 )
+	AM_RANGE(0x000000, 0x1fffff) AM_WRITE(MWA32_ROM)
+	AM_RANGE(0x300000, 0x30007f) AM_WRITE(f3_sound_bankswitch_w)
+	AM_RANGE(0x400000, 0x43ffff) AM_WRITE(MWA32_RAM) AM_BASE(&f3_ram)
+	AM_RANGE(0x440000, 0x447fff) AM_WRITE(f3_palette_24bit_w) AM_BASE(&paletteram32)
+	AM_RANGE(0x4a0000, 0x4a001f) AM_WRITE(f3_control_w)
+	AM_RANGE(0x600000, 0x60ffff) AM_WRITE(MWA32_RAM) AM_BASE(&spriteram32) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x610000, 0x61bfff) AM_WRITE(f3_pf_data_w) AM_BASE(&f3_pf_data)
+	AM_RANGE(0x61c000, 0x61dfff) AM_WRITE(f3_videoram_w) AM_BASE(&videoram32)
+	AM_RANGE(0x61e000, 0x61ffff) AM_WRITE(f3_vram_w) AM_BASE(&f3_vram)
+	AM_RANGE(0x620000, 0x62ffff) AM_WRITE(f3_lineram_w) AM_BASE(&f3_line_ram)
+	AM_RANGE(0x630000, 0x63ffff) AM_WRITE(f3_pivot_w) AM_BASE(&f3_pivot_ram)
+	AM_RANGE(0x660000, 0x66000f) AM_WRITE(f3_control_0_w)
+	AM_RANGE(0x660010, 0x66001f) AM_WRITE(f3_control_1_w)
+	AM_RANGE(0xc00000, 0xc007ff) AM_WRITE(MWA32_RAM) AM_BASE(&f3_shared_ram)
+	AM_RANGE(0xc80000, 0xc80003) AM_WRITE(f3_sound_reset_0_w)
+	AM_RANGE(0xc80100, 0xc80103) AM_WRITE(f3_sound_reset_1_w)
+ADDRESS_MAP_END
 
 /******************************************************************************/
 
-static MEMORY_READ16_START( sound_readmem )
-	{ 0x000000, 0x03ffff, MRA16_RAM },
-	{ 0x140000, 0x140fff, f3_68000_share_r },
-	{ 0x200000, 0x20001f, ES5505_data_0_r },
-	{ 0x260000, 0x2601ff, es5510_dsp_r },
-	{ 0x280000, 0x28001f, f3_68681_r },
-	{ 0xc00000, 0xc1ffff, MRA16_BANK1 },
-	{ 0xc20000, 0xc3ffff, MRA16_BANK2 },
-	{ 0xc40000, 0xc7ffff, MRA16_BANK3 },
-	{ 0xff8000, 0xffffff, MRA16_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( sound_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x140000, 0x140fff) AM_READ(f3_68000_share_r)
+	AM_RANGE(0x200000, 0x20001f) AM_READ(ES5505_data_0_r)
+	AM_RANGE(0x260000, 0x2601ff) AM_READ(es5510_dsp_r)
+	AM_RANGE(0x280000, 0x28001f) AM_READ(f3_68681_r)
+	AM_RANGE(0xc00000, 0xc1ffff) AM_READ(MRA16_BANK1)
+	AM_RANGE(0xc20000, 0xc3ffff) AM_READ(MRA16_BANK2)
+	AM_RANGE(0xc40000, 0xc7ffff) AM_READ(MRA16_BANK3)
+	AM_RANGE(0xff8000, 0xffffff) AM_READ(MRA16_RAM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( sound_writemem )
-	{ 0x000000, 0x03ffff, MWA16_RAM },
-	{ 0x140000, 0x140fff, f3_68000_share_w },
-	{ 0x200000, 0x20001f, ES5505_data_0_w },
-	{ 0x260000, 0x2601ff, es5510_dsp_w },
-	{ 0x280000, 0x28001f, f3_68681_w },
-	{ 0x300000, 0x30003f, f3_es5505_bank_w },
-	{ 0x340000, 0x340003, f3_volume_w }, /* 8 channel volume control */
-	{ 0xc00000, 0xc7ffff, MWA16_ROM },
-	{ 0xff8000, 0xffffff, MWA16_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( sound_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_RAM)
+	AM_RANGE(0x140000, 0x140fff) AM_WRITE(f3_68000_share_w)
+	AM_RANGE(0x200000, 0x20001f) AM_WRITE(ES5505_data_0_w)
+	AM_RANGE(0x260000, 0x2601ff) AM_WRITE(es5510_dsp_w)
+	AM_RANGE(0x280000, 0x28001f) AM_WRITE(f3_68681_w)
+	AM_RANGE(0x300000, 0x30003f) AM_WRITE(f3_es5505_bank_w)
+	AM_RANGE(0x340000, 0x340003) AM_WRITE(f3_volume_w) /* 8 channel volume control */
+	AM_RANGE(0xc00000, 0xc7ffff) AM_WRITE(MWA16_ROM)
+	AM_RANGE(0xff8000, 0xffffff) AM_WRITE(MWA16_RAM)
+ADDRESS_MAP_END
 
 /******************************************************************************/
 
@@ -470,12 +470,12 @@ static MACHINE_DRIVER_START( f3 )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(M68EC020, 16000000)
-	MDRV_CPU_MEMORY(f3_readmem,f3_writemem)
+	MDRV_CPU_PROGRAM_MAP(f3_readmem,f3_writemem)
 	MDRV_CPU_VBLANK_INT(f3_interrupt,2)
 
 	MDRV_CPU_ADD(M68000, 16000000)
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
-	MDRV_CPU_MEMORY(sound_readmem,sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(sound_readmem,sound_writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(624) /* 58.97 Hz, 624us vblank time */

@@ -34,38 +34,38 @@ INTERRUPT_GEN( shaolins_interrupt )
 
 
 
-static MEMORY_READ_START( readmem )
-	{ 0x0500, 0x0500, input_port_3_r },	/* Dipswitch settings */
-	{ 0x0600, 0x0600, input_port_4_r },	/* Dipswitch settings */
-	{ 0x0700, 0x0700, input_port_0_r },	/* coins + service */
-	{ 0x0701, 0x0701, input_port_1_r },	/* player 1 controls */
-	{ 0x0702, 0x0702, input_port_2_r },	/* player 2 controls */
-	{ 0x0703, 0x0703, input_port_5_r },	/* selftest */
-	{ 0x2800, 0x2bff, MRA_RAM },	/* RAM BANK 2 */
-	{ 0x3000, 0x33ff, MRA_RAM },	/* RAM BANK 1 */
-	{ 0x3800, 0x3fff, MRA_RAM },	/* video RAM */
-	{ 0x4000, 0x5fff, MRA_ROM },    /* Machine checks for extra rom */
-	{ 0x6000, 0xffff, MRA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0500, 0x0500) AM_READ(input_port_3_r)	/* Dipswitch settings */
+	AM_RANGE(0x0600, 0x0600) AM_READ(input_port_4_r)	/* Dipswitch settings */
+	AM_RANGE(0x0700, 0x0700) AM_READ(input_port_0_r)	/* coins + service */
+	AM_RANGE(0x0701, 0x0701) AM_READ(input_port_1_r)	/* player 1 controls */
+	AM_RANGE(0x0702, 0x0702) AM_READ(input_port_2_r)	/* player 2 controls */
+	AM_RANGE(0x0703, 0x0703) AM_READ(input_port_5_r)	/* selftest */
+	AM_RANGE(0x2800, 0x2bff) AM_READ(MRA8_RAM)	/* RAM BANK 2 */
+	AM_RANGE(0x3000, 0x33ff) AM_READ(MRA8_RAM)	/* RAM BANK 1 */
+	AM_RANGE(0x3800, 0x3fff) AM_READ(MRA8_RAM)	/* video RAM */
+	AM_RANGE(0x4000, 0x5fff) AM_READ(MRA8_ROM)    /* Machine checks for extra rom */
+	AM_RANGE(0x6000, 0xffff) AM_READ(MRA8_ROM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x0000, shaolins_nmi_w },	/* bit 0 = flip screen, bit 1 = nmi enable, bit 2 = ? */
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x0000) AM_WRITE(shaolins_nmi_w)	/* bit 0 = flip screen, bit 1 = nmi enable, bit 2 = ? */
 										/* bit 3, bit 4 = coin counters */
-	{ 0x0100, 0x0100, watchdog_reset_w },
-	{ 0x0300, 0x0300, SN76496_0_w }, 	/* trigger chip to read from latch. The program always */
-	{ 0x0400, 0x0400, SN76496_1_w }, 	/* writes the same number as the latch, so we don't */
+	AM_RANGE(0x0100, 0x0100) AM_WRITE(watchdog_reset_w)
+	AM_RANGE(0x0300, 0x0300) AM_WRITE(SN76496_0_w) 	/* trigger chip to read from latch. The program always */
+	AM_RANGE(0x0400, 0x0400) AM_WRITE(SN76496_1_w) 	/* writes the same number as the latch, so we don't */
 										/* bother emulating them. */
-	{ 0x0800, 0x0800, MWA_NOP },	/* latch for 76496 #0 */
-	{ 0x1000, 0x1000, MWA_NOP },	/* latch for 76496 #1 */
-	{ 0x1800, 0x1800, shaolins_palettebank_w },
-	{ 0x2000, 0x2000, shaolins_scroll_w },
-	{ 0x2800, 0x2bff, MWA_RAM },	/* RAM BANK 2 */
-	{ 0x3000, 0x30ff, MWA_RAM },	/* RAM BANK 1 */
-	{ 0x3100, 0x33ff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0x3800, 0x3bff, shaolins_colorram_w, &colorram },
-	{ 0x3c00, 0x3fff, shaolins_videoram_w, &videoram },
-	{ 0x6000, 0xffff, MWA_ROM },
-MEMORY_END
+	AM_RANGE(0x0800, 0x0800) AM_WRITE(MWA8_NOP)	/* latch for 76496 #0 */
+	AM_RANGE(0x1000, 0x1000) AM_WRITE(MWA8_NOP)	/* latch for 76496 #1 */
+	AM_RANGE(0x1800, 0x1800) AM_WRITE(shaolins_palettebank_w)
+	AM_RANGE(0x2000, 0x2000) AM_WRITE(shaolins_scroll_w)
+	AM_RANGE(0x2800, 0x2bff) AM_WRITE(MWA8_RAM)	/* RAM BANK 2 */
+	AM_RANGE(0x3000, 0x30ff) AM_WRITE(MWA8_RAM)	/* RAM BANK 1 */
+	AM_RANGE(0x3100, 0x33ff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x3800, 0x3bff) AM_WRITE(shaolins_colorram_w) AM_BASE(&colorram)
+	AM_RANGE(0x3c00, 0x3fff) AM_WRITE(shaolins_videoram_w) AM_BASE(&videoram)
+	AM_RANGE(0x6000, 0xffff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
 
 
@@ -229,7 +229,7 @@ static MACHINE_DRIVER_START( shaolins )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(M6809, 1250000)        /* 1.25 MHz */
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
 	MDRV_CPU_VBLANK_INT(shaolins_interrupt,16)	/* 1 IRQ + 8 NMI */
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -302,30 +302,7 @@ ROM_START( shaolins )
 	ROM_LOAD( "kicker.f16",   0x0400, 0x0100, CRC(80009cf5) SHA1(a367f3f55d75a9d5bf4d43f9d77272eb910a1344) ) /* sprite lookup table */
 ROM_END
 
-ROM_START( kfjohnny )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )     /* 64k for code */
-	ROM_LOAD( "kikrd8.bin",   0x6000, 0x2000, CRC(2598dfdd) )
-	ROM_LOAD( "kikrd9.bin",   0x8000, 0x4000, CRC(0cf0351a) )
-	ROM_LOAD( "kikrd11.bin",  0xC000, 0x4000, CRC(654037f8) )
-
-	ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "kfjohnny.gf1", 0x0000, 0x2000, CRC(be0310d0) )
-	ROM_LOAD( "kfjohnny.gf2", 0x2000, 0x2000, CRC(fab8c880) )
-
-	ROM_REGION( 0x8000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "kfjohnny.gf4", 0x0000, 0x4000, CRC(f7fbbb9c) )
-	ROM_LOAD( "kfjohnny.gf3", 0x4000, 0x4000, CRC(84bc0cfd) )
-
-	ROM_REGION( 0x0500, REGION_PROMS, 0 )
-	ROM_LOAD( "kicker.a12",   0x0000, 0x0100, CRC(b09db4b4) ) /* palette red component */
-	ROM_LOAD( "kicker.a13",   0x0100, 0x0100, CRC(270a2bf3) ) /* palette green component */
-	ROM_LOAD( "kicker.a14",   0x0200, 0x0100, CRC(83e95ea8) ) /* palette blue component */
-	ROM_LOAD( "kicker.b8",    0x0300, 0x0100, CRC(aa900724) ) /* character lookup table */
-	ROM_LOAD( "kicker.f16",   0x0400, 0x0100, CRC(80009cf5) ) /* sprite lookup table */
-ROM_END
-
 
 
 GAME( 1985, kicker,   0,      shaolins, shaolins, 0, ROT90, "Konami", "Kicker" )
 GAME( 1985, shaolins, kicker, shaolins, shaolins, 0, ROT90, "Konami", "Shao-Lin's Road" )
-GAME( 2002, kfjohnny, kicker, shaolins, shaolins, 0, ROT90, "hack", "Kung-Fu Johnny" ) /* hack by Smitdogg */

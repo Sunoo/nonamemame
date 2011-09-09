@@ -152,7 +152,7 @@ PRm-40		IC21			PRm-40		<both type 6331-1, 16 pin>
 
 #include "driver.h"
 //#include "vidhrdw/generic.h"
-#include "monaco.h"
+#include "includes/monaco.h"
 
 enum
 {
@@ -773,13 +773,13 @@ static INTERRUPT_GEN( monaco_interrupt )
 
 /*********************************************/
 
-static MEMORY_READ_START( readmem ) /* fake */
-	{ 0x0000, 0xffff, MRA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 ) /* fake */
+	AM_RANGE(0x0000, 0xffff) AM_READ(MRA8_ROM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem ) /* fake */
-	{ 0x0000, 0xffff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 ) /* fake */
+	AM_RANGE(0x0000, 0xffff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
 INPUT_PORTS_START( monaco )
 	PORT_START /* fake */
@@ -1133,8 +1133,8 @@ static MACHINE_DRIVER_START( monaco )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 200) /* fake */
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(0,0)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(0,0)
 	MDRV_CPU_VBLANK_INT(monaco_interrupt,1)
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -1161,29 +1161,29 @@ ROM_START( monaco )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* fake */
 
 	ROM_REGION( 0x3000, REGION_GFX1, 0 )
-	ROM_LOAD( "pr125", 512*0,  512, CRC(7a66ed4c) ) /* light data */
-	ROM_LOAD( "pr126", 512*1,  512, CRC(5d7a8f12) ) /* explosion */
-	ROM_LOAD( "pr127", 512*2,  512, CRC(8ffdc2f0) ) /* car(2)main */
-	ROM_LOAD( "pr128", 512*3,  512, CRC(dde29dea) ) /* car(2)rotated */
-	ROM_LOAD( "pr129", 512*4,  512, CRC(7b18af26) ) /* car(2)rotated */
-	ROM_LOAD( "pr130", 512*5,  512, CRC(9ef1913b) ) /* car(2) spinout */
-	ROM_LOAD( "pr131", 512*6,  512, CRC(ff31eb01) ) /* splash */
-	ROM_LOAD( "pr132", 512*7,  512, CRC(6b8ad9bc) ) /* car(2)(other) */
-	ROM_LOAD( "pr133", 512*8,  512, CRC(d50641d9) ) /* text(4) */
-	ROM_LOAD( "pr134", 512*9,  512, CRC(8ebd50bb) ) /* tree, grass */
-	ROM_LOAD( "pr135", 512*10, 512, CRC(986eda32) ) /* shrub */
-	ROM_LOAD( "pr136", 512*11, 512, CRC(ecc5d1a2) ) /* house */
-	ROM_LOAD( "pr137", 512*12, 512, CRC(ddd9004e) ) /* tunnel, oil slip */
-	ROM_LOAD( "pr138", 512*13, 512, CRC(058e53cf) ) /* firetruck */
-	ROM_LOAD( "pr139", 512*14, 512, CRC(e8ba0794) ) /* car, bridge symbol */
-	ROM_LOAD( "pr140", 512*15, 512, CRC(48e9971b) ) /* bridge-water */
-	ROM_LOAD( "pr141", 512*16, 512, CRC(99934236) ) /* bridge-pillar */
+	ROM_LOAD( "pr125", 512*0,  512, CRC(7a66ed4c) SHA1(514e129c334a551b931c90b063b073a9b4bdffc3) ) /* light data */
+	ROM_LOAD( "pr126", 512*1,  512, CRC(5d7a8f12) SHA1(b4f0d21b91a7cf7002f99c08788669c7c38be51d) ) /* explosion */
+	ROM_LOAD( "pr127", 512*2,  512, CRC(8ffdc2f0) SHA1(05cc3330c067965b8b90b5d27119fe9f26580a13) ) /* car(2)main */
+	ROM_LOAD( "pr128", 512*3,  512, CRC(dde29dea) SHA1(34c413edff991297471bd0bc193c4bd8ede4e468) ) /* car(2)rotated */
+	ROM_LOAD( "pr129", 512*4,  512, CRC(7b18af26) SHA1(3d1ff2610813544c3b9b65182f081272a9537640) ) /* car(2)rotated */
+	ROM_LOAD( "pr130", 512*5,  512, CRC(9ef1913b) SHA1(58830121781b8a13532eaf8ea13ec07f10522320) ) /* car(2) spinout */
+	ROM_LOAD( "pr131", 512*6,  512, CRC(ff31eb01) SHA1(fd6bcd92c4bd919bb1a96ca97688d46cb310b39d) ) /* splash */
+	ROM_LOAD( "pr132", 512*7,  512, CRC(6b8ad9bc) SHA1(be36e3b6b647d3a9565bc45903027c791dc889e5) ) /* car(2)(other) */
+	ROM_LOAD( "pr133", 512*8,  512, CRC(d50641d9) SHA1(bf399e9830c88e4d8f8fb386305f54ef766946d9) ) /* text(4) */
+	ROM_LOAD( "pr134", 512*9,  512, CRC(8ebd50bb) SHA1(98d51f503753d4d7191a09b509d26c1e049e981a) ) /* tree, grass */
+	ROM_LOAD( "pr135", 512*10, 512, CRC(986eda32) SHA1(73fa539d4c83748952d9339985208520fec955f3) ) /* shrub */
+	ROM_LOAD( "pr136", 512*11, 512, CRC(ecc5d1a2) SHA1(33bff7381785557a85e4c8bdd74679b59e0ed9d5) ) /* house */
+	ROM_LOAD( "pr137", 512*12, 512, CRC(ddd9004e) SHA1(5229c34578e66d9c51a05439a516513946ba69ed) ) /* tunnel, oil slip */
+	ROM_LOAD( "pr138", 512*13, 512, CRC(058e53cf) SHA1(7c3aaaca5a9e9ce3a3badd0dcc8360342673a397) ) /* firetruck */
+	ROM_LOAD( "pr139", 512*14, 512, CRC(e8ba0794) SHA1(eadd7425134f26b1c126bbcd3d3dabf4b2e1fe70) ) /* car, bridge symbol */
+	ROM_LOAD( "pr140", 512*15, 512, CRC(48e9971b) SHA1(c0c265cdc08727e3caaf49cdfe728a91c4c46ba2) ) /* bridge-water */
+	ROM_LOAD( "pr141", 512*16, 512, CRC(99934236) SHA1(ec271f3e690d5c57ead9132b22b9b1b966e4d170) ) /* bridge-pillar */
 
 	ROM_REGION( 32*3, REGION_PROMS, 0 )
-	ROM_LOAD( "prm38",	0*32, 32, CRC(82dd0a0f) )	/* acceleration related */
-	ROM_LOAD( "prm39",	1*32, 32, CRC(6acfa0da) )	/* regulates opponent car speed */
+	ROM_LOAD( "prm38",	0*32, 32, CRC(82dd0a0f) SHA1(3e7e475c3270853d70c1fe90a773172532b60cfb) )	/* acceleration related */
+	ROM_LOAD( "prm39",	1*32, 32, CRC(6acfa0da) SHA1(1e56da4cdf71a095eac29878969b831babac222b) )	/* regulates opponent car speed */
 
-//	ROM_LOAD( "prm-40",	2*32, 32, CRC(8030dac8) )
+//	ROM_LOAD( "prm-40",	2*32, 32, 0x8030dac8 )
 /*	PR40 is in the Fanfare sound circuit and seems to access the particular
  *	notes for the fanfare sound (so PR40 may contain timing and pointer info
  *	on the melody).  The switch (SW1) I mentioned before that helped in tuning

@@ -116,5 +116,3 @@ extern size_t decocass_bgvideoram_size;
 extern size_t decocass_tileram_size;
 extern size_t decocass_objectram_size;
 
-extern int throttle;
-extern int frameskip;

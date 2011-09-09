@@ -6,10 +6,10 @@
 
   Crypt Killer
   Konami, 1995
-
+  
   PCB Layout
   ----------
-
+  
   GQ420  PWB354905B
   |----------------------------------------------------------|
   |CN14     420A01.2G  420A02.3M           CN6  CN7   CN8    |
@@ -36,7 +36,7 @@
   | KM48V514  KM48V514                (U420UAA04)            |
   | KM48V514  KM48V514                                       |
   |----------------------------------------------------------|
-
+  
   Notes:
         CN6, CN7, CN8: For connection of guns.
         CN3 : For connection of extra controls/buttons.
@@ -59,11 +59,10 @@
 static data8_t sndto000[ 16 ];
 static data8_t sndtor3k[ 16 ];
 static data8_t sector_buffer[512];
-static UINT8 *m_p_n_ram;
 
 INLINE void psxwritebyte( UINT32 n_address, UINT8 n_data )
 {
-	m_p_n_ram[ BYTE_XOR_LE( n_address ) ] = n_data;
+	*( (UINT8 *)g_p_n_psxram + BYTE_XOR_LE( n_address ) ) = n_data;
 }
 
 static WRITE32_HANDLER( soundr3k_w )
@@ -232,71 +231,49 @@ static VIDEO_UPDATE( konamigq )
 	draw_crosshair( bitmap, GUNX( 9 ), GUNY( 10 ), cliprect );
 }
 
-static MEMORY_WRITE32_START( konamigq_writemem )
-	{ 0x00000000, 0x003fffff, MWA32_RAM },    /* ram */
-	{ 0x1f000000, 0x1f00001f, am53cf96_w },
-	{ 0x1f100000, 0x1f10000f, soundr3k_w },
-	{ 0x1f180000, 0x1f180003, eeprom_w },
-	{ 0x1f198000, 0x1f198003, MWA32_NOP },    /* cabinet lamps? */
-	{ 0x1f1a0000, 0x1f1a0003, MWA32_NOP },    /* indicates gun trigger */
-	{ 0x1f300000, 0x1f5fffff, pcmram_w },
-	{ 0x1f680000, 0x1f68001f, mb89371_w },
-	{ 0x1f780000, 0x1f780003, MWA32_NOP },    /* watchdog? */
-	{ 0x1f800000, 0x1f8003ff, MWA32_BANK1 },  /* scratchpad */
-	{ 0x1f801000, 0x1f801007, MWA32_NOP },
-	{ 0x1f801008, 0x1f80100b, MWA32_RAM },    /* ?? */
-	{ 0x1f80100c, 0x1f80102f, MWA32_NOP },
-	{ 0x1f801040, 0x1f80104f, psx_sio_w },
-	{ 0x1f801060, 0x1f80106f, MWA32_NOP },
-	{ 0x1f801070, 0x1f801077, psx_irq_w },
-	{ 0x1f801080, 0x1f8010ff, psx_dma_w },
-	{ 0x1f801100, 0x1f80113f, psx_counter_w },
-	{ 0x1f801810, 0x1f801817, psx_gpu_w },
-	{ 0x1f801820, 0x1f801827, psx_mdec_w },
-	{ 0x1f801c00, 0x1f801dff, MWA32_NOP },
-	{ 0x1f802020, 0x1f802033, MWA32_RAM },
-	{ 0x1f802040, 0x1f802043, MWA32_NOP },
-	{ 0x1fc00000, 0x1fffffff, MWA32_ROM },    /* bios mirror */
-	{ 0x80000000, 0x803fffff, MWA32_BANK3 },  /* ram mirror */
-	{ 0x9fc00000, 0x9fc7ffff, MWA32_ROM },    /* bios mirror */
-	{ 0xa0000000, 0xa03fffff, MWA32_BANK5 },  /* ram mirror */
-	{ 0xbfc00000, 0xbfc7ffff, MWA32_ROM },    /* bios */
-	{ 0xfffe0130, 0xfffe0133, MWA32_NOP },    /* ?? */
-MEMORY_END
-
-static MEMORY_READ32_START( konamigq_readmem )
-	{ 0x00000000, 0x003fffff, MRA32_RAM },    /* ram */
-	{ 0x1f000000, 0x1f00001f, am53cf96_r },
-	{ 0x1f100010, 0x1f10001f, soundr3k_r },
-	{ 0x1f200000, 0x1f200003, gun1_x_r },
-	{ 0x1f208000, 0x1f208003, gun1_y_r },
-	{ 0x1f210000, 0x1f210003, gun2_x_r },
-	{ 0x1f218000, 0x1f218003, gun2_y_r },
-	{ 0x1f220000, 0x1f220003, gun3_x_r },
-	{ 0x1f228000, 0x1f228003, gun3_y_r },
-	{ 0x1f230000, 0x1f230003, read_inputs_0 },
-	{ 0x1f230004, 0x1f230007, read_inputs_1 },
-	{ 0x1f238000, 0x1f238003, eeprom_r },
-	{ 0x1f300000, 0x1f5fffff, pcmram_r },
-	{ 0x1f680000, 0x1f68001f, mb89371_r },
-	{ 0x1f800000, 0x1f8003ff, MRA32_BANK1 },  /* scratchpad */
-	{ 0x1f801008, 0x1f80100b, MRA32_RAM },    /* ?? */
-	{ 0x1f801010, 0x1f801013, MRA32_NOP },
-	{ 0x1f801014, 0x1f801017, MRA32_NOP },
-	{ 0x1f801040, 0x1f80105f, psx_sio_r },
-	{ 0x1f801070, 0x1f801077, psx_irq_r },
-	{ 0x1f801080, 0x1f8010ff, psx_dma_r },
-	{ 0x1f801100, 0x1f80113f, psx_counter_r },
-	{ 0x1f801810, 0x1f801817, psx_gpu_r },
-	{ 0x1f801820, 0x1f801827, psx_mdec_r },
-	{ 0x1f801c00, 0x1f801dff, MRA32_NOP },
-	{ 0x1f802020, 0x1f802033, MRA32_RAM },
-	{ 0x1fc00000, 0x1fffffff, MRA32_BANK2 },  /* bios mirror */
-	{ 0x80000000, 0x803fffff, MRA32_BANK3 },  /* ram mirror */
-	{ 0x9fc00000, 0x9fc7ffff, MRA32_BANK4 },  /* bios mirror */
-	{ 0xa0000000, 0xa03fffff, MRA32_BANK5 },  /* ram mirror */
-	{ 0xbfc00000, 0xbfc7ffff, MRA32_BANK6 },  /* bios */
-MEMORY_END
+static ADDRESS_MAP_START( konamigq_map, ADDRESS_SPACE_PROGRAM, 32 )
+	AM_RANGE(0x00000000, 0x003fffff) AM_RAM	AM_SHARE(1) AM_BASE(&g_p_n_psxram) AM_SIZE(&g_n_psxramsize) /* ram */
+	AM_RANGE(0x1f000000, 0x1f00001f) AM_READWRITE(am53cf96_r, am53cf96_w)
+	AM_RANGE(0x1f100000, 0x1f10000f) AM_WRITE(soundr3k_w)
+	AM_RANGE(0x1f100010, 0x1f10001f) AM_READ(soundr3k_r)
+	AM_RANGE(0x1f180000, 0x1f180003) AM_WRITE(eeprom_w)
+	AM_RANGE(0x1f198000, 0x1f198003) AM_WRITENOP    		/* cabinet lamps? */
+	AM_RANGE(0x1f1a0000, 0x1f1a0003) AM_WRITENOP    		/* indicates gun trigger */
+	AM_RANGE(0x1f200000, 0x1f200003) AM_READ(gun1_x_r)
+	AM_RANGE(0x1f208000, 0x1f208003) AM_READ(gun1_y_r)
+	AM_RANGE(0x1f210000, 0x1f210003) AM_READ(gun2_x_r)
+	AM_RANGE(0x1f218000, 0x1f218003) AM_READ(gun2_y_r)
+	AM_RANGE(0x1f220000, 0x1f220003) AM_READ(gun3_x_r)
+	AM_RANGE(0x1f228000, 0x1f228003) AM_READ(gun3_y_r)
+	AM_RANGE(0x1f230000, 0x1f230003) AM_READ(read_inputs_0)
+	AM_RANGE(0x1f230004, 0x1f230007) AM_READ(read_inputs_1)
+	AM_RANGE(0x1f238000, 0x1f238003) AM_READ(eeprom_r)
+	AM_RANGE(0x1f300000, 0x1f5fffff) AM_READWRITE(pcmram_r, pcmram_w)
+	AM_RANGE(0x1f680000, 0x1f68001f) AM_READWRITE(mb89371_r, mb89371_w)
+	AM_RANGE(0x1f780000, 0x1f780003) AM_WRITENOP /* watchdog? */
+	AM_RANGE(0x1f800000, 0x1f8003ff) AM_RAM /* scratchpad */
+	AM_RANGE(0x1f801000, 0x1f801007) AM_WRITENOP
+	AM_RANGE(0x1f801008, 0x1f80100b) AM_RAM /* ?? */
+	AM_RANGE(0x1f80100c, 0x1f80102f) AM_WRITENOP
+	AM_RANGE(0x1f801010, 0x1f801013) AM_READNOP
+	AM_RANGE(0x1f801014, 0x1f801017) AM_READNOP
+	AM_RANGE(0x1f801040, 0x1f80105f) AM_READWRITE(psx_sio_r, psx_sio_w)
+	AM_RANGE(0x1f801060, 0x1f80106f) AM_WRITENOP
+	AM_RANGE(0x1f801070, 0x1f801077) AM_READWRITE(psx_irq_r, psx_irq_w)
+	AM_RANGE(0x1f801080, 0x1f8010ff) AM_READWRITE(psx_dma_r, psx_dma_w)
+	AM_RANGE(0x1f801100, 0x1f80113f) AM_READWRITE(psx_counter_r, psx_counter_w)
+	AM_RANGE(0x1f801810, 0x1f801817) AM_READWRITE(psx_gpu_r, psx_gpu_w)
+	AM_RANGE(0x1f801820, 0x1f801827) AM_READWRITE(psx_mdec_r, psx_mdec_w)
+	AM_RANGE(0x1f801c00, 0x1f801dff) AM_NOP
+	AM_RANGE(0x1f802020, 0x1f802033) AM_RAM /* ?? */
+	AM_RANGE(0x1f802040, 0x1f802043) AM_WRITENOP
+	AM_RANGE(0x1fc00000, 0x1fc7ffff) AM_ROM AM_SHARE(2) AM_REGION(REGION_USER1, 0) /* bios */
+	AM_RANGE(0x80000000, 0x803fffff) AM_RAM AM_SHARE(1) /* ram mirror */
+	AM_RANGE(0x9fc00000, 0x9fc7ffff) AM_ROM AM_SHARE(2) /* bios mirror */
+	AM_RANGE(0xa0000000, 0xa03fffff) AM_RAM AM_SHARE(1) /* ram mirror */
+	AM_RANGE(0xbfc00000, 0xbfc7ffff) AM_ROM AM_SHARE(2) /* bios mirror */
+	AM_RANGE(0xfffe0130, 0xfffe0133) AM_WRITENOP
+ADDRESS_MAP_END
 
 /* SOUND CPU */
 
@@ -339,23 +316,23 @@ static WRITE16_HANDLER( sndcomm68k_w )
 }
 
 /* 68000 memory handling */
-static MEMORY_READ16_START( sndreadmem )
-	{ 0x000000, 0x07ffff, MRA16_ROM },
-	{ 0x100000, 0x10ffff, MRA16_RAM },
-	{ 0x200000, 0x2004ff, dual539_r },
-	{ 0x300000, 0x300001, tms57002_data_word_r },
-	{ 0x400010, 0x40001f, sndcomm68k_r },
-	{ 0x500000, 0x500001, tms57002_status_word_r },
-MEMORY_END
+static ADDRESS_MAP_START( sndreadmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x07ffff) AM_READ(MRA16_ROM)
+	AM_RANGE(0x100000, 0x10ffff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x200000, 0x2004ff) AM_READ(dual539_r)
+	AM_RANGE(0x300000, 0x300001) AM_READ(tms57002_data_word_r)
+	AM_RANGE(0x400010, 0x40001f) AM_READ(sndcomm68k_r)
+	AM_RANGE(0x500000, 0x500001) AM_READ(tms57002_status_word_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( sndwritemem )
-	{ 0x100000, 0x10ffff, MWA16_RAM },
-	{ 0x200000, 0x2004ff, dual539_w },
-	{ 0x300000, 0x300001, tms57002_data_word_w },
-	{ 0x400000, 0x40000f, sndcomm68k_w },
-	{ 0x500000, 0x500001, tms57002_control_word_w },
-	{ 0x580000, 0x580001, MWA16_NOP }, /* ?? */
-MEMORY_END
+static ADDRESS_MAP_START( sndwritemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x100000, 0x10ffff) AM_WRITE(MWA16_RAM)
+	AM_RANGE(0x200000, 0x2004ff) AM_WRITE(dual539_w)
+	AM_RANGE(0x300000, 0x300001) AM_WRITE(tms57002_data_word_w)
+	AM_RANGE(0x400000, 0x40000f) AM_WRITE(sndcomm68k_w)
+	AM_RANGE(0x500000, 0x500001) AM_WRITE(tms57002_control_word_w)
+	AM_RANGE(0x580000, 0x580001) AM_WRITE(MWA16_NOP) /* ?? */
+ADDRESS_MAP_END
 
 static struct K054539interface k054539_interface =
 {
@@ -415,17 +392,9 @@ static struct AM53CF96interface scsi_intf =
 
 static DRIVER_INIT( konamigq )
 {
-	cpu_setbank( 1, memory_region( REGION_USER1 ) );
-	cpu_setbank( 2, memory_region( REGION_USER2 ) );
-	cpu_setbank( 3, memory_region( REGION_CPU1 ) );
-	cpu_setbank( 4, memory_region( REGION_USER2 ) );
-	cpu_setbank( 5, memory_region( REGION_CPU1 ) );
-	cpu_setbank( 6, memory_region( REGION_USER2 ) );
-
 	psx_driver_init();
 
 	m_p_n_pcmram = memory_region( REGION_SOUND1 ) + 0x80000;
-	m_p_n_ram = memory_region( REGION_CPU1 );
 
 	/* init the scsi controller and hook up it's DMA */
 	am53cf96_init(&scsi_intf);
@@ -447,12 +416,12 @@ static MACHINE_INIT( konamigq )
 static MACHINE_DRIVER_START( konamigq )
 	/* basic machine hardware */
 	MDRV_CPU_ADD( PSXCPU, 33868800 / 2 ) /* 33MHz ?? */
-	MDRV_CPU_MEMORY( konamigq_readmem, konamigq_writemem )
+	MDRV_CPU_PROGRAM_MAP( konamigq_map, 0 )
 	MDRV_CPU_VBLANK_INT( psx_vblank, 1 )
 
 	MDRV_CPU_ADD_TAG( "sound", M68000, 8000000 )
 	MDRV_CPU_FLAGS( CPU_AUDIO_CPU )
-	MDRV_CPU_MEMORY( sndreadmem, sndwritemem )
+	MDRV_CPU_PROGRAM_MAP( sndreadmem, sndwritemem )
 	MDRV_CPU_PERIODIC_INT( irq2_line_hold, 480 )
 
 	MDRV_FRAMES_PER_SECOND( 60 )
@@ -463,7 +432,7 @@ static MACHINE_DRIVER_START( konamigq )
 
 	/* video hardware */
 	MDRV_VIDEO_ATTRIBUTES( VIDEO_TYPE_RASTER )
-#if 0 //defined( MAME_DEBUG )
+#if defined( MAME_DEBUG )
 	MDRV_SCREEN_SIZE( 1024, 1024 )
 	MDRV_VISIBLE_AREA( 0, 1023, 0, 1023 )
 #else
@@ -576,20 +545,17 @@ INPUT_PORTS_START( konamigq )
 INPUT_PORTS_END
 
 ROM_START( cryptklr )
-	ROM_REGION( 0x0400000, REGION_CPU1, 0 ) /* main ram */
-	ROM_REGION( 0x0000400, REGION_USER1, 0 ) /* scratchpad */
-
 	ROM_REGION( 0x80000, REGION_CPU2, 0 ) /* 68000 sound program */
 	ROM_LOAD16_WORD_SWAP( "420a01.2g", 0x000000, 0x080000, CRC(84fc2613) SHA1(e06f4284614d33c76529eb43b168d095200a9eac) )
 
 	ROM_REGION( 0x400000, REGION_SOUND1, 0 )
 	ROM_LOAD( "420a02.3m",    0x000000, 0x080000, CRC(2169c3c4) SHA1(6d525f10385791e19eb1897d18f0bab319640162) )
 
-	ROM_REGION32_LE( 0x080000, REGION_USER2, 0 ) /* bios */
+	ROM_REGION32_LE( 0x080000, REGION_USER1, 0 ) /* bios */
 	ROM_LOAD( "420b03.27p",   0x0000000, 0x080000, CRC(aab391b1) SHA1(bf9dc7c0c8168c22a4be266fe6a66d3738df916b) )
 
 	DISK_REGION( REGION_DISKS )
-	DISK_IMAGE( "420uaa04.chd", 0, MD5(179464886f58a2e14b284e3813227a86) SHA1(18fe867c44982bacf0d3ff8453487cd06425a6b7) )
+	DISK_IMAGE( "420uaa04", 0, MD5(179464886f58a2e14b284e3813227a86) SHA1(18fe867c44982bacf0d3ff8453487cd06425a6b7) )
 ROM_END
 
-GAMEX( 1995, cryptklr, 0, konamigq, konamigq, konamigq, ROT0, "Konami", "Crypt Killer (ver. UAA)", GAME_IMPERFECT_GRAPHICS )
+GAMEX( 1995, cryptklr, 0, konamigq, konamigq, konamigq, ROT0, "Konami", "Crypt Killer (GQ420 UAA)", GAME_IMPERFECT_GRAPHICS )

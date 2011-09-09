@@ -10,25 +10,25 @@ VDP:    HD46505SP (6845) (CRT controller)
 Custom: TC17G032AP-0246 (blitter)
 
 ----------------------------------------------------------------------------------------
-Year + Game					Board(s)			Sound						Palette
+Year + Game					Board(s)					Sound						Palette
 ----------------------------------------------------------------------------------------
-88 Hana no Mai				D1610088L1			AY8912 YM2203        M5205	PROM
-88 Hana Kochou				D201901L			AY8912 YM2203        M5205	PROM
-89 Hana Oriduru				D2304268L			AY8912        YM2413 M5205	RAM
-89 Dragon Punch				D24?		 		       YM2203				PROM
-89 Mahjong Friday			D2607198L1			              YM2413		PROM
-89 Jantouki					D2711078L-B			**TODO** (1)
-89 Sports Match				D31?		 	           YM2203				PROM
-90 Mahjong Campus Hunting	D3312108L1-1 + DXB?	AY8912        YM2413 M5205	RAM
-90 7jigen no Youseitachi	D3707198L1   + DXB?	AY8912        YM2413 M5205	RAM
-91 Mahjong Yarunara			D4508308L-2  + DXB	AY8912        YM2413 M5205	RAM
-91 Mahjong Angels			D6107068L-1  + DXB	AY8912        YM2413 M5205	RAM
-91 Mahjong Dial Q2			D5212298L-1		                  YM2413		PROM
-92 Quiz TV Gassyuukoku Q&Q	D6410288L-1  + DXB	AY8912        YM2413 M5205	RAM
-94 Maya											      YM2203				PROM
+88 Hana no Mai				D1610088L1					AY8912 YM2203        M5205	PROM
+88 Hana Kochou				D201901L2 + D201901L1-0		AY8912 YM2203        M5205	PROM
+89 Hana Oriduru				D2304268L					AY8912        YM2413 M5205	RAM
+89 Dragon Punch				D24?		 				       YM2203				PROM
+89 Mahjong Friday			D2607198L1					              YM2413		PROM
+89 Sports Match				D31?		 	    		       YM2203				PROM
+90 Jong Tou Ki (1)			D1505178-A + D2711078L-B	AY8912 YM2203        M5205	PROM
+90 Mahjong Campus Hunting	D3312108L1-1 + D23SUB1		AY8912        YM2413 M5205	RAM
+90 7jigen no Youseitachi	D3707198L1 + D23SUB1		AY8912        YM2413 M5205	RAM
+90 Mahjong Electron Base								AY8912        YM2413      	RAM
+90 Neruton Haikujiradan		D4005208L1-1 + D4508308L-2	AY8912        YM2413 M5205	RAM
+91 Mahjong Yarunara			D5512068L1-1 + D4508308L-2	AY8912        YM2413 M5205	RAM
+91 Mahjong Angels			D5512068L1-1 + D6107068L-1	AY8912        YM2413 M5205	RAM
+91 Mahjong Dial Q2			D5212298L-1		    		              YM2413		PROM
+92 Quiz TV Gassyuukoku Q&Q	D5512068L1-2 + D6410288L-1	AY8912        YM2413 M5205	RAM
+94 Maya												    	  YM2203				PROM
 ----------------------------------------------------------------------------------------
-DXB = Dynax Motherboard System D5512068L1-1/2
-
 (1) quite different from the others: it has a slave Z80 and *two* blitters
 
 Notes:
@@ -48,23 +48,22 @@ Notes:
 TODO:
 - Inputs are grossly mapped, especially for the card games.
 
-- mjdialq2: the title screen is corrupted by the scrolling logo. This would be
-  fixed by not wrapping around when drawing bìpast the bottom of the bitmap,
-  but doing so would break the last picture of gal 6 (which is scrolled up so
-  that the bottom of the bitmap is near the middle of the screen).
-
 - In the interleaved games, "reverse write" test in service mode is wrong due to
   interleaving. Correct behaviour? None of these games has a "flip screen" dip
   switch, while mjfriday and mjdialq2, which aren't interleaved, have it.
 
 - Palette banking is not correct, see quiztvqq cross hatch test.
 
+- Rom banking of the blitter roms: it can only address 0x100000 bytes.
+
+- Scrolling / wrap enable is not correct in hnoridur type hardware. See the dynax
+  logo in neruton: it has to do with writes to c3/c4 and there are 2 additional
+  scroll registers at 64/66.
+
 - 7jigen: priority 0x30 is ok when used in the "gals check", but is wrong during
   attract mode, where the girl is hidden by the background. Another possible
   priority issue in attract mode is when the balls scroll over the devil.
 
-- mjangels: the title screen is wrong. Is this related to scroll_high being 1?
-  (it usually is either 0 or 3)
 
 ***************************************************************************/
 
@@ -122,6 +121,81 @@ void sprtmtch_sound_callback(int state)
 	sprtmtch_update_irq();
 }
 
+
+/***************************************************************************
+							Jantouki - Main CPU
+***************************************************************************/
+
+UINT8 dynax_blitter2_irq;
+
+/* It runs in IM 0, thus needs an opcode on the data bus */
+void jantouki_update_irq(void)
+{
+	int irq	=	((dynax_blitter_irq)	? 0x08 : 0) |
+				((dynax_blitter2_irq)	? 0x10 : 0) |
+				((dynax_vblank_irq)		? 0x20 : 0) ;
+	cpu_set_irq_line_and_vector(0, 0, irq ? ASSERT_LINE : CLEAR_LINE, 0xc7 | irq); /* rst $xx */
+}
+
+WRITE_HANDLER( jantouki_vblank_ack_w )
+{
+	dynax_vblank_irq = 0;
+	jantouki_update_irq();
+}
+
+WRITE_HANDLER( jantouki_blitter_ack_w )
+{
+	dynax_blitter_irq = data;
+	jantouki_update_irq();
+}
+
+WRITE_HANDLER( jantouki_blitter2_ack_w )
+{
+	dynax_blitter2_irq = data;
+	jantouki_update_irq();
+}
+
+INTERRUPT_GEN( jantouki_vblank_interrupt )
+{
+	dynax_vblank_irq = 1;
+	jantouki_update_irq();
+}
+
+
+/***************************************************************************
+							Jantouki - Sound CPU
+***************************************************************************/
+
+UINT8 dynax_soundlatch_irq;
+UINT8 dynax_sound_vblank_irq;
+
+void jantouki_sound_update_irq(void)
+{
+	int irq	=	((dynax_sound_irq)			? 0x08 : 0) |
+				((dynax_soundlatch_irq)		? 0x10 : 0) |
+				((dynax_sound_vblank_irq)	? 0x20 : 0) ;
+	cpu_set_irq_line_and_vector(1, 0, irq ? ASSERT_LINE : CLEAR_LINE, 0xc7 | irq); /* rst $xx */
+}
+
+INTERRUPT_GEN( jantouki_sound_vblank_interrupt )
+{
+	dynax_sound_vblank_irq = 1;
+	jantouki_sound_update_irq();
+}
+
+WRITE_HANDLER( jantouki_sound_vblank_ack_w )
+{
+	dynax_sound_vblank_irq = 0;
+	jantouki_sound_update_irq();
+}
+
+void jantouki_sound_callback(int state)
+{
+	dynax_sound_irq = state;
+	jantouki_sound_update_irq();
+}
+
+
 /***************************************************************************
 
 
@@ -136,15 +210,11 @@ void sprtmtch_sound_callback(int state)
 
 static WRITE_HANDLER( dynax_coincounter_0_w )
 {
-	coin_counter_w(0, data & 1);
-	if (data & ~1)
-		logerror("CPU#0 PC %06X: Warning, coin counter 0 <- %02X\n", activecpu_get_pc(), data);
+	coin_counter_w(0, data);
 }
 static WRITE_HANDLER( dynax_coincounter_1_w )
 {
-	coin_counter_w(1, data & 1);
-	if (data & ~1)
-		logerror("CPU#0 PC %06X: Warning, coin counter 1 <- %02X\n", activecpu_get_pc(), data);
+	coin_counter_w(1, data);
 }
 
 static READ_HANDLER( ret_ff )	{	return 0xff;	}
@@ -181,6 +251,12 @@ static WRITE_HANDLER( dynax_rombank_w )
 {
 	data8_t *ROM = memory_region(REGION_CPU1);
 	cpu_setbank(1,&ROM[0x08000+0x8000*(data & 0x0f)]);
+}
+
+static WRITE_HANDLER( jantouki_sound_rombank_w )
+{
+	data8_t *ROM = memory_region(REGION_CPU2);
+	cpu_setbank(2,&ROM[0x08000+0x8000*data]);
 }
 
 
@@ -321,6 +397,21 @@ static void adpcm_int(int data)
 		cpu_set_nmi_line(0,PULSE_LINE);
 	}
 }
+static void adpcm_int_cpu1(int data)
+{
+	static int toggle;
+
+	MSM5205_data_w(0,msm5205next >> 4);
+	msm5205next<<=4;
+
+	toggle = 1 - toggle;
+	if (toggle)
+	{
+		if (resetkludge)	// don't know what's wrong, but NMIs when the 5205 is reset make the game crash
+		cpu_set_nmi_line(1,PULSE_LINE);	// cpu1
+	}
+}
+
 
 static WRITE_HANDLER( adpcm_data_w )
 {
@@ -354,307 +445,333 @@ WRITE_HANDLER( nanajign_layer_half_w )
 }
 
 
-static MEMORY_READ_START( sprtmtch_readmem )
-	{ 0x0000, 0x6fff, MRA_ROM },
-	{ 0x7000, 0x7fff, MRA_RAM },
-	{ 0x8000, 0xffff, MRA_BANK1 },
-MEMORY_END
-static MEMORY_WRITE_START( sprtmtch_writemem )
-	{ 0x0000, 0x6fff, MWA_ROM },
-	{ 0x7000, 0x7fff, MWA_RAM },
-	{ 0x7000, 0x7fff, MWA_RAM, &generic_nvram, &generic_nvram_size },
-	{ 0x8000, 0xffff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( sprtmtch_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x6fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x7000, 0x7fff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x8000, 0xffff) AM_READ(MRA8_BANK1)
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( sprtmtch_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x6fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x7000, 0x7fff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x7000, 0x7fff) AM_WRITE(MWA8_RAM) AM_BASE(&generic_nvram) AM_SIZE(&generic_nvram_size)
+	AM_RANGE(0x8000, 0xffff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( hnoridur_readmem )
-	{ 0x0000, 0x6fff, MRA_ROM },
-	{ 0x7000, 0x7fff, MRA_RAM },
-	{ 0x8000, 0xffff, MRA_BANK1 },
-MEMORY_END
-static MEMORY_WRITE_START( hnoridur_writemem )
-	{ 0x0000, 0x6fff, MWA_ROM },
-	{ 0x7000, 0x7fff, MWA_RAM, &generic_nvram, &generic_nvram_size },
-	{ 0x8000, 0xffff, hnoridur_palette_w },
-MEMORY_END
+static ADDRESS_MAP_START( hnoridur_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x6fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x7000, 0x7fff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x8000, 0xffff) AM_READ(MRA8_BANK1)
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( hnoridur_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x6fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x7000, 0x7fff) AM_WRITE(MWA8_RAM) AM_BASE(&generic_nvram) AM_SIZE(&generic_nvram_size)
+	AM_RANGE(0x8000, 0xffff) AM_WRITE(hnoridur_palette_w)
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( mcnpshnt_readmem )
-	{ 0x0000, 0x5fff, MRA_ROM },
-	{ 0x6000, 0x6fff, MRA_RAM },
-	{ 0x7000, 0x7fff, MRA_RAM },
-	{ 0x8000, 0xffff, MRA_BANK1 },
-MEMORY_END
-static MEMORY_WRITE_START( mcnpshnt_writemem )
-	{ 0x0000, 0x5fff, MWA_ROM },
-	{ 0x6000, 0x6fff, MWA_RAM },
-	{ 0x7000, 0x7fff, MWA_RAM, &generic_nvram, &generic_nvram_size },
-	{ 0x8000, 0x8fff, hnoridur_palette_w },
-MEMORY_END
+static ADDRESS_MAP_START( mcnpshnt_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x6000, 0x6fff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x7000, 0x7fff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x8000, 0xffff) AM_READ(MRA8_BANK1)
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( mcnpshnt_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x6000, 0x6fff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x7000, 0x7fff) AM_WRITE(MWA8_RAM) AM_BASE(&generic_nvram) AM_SIZE(&generic_nvram_size)
+	AM_RANGE(0x8000, 0x8fff) AM_WRITE(hnoridur_palette_w)
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( mjdialq2_readmem )
-	{ 0x0000, 0x07ff, MRA_ROM },
-	{ 0x0800, 0x1fff, MRA_RAM },
-	{ 0x2000, 0x7fff, MRA_ROM },
-	{ 0x8000, 0xffff, MRA_BANK1 },
-MEMORY_END
-static MEMORY_WRITE_START( mjdialq2_writemem )
-	{ 0x0000, 0x07ff, MWA_ROM },
-	{ 0x0800, 0x0fff, MWA_RAM },
-	{ 0x1000, 0x1fff, MWA_RAM, &generic_nvram, &generic_nvram_size },
-	{ 0x2000, 0x7fff, MWA_ROM },
-	{ 0x8000, 0xffff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( mjdialq2_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x07ff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x0800, 0x1fff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x2000, 0x7fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0xffff) AM_READ(MRA8_BANK1)
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( mjdialq2_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x07ff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x0800, 0x0fff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x1000, 0x1fff) AM_WRITE(MWA8_RAM) AM_BASE(&generic_nvram) AM_SIZE(&generic_nvram_size)
+	AM_RANGE(0x2000, 0x7fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x8000, 0xffff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( yarunara_readmem )
-	{ 0x0000, 0x5fff, MRA_ROM		},	// ROM
-	{ 0x6000, 0x6fff, MRA_RAM		},	// RAM
-	{ 0x7000, 0x7fff, MRA_RAM		},	// NVRAM
-	{ 0x8000, 0xffff, MRA_BANK1		},	// ROM (Banked)
-MEMORY_END
-static MEMORY_WRITE_START( yarunara_writemem )
-	{ 0x0000, 0x5fff, MWA_ROM					},	// ROM
-	{ 0x6000, 0x6fff, MWA_RAM					},	// RAM
-	{ 0x7000, 0x7fff, MWA_RAM, &generic_nvram, &generic_nvram_size },
-	{ 0x8000, 0x81ff, yarunara_palette_w		},	// Palette or RTC
-	{ 0x8000, 0xffff, MWA_ROM					},	// ROM (Banked)
-MEMORY_END
+static ADDRESS_MAP_START( yarunara_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_READ(MRA8_ROM		)	// ROM
+	AM_RANGE(0x6000, 0x6fff) AM_READ(MRA8_RAM		)	// RAM
+	AM_RANGE(0x7000, 0x7fff) AM_READ(MRA8_RAM		)	// NVRAM
+	AM_RANGE(0x8000, 0xffff) AM_READ(MRA8_BANK1	)	// ROM (Banked)
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( yarunara_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_WRITE(MWA8_ROM				)	// ROM
+	AM_RANGE(0x6000, 0x6fff) AM_WRITE(MWA8_RAM				)	// RAM
+	AM_RANGE(0x7000, 0x7fff) AM_WRITE(MWA8_RAM) AM_BASE(&generic_nvram) AM_SIZE(&generic_nvram_size)
+	AM_RANGE(0x8000, 0x81ff) AM_WRITE(yarunara_palette_w	)	// Palette or RTC
+	AM_RANGE(0x8000, 0xffff) AM_WRITE(MWA8_ROM				)	// ROM (Banked)
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( nanajign_readmem )
-	{ 0x0000, 0x5fff, MRA_ROM					},	// ROM
-	{ 0x6000, 0x7fff, MRA_RAM					},	// RAM
-	{ 0x8000, 0xffff, MRA_BANK1					},	// ROM (Banked)
-MEMORY_END
-static MEMORY_WRITE_START( nanajign_writemem )
-	{ 0x0000, 0x5fff, MWA_ROM					},	// ROM
-	{ 0x6000, 0x7fff, MWA_RAM					},	// RAM
-	{ 0x8000, 0x80ff, nanajign_palette_w		},
-	{ 0x8000, 0xffff, MWA_ROM					},	// ROM (Banked)
-MEMORY_END
+static ADDRESS_MAP_START( nanajign_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x6000, 0x6fff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x7000, 0x7fff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x8000, 0xffff) AM_READ(MRA8_BANK1)
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( nanajign_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x6000, 0x6fff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x7000, 0x7fff) AM_WRITE(MWA8_RAM) AM_BASE(&generic_nvram) AM_SIZE(&generic_nvram_size)
+	AM_RANGE(0x8000, 0x80ff) AM_WRITE(nanajign_palette_w	)
+	AM_RANGE(0x8000, 0xffff) AM_WRITE(MWA8_ROM				)	// ROM (Banked)
+ADDRESS_MAP_END
 
 
+static ADDRESS_MAP_START( jantouki_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x6000, 0x6fff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x7000, 0x7fff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x8000, 0xffff) AM_READ(MRA8_BANK1)
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( jantouki_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x6000, 0x6fff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x7000, 0x7fff) AM_WRITE(MWA8_RAM) AM_BASE(&generic_nvram) AM_SIZE(&generic_nvram_size)
+	AM_RANGE(0x8000, 0xffff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
+
+static ADDRESS_MAP_START( jantouki_sound_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x6fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x7000, 0x7fff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x8000, 0xffff) AM_READ(MRA8_BANK2)
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( jantouki_sound_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x6fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x7000, 0x7fff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x8000, 0xffff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
 
+static ADDRESS_MAP_START( hanamai_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x60, 0x60) AM_READ(hanamai_keyboard_0_r	)	// P1
+	AM_RANGE(0x61, 0x61) AM_READ(hanamai_keyboard_1_r	)	// P2
+	AM_RANGE(0x62, 0x62) AM_READ(input_port_2_r			)	// Coins
+	AM_RANGE(0x63, 0x63) AM_READ(ret_ff					)	// ?
+	AM_RANGE(0x78, 0x78) AM_READ(YM2203_status_port_0_r	)	// YM2203
+	AM_RANGE(0x79, 0x79) AM_READ(YM2203_read_port_0_r	)	// 2 x DSW
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( hanamai_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_WRITE(dynax_extra_scrollx_w		)	// screen scroll X
+	AM_RANGE(0x20, 0x20) AM_WRITE(dynax_extra_scrolly_w		)	// screen scroll Y
+	AM_RANGE(0x41, 0x47) AM_WRITE(dynax_blitter_rev2_w		)	// Blitter
+	AM_RANGE(0x50, 0x50) AM_WRITE(dynax_rombank_w			)	// BANK ROM Select	hnkochou only
+	AM_RANGE(0x64, 0x64) AM_WRITE(hanamai_keyboard_w			)	// keyboard row select
+	AM_RANGE(0x65, 0x65) AM_WRITE(dynax_rombank_w			)	// BANK ROM Select  hanamai only
+	AM_RANGE(0x66, 0x66) AM_WRITE(dynax_vblank_ack_w			)	// VBlank IRQ Ack
+	AM_RANGE(0x67, 0x67) AM_WRITE(adpcm_data_w				)	// MSM5205 data
+	AM_RANGE(0x68, 0x68) AM_WRITE(dynax_layer_enable_w		)	// Layers Enable
+	AM_RANGE(0x69, 0x69) AM_WRITE(hanamai_priority_w			)	// layer priority
+	AM_RANGE(0x6a, 0x6a) AM_WRITE(dynax_blit_dest_w			)	// Destination Layer
+	AM_RANGE(0x6b, 0x6b) AM_WRITE(dynax_blit_pen_w			)	// Destination Pen
+	AM_RANGE(0x6c, 0x6c) AM_WRITE(dynax_blit_palette01_w		)	// Layers Palettes (Low Bits)
+	AM_RANGE(0x6d, 0x6d) AM_WRITE(dynax_blit_palette23_w		)	//
+	AM_RANGE(0x6e, 0x6e) AM_WRITE(dynax_blit_backpen_w		)	// Background Color
+	AM_RANGE(0x70, 0x70) AM_WRITE(adpcm_reset_w				)	// MSM5205 reset
+	AM_RANGE(0x71, 0x71) AM_WRITE(dynax_flipscreen_w			)	// Flip Screen
+	AM_RANGE(0x72, 0x72) AM_WRITE(dynax_coincounter_0_w		)	// Coin Counters
+	AM_RANGE(0x73, 0x73) AM_WRITE(dynax_coincounter_1_w		)	//
+	AM_RANGE(0x74, 0x74) AM_WRITE(dynax_blitter_ack_w		)	// Blitter IRQ Ack
+	AM_RANGE(0x76, 0x76) AM_WRITE(dynax_blit_palbank_w		)	// Layers Palettes (High Bit)
+	AM_RANGE(0x77, 0x77) AM_WRITE(hanamai_layer_half_w		)	// half of the interleaved layer to write to
+	AM_RANGE(0x78, 0x78) AM_WRITE(YM2203_control_port_0_w	)	// YM2203
+	AM_RANGE(0x79, 0x79) AM_WRITE(YM2203_write_port_0_w		)	//
+	AM_RANGE(0x7a, 0x7a) AM_WRITE(AY8910_control_port_0_w	)	// AY8910
+	AM_RANGE(0x7b, 0x7b) AM_WRITE(AY8910_write_port_0_w		)	//
+//	AM_RANGE(0x7c, 0x7c) AM_WRITE(MWA8_NOP					)	// CRT Controller
+//	AM_RANGE(0x7d, 0x7d) AM_WRITE(MWA8_NOP					)	// CRT Controller
+ADDRESS_MAP_END
 
-static PORT_READ_START( hanamai_readport )
-	{ 0x60, 0x60, hanamai_keyboard_0_r		},	// P1
-	{ 0x61, 0x61, hanamai_keyboard_1_r		},	// P2
-	{ 0x62, 0x62, input_port_2_r			},	// Coins
-	{ 0x63, 0x63, ret_ff					},	// ?
-	{ 0x78, 0x78, YM2203_status_port_0_r	},	// YM2203
-	{ 0x79, 0x79, YM2203_read_port_0_r		},	// 2 x DSW
-PORT_END
-static PORT_WRITE_START( hanamai_writeport )
-	{ 0x00, 0x00, dynax_extra_scrollx_w		},	// screen scroll X
-	{ 0x20, 0x20, dynax_extra_scrolly_w		},	// screen scroll Y
-	{ 0x41, 0x47, dynax_blitter_rev2_w		},	// Blitter
-	{ 0x50, 0x50, dynax_rombank_w			},	// BANK ROM Select	hnkochou only
-	{ 0x64, 0x64, hanamai_keyboard_w		},	// keyboard row select
-	{ 0x65, 0x65, dynax_rombank_w			},	// BANK ROM Select  hanamai only
-	{ 0x66, 0x66, dynax_vblank_ack_w		},	// VBlank IRQ Ack
-	{ 0x67, 0x67, adpcm_data_w				},	// MSM5205 data
-	{ 0x68, 0x68, dynax_layer_enable_w		},	// Layers Enable
-	{ 0x69, 0x69, hanamai_priority_w		},	// layer priority
-	{ 0x6a, 0x6a, dynax_blit_dest_w			},	// Destination Layer
-	{ 0x6b, 0x6b, dynax_blit_pen_w			},	// Destination Pen
-	{ 0x6c, 0x6c, dynax_blit_palette01_w	},	// Layers Palettes (Low Bits)
-	{ 0x6d, 0x6d, dynax_blit_palette2_w		},	//
-	{ 0x6e, 0x6e, dynax_blit_backpen_w		},	// Background Color
-	{ 0x70, 0x70, adpcm_reset_w				},	// MSM5205 reset
-	{ 0x71, 0x71, dynax_flipscreen_w		},	// Flip Screen
-	{ 0x72, 0x72, dynax_coincounter_0_w		},	// Coin Counters
-	{ 0x73, 0x73, dynax_coincounter_1_w		},	//
-	{ 0x74, 0x74, dynax_blitter_ack_w		},	// Blitter IRQ Ack
-	{ 0x76, 0x76, dynax_blit_palbank_w		},	// Layers Palettes (High Bit)
-	{ 0x77, 0x77, hanamai_layer_half_w		},	// half of the interleaved layer to write to
-	{ 0x78, 0x78, YM2203_control_port_0_w	},	// YM2203
-	{ 0x79, 0x79, YM2203_write_port_0_w		},	//
-	{ 0x7a, 0x7a, AY8910_control_port_0_w	},	// AY8910
-	{ 0x7b, 0x7b, AY8910_write_port_0_w		},	//
-//	{ 0x7c, 0x7c, IOWP_NOP					},	// CRT Controller
-//	{ 0x7d, 0x7d, IOWP_NOP					},	// CRT Controller
-PORT_END
 
-
-static PORT_READ_START( hnoridur_readport )
-	{ 0x21, 0x21, input_port_2_r			},	// Coins
-	{ 0x22, 0x22, hanamai_keyboard_1_r		},	// P2
-	{ 0x23, 0x23, hanamai_keyboard_0_r		},	// P1
-	{ 0x24, 0x24, input_port_1_r			},	// DSW2
-	{ 0x25, 0x25, input_port_9_r			},	// DSW4
-	{ 0x26, 0x26, input_port_8_r			},	// DSW3
-	{ 0x36, 0x36, AY8910_read_port_0_r		},	// AY8910, DSW1
-	{ 0x57, 0x57, ret_ff					},	// ?
-PORT_END
-static PORT_WRITE_START( hnoridur_writeport )
-	{ 0x01, 0x07, dynax_blitter_rev2_w		},	// Blitter
-	{ 0x20, 0x20, hanamai_keyboard_w		},	// keyboard row select
-	{ 0x30, 0x30, adpcm_reset_w				},	// MSM5205 reset
-	{ 0x32, 0x32, adpcm_data_w				},	// MSM5205 data
-	{ 0x34, 0x34, YM2413_register_port_0_w	},	// YM2413
-	{ 0x35, 0x35, YM2413_data_port_0_w		},	//
-	{ 0x38, 0x38, AY8910_write_port_0_w		},	// AY8910
-	{ 0x3a, 0x3a, AY8910_control_port_0_w	},	//
-//	{ 0x10, 0x10, IOWP_NOP					},	// CRT Controller
-//	{ 0x11, 0x11, IOWP_NOP					},	// CRT Controller
-	{ 0x40, 0x40, dynax_blit_pen_w			},	// Destination Pen
-	{ 0x41, 0x41, dynax_blit_dest_w			},	// Destination Layer
-	{ 0x42, 0x42, dynax_blit_palette01_w	},	// Layers Palettes
-	{ 0x43, 0x43, dynax_blit_palette2_w		},	//
-	{ 0x44, 0x44, hanamai_priority_w		},	// layer priority and enable
-	{ 0x45, 0x45, dynax_blit_backpen_w		},	// Background Color
-	{ 0x47, 0x47, hnoridur_palbank_w		},
-	{ 0x50, 0x50, dynax_extra_scrollx_w		},	// screen scroll X
-	{ 0x51, 0x51, dynax_extra_scrolly_w		},	// screen scroll Y
-	{ 0x54, 0x54, hnoridur_rombank_w		},	// BANK ROM Select
-	{ 0x56, 0x56, dynax_vblank_ack_w		},	// VBlank IRQ Ack
-	{ 0x60, 0x60, dynax_flipscreen_w		},	// Flip Screen
-	{ 0x61, 0x61, hanamai_layer_half_w		},	// half of the interleaved layer to write to
-	{ 0x62, 0x62, hnoridur_layer_half2_w		},	//
-	{ 0x67, 0x67, dynax_blitter_ack_w		},	// Blitter IRQ Ack
-	{ 0x70, 0x70, dynax_coincounter_0_w		},	// Coin Counters
-	{ 0x71, 0x71, dynax_coincounter_1_w		},	//
-PORT_END
+static ADDRESS_MAP_START( hnoridur_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x21, 0x21) AM_READ(input_port_2_r			)	// Coins
+	AM_RANGE(0x22, 0x22) AM_READ(hanamai_keyboard_1_r	)	// P2
+	AM_RANGE(0x23, 0x23) AM_READ(hanamai_keyboard_0_r	)	// P1
+	AM_RANGE(0x24, 0x24) AM_READ(input_port_1_r			)	// DSW2
+	AM_RANGE(0x25, 0x25) AM_READ(input_port_9_r			)	// DSW4
+	AM_RANGE(0x26, 0x26) AM_READ(input_port_8_r			)	// DSW3
+	AM_RANGE(0x36, 0x36) AM_READ(AY8910_read_port_0_r	)	// AY8910, DSW1
+	AM_RANGE(0x57, 0x57) AM_READ(ret_ff					)	// ?
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( hnoridur_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x01, 0x07) AM_WRITE(dynax_blitter_rev2_w		)	// Blitter
+	AM_RANGE(0x20, 0x20) AM_WRITE(hanamai_keyboard_w			)	// keyboard row select
+	AM_RANGE(0x30, 0x30) AM_WRITE(adpcm_reset_w				)	// MSM5205 reset
+	AM_RANGE(0x32, 0x32) AM_WRITE(adpcm_data_w				)	// MSM5205 data
+	AM_RANGE(0x34, 0x34) AM_WRITE(YM2413_register_port_0_w	)	// YM2413
+	AM_RANGE(0x35, 0x35) AM_WRITE(YM2413_data_port_0_w		)	//
+	AM_RANGE(0x38, 0x38) AM_WRITE(AY8910_write_port_0_w		)	// AY8910
+	AM_RANGE(0x3a, 0x3a) AM_WRITE(AY8910_control_port_0_w	)	//
+//	AM_RANGE(0x10, 0x10) AM_WRITE(MWA8_NOP					)	// CRT Controller
+//	AM_RANGE(0x11, 0x11) AM_WRITE(MWA8_NOP					)	// CRT Controller
+	AM_RANGE(0x40, 0x40) AM_WRITE(dynax_blit_pen_w			)	// Destination Pen
+	AM_RANGE(0x41, 0x41) AM_WRITE(dynax_blit_dest_w			)	// Destination Layer
+	AM_RANGE(0x42, 0x42) AM_WRITE(dynax_blit_palette01_w		)	// Layers Palettes
+	AM_RANGE(0x43, 0x43) AM_WRITE(dynax_blit_palette23_w		)	//
+	AM_RANGE(0x44, 0x44) AM_WRITE(hanamai_priority_w			)	// layer priority and enable
+	AM_RANGE(0x45, 0x45) AM_WRITE(dynax_blit_backpen_w		)	// Background Color
+	AM_RANGE(0x46, 0x46) AM_WRITE(MWA8_NOP					)	// Blitter ROM bank (TODO)
+	AM_RANGE(0x47, 0x47) AM_WRITE(hnoridur_palbank_w			)
+	AM_RANGE(0x50, 0x50) AM_WRITE(dynax_extra_scrollx_w		)	// screen scroll X
+	AM_RANGE(0x51, 0x51) AM_WRITE(dynax_extra_scrolly_w		)	// screen scroll Y
+	AM_RANGE(0x54, 0x54) AM_WRITE(hnoridur_rombank_w			)	// BANK ROM Select
+	AM_RANGE(0x55, 0x55) AM_WRITE(MWA8_NOP						)	// ? VBlank IRQ Ack
+	AM_RANGE(0x56, 0x56) AM_WRITE(dynax_vblank_ack_w			)	// VBlank IRQ Ack
+	AM_RANGE(0x60, 0x60) AM_WRITE(dynax_flipscreen_w			)	// Flip Screen
+	AM_RANGE(0x61, 0x61) AM_WRITE(hanamai_layer_half_w		)	// half of the interleaved layer to write to
+	AM_RANGE(0x62, 0x62) AM_WRITE(hnoridur_layer_half2_w		)	//
+	AM_RANGE(0x67, 0x67) AM_WRITE(dynax_blitter_ack_w		)	// Blitter IRQ Ack
+	AM_RANGE(0x70, 0x70) AM_WRITE(dynax_coincounter_0_w		)	// Coin Counters
+	AM_RANGE(0x71, 0x71) AM_WRITE(dynax_coincounter_1_w		)	//
+ADDRESS_MAP_END
 
 
 // Almost identical to hnoridur
-static PORT_READ_START( mcnpshnt_readport )
-	{ 0x21, 0x21, input_port_2_r			},	// Coins
-	{ 0x22, 0x22, hanamai_keyboard_1_r		},	// P2
-	{ 0x23, 0x23, hanamai_keyboard_0_r		},	// P1
-	{ 0x24, 0x24, input_port_0_r			},	// DSW2
-	{ 0x26, 0x26, input_port_1_r			},	// DSW3
-	{ 0x57, 0x57, ret_ff					},	// ?
-PORT_END
-static PORT_WRITE_START( mcnpshnt_writeport )
-	{ 0x01, 0x07, dynax_blitter_rev2_w		},	// Blitter
-//	{ 0x10, 0x10, IOWP_NOP					},	// CRT Controller
-//	{ 0x11, 0x11, IOWP_NOP					},	// CRT Controller
-	{ 0x20, 0x20, hanamai_keyboard_w		},	// keyboard row select
-	{ 0x30, 0x30, adpcm_reset_w				},	// MSM5205 reset
-	{ 0x32, 0x32, adpcm_data_w				},	// MSM5205 data
-	{ 0x34, 0x34, YM2413_register_port_0_w	},	// YM2413
-	{ 0x35, 0x35, YM2413_data_port_0_w		},	//
-	{ 0x38, 0x38, AY8910_write_port_0_w		},	// AY8910
-	{ 0x3a, 0x3a, AY8910_control_port_0_w	},	//
-	{ 0x40, 0x40, dynax_blit_pen_w			},	// Destination Pen
-	{ 0x41, 0x41, dynax_blit_dest_w			},	// Destination Layer
-	{ 0x42, 0x42, dynax_blit_palette01_w	},	// Layers Palettes
-	{ 0x43, 0x43, dynax_blit_palette2_w		},	//
-	{ 0x44, 0x44, hanamai_priority_w		},	// layer priority and enable
-	{ 0x45, 0x45, dynax_blit_backpen_w		},	// Background Color
-	{ 0x47, 0x47, hnoridur_palbank_w		},
-	{ 0x50, 0x50, dynax_extra_scrollx_w		},	// screen scroll X
-	{ 0x51, 0x51, dynax_extra_scrolly_w		},	// screen scroll Y
-	{ 0x54, 0x54, hnoridur_rombank_w		},	// BANK ROM Select
-	{ 0x56, 0x56, dynax_vblank_ack_w		},	// VBlank IRQ Ack
-	{ 0x60, 0x60, dynax_flipscreen_w		},	// Flip Screen
-	{ 0x61, 0x61, nanajign_layer_half_w		},	// half of the interleaved layer to write to
-	{ 0x62, 0x62, hnoridur_layer_half2_w		},	//
-	{ 0x67, 0x67, dynax_blitter_ack_w		},	// Blitter IRQ Ack
-	{ 0x70, 0x70, dynax_coincounter_0_w		},	// Coin Counters
-	{ 0x71, 0x71, dynax_coincounter_1_w		},	//
-PORT_END
+static ADDRESS_MAP_START( mcnpshnt_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x21, 0x21) AM_READ(input_port_2_r			)	// Coins
+	AM_RANGE(0x22, 0x22) AM_READ(hanamai_keyboard_1_r	)	// P2
+	AM_RANGE(0x23, 0x23) AM_READ(hanamai_keyboard_0_r	)	// P1
+	AM_RANGE(0x24, 0x24) AM_READ(input_port_0_r			)	// DSW2
+	AM_RANGE(0x26, 0x26) AM_READ(input_port_1_r			)	// DSW3
+	AM_RANGE(0x57, 0x57) AM_READ(ret_ff					)	// ?
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( mcnpshnt_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x01, 0x07) AM_WRITE(dynax_blitter_rev2_w		)	// Blitter
+//	AM_RANGE(0x10, 0x10) AM_WRITE(MWA8_NOP					)	// CRT Controller
+//	AM_RANGE(0x11, 0x11) AM_WRITE(MWA8_NOP					)	// CRT Controller
+	AM_RANGE(0x20, 0x20) AM_WRITE(hanamai_keyboard_w			)	// keyboard row select
+	AM_RANGE(0x30, 0x30) AM_WRITE(adpcm_reset_w				)	// MSM5205 reset
+	AM_RANGE(0x32, 0x32) AM_WRITE(adpcm_data_w				)	// MSM5205 data
+	AM_RANGE(0x34, 0x34) AM_WRITE(YM2413_register_port_0_w	)	// YM2413
+	AM_RANGE(0x35, 0x35) AM_WRITE(YM2413_data_port_0_w		)	//
+	AM_RANGE(0x38, 0x38) AM_WRITE(AY8910_write_port_0_w		)	// AY8910
+	AM_RANGE(0x3a, 0x3a) AM_WRITE(AY8910_control_port_0_w	)	//
+	AM_RANGE(0x40, 0x40) AM_WRITE(dynax_blit_pen_w			)	// Destination Pen
+	AM_RANGE(0x41, 0x41) AM_WRITE(dynax_blit_dest_w			)	// Destination Layer
+	AM_RANGE(0x42, 0x42) AM_WRITE(dynax_blit_palette01_w		)	// Layers Palettes
+	AM_RANGE(0x43, 0x43) AM_WRITE(dynax_blit_palette23_w		)	//
+	AM_RANGE(0x44, 0x44) AM_WRITE(hanamai_priority_w			)	// layer priority and enable
+	AM_RANGE(0x45, 0x45) AM_WRITE(dynax_blit_backpen_w		)	// Background Color
+	AM_RANGE(0x47, 0x47) AM_WRITE(hnoridur_palbank_w			)
+	AM_RANGE(0x50, 0x50) AM_WRITE(dynax_extra_scrollx_w		)	// screen scroll X
+	AM_RANGE(0x51, 0x51) AM_WRITE(dynax_extra_scrolly_w		)	// screen scroll Y
+	AM_RANGE(0x54, 0x54) AM_WRITE(hnoridur_rombank_w			)	// BANK ROM Select
+	AM_RANGE(0x56, 0x56) AM_WRITE(dynax_vblank_ack_w			)	// VBlank IRQ Ack
+	AM_RANGE(0x60, 0x60) AM_WRITE(dynax_flipscreen_w			)	// Flip Screen
+	AM_RANGE(0x61, 0x61) AM_WRITE(nanajign_layer_half_w		)	// half of the interleaved layer to write to
+	AM_RANGE(0x62, 0x62) AM_WRITE(hnoridur_layer_half2_w		)	//
+	AM_RANGE(0x67, 0x67) AM_WRITE(dynax_blitter_ack_w		)	// Blitter IRQ Ack
+	AM_RANGE(0x70, 0x70) AM_WRITE(dynax_coincounter_0_w		)	// Coin Counters
+	AM_RANGE(0x71, 0x71) AM_WRITE(dynax_coincounter_1_w		)	//
+ADDRESS_MAP_END
 
 
-static PORT_READ_START( sprtmtch_readport )
-	{ 0x10, 0x10, YM2203_status_port_0_r	},	// YM2203
-	{ 0x11, 0x11, YM2203_read_port_0_r		},	// 2 x DSW
-	{ 0x20, 0x20, input_port_0_r			},	// P1
-	{ 0x21, 0x21, input_port_1_r			},	// P2
-	{ 0x22, 0x22, input_port_2_r			},	// Coins
-	{ 0x23, 0x23, ret_ff					},	// ?
-PORT_END
-static PORT_WRITE_START( sprtmtch_writeport )
-	{ 0x01, 0x07, dynax_blitter_rev2_w		},	// Blitter
-	{ 0x10, 0x10, YM2203_control_port_0_w	},	// YM2203
-	{ 0x11, 0x11, YM2203_write_port_0_w		},	//
-//	{ 0x12, 0x12, IOWP_NOP					},	// CRT Controller
-//	{ 0x13, 0x13, IOWP_NOP					},	// CRT Controller
-	{ 0x30, 0x30, dynax_layer_enable_w		},	// Layers Enable
-	{ 0x31, 0x31, dynax_rombank_w			},	// BANK ROM Select
-	{ 0x32, 0x32, dynax_blit_dest_w			},	// Destination Layer
-	{ 0x33, 0x33, dynax_blit_pen_w			},	// Destination Pen
-	{ 0x34, 0x34, dynax_blit_palette01_w	},	// Layers Palettes (Low Bits)
-	{ 0x35, 0x35, dynax_blit_palette2_w		},	//
-	{ 0x36, 0x36, dynax_blit_backpen_w		},	// Background Color
-	{ 0x37, 0x37, dynax_vblank_ack_w		},	// VBlank IRQ Ack
-//	{ 0x40, 0x40, adpcm_reset_w				},	// MSM5205 reset
-	{ 0x41, 0x41, dynax_flipscreen_w		},	// Flip Screen
-	{ 0x42, 0x42, dynax_coincounter_0_w		},	// Coin Counters
-	{ 0x43, 0x43, dynax_coincounter_1_w		},	//
-	{ 0x44, 0x44, dynax_blitter_ack_w		},	// Blitter IRQ Ack
-	{ 0x45, 0x45, dynax_blit_palbank_w		},	// Layers Palettes (High Bit)
-PORT_END
+static ADDRESS_MAP_START( sprtmtch_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x10, 0x10) AM_READ(YM2203_status_port_0_r	)	// YM2203
+	AM_RANGE(0x11, 0x11) AM_READ(YM2203_read_port_0_r	)	// 2 x DSW
+	AM_RANGE(0x20, 0x20) AM_READ(input_port_0_r			)	// P1
+	AM_RANGE(0x21, 0x21) AM_READ(input_port_1_r			)	// P2
+	AM_RANGE(0x22, 0x22) AM_READ(input_port_2_r			)	// Coins
+	AM_RANGE(0x23, 0x23) AM_READ(ret_ff					)	// ?
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( sprtmtch_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x01, 0x07) AM_WRITE(dynax_blitter_rev2_w		)	// Blitter
+	AM_RANGE(0x10, 0x10) AM_WRITE(YM2203_control_port_0_w	)	// YM2203
+	AM_RANGE(0x11, 0x11) AM_WRITE(YM2203_write_port_0_w		)	//
+//	AM_RANGE(0x12, 0x12) AM_WRITE(MWA8_NOP					)	// CRT Controller
+//	AM_RANGE(0x13, 0x13) AM_WRITE(MWA8_NOP					)	// CRT Controller
+	AM_RANGE(0x30, 0x30) AM_WRITE(dynax_layer_enable_w		)	// Layers Enable
+	AM_RANGE(0x31, 0x31) AM_WRITE(dynax_rombank_w			)	// BANK ROM Select
+	AM_RANGE(0x32, 0x32) AM_WRITE(dynax_blit_dest_w			)	// Destination Layer
+	AM_RANGE(0x33, 0x33) AM_WRITE(dynax_blit_pen_w			)	// Destination Pen
+	AM_RANGE(0x34, 0x34) AM_WRITE(dynax_blit_palette01_w		)	// Layers Palettes (Low Bits)
+	AM_RANGE(0x35, 0x35) AM_WRITE(dynax_blit_palette23_w		)	//
+	AM_RANGE(0x36, 0x36) AM_WRITE(dynax_blit_backpen_w		)	// Background Color
+	AM_RANGE(0x37, 0x37) AM_WRITE(dynax_vblank_ack_w			)	// VBlank IRQ Ack
+//	AM_RANGE(0x40, 0x40) AM_WRITE(adpcm_reset_w				)	// MSM5205 reset
+	AM_RANGE(0x41, 0x41) AM_WRITE(dynax_flipscreen_w			)	// Flip Screen
+	AM_RANGE(0x42, 0x42) AM_WRITE(dynax_coincounter_0_w		)	// Coin Counters
+	AM_RANGE(0x43, 0x43) AM_WRITE(dynax_coincounter_1_w		)	//
+	AM_RANGE(0x44, 0x44) AM_WRITE(dynax_blitter_ack_w		)	// Blitter IRQ Ack
+	AM_RANGE(0x45, 0x45) AM_WRITE(dynax_blit_palbank_w		)	// Layers Palettes (High Bit)
+ADDRESS_MAP_END
 
 
 
-static PORT_READ_START( mjfriday_readport )
-	{ 0x63, 0x63, hanamai_keyboard_0_r		},	// P1
-	{ 0x62, 0x62, hanamai_keyboard_1_r		},	// P2
-	{ 0x61, 0x61, input_port_2_r			},	// Coins
-	{ 0x64, 0x64, input_port_0_r			},	// DSW
-	{ 0x67, 0x67, input_port_1_r			},	// DSW
-PORT_END
-static PORT_WRITE_START( mjfriday_writeport )
-	{ 0x41, 0x47, dynax_blitter_rev2_w		},	// Blitter
-//	{ 0x50, 0x50, IOWP_NOP					},	// CRT Controller
-//	{ 0x51, 0x51, IOWP_NOP					},	// CRT Controller
-	{ 0x60, 0x60, hanamai_keyboard_w		},	// keyboard row select
-	{ 0x70, 0x70, YM2413_register_port_0_w	},	// YM2413
-	{ 0x71, 0x71, YM2413_data_port_0_w		},	//
-	{ 0x00, 0x00, dynax_blit_pen_w			},	// Destination Pen
-	{ 0x01, 0x01, dynax_blit_palette01_w	},	// Layers Palettes (Low Bits)
-	{ 0x02, 0x02, dynax_rombank_w			},	// BANK ROM Select
-	{ 0x03, 0x03, dynax_blit_backpen_w		},	// Background Color
-	{ 0x10, 0x11, mjdialq2_blit_dest_w		},	// Destination Layer
-	{ 0x12, 0x12, dynax_blit_palbank_w		},	// Layers Palettes (High Bit)
-	{ 0x13, 0x13, dynax_flipscreen_w		},	// Flip Screen
-	{ 0x14, 0x14, dynax_coincounter_0_w		},	// Coin Counters
-	{ 0x15, 0x15, dynax_coincounter_1_w		},	//
-	{ 0x16, 0x17, mjdialq2_layer_enable_w	},	// Layers Enable
-//	{ 0x80, 0x80, IOWP_NOP					},	// IRQ ack?
-PORT_END
+static ADDRESS_MAP_START( mjfriday_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x63, 0x63) AM_READ(hanamai_keyboard_0_r	)	// P1
+	AM_RANGE(0x62, 0x62) AM_READ(hanamai_keyboard_1_r	)	// P2
+	AM_RANGE(0x61, 0x61) AM_READ(input_port_2_r			)	// Coins
+	AM_RANGE(0x64, 0x64) AM_READ(input_port_0_r			)	// DSW
+	AM_RANGE(0x67, 0x67) AM_READ(input_port_1_r			)	// DSW
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( mjfriday_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x41, 0x47) AM_WRITE(dynax_blitter_rev2_w		)	// Blitter
+//	AM_RANGE(0x50, 0x50) AM_WRITE(MWA8_NOP					)	// CRT Controller
+//	AM_RANGE(0x51, 0x51) AM_WRITE(MWA8_NOP					)	// CRT Controller
+	AM_RANGE(0x60, 0x60) AM_WRITE(hanamai_keyboard_w			)	// keyboard row select
+	AM_RANGE(0x70, 0x70) AM_WRITE(YM2413_register_port_0_w	)	// YM2413
+	AM_RANGE(0x71, 0x71) AM_WRITE(YM2413_data_port_0_w		)	//
+	AM_RANGE(0x00, 0x00) AM_WRITE(dynax_blit_pen_w			)	// Destination Pen
+	AM_RANGE(0x01, 0x01) AM_WRITE(dynax_blit_palette01_w		)	// Layers Palettes (Low Bits)
+	AM_RANGE(0x02, 0x02) AM_WRITE(dynax_rombank_w			)	// BANK ROM Select
+	AM_RANGE(0x03, 0x03) AM_WRITE(dynax_blit_backpen_w		)	// Background Color
+	AM_RANGE(0x10, 0x11) AM_WRITE(mjdialq2_blit_dest_w		)	// Destination Layer
+	AM_RANGE(0x12, 0x12) AM_WRITE(dynax_blit_palbank_w		)	// Layers Palettes (High Bit)
+	AM_RANGE(0x13, 0x13) AM_WRITE(dynax_flipscreen_w			)	// Flip Screen
+	AM_RANGE(0x14, 0x14) AM_WRITE(dynax_coincounter_0_w		)	// Coin Counters
+	AM_RANGE(0x15, 0x15) AM_WRITE(dynax_coincounter_1_w		)	//
+	AM_RANGE(0x16, 0x17) AM_WRITE(mjdialq2_layer_enable_w	)	// Layers Enable
+//	AM_RANGE(0x80, 0x80) AM_WRITE(MWA8_NOP					)	// IRQ ack?
+ADDRESS_MAP_END
 
 
-static PORT_READ_START( nanajign_readport )
-	{ 0x11, 0x11, input_port_2_r			},	// Coins
-	{ 0x12, 0x12, hanamai_keyboard_1_r		},	// P2
-	{ 0x13, 0x13, hanamai_keyboard_0_r		},	// P1
-	{ 0x14, 0x14, input_port_0_r			},	// DSW1
-	{ 0x15, 0x15, input_port_1_r			},	// DSW2
-	{ 0x16, 0x16, input_port_8_r			},	// DSW3
-PORT_END
-static PORT_WRITE_START( nanajign_writeport )
-	{ 0x00, 0x00, adpcm_reset_w				},	// MSM5205 reset
-	{ 0x02, 0x02, adpcm_data_w				},	// MSM5205 data
-	{ 0x04, 0x04, YM2413_register_port_0_w	},	// YM2413
-	{ 0x05, 0x05, YM2413_data_port_0_w		},	//
-	{ 0x08, 0x08, AY8910_write_port_0_w		},	// AY8910
-	{ 0x0a, 0x0a, AY8910_control_port_0_w	},	//
-	{ 0x10, 0x10, hanamai_keyboard_w		},	// keyboard row select
-//	{ 0x20, 0x21, IOWP_NOP					},	// CRT Controller
-	{ 0x31, 0x37, dynax_blitter_rev2_w		},	// Blitter
-	{ 0x40, 0x40, dynax_coincounter_0_w		},	// Coin Counter
-	{ 0x50, 0x50, dynax_flipscreen_w		},	// Flip Screen
-	{ 0x51, 0x51, hanamai_layer_half_w		},	// half of the interleaved layer to write to
-	{ 0x52, 0x52, hnoridur_layer_half2_w		},	//
-	{ 0x57, 0x57, dynax_blitter_ack_w		},	// Blitter IRQ Ack
-	{ 0x60, 0x60, dynax_extra_scrollx_w		},	// screen scroll X
-	{ 0x62, 0x62, dynax_extra_scrolly_w		},	// screen scroll Y
-	{ 0x6a, 0x6a, hnoridur_rombank_w		},	// BANK ROM Select
-	{ 0x6c, 0x6c, dynax_vblank_ack_w		},	// VBlank IRQ Ack
-	{ 0x70, 0x70, dynax_blit_pen_w			},	// Destination Pen
-	{ 0x71, 0x71, dynax_blit_dest_w			},	// Destination Layer
-	{ 0x72, 0x72, dynax_blit_palette01_w	},	// Layers Palettes
-	{ 0x73, 0x73, dynax_blit_palette2_w		},	//
-	{ 0x74, 0x74, hanamai_priority_w		},	// layer priority and enable
-	{ 0x75, 0x75, dynax_blit_backpen_w		},	// Background Color
-	{ 0x77, 0x77, hnoridur_palbank_w		},
-PORT_END
+static ADDRESS_MAP_START( nanajign_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x11, 0x11) AM_READ(input_port_2_r			)	// Coins
+	AM_RANGE(0x12, 0x12) AM_READ(hanamai_keyboard_1_r	)	// P2
+	AM_RANGE(0x13, 0x13) AM_READ(hanamai_keyboard_0_r	)	// P1
+	AM_RANGE(0x14, 0x14) AM_READ(input_port_0_r			)	// DSW1
+	AM_RANGE(0x15, 0x15) AM_READ(input_port_1_r			)	// DSW2
+	AM_RANGE(0x16, 0x16) AM_READ(input_port_8_r			)	// DSW3
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( nanajign_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_WRITE(adpcm_reset_w				)	// MSM5205 reset
+	AM_RANGE(0x02, 0x02) AM_WRITE(adpcm_data_w				)	// MSM5205 data
+	AM_RANGE(0x04, 0x04) AM_WRITE(YM2413_register_port_0_w	)	// YM2413
+	AM_RANGE(0x05, 0x05) AM_WRITE(YM2413_data_port_0_w		)	//
+	AM_RANGE(0x08, 0x08) AM_WRITE(AY8910_write_port_0_w		)	// AY8910
+	AM_RANGE(0x0a, 0x0a) AM_WRITE(AY8910_control_port_0_w	)	//
+	AM_RANGE(0x10, 0x10) AM_WRITE(hanamai_keyboard_w			)	// keyboard row select
+//	AM_RANGE(0x20, 0x21) AM_WRITE(MWA8_NOP					)	// CRT Controller
+	AM_RANGE(0x31, 0x37) AM_WRITE(dynax_blitter_rev2_w		)	// Blitter
+	AM_RANGE(0x40, 0x40) AM_WRITE(dynax_coincounter_0_w		)	// Coin Counter
+	AM_RANGE(0x50, 0x50) AM_WRITE(dynax_flipscreen_w			)	// Flip Screen
+	AM_RANGE(0x51, 0x51) AM_WRITE(hanamai_layer_half_w		)	// half of the interleaved layer to write to
+	AM_RANGE(0x52, 0x52) AM_WRITE(hnoridur_layer_half2_w		)	//
+	AM_RANGE(0x57, 0x57) AM_WRITE(dynax_blitter_ack_w		)	// Blitter IRQ Ack
+	AM_RANGE(0x60, 0x60) AM_WRITE(dynax_extra_scrollx_w		)	// screen scroll X
+	AM_RANGE(0x62, 0x62) AM_WRITE(dynax_extra_scrolly_w		)	// screen scroll Y
+	AM_RANGE(0x6a, 0x6a) AM_WRITE(hnoridur_rombank_w			)	// BANK ROM Select
+	AM_RANGE(0x6c, 0x6c) AM_WRITE(dynax_vblank_ack_w			)	// VBlank IRQ Ack
+	AM_RANGE(0x70, 0x70) AM_WRITE(dynax_blit_pen_w			)	// Destination Pen
+	AM_RANGE(0x71, 0x71) AM_WRITE(dynax_blit_dest_w			)	// Destination Layer
+	AM_RANGE(0x72, 0x72) AM_WRITE(dynax_blit_palette01_w		)	// Layers Palettes
+	AM_RANGE(0x73, 0x73) AM_WRITE(dynax_blit_palette23_w		)	//
+	AM_RANGE(0x74, 0x74) AM_WRITE(hanamai_priority_w			)	// layer priority and enable
+	AM_RANGE(0x75, 0x75) AM_WRITE(dynax_blit_backpen_w		)	// Background Color
+	AM_RANGE(0x77, 0x77) AM_WRITE(hnoridur_palbank_w			)
+ADDRESS_MAP_END
 
 
 
@@ -732,90 +849,214 @@ WRITE_HANDLER( yarunara_flipscreen_w )
 	dynax_flipscreen_w(0,(data&2)?1:0);
 }
 
-static PORT_READ_START( yarunara_readport )
-	{ 0x02, 0x03, yarunara_input_r		},	// Controls
-	{ 0x4c, 0x4c, input_port_0_r		},	// DSW 1
-	{ 0x4f, 0x4f, input_port_1_r		},	// DSW 2
-PORT_END
+static ADDRESS_MAP_START( yarunara_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x02, 0x03) AM_READ(yarunara_input_r	)	// Controls
+	AM_RANGE(0x4c, 0x4c) AM_READ(input_port_0_r		)	// DSW 1
+	AM_RANGE(0x4f, 0x4f) AM_READ(input_port_1_r		)	// DSW 2
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( yarunara_writeport )
-	{ 0x00, 0x01, yarunara_input_w			},	// Controls
-	{ 0x11, 0x17, dynax_blitter_rev2_w		},	// Blitter
-	{ 0x20, 0x20, adpcm_reset_w				},	// MSM5205 reset
-	{ 0x22, 0x22, adpcm_data_w				},	// MSM5205 data
-	{ 0x24, 0x24, YM2413_register_port_0_w	},	// YM2413
-	{ 0x25, 0x25, YM2413_data_port_0_w		},	//
-	{ 0x28, 0x28, AY8910_write_port_0_w		},	// AY8910
-	{ 0x2a, 0x2a, AY8910_control_port_0_w	},	//
-	{ 0x48, 0x48, dynax_extra_scrollx_w		},	// screen scroll X
-	{ 0x49, 0x49, dynax_extra_scrolly_w		},	// screen scroll Y
-	{ 0x4a, 0x4a, yarunara_rombank_w		},	// BANK ROM Select
-	{ 0x4b, 0x4b, dynax_vblank_ack_w		},	// VBlank IRQ Ack
+static ADDRESS_MAP_START( yarunara_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x01) AM_WRITE(yarunara_input_w			)	// Controls
+	AM_RANGE(0x11, 0x17) AM_WRITE(dynax_blitter_rev2_w		)	// Blitter
+	AM_RANGE(0x20, 0x20) AM_WRITE(adpcm_reset_w				)	// MSM5205 reset
+	AM_RANGE(0x22, 0x22) AM_WRITE(adpcm_data_w				)	// MSM5205 data
+	AM_RANGE(0x24, 0x24) AM_WRITE(YM2413_register_port_0_w	)	// YM2413
+	AM_RANGE(0x25, 0x25) AM_WRITE(YM2413_data_port_0_w		)	//
+	AM_RANGE(0x28, 0x28) AM_WRITE(AY8910_write_port_0_w		)	// AY8910
+	AM_RANGE(0x2a, 0x2a) AM_WRITE(AY8910_control_port_0_w	)	//
+	AM_RANGE(0x48, 0x48) AM_WRITE(dynax_extra_scrollx_w		)	// screen scroll X
+	AM_RANGE(0x49, 0x49) AM_WRITE(dynax_extra_scrolly_w		)	// screen scroll Y
+	AM_RANGE(0x4a, 0x4a) AM_WRITE(yarunara_rombank_w			)	// BANK ROM Select
+	AM_RANGE(0x4b, 0x4b) AM_WRITE(dynax_vblank_ack_w			)	// VBlank IRQ Ack
 
-	{ 0x50, 0x50, yarunara_flipscreen_w		},
-	{ 0x51, 0x51, yarunara_layer_half_w		},	// half of the interleaved layer to write to
-	{ 0x52, 0x52, yarunara_layer_half2_w	},	//
+	AM_RANGE(0x50, 0x50) AM_WRITE(yarunara_flipscreen_w		)
+	AM_RANGE(0x51, 0x51) AM_WRITE(yarunara_layer_half_w		)	// half of the interleaved layer to write to
+	AM_RANGE(0x52, 0x52) AM_WRITE(yarunara_layer_half2_w		)	//
 	// 53 ?
 	// 54 ?
-	{ 0x57, 0x57, dynax_blitter_ack_w		},	// Blitter IRQ Ack
-	{ 0x68, 0x68, dynax_blit_pen_w			},	// Destination Pen
-	{ 0x69, 0x69, dynax_blit_dest_w			},	// Destination Layer
-	{ 0x6a, 0x6a, dynax_blit_palette01_w	},	// Layers Palettes
-	{ 0x6b, 0x6b, dynax_blit_palette2_w		},	//
-	{ 0x6c, 0x6c, hanamai_priority_w		},	// layer priority and enable
-	{ 0x6d, 0x6d, dynax_blit_backpen_w		},	// Background Color
+	AM_RANGE(0x57, 0x57) AM_WRITE(dynax_blitter_ack_w		)	// Blitter IRQ Ack
+	AM_RANGE(0x68, 0x68) AM_WRITE(dynax_blit_pen_w			)	// Destination Pen
+	AM_RANGE(0x69, 0x69) AM_WRITE(dynax_blit_dest_w			)	// Destination Layer
+	AM_RANGE(0x6a, 0x6a) AM_WRITE(dynax_blit_palette01_w		)	// Layers Palettes
+	AM_RANGE(0x6b, 0x6b) AM_WRITE(dynax_blit_palette23_w		)	//
+	AM_RANGE(0x6c, 0x6c) AM_WRITE(hanamai_priority_w			)	// layer priority and enable
+	AM_RANGE(0x6d, 0x6d) AM_WRITE(dynax_blit_backpen_w		)	// Background Color
 	// 6e ?
-PORT_END
+ADDRESS_MAP_END
+
+
+/***************************************************************************
+							Jantouki - Main CPU
+***************************************************************************/
+
+UINT8 dynax_soundlatch_ack;
+UINT8 dynax_soundlatch_full;
+static data8_t latch;
+
+READ_HANDLER( jantouki_soundlatch_ack_r )
+{
+	return (dynax_soundlatch_ack) ? 0x80 : 0;
+}
+
+WRITE_HANDLER( jantouki_soundlatch_w )
+{
+	dynax_soundlatch_ack = 1;
+	dynax_soundlatch_full = 1;
+	dynax_soundlatch_irq = 1;
+	latch = data;
+	jantouki_sound_update_irq();
+}
+
+READ_HANDLER( jantouki_blitter_busy_r )
+{
+	return 0;	// bit 0 & 1
+}
+
+static WRITE_HANDLER( jantouki_rombank_w )
+{
+	data8_t *ROM = memory_region(REGION_CPU1);
+	cpu_setbank(1,&ROM[0x8000 + 0x8000*(data&0x0f)]);
+	set_led_status(0,data & 0x10);	// maybe
+}
+
+static ADDRESS_MAP_START( jantouki_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x4a, 0x4a) AM_READ(jantouki_soundlatch_ack_r	)	// Soundlatch status
+	AM_RANGE(0x52, 0x52) AM_READ(hanamai_keyboard_0_r		)	// P1
+	AM_RANGE(0x54, 0x54) AM_READ(input_port_2_r				)	// Coins
+	AM_RANGE(0x55, 0x55) AM_READ(input_port_0_r				)	// DSW1
+	AM_RANGE(0x56, 0x56) AM_READ(input_port_1_r				)	// DSW2
+	AM_RANGE(0x67, 0x67) AM_READ(jantouki_blitter_busy_r		)	//
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( jantouki_writeport, ADDRESS_SPACE_IO, 8 )
+//	AM_RANGE(0x40, 0x41) AM_WRITE(MWA8_NOP					)	// CRT Controller
+	AM_RANGE(0x48, 0x48) AM_WRITE(jantouki_rombank_w			)	// BANK ROM Select
+	AM_RANGE(0x49, 0x49) AM_WRITE(jantouki_soundlatch_w		)	// To Sound CPU
+	AM_RANGE(0x4b, 0x4b) AM_WRITE(dynax_blit2_dest_w			)	// Destination Layer 2
+	AM_RANGE(0x4d, 0x4d) AM_WRITE(dynax_blit_dest_w			)	// Destination Layer
+	AM_RANGE(0x4f, 0x4f) AM_WRITE(MWA8_NOP					)	// Blitter ROM bank (TODO)
+	AM_RANGE(0x50, 0x50) AM_WRITE(jantouki_vblank_ack_w		)	// VBlank IRQ Ack
+	AM_RANGE(0x51, 0x51) AM_WRITE(hanamai_keyboard_w			)	// keyboard row select
+	AM_RANGE(0x58, 0x58) AM_WRITE(dynax_coincounter_0_w		)	// Coin Counter
+	AM_RANGE(0x5b, 0x5b) AM_WRITE(dynax_blit2_palbank_w		)	// Layers Palettes (High Bit)
+	AM_RANGE(0x5d, 0x5d) AM_WRITE(dynax_blit_palbank_w		)	//
+	AM_RANGE(0x5e, 0x5e) AM_WRITE(jantouki_blitter_ack_w		)	// Blitter IRQ Ack
+	AM_RANGE(0x5f, 0x5f) AM_WRITE(jantouki_blitter2_ack_w	)	// Blitter 2 IRQ Ack
+	AM_RANGE(0x60, 0x60) AM_WRITE(dynax_blit_palette67_w		)	// Layers Palettes (Low Bits)
+	AM_RANGE(0x61, 0x61) AM_WRITE(dynax_blit_palette45_w		)	//
+	AM_RANGE(0x62, 0x62) AM_WRITE(dynax_blit_palette23_w		)	//
+	AM_RANGE(0x63, 0x63) AM_WRITE(dynax_blit_palette01_w		)	//
+	AM_RANGE(0x64, 0x64) AM_WRITE(dynax_blit_backpen_w		)	// Background Color
+	AM_RANGE(0x65, 0x65) AM_WRITE(dynax_blit2_pen_w			)	// Destination Pen 2
+	AM_RANGE(0x66, 0x66) AM_WRITE(dynax_blit_pen_w			)	// Destination Pen
+	AM_RANGE(0x69, 0x6f) AM_WRITE(jantouki_blitter2_rev2_w	)	// Blitter
+	AM_RANGE(0x71, 0x77) AM_WRITE(jantouki_blitter_rev2_w	)	// Blitter
+	AM_RANGE(0x78, 0x7e) AM_WRITE(jantouki_layer_enable_w	)	// Layers Enable
+ADDRESS_MAP_END
+
+/***************************************************************************
+							Jantouki - Sound CPU
+***************************************************************************/
+
+WRITE_HANDLER( jantouki_soundlatch_ack_w )
+{
+	dynax_soundlatch_ack = data;
+	dynax_soundlatch_irq = 0;
+	jantouki_sound_update_irq();
+}
+
+READ_HANDLER( jantouki_soundlatch_r )
+{
+	dynax_soundlatch_full = 0;
+	return latch;
+}
+
+READ_HANDLER( jantouki_soundlatch_status_r )
+{
+	return (dynax_soundlatch_full) ? 0 : 0x80;
+}
+
+static ADDRESS_MAP_START( jantouki_sound_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x21, 0x21) AM_READ(AY8910_read_port_0_r			)	// AY8910
+	AM_RANGE(0x28, 0x28) AM_READ(YM2203_status_port_0_r			)	// YM2203
+	AM_RANGE(0x29, 0x29) AM_READ(YM2203_read_port_0_r			)	//
+	AM_RANGE(0x50, 0x50) AM_READ(jantouki_soundlatch_status_r	)	// Soundlatch status
+	AM_RANGE(0x70, 0x70) AM_READ(jantouki_soundlatch_r			)	// From Main CPU
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( jantouki_sound_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_WRITE(jantouki_sound_rombank_w		)	// BANK ROM Select
+	AM_RANGE(0x10, 0x10) AM_WRITE(jantouki_sound_vblank_ack_w	)	// VBlank IRQ Ack
+	AM_RANGE(0x22, 0x22) AM_WRITE(AY8910_write_port_0_w			)	// AY8910
+	AM_RANGE(0x23, 0x23) AM_WRITE(AY8910_control_port_0_w		)	//
+	AM_RANGE(0x28, 0x28) AM_WRITE(YM2203_control_port_0_w		)	// YM2203
+	AM_RANGE(0x29, 0x29) AM_WRITE(YM2203_write_port_0_w			)	//
+	AM_RANGE(0x30, 0x30) AM_WRITE(adpcm_reset_w					)	// MSM5205 reset
+	AM_RANGE(0x40, 0x40) AM_WRITE(adpcm_data_w					)	// MSM5205 data
+	AM_RANGE(0x60, 0x60) AM_WRITE(jantouki_soundlatch_ack_w		)	// Soundlatch status
+ADDRESS_MAP_END
 
 
 
 /***************************************************************************
-
-Lady Frog, or is it Dragon Punch, or is Lady Frog the name of a bootleg
-Dragon Punch?
-
-The program jumps straight away to an unmapped memory address. I don't know,
-maybe there's a ROM missing.
-
-roldfrog.001 contains
-VIDEO COMPUTER SYSTEM  (C)1989 DYNAX INC  NAGOYA JAPAN  DRAGON PUNCH  VER. 1.30
-
+							Mahjong Electron Base
 ***************************************************************************/
 
-static MEMORY_READ16_START( roldfrog_readmem )
-	{ 0x000000, 0x3fffff, MRA16_ROM },
-	{ 0x881800, 0x881fff, MRA16_RAM },
-	{ 0x840000, 0x840001, input_port_0_word_r },
-	{ 0x840002, 0x840003, input_port_1_word_r },
-	{ 0x840004, 0x840005, input_port_2_word_r },
-	{ 0x840006, 0x840007, input_port_3_word_r },
-	{ 0xffc000, 0xffffff, MRA16_RAM },
-MEMORY_END
-
-static MEMORY_WRITE16_START( roldfrog_writemem )
-	{ 0x000000, 0x3fffff, MWA16_ROM },
-	{ 0x800000, 0x83ffff, MWA16_RAM },
-	{ 0x881800, 0x881fff, MWA16_RAM },
-	{ 0xffc000, 0xffffff, MWA16_RAM },
-MEMORY_END
-
-
-static struct GfxLayout charlayout =
+static READ_HANDLER( mjelctrn_keyboard_1_r )
 {
-	8,8,
-	RGN_FRAC(1,4),
-	4,
-	{ RGN_FRAC(0,4), RGN_FRAC(1,4), RGN_FRAC(2,4), RGN_FRAC(3,4) },
-	{ STEP8(0,1) },
-	{ STEP8(0,8) },
-	8*8
-};
+	return (hanamai_keyboard_1_r(0) & 0x3f) | (readinputport(10) ? 0x40 : 0);
+}
 
-static struct GfxDecodeInfo gfxdecodeinfo[] =
+static READ_HANDLER( mjelctrn_dsw_r )
 {
-	{ REGION_GFX2, 0, &charlayout,  0, 1 },
-	{ -1 } /* end of array */
-};
+	int dsw = (keyb & 0xc0) >> 6;
+	if (dsw >= 2)	dsw = dsw - 2 + 8;	// 0-3 -> IN0,IN1,IN8,IN9
+	return readinputport(dsw);
+}
+
+static WRITE_HANDLER( mjelctrn_blitter_ack_w )
+{
+	dynax_blitter_irq = 0;
+}
+
+static ADDRESS_MAP_START( mjelctrn_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x81, 0x81) AM_READ(input_port_2_r			)	// Coins
+	AM_RANGE(0x82, 0x82) AM_READ(mjelctrn_keyboard_1_r	)	// P2
+	AM_RANGE(0x83, 0x83) AM_READ(hanamai_keyboard_0_r	)	// P1
+	AM_RANGE(0x84, 0x84) AM_READ(mjelctrn_dsw_r			)	// DSW x 4
+	AM_RANGE(0x85, 0x85) AM_READ(ret_ff					)	// ?
+ADDRESS_MAP_END
+static ADDRESS_MAP_START( mjelctrn_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x04, 0x04) AM_WRITE(YM2413_register_port_0_w	)	// YM2413
+	AM_RANGE(0x05, 0x05) AM_WRITE(YM2413_data_port_0_w		)	//
+	AM_RANGE(0x08, 0x08) AM_WRITE(AY8910_write_port_0_w		)	// AY8910
+	AM_RANGE(0x0a, 0x0a) AM_WRITE(AY8910_control_port_0_w	)	//
+AM_RANGE(0x11, 0x12) AM_WRITE(mjelctrn_blitter_ack_w)			//?
+	//neruton
+	AM_RANGE(0x00, 0x00) AM_WRITE(adpcm_reset_w				)	// MSM5205 reset
+	AM_RANGE(0x02, 0x02) AM_WRITE(adpcm_data_w				)	// MSM5205 data
+//	AM_RANGE(0x20, 0x20) AM_WRITE(MWA8_NOP					)	// CRT Controller
+//	AM_RANGE(0x21, 0x21) AM_WRITE(MWA8_NOP					)	// CRT Controller
+	AM_RANGE(0x40, 0x40) AM_WRITE(dynax_coincounter_0_w		)	// Coin Counters
+	AM_RANGE(0x41, 0x41) AM_WRITE(dynax_coincounter_1_w		)	//
+	AM_RANGE(0x60, 0x60) AM_WRITE(dynax_extra_scrollx_w		)	// screen scroll X
+	AM_RANGE(0x62, 0x62) AM_WRITE(dynax_extra_scrolly_w		)	// screen scroll Y
+//	AM_RANGE(0x64, 0x64) AM_WRITE(dynax_extra_scrollx_w		)	// screen scroll X
+//	AM_RANGE(0x66, 0x66) AM_WRITE(dynax_extra_scrolly_w		)	// screen scroll Y
+	AM_RANGE(0x6a, 0x6a) AM_WRITE(hnoridur_rombank_w		)	// BANK ROM Select
+	AM_RANGE(0x80, 0x80) AM_WRITE(hanamai_keyboard_w		)	// keyboard row select
+	AM_RANGE(0xa1, 0xa7) AM_WRITE(dynax_blitter_rev2_w		)	// Blitter
+	AM_RANGE(0xc0, 0xc0) AM_WRITE(dynax_flipscreen_w		)	// Flip Screen
+	AM_RANGE(0xc1, 0xc1) AM_WRITE(hanamai_layer_half_w		)	// half of the interleaved layer to write to
+	AM_RANGE(0xc2, 0xc2) AM_WRITE(hnoridur_layer_half2_w	)	//
+//	c3,c4	seem to be related to wrap around enable
+	AM_RANGE(0xe0, 0xe0) AM_WRITE(dynax_blit_pen_w			)	// Destination Pen
+	AM_RANGE(0xe1, 0xe1) AM_WRITE(dynax_blit_dest_w			)	// Destination Layer
+	AM_RANGE(0xe2, 0xe2) AM_WRITE(dynax_blit_palette01_w	)	// Layers Palettes
+	AM_RANGE(0xe3, 0xe3) AM_WRITE(dynax_blit_palette23_w	)	//
+	AM_RANGE(0xe4, 0xe4) AM_WRITE(hanamai_priority_w		)	// layer priority and enable
+	AM_RANGE(0xe5, 0xe5) AM_WRITE(dynax_blit_backpen_w		)	// Background Color
+	AM_RANGE(0xe6, 0xe6) AM_WRITE(MWA8_NOP					)	// Blitter ROM bank (TODO)
+	AM_RANGE(0xe7, 0xe7) AM_WRITE(hnoridur_palbank_w		)
+ADDRESS_MAP_END
 
 /***************************************************************************
 
@@ -1910,6 +2151,537 @@ INPUT_PORTS_START( nanajign )
 INPUT_PORTS_END
 
 
+INPUT_PORTS_START( jantouki )
+	PORT_START
+	PORT_DIPNAME( 0x07, 0x07, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x07, "0" )	// 0 6 2
+	PORT_DIPSETTING(    0x06, "1" )	// 0 6 1
+	PORT_DIPSETTING(    0x05, "2" )	// 1 5 2
+	PORT_DIPSETTING(    0x04, "3" )	// 1 5 1
+	PORT_DIPSETTING(    0x03, "4" ) // 2 4 2
+	PORT_DIPSETTING(    0x02, "5" )	// 2 4 1
+	PORT_DIPSETTING(    0x01, "6" )	// 2 3 1
+	PORT_DIPSETTING(    0x00, "7" )	// 2 2 1
+	PORT_DIPNAME( 0x18, 0x18, DEF_STR( Coinage ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x18, DEF_STR( 1C_1C ) )
+//	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( 1C_2C ) )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )	//*
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )	//*
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	PORT_START
+	PORT_DIPNAME( 0x07, 0x07, "Hours" )
+	PORT_DIPSETTING(    0x07, "08:30" )
+	PORT_DIPSETTING(    0x06, "09:00" )
+	PORT_DIPSETTING(    0x05, "09:30" )
+	PORT_DIPSETTING(    0x04, "10:00" )
+	PORT_DIPSETTING(    0x03, "10:30" )
+	PORT_DIPSETTING(    0x02, "11:00" )
+	PORT_DIPSETTING(    0x01, "11:30" )
+	PORT_DIPSETTING(    0x00, "12:00" )
+	PORT_DIPNAME( 0x08, 0x08, "Moles On Gal's Face" )
+	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x10, 0x10, "Choose Game Mode" )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20, 0x20, "Bonus Coin Every" )
+	PORT_DIPSETTING(    0x00, "30" )
+	PORT_DIPSETTING(    0x20, "150" )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Unknown ) )	//*
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	PORT_START
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, DEF_STR(Service_Mode), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )	// Analyzer
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE3 )	// Memory Reset
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )
+
+	PORT_START
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "A",   KEYCODE_A,        IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "E",   KEYCODE_E,        IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "I",   KEYCODE_I,        IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "M",   KEYCODE_M,        IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Kan", KEYCODE_LCONTROL, IP_JOY_NONE )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
+	PORT_START
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "B",     KEYCODE_B,        IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "F",     KEYCODE_F,        IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "J",     KEYCODE_J,        IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "N",     KEYCODE_N,        IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Reach", KEYCODE_LSHIFT,   IP_JOY_NONE )
+	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "Bet",   KEYCODE_RCONTROL, IP_JOY_NONE )
+
+	PORT_START
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "C",   KEYCODE_C,     IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "G",   KEYCODE_G,     IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "K",   KEYCODE_K,     IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Chi", KEYCODE_SPACE, IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Ron", KEYCODE_Z,     IP_JOY_NONE )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
+	PORT_START
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "D",   KEYCODE_D,    IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "H",   KEYCODE_H,    IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "L",   KEYCODE_L,    IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Pon", KEYCODE_LALT, IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
+	PORT_START
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+INPUT_PORTS_END
+
+
+INPUT_PORTS_START( mjelct3 )
+	PORT_START	// IN0 - DSW2 -> 7c21 (select = 00)
+	PORT_DIPNAME( 0x03, 0x03, "Difficulty?" )
+	PORT_DIPSETTING(    0x03, "0" )	// 20
+	PORT_DIPSETTING(    0x00, "1" )	// 32
+	PORT_DIPSETTING(    0x01, "2" )	// 64
+	PORT_DIPSETTING(    0x02, "3" )	// c8
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_A ) )
+	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 1C_5C ) )
+	PORT_DIPSETTING(    0x00, "1 Coin/10 Credits" )
+	PORT_DIPNAME( 0x30, 0x30, "Min Pay?" )
+	PORT_DIPSETTING(    0x30, "1" )
+	PORT_DIPSETTING(    0x20, "2" )
+	PORT_DIPSETTING(    0x10, "3" )
+	PORT_DIPSETTING(    0x00, "5" )
+	PORT_DIPNAME( 0x40, 0x40, "Allow Coin Out" )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80, 0x80, "Win A Prize?" )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	PORT_START	// IN1 - DSW1 -> 7c20 (select = 40)
+	PORT_DIPNAME( 0x0f, 0x07, "Pay Out Rate" )
+	PORT_DIPSETTING(    0x00, "50" )
+	PORT_DIPSETTING(    0x01, "53" )
+	PORT_DIPSETTING(    0x02, "56" )
+	PORT_DIPSETTING(    0x03, "59" )
+	PORT_DIPSETTING(    0x04, "62" )
+	PORT_DIPSETTING(    0x05, "65" )
+	PORT_DIPSETTING(    0x06, "68" )
+	PORT_DIPSETTING(    0x07, "71" )
+	PORT_DIPSETTING(    0x08, "75" )
+	PORT_DIPSETTING(    0x09, "78" )
+	PORT_DIPSETTING(    0x0a, "81" )
+	PORT_DIPSETTING(    0x0b, "84" )
+	PORT_DIPSETTING(    0x0c, "87" )
+	PORT_DIPSETTING(    0x0d, "90" )
+	PORT_DIPSETTING(    0x0e, "93" )
+	PORT_DIPSETTING(    0x0f, "96" )
+	PORT_DIPNAME( 0x30, 0x30, "Max Bet" )
+	PORT_DIPSETTING(    0x30, "1" )
+	PORT_DIPSETTING(    0x20, "5" )
+	PORT_DIPSETTING(    0x10, "10" )
+	PORT_DIPSETTING(    0x00, "20" )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Coin_B ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( 1C_5C ) )
+	PORT_DIPSETTING(    0x00, "1 Coin/10 Credits" )
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Flip_Screen ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	PORT_START	// IN2
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SERVICE4 )	// Pay
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN  )	// 18B
+	PORT_SERVICE( 0x04, IP_ACTIVE_LOW )				// Test
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )	// Analyzer
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE3 )	// Memory Reset
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2    )	// Note
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1    )	// Coin
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )	// Service
+
+	PORT_START	// IN3
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "A",   KEYCODE_A,        IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "E",   KEYCODE_E,        IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "I",   KEYCODE_I,        IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "M",   KEYCODE_M,        IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Kan", KEYCODE_LCONTROL, IP_JOY_NONE )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1                              )
+
+	PORT_START	// IN4
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "B",     KEYCODE_B,        IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "F",     KEYCODE_F,        IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "J",     KEYCODE_J,        IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "N",     KEYCODE_N,        IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Reach", KEYCODE_LSHIFT,   IP_JOY_NONE )
+	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "Bet",   KEYCODE_RCONTROL, IP_JOY_NONE )
+
+	PORT_START	// IN5
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "C",   KEYCODE_C,     IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "G",   KEYCODE_G,     IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "K",   KEYCODE_K,     IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Chi", KEYCODE_SPACE, IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Ron", KEYCODE_Z,     IP_JOY_NONE )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
+	PORT_START	// IN6
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "D",   KEYCODE_D,    IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "H",   KEYCODE_H,    IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "L",   KEYCODE_L,    IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Pon", KEYCODE_LALT, IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
+	PORT_START	// IN7
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "Last Chance",  KEYCODE_RALT,      IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "Take Score",   KEYCODE_2,         IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "Double Up",    KEYCODE_RSHIFT,    IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Flip Flop",    KEYCODE_X,         IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Big",          KEYCODE_ENTER,     IP_JOY_NONE )
+	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "Small",        KEYCODE_BACKSPACE, IP_JOY_NONE )
+
+	PORT_START	// IN8 - DSW3 -> 7c22 (select = 80)
+	PORT_DIPNAME( 0x07, 0x07, "YAKUMAN Bonus" )
+	PORT_DIPSETTING(    0x07, "Cut" )
+	PORT_DIPSETTING(    0x06, "1 T" )
+	PORT_DIPSETTING(    0x05, "300" )
+	PORT_DIPSETTING(    0x04, "500" )
+	PORT_DIPSETTING(    0x03, "700" )
+	PORT_DIPSETTING(    0x02, "1000" )
+//	PORT_DIPSETTING(    0x01, "1000" )
+//	PORT_DIPSETTING(    0x00, "1000" )
+	PORT_DIPNAME( 0x08, 0x08, "YAKU times" )
+	PORT_DIPSETTING(    0x08, "1" )
+	PORT_DIPSETTING(    0x00, "2" )
+	PORT_DIPNAME( 0x10, 0x10, "Win Rate?" )
+	PORT_DIPSETTING(    0x10, "High" )
+	PORT_DIPSETTING(    0x00, "Low" )
+	PORT_DIPNAME( 0x20, 0x20, "Draw New Tile (Part 3 Only)" )
+	PORT_DIPSETTING(    0x00, "Automatic" )
+	PORT_DIPSETTING(    0x20, "Manual" )
+	PORT_DIPNAME( 0x40, 0x40, "DonDen Key" )
+	PORT_DIPSETTING(    0x40, "A" )
+	PORT_DIPSETTING(    0x00, "Flip Flop" )
+	PORT_DIPNAME( 0x80, 0x00, "Subtitle" )
+	PORT_DIPSETTING(    0x80, "None (Part 2)" )
+	PORT_DIPSETTING(    0x00, "Super Express (Part 3)" )
+
+	PORT_START	// IN9 - DSW4 -> 7c23 (select = c0)
+	PORT_DIPNAME( 0x01, 0x01, "Last Chance" )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( On ) )
+	PORT_DIPNAME( 0x02, 0x02, "Pay Rate?" )
+	PORT_DIPSETTING(    0x02, "High" )
+	PORT_DIPSETTING(    0x00, "Low" )
+	PORT_DIPNAME( 0x04, 0x04, "Choose Bonus" )
+	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x08, 0x08, "In-Game Bet?" )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
+	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20, 0x00, "In-Game Music" )
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x40, 0x40, "Select Girl" )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80, 0x80, "Moles On Gal's Face" )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
+
+	PORT_START	// IN10 - Fake DSW
+	PORT_DIPNAME( 0xff, 0xff, "Allow Bets" )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0xff, DEF_STR( On ) )
+INPUT_PORTS_END
+
+
+INPUT_PORTS_START( mjelctrn )
+	PORT_START	// IN0 - DSW2 -> 7c21 (select = 00)
+	PORT_DIPNAME( 0x03, 0x03, "Difficulty?" )
+	PORT_DIPSETTING(    0x03, "0" )	// 20
+	PORT_DIPSETTING(    0x00, "1" )	// 32
+	PORT_DIPSETTING(    0x01, "2" )	// 64
+	PORT_DIPSETTING(    0x02, "3" )	// c8
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Coin_A ) )
+	PORT_DIPSETTING(    0x0c, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( 1C_2C ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( 1C_5C ) )
+	PORT_DIPSETTING(    0x00, "1 Coin/10 Credits" )
+	PORT_DIPNAME( 0x30, 0x30, "Min Pay?" )
+	PORT_DIPSETTING(    0x30, "1" )
+	PORT_DIPSETTING(    0x20, "2" )
+	PORT_DIPSETTING(    0x10, "3" )
+	PORT_DIPSETTING(    0x00, "5" )
+	PORT_DIPNAME( 0x40, 0x40, "Allow Coin Out" )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80, 0x80, "Win A Prize?" )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	PORT_START	// IN1 - DSW1 -> 7c20 (select = 40)
+	PORT_DIPNAME( 0x0f, 0x07, "Pay Out Rate" )
+	PORT_DIPSETTING(    0x00, "50" )
+	PORT_DIPSETTING(    0x01, "53" )
+	PORT_DIPSETTING(    0x02, "56" )
+	PORT_DIPSETTING(    0x03, "59" )
+	PORT_DIPSETTING(    0x04, "62" )
+	PORT_DIPSETTING(    0x05, "65" )
+	PORT_DIPSETTING(    0x06, "68" )
+	PORT_DIPSETTING(    0x07, "71" )
+	PORT_DIPSETTING(    0x08, "75" )
+	PORT_DIPSETTING(    0x09, "78" )
+	PORT_DIPSETTING(    0x0a, "81" )
+	PORT_DIPSETTING(    0x0b, "84" )
+	PORT_DIPSETTING(    0x0c, "87" )
+	PORT_DIPSETTING(    0x0d, "90" )
+	PORT_DIPSETTING(    0x0e, "93" )
+	PORT_DIPSETTING(    0x0f, "96" )
+	PORT_DIPNAME( 0x30, 0x30, "Max Bet" )
+	PORT_DIPSETTING(    0x30, "1" )
+	PORT_DIPSETTING(    0x20, "5" )
+	PORT_DIPSETTING(    0x10, "10" )
+	PORT_DIPSETTING(    0x00, "20" )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Coin_B ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( 1C_5C ) )
+	PORT_DIPSETTING(    0x00, "1 Coin/10 Credits" )
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Flip_Screen ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	PORT_START	// IN2
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SERVICE4 )	// Pay
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN  )	// 18B
+	PORT_SERVICE( 0x04, IP_ACTIVE_LOW )				// Test
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )	// Analyzer
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE3 )	// Memory Reset
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2    )	// Note
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1    )	// Coin
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )	// Service
+
+	PORT_START	// IN3
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "A",   KEYCODE_A,        IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "E",   KEYCODE_E,        IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "I",   KEYCODE_I,        IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "M",   KEYCODE_M,        IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Kan", KEYCODE_LCONTROL, IP_JOY_NONE )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1                              )
+
+	PORT_START	// IN4
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "B",     KEYCODE_B,        IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "F",     KEYCODE_F,        IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "J",     KEYCODE_J,        IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "N",     KEYCODE_N,        IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Reach", KEYCODE_LSHIFT,   IP_JOY_NONE )
+	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "Bet",   KEYCODE_RCONTROL, IP_JOY_NONE )
+
+	PORT_START	// IN5
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "C",   KEYCODE_C,     IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "G",   KEYCODE_G,     IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "K",   KEYCODE_K,     IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Chi", KEYCODE_SPACE, IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Ron", KEYCODE_Z,     IP_JOY_NONE )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
+	PORT_START	// IN6
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "D",   KEYCODE_D,    IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "H",   KEYCODE_H,    IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "L",   KEYCODE_L,    IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Pon", KEYCODE_LALT, IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
+	PORT_START	// IN7
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "Last Chance",  KEYCODE_RALT,      IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "Take Score",   KEYCODE_2,         IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "Double Up",    KEYCODE_RSHIFT,    IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Flip Flop",    KEYCODE_X,         IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Big",          KEYCODE_ENTER,     IP_JOY_NONE )
+	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "Small",        KEYCODE_BACKSPACE, IP_JOY_NONE )
+
+	PORT_START	// IN8 - DSW3 -> 7c22 (select = 80)
+	PORT_DIPNAME( 0x07, 0x07, "YAKUMAN Bonus" )
+	PORT_DIPSETTING(    0x07, "Cut" )
+	PORT_DIPSETTING(    0x06, "1 T" )
+	PORT_DIPSETTING(    0x05, "300" )
+	PORT_DIPSETTING(    0x04, "500" )
+	PORT_DIPSETTING(    0x03, "700" )
+	PORT_DIPSETTING(    0x02, "1000" )
+//	PORT_DIPSETTING(    0x01, "1000" )
+//	PORT_DIPSETTING(    0x00, "1000" )
+	PORT_DIPNAME( 0x08, 0x08, "YAKU times" )
+	PORT_DIPSETTING(    0x08, "1" )
+	PORT_DIPSETTING(    0x00, "2" )
+	PORT_DIPNAME( 0x10, 0x10, "Win Rate?" )
+	PORT_DIPSETTING(    0x10, "High" )
+	PORT_DIPSETTING(    0x00, "Low" )
+	PORT_DIPNAME( 0x20, 0x20, "Draw New Tile (Part 4 Only)" )
+	PORT_DIPSETTING(    0x00, "Automatic" )
+	PORT_DIPSETTING(    0x20, "Manual" )
+	PORT_DIPNAME( 0x40, 0x40, "DonDen Key" )
+	PORT_DIPSETTING(    0x40, "A" )
+	PORT_DIPSETTING(    0x00, "Flip Flop" )
+	PORT_DIPNAME( 0x80, 0x00, "Subtitle" )
+	PORT_DIPSETTING(    0x80, "None (Part 2)" )
+	PORT_DIPSETTING(    0x00, "???? (Part 4)" )
+
+	PORT_START	// IN9 - DSW4 -> 7c23 (select = c0)
+	PORT_DIPNAME( 0x01, 0x01, "Last Chance" )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( On ) )
+	PORT_DIPNAME( 0x02, 0x02, "Pay Rate?" )
+	PORT_DIPSETTING(    0x02, "High" )
+	PORT_DIPSETTING(    0x00, "Low" )
+	PORT_DIPNAME( 0x04, 0x04, "Choose Bonus" )
+	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x08, 0x08, "In-Game Bet?" )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
+	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20, 0x00, "In-Game Music" )
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x40, 0x40, "Select Girl" )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80, 0x00, "Girls" )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	PORT_START	// IN10 - Fake DSW
+	PORT_DIPNAME( 0xff, 0xff, "Allow Bets" )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0xff, DEF_STR( On ) )
+INPUT_PORTS_END
+
+INPUT_PORTS_START( neruton )
+	PORT_START	// IN0 - DSW2 -> 6a77 (select = 00)
+	PORT_DIPNAME( 0x07, 0x07, "Hours" )
+	PORT_DIPSETTING(    0x07, "08:30" )
+	PORT_DIPSETTING(    0x06, "09:00" )
+	PORT_DIPSETTING(    0x05, "09:30" )
+	PORT_DIPSETTING(    0x04, "10:00" )
+	PORT_DIPSETTING(    0x03, "10:30" )
+	PORT_DIPSETTING(    0x02, "11:00" )
+	PORT_DIPSETTING(    0x01, "11:30" )
+	PORT_DIPSETTING(    0x00, "12:00" )
+	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x00, "30" )
+	PORT_DIPSETTING(    0x20, "60" )
+	PORT_BITX(    0x40, 0x40, IPT_DIPSWITCH_NAME | IPF_CHEAT, "See Opponent's Tiles", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
+
+	PORT_START	// IN1 - DSW1 -> 6a76 (select = 40)
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( 1C_2C ) )
+	PORT_DIPNAME( 0x04, 0x04, "PINFU with TSUMO" )
+	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( Yes ) )
+	PORT_DIPNAME( 0x38, 0x20, DEF_STR( Difficulty ) )
+	PORT_DIPSETTING(    0x38, "1 (Easy)" )
+	PORT_DIPSETTING(    0x30, "2" )
+	PORT_DIPSETTING(    0x28, "3" )
+	PORT_DIPSETTING(    0x20, "4" )
+	PORT_DIPSETTING(    0x18, "5" )
+	PORT_DIPSETTING(    0x10, "6" )
+	PORT_DIPSETTING(    0x08, "7" )
+	PORT_DIPSETTING(    0x00, "8 (Hard)" )
+	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Flip_Screen ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	PORT_START	// IN2
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )	// 17B
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN  )	// 18B
+	PORT_BITX(0x04, IP_ACTIVE_LOW, IPT_SERVICE, "Test", KEYCODE_F1, IP_JOY_NONE )	// Test
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE2 )	// Analyzer
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE3 )	// Memory Reset
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN  )	// 06B
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1    )	// Coin
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN  )	// 18A
+
+	PORT_START	// IN3
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "A",   KEYCODE_A,        IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "E",   KEYCODE_E,        IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "I",   KEYCODE_I,        IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "M",   KEYCODE_M,        IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Kan", KEYCODE_LCONTROL, IP_JOY_NONE )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1                              )
+
+	PORT_START	// IN4
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "B",     KEYCODE_B,        IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "F",     KEYCODE_F,        IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "J",     KEYCODE_J,        IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "N",     KEYCODE_N,        IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Reach", KEYCODE_LSHIFT,   IP_JOY_NONE )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
+	PORT_START	// IN5
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "C",   KEYCODE_C,     IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "G",   KEYCODE_G,     IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "K",   KEYCODE_K,     IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Chi", KEYCODE_SPACE, IP_JOY_NONE )
+	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Ron", KEYCODE_Z,     IP_JOY_NONE )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
+	PORT_START	// IN6
+	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "D",   KEYCODE_D,    IP_JOY_NONE )
+	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "H",   KEYCODE_H,    IP_JOY_NONE )
+	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "L",   KEYCODE_L,    IP_JOY_NONE )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Pon", KEYCODE_LALT, IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+
+	PORT_START	// IN7
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Flip",   KEYCODE_X,    IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
+INPUT_PORTS_END
+
+
 /***************************************************************************
 
 
@@ -1960,8 +2732,8 @@ static MACHINE_DRIVER_START( hanamai )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main",Z80,22000000 / 4)	/* 5.5MHz */
-	MDRV_CPU_MEMORY(sprtmtch_readmem,sprtmtch_writemem)
-	MDRV_CPU_PORTS(hanamai_readport,hanamai_writeport)
+	MDRV_CPU_PROGRAM_MAP(sprtmtch_readmem,sprtmtch_writemem)
+	MDRV_CPU_IO_MAP(hanamai_readport,hanamai_writeport)
 	MDRV_CPU_VBLANK_INT(sprtmtch_vblank_interrupt,1)	/* IM 0 needs an opcode on the data bus */
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -2014,8 +2786,8 @@ static MACHINE_DRIVER_START( hnoridur )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main",Z80,22000000 / 4)	/* 5.5MHz */
-	MDRV_CPU_MEMORY(hnoridur_readmem,hnoridur_writemem)
-	MDRV_CPU_PORTS(hnoridur_readport,hnoridur_writeport)
+	MDRV_CPU_PROGRAM_MAP(hnoridur_readmem,hnoridur_writemem)
+	MDRV_CPU_IO_MAP(hnoridur_readport,hnoridur_writeport)
 	MDRV_CPU_VBLANK_INT(sprtmtch_vblank_interrupt,1)	/* IM 0 needs an opcode on the data bus */
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -2060,8 +2832,8 @@ static MACHINE_DRIVER_START( sprtmtch )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80,22000000 / 4)	/* 5.5MHz */
-	MDRV_CPU_MEMORY(sprtmtch_readmem,sprtmtch_writemem)
-	MDRV_CPU_PORTS(sprtmtch_readport,sprtmtch_writeport)
+	MDRV_CPU_PROGRAM_MAP(sprtmtch_readmem,sprtmtch_writemem)
+	MDRV_CPU_IO_MAP(sprtmtch_readport,sprtmtch_writeport)
 	MDRV_CPU_VBLANK_INT(sprtmtch_vblank_interrupt,1)	/* IM 0 needs an opcode on the data bus */
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -2085,47 +2857,6 @@ MACHINE_DRIVER_END
 
 
 /***************************************************************************
-								Lady Frog
-***************************************************************************/
-
-static MACHINE_DRIVER_START( roldfrog )
-
-	/* basic machine hardware */
-	MDRV_CPU_ADD(Z80,22000000 / 4)	/* 5.5MHz */
-	MDRV_CPU_MEMORY(sprtmtch_readmem,sprtmtch_writemem)
-	MDRV_CPU_PORTS(sprtmtch_readport,sprtmtch_writeport)
-	MDRV_CPU_VBLANK_INT(sprtmtch_vblank_interrupt,1)	/* IM 0 needs an opcode on the data bus */
-
-// Until the protection on the 68000 is figured out (or it will crash)
-#if 0
-	MDRV_CPU_ADD(M68000, 10000000)	/* 10 MHz??? */
-	MDRV_CPU_MEMORY(roldfrog_readmem,roldfrog_writemem)
-	MDRV_CPU_VBLANK_INT(irq6_line_hold,1)
-#endif
-
-	MDRV_FRAMES_PER_SECOND(60)
-	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
-
-	MDRV_NVRAM_HANDLER(generic_0fill)
-
-	/* video hardware */
-	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER|VIDEO_PIXEL_ASPECT_RATIO_1_2)
-	MDRV_SCREEN_SIZE(512, 256)
-	MDRV_VISIBLE_AREA(0, 512-1, 16, 256-1)
-	MDRV_PALETTE_LENGTH(512)
-	MDRV_GFXDECODE(gfxdecodeinfo)	// has gfx
-
-	// no static palette
-	MDRV_VIDEO_START(sprtmtch)
-	MDRV_VIDEO_UPDATE(sprtmtch)
-
-	/* sound hardware */
-	MDRV_SOUND_ADD(YM2203, sprtmtch_ym2203_interface)
-MACHINE_DRIVER_END
-
-
-
-/***************************************************************************
 							Mahjong Friday
 ***************************************************************************/
 
@@ -2140,8 +2871,8 @@ static MACHINE_DRIVER_START( mjfriday )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main",Z80,24000000/4)	/* 6 MHz? */
-	MDRV_CPU_MEMORY(sprtmtch_readmem,sprtmtch_writemem)
-	MDRV_CPU_PORTS(mjfriday_readport,mjfriday_writeport)
+	MDRV_CPU_PROGRAM_MAP(sprtmtch_readmem,sprtmtch_writemem)
+	MDRV_CPU_IO_MAP(mjfriday_readport,mjfriday_writeport)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -2173,7 +2904,7 @@ static MACHINE_DRIVER_START( mjdialq2 )
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM( mjfriday )
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(mjdialq2_readmem,mjdialq2_writemem)
+	MDRV_CPU_PROGRAM_MAP(mjdialq2_readmem,mjdialq2_writemem)
 MACHINE_DRIVER_END
 
 
@@ -2195,8 +2926,8 @@ static MACHINE_DRIVER_START( yarunara )
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM( hnoridur )
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(yarunara_readmem,yarunara_writemem)
-	MDRV_CPU_PORTS(yarunara_readport,yarunara_writeport)
+	MDRV_CPU_PROGRAM_MAP(yarunara_readmem,yarunara_writemem)
+	MDRV_CPU_IO_MAP(yarunara_readport,yarunara_writeport)
 	MDRV_CPU_PERIODIC_INT(yarunara_clock_interrupt,10)	// RTC
 
 	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER)
@@ -2212,8 +2943,8 @@ static MACHINE_DRIVER_START( mcnpshnt )
 
 	MDRV_IMPORT_FROM( hnoridur )
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(mcnpshnt_readmem,mcnpshnt_writemem)
-	MDRV_CPU_PORTS(mcnpshnt_readport,mcnpshnt_writeport)
+	MDRV_CPU_PROGRAM_MAP(mcnpshnt_readmem,mcnpshnt_writemem)
+	MDRV_CPU_IO_MAP(mcnpshnt_readport,mcnpshnt_writeport)
 
 	MDRV_VIDEO_START(mcnpshnt)	// different priorities
 MACHINE_DRIVER_END
@@ -2227,10 +2958,143 @@ static MACHINE_DRIVER_START( nanajign )
 
 	MDRV_IMPORT_FROM( hnoridur )
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(nanajign_readmem,nanajign_writemem)
-	MDRV_CPU_PORTS(nanajign_readport,nanajign_writeport)
+	MDRV_CPU_PROGRAM_MAP(nanajign_readmem,nanajign_writemem)
+	MDRV_CPU_IO_MAP(nanajign_readport,nanajign_writeport)
 MACHINE_DRIVER_END
 
+
+/***************************************************************************
+								Jantouki
+***************************************************************************/
+
+// dual monitor, 2 CPU's, 2 blitters
+
+static struct YM2203interface jantouki_ym2203_interface =
+{
+	1,
+	22000000 / 8,					/* 2.75MHz */
+	{ YM2203_VOL(50,20) },
+	{ 0 },							/* Port A Read: DSW */
+	{ 0 },							/* Port B Read: DSW */
+	{ 0 },							/* Port A Write */
+	{ 0 },							/* Port B Write */
+	{ jantouki_sound_callback },	/* IRQ handler */
+};
+
+struct MSM5205interface jantouki_msm5205_interface =
+{
+	1,
+	384000,
+	{ adpcm_int_cpu1 },			/* IRQ handler */
+	{ MSM5205_S48_4B },		/* 8 KHz, 4 Bits  */
+	{ 100 }
+};
+
+static MACHINE_DRIVER_START( jantouki )
+
+	/* basic machine hardware */
+	MDRV_CPU_ADD_TAG("main",Z80,22000000 / 4)	/* 5.5MHz */
+	MDRV_CPU_PROGRAM_MAP(jantouki_readmem,jantouki_writemem)
+	MDRV_CPU_IO_MAP(jantouki_readport,jantouki_writeport)
+	MDRV_CPU_VBLANK_INT(jantouki_vblank_interrupt, 1)	/* IM 0 needs an opcode on the data bus */
+
+	MDRV_CPU_ADD_TAG("sound",Z80,22000000 / 4)	/* 5.5MHz */
+	MDRV_CPU_PROGRAM_MAP(jantouki_sound_readmem,jantouki_sound_writemem)
+	MDRV_CPU_IO_MAP(jantouki_sound_readport,jantouki_sound_writeport)
+	MDRV_CPU_VBLANK_INT(jantouki_sound_vblank_interrupt,1)	/* IM 0 needs an opcode on the data bus */
+
+	MDRV_FRAMES_PER_SECOND(60)
+	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+	MDRV_MACHINE_INIT(adpcm)
+
+	MDRV_NVRAM_HANDLER(generic_0fill)
+
+	/* video hardware */
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_DUAL_MONITOR)
+	MDRV_ASPECT_RATIO(4,6)
+	MDRV_SCREEN_SIZE(512, 512)
+	MDRV_VISIBLE_AREA(0, 512-1, 16, 16+240+240-1)
+	MDRV_PALETTE_LENGTH(512)
+
+	MDRV_PALETTE_INIT(sprtmtch)			// static palette
+	MDRV_VIDEO_START(jantouki)
+	MDRV_VIDEO_UPDATE(jantouki)
+
+	/* sound hardware */
+	MDRV_SOUND_ADD(AY8910,  hanamai_ay8910_interface)
+	MDRV_SOUND_ADD(YM2203,  jantouki_ym2203_interface)
+	MDRV_SOUND_ADD(MSM5205, jantouki_msm5205_interface)
+MACHINE_DRIVER_END
+
+
+/***************************************************************************
+							Mahjong Electron Base
+***************************************************************************/
+
+/*	It runs in IM 2, thus needs a vector on the data bus:
+	0xfa and 0xfc are very similar, they should be triggered by the blitter
+	0xf8 is vblank	*/
+void mjelctrn_update_irq(void)
+{
+	dynax_blitter_irq = 1;
+	cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, 0xfa);
+}
+
+INTERRUPT_GEN( mjelctrn_vblank_interrupt )
+{
+	// This is a kludge to avoid losing blitter interrupts
+	// there should be a vblank ack mechanism
+	if (!dynax_blitter_irq)
+		cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, 0xf8);
+}
+
+static MACHINE_DRIVER_START( mjelctrn )
+
+	MDRV_IMPORT_FROM( hnoridur )
+	MDRV_CPU_MODIFY("main")
+	MDRV_CPU_PROGRAM_MAP(nanajign_readmem,nanajign_writemem)
+	MDRV_CPU_IO_MAP(mjelctrn_readport,mjelctrn_writeport)
+	MDRV_CPU_VBLANK_INT(mjelctrn_vblank_interrupt,1)	/* IM 2 needs a vector on the data bus */
+
+	MDRV_VIDEO_START(mjelctrn)
+MACHINE_DRIVER_END
+
+
+/***************************************************************************
+									Neruton
+***************************************************************************/
+
+/*	It runs in IM 2, thus needs a vector on the data bus:
+	0x42 and 0x44 are very similar, they should be triggered by the blitter
+	0x40 is vblank
+	0x46 is a periodic irq?	*/
+void neruton_update_irq(void)
+{
+	dynax_blitter_irq = 1;
+	cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, 0x42);
+}
+
+INTERRUPT_GEN( neruton_vblank_interrupt )
+{
+	// This is a kludge to avoid losing blitter interrupts
+	// there should be a vblank ack mechanism
+	if (dynax_blitter_irq)	return;
+
+	switch(cpu_getiloops())
+	{
+		case 0:		cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, 0x40);	break;
+		default:	cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, 0x46);
+	}
+}
+
+static MACHINE_DRIVER_START( neruton )
+
+	MDRV_IMPORT_FROM( mjelctrn )
+	MDRV_CPU_MODIFY("main")
+	MDRV_CPU_VBLANK_INT(neruton_vblank_interrupt,1+10)	/* IM 2 needs a vector on the data bus */
+
+	MDRV_VIDEO_START(neruton)
+MACHINE_DRIVER_END
 
 /***************************************************************************
 
@@ -2407,87 +3271,6 @@ ROM_START( sprtmtch )
 	ROM_REGION( 0x400, REGION_PROMS, ROMREGION_DISPOSE )	/* Color PROMs */
 	ROM_LOAD( "18g", 0x000, 0x200, CRC(dcc4e0dd) SHA1(4e0fb8fd7192bf32247966742df4b80585f32c37) )	// FIXED BITS (0xxxxxxx)
 	ROM_LOAD( "17g", 0x200, 0x200, CRC(5443ebfb) SHA1(5b63220a3f6520e353db99b06e645640d1cfde2f) )
-ROM_END
-
-
-/***************************************************************************
-
-The Return of Lady Frog
-Microhard, 1993
-
-PCB Layout
-----------
-
-
-YM2203                            68000
-YM3014    6116           **       2   6
-          6116          6116      3   7
-6264                              4   8
-1  Z80           MACH130          5   9
-                 681000        6264  6264
-
-
-DSW2              2148                10
-DSW1              2148  6264  30MHz   11
-                  2148  6264  24MHz   12
-                  2148                13
-
-Notes:
-      68000 Clock = >10MHz (my meter can only read up to 10.000MHz)
-        Z80 Clock = 3MHz
-               ** = possibly PLD (surface is scratched, type PLCC44)
-    Vertical Sync = 60Hz
-      Horiz. Sync = 15.56kHz
-
-
-***************************************************************************/
-
-ROM_START( roldfrog )
-	ROM_REGION( 0x90000, REGION_CPU1, 0 )	/* Z80 Code */
-	ROM_LOAD( "roldfrog.001", 0x00000, 0x20000, CRC(ba9eb1c6) SHA1(649d1103f3188554eaa3fc87a1f52c53233932b2) )
-	ROM_RELOAD(               0x20000, 0x20000 )
-
-	ROM_REGION( 0x400000, REGION_CPU2, 0 )	/* 68000 code */
-	ROM_LOAD16_BYTE( "roldfrog.002",	0x000000, 0x080000, CRC(724cf022) SHA1(f8cddfb785ae7900cb95b854811ec3fb250fa7fe) )
-	ROM_LOAD16_BYTE( "roldfrog.006",	0x000001, 0x080000, CRC(e52a7ae2) SHA1(5c6ecbc2711376afdd7b8da11f84d36ffc464c8a) )
-	ROM_LOAD16_BYTE( "roldfrog.003",	0x100000, 0x080000, CRC(a1d49967) SHA1(54d73c1db1090b7d5109906525ce95ee8c00ad1f) )
-	ROM_LOAD16_BYTE( "roldfrog.007",	0x100001, 0x080000, CRC(e5805c4e) SHA1(5691807b711ea5137f91afd6033fcd734d2b5ad0) )
-	ROM_LOAD16_BYTE( "roldfrog.004",	0x200000, 0x080000, CRC(709281f5) SHA1(01453168df4dc84069346cecd1fba9adeae6fcb8) )
-	ROM_LOAD16_BYTE( "roldfrog.008",	0x200001, 0x080000, CRC(39adcba4) SHA1(6c8c945b6383fa2549e6654b427a7ce4c7ff46b5) )
-	ROM_LOAD16_BYTE( "roldfrog.005",	0x300000, 0x080000, CRC(b683160c) SHA1(526a772108a6bf71207a7b6de7cbd14f8e9496bc) )
-	ROM_LOAD16_BYTE( "roldfrog.009",	0x300001, 0x080000, CRC(e475fb76) SHA1(9ab56db86530647ea4a5d2109a02119710ff9b7e) )
-
-	ROM_REGION( 0x10000, REGION_GFX1, 0 )	/* blitter data ?? */
-
-	ROM_REGION( 0x80000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "roldfrog.010",       0x00000, 0x20000, CRC(51fd0e1a) SHA1(940c4231b21d16c62cad47c22fe735b18662af4a) )
-	ROM_LOAD( "roldfrog.011",       0x20000, 0x20000, CRC(610bf6f3) SHA1(04a7efac2e83c6747d4bd480b1f3118eb44a1f76) )
-	ROM_LOAD( "roldfrog.012",       0x40000, 0x20000, CRC(466ede67) SHA1(2d44dba1e76e5ceebf33fa6fc148ed665701a7ff) )
-	ROM_LOAD( "roldfrog.013",       0x60000, 0x20000, CRC(fad3e8be) SHA1(eccd7b1440d3a0d433c92ff33213326e0d57422a) )
-ROM_END
-
-ROM_START( roldfrga )
-	ROM_REGION( 0x90000, REGION_CPU1, 0 )	/* Z80 Code */
-	ROM_LOAD( "roldfrog.001", 0x00000, 0x20000, CRC(ba9eb1c6) SHA1(649d1103f3188554eaa3fc87a1f52c53233932b2) )
-	ROM_RELOAD(               0x20000, 0x20000 )
-
-	ROM_REGION( 0x400000, REGION_CPU2, 0 )	/* 68000 code */
-	ROM_LOAD16_BYTE( "roldfrog.002",	0x000000, 0x080000, CRC(724cf022) SHA1(f8cddfb785ae7900cb95b854811ec3fb250fa7fe) )
-	ROM_LOAD16_BYTE( "roldfrog.006",	0x000001, 0x080000, CRC(e52a7ae2) SHA1(5c6ecbc2711376afdd7b8da11f84d36ffc464c8a) )
-	ROM_LOAD16_BYTE( "roldfrog.003",	0x100000, 0x080000, CRC(a1d49967) SHA1(54d73c1db1090b7d5109906525ce95ee8c00ad1f) )
-	ROM_LOAD16_BYTE( "roldfrog.007",	0x100001, 0x080000, CRC(e5805c4e) SHA1(5691807b711ea5137f91afd6033fcd734d2b5ad0) )
-	ROM_LOAD16_BYTE( "roldfrog.004",	0x200000, 0x080000, CRC(709281f5) SHA1(01453168df4dc84069346cecd1fba9adeae6fcb8) )
-	ROM_LOAD16_BYTE( "roldfrog.008",	0x200001, 0x080000, CRC(39adcba4) SHA1(6c8c945b6383fa2549e6654b427a7ce4c7ff46b5) )
-	ROM_LOAD16_BYTE( "roldfrog.005",	0x300000, 0x080000, CRC(b683160c) SHA1(526a772108a6bf71207a7b6de7cbd14f8e9496bc) )
-	ROM_LOAD16_BYTE( "9",	            0x300001, 0x080000, CRC(fd515b58) SHA1(7926ab9afbc260219351a02b56b82ede883f9aab) )	// differs with roldfrog.009 by 1 byte
-
-	ROM_REGION( 0x10000, REGION_GFX1, 0 )	/* blitter data ?? */
-
-	ROM_REGION( 0x80000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "roldfrog.010",       0x00000, 0x20000, CRC(51fd0e1a) SHA1(940c4231b21d16c62cad47c22fe735b18662af4a) )
-	ROM_LOAD( "roldfrog.011",       0x20000, 0x20000, CRC(610bf6f3) SHA1(04a7efac2e83c6747d4bd480b1f3118eb44a1f76) )
-	ROM_LOAD( "roldfrog.012",       0x40000, 0x20000, CRC(466ede67) SHA1(2d44dba1e76e5ceebf33fa6fc148ed665701a7ff) )
-	ROM_LOAD( "roldfrog.013",       0x60000, 0x20000, CRC(fad3e8be) SHA1(eccd7b1440d3a0d433c92ff33213326e0d57422a) )
 ROM_END
 
 
@@ -2949,27 +3732,302 @@ ROM_END
 
 /***************************************************************************
 
+Jantouki
+(c)1989 Dynax
+
+D1505178-A (main board)
+D2711078L-B (ROM board)
+
+CPU:	Z80-B
+Sound:	Z80-B
+		AY-3-8912A
+		YM2203C
+		M5205
+OSC:	22.000MHz
+VDP:	HD46505SP
+Custom:	(TC17G032AP-0246) x2
+
+
+2702.6D  MROM1  main prg.
+2701.6C  MROM2
+
+2705.6G  SROM1  sound prg.
+2704.6F  SROM2  sound data
+2703.6E  SROM3
+
+2709.3G  BROM1  chr.
+2710.3F  BROM2
+2711.3E  BROM3
+2712.3D  BROM4
+2713.3C  BROM5
+2706.5G  BROM6
+2707.5F  BROM7
+2708.5E  BROM8
+
+2718.1G  AROM1  chr.
+2719.1F  AROM2
+2720.1E  AROM3
+2721.1D  AROM4
+2722.1C  AROM5
+2714.2G  AROM6
+2715.2F  AROM7
+2716.2E  AROM8
+2717.2D  AROM9
+
+27-1_19H.18G    color
+27-2.20H.19G
+***************************************************************************/
+
+ROM_START( jantouki )
+	ROM_REGION( 0x20000, REGION_CPU1, 0 )	/* Z80 Code */
+	ROM_LOAD( "2702.6d", 0x000000, 0x010000, CRC(9e9bea93) SHA1(c8b1a0621d3dae37d809bdbaa4ed4af73847b714) )
+	ROM_LOAD( "2701.6c", 0x010000, 0x010000, CRC(a58bc982) SHA1(5cdea3cdf3eaacb6bdf6ddb68e3d57fe53d70bb9) )
+
+	ROM_REGION( 0x68000, REGION_CPU2, 0 )	/* Z80 Code */
+	ROM_LOAD( "2705.6g", 0x000000, 0x010000, CRC(9d21e4af) SHA1(454601f4cb89da53c6881f4d8109d3c0babcfe5e) )
+	// banks 4-b:
+	ROM_LOAD( "2704.6f", 0x028000, 0x020000, CRC(4bb62bb4) SHA1(0de5605cecb1e729a5b5b866274395945cf88aa3) )
+	ROM_LOAD( "2703.6e", 0x048000, 0x020000, CRC(44006ee5) SHA1(287ffd095755dc2a1e40e667723985c9052fdcdf) )
+
+	ROM_REGION( 0x100000, REGION_GFX1, 0 )	/* blitter data */
+	ROM_LOAD( "2709.3g", 0x000000, 0x020000, CRC(e6dd4853) SHA1(85394e34eee95cd4430d062b3dbdfbe066c661b6) )
+	ROM_LOAD( "2710.3f", 0x020000, 0x020000, CRC(7ef4d92f) SHA1(414e26242e824f5d4c40a039a3f3486f84338325) )
+	ROM_LOAD( "2711.3e", 0x040000, 0x020000, CRC(8bfee4c2) SHA1(7c0e7535f7d7cd7f665e7925ff0cdab6b96a4b83) )
+	ROM_LOAD( "2712.3d", 0x060000, 0x020000, CRC(6ecd4913) SHA1(00a2355d6cb1643b7cc964e702a4ac5cfe7906c5) )
+	ROM_LOAD( "2713.3c", 0x080000, 0x020000, CRC(33272f5d) SHA1(8a23ef0e6ad24905fd5c249e8ea8560ec29a585c) )
+	ROM_LOAD( "2706.5g", 0x0a0000, 0x020000, CRC(fd72b190) SHA1(3d790dc1e40cbf963d8413ea91e518e19973734d) )
+	ROM_LOAD( "2707.5f", 0x0c0000, 0x020000, CRC(4ec7a81e) SHA1(a6227ca2b648ebc1a5a5f6fbfc6412c44752b77d) )
+	ROM_LOAD( "2708.5e", 0x0e0000, 0x020000, CRC(45845dc9) SHA1(cec3f82e3440f724f59d8386c8d2b0e030703ed5) )
+
+	ROM_REGION( 0x120000, REGION_GFX2, 0 )	/* blitter 2 data */
+	ROM_LOAD( "2718.1g", 0x000000, 0x020000, CRC(65608d7e) SHA1(28a960450d2d1cfb314c574123c2fbc61f2ded51) )
+	ROM_LOAD( "2719.1f", 0x020000, 0x020000, CRC(4cbc9361) SHA1(320d3ce504ad2e27937e7e3a761c672a22749658) )
+	ROM_LOAD( "2720.1e", 0x040000, 0x020000, CRC(4c9a25e5) SHA1(0298a5dad034b1ac113f6e07f4e9334ed6e0e89b) )
+	ROM_LOAD( "2721.1d", 0x060000, 0x020000, CRC(715c864a) SHA1(a4b436ddeaa161d6661063b6de503f07ecc5894a) )
+	ROM_LOAD( "2722.1c", 0x080000, 0x020000, CRC(cc0b0cd7) SHA1(ccd3ff1cafbcaf87439a6dfe38b5057febc15012) )
+	ROM_LOAD( "2714.2g", 0x0a0000, 0x020000, CRC(17341b6b) SHA1(0ae43e53429e9561a00ea9597299477f2c7ddf4b) )
+	ROM_LOAD( "2715.2f", 0x0c0000, 0x020000, CRC(486b7138) SHA1(623ddb0e9a9444cf0e920b78562a4748fa1c54d9) )
+	ROM_LOAD( "2716.2e", 0x0e0000, 0x020000, CRC(f388b0da) SHA1(4c04509eeda3f82bf6f8940a406e17423d0210a0) )
+	ROM_LOAD( "2717.2d", 0x100000, 0x020000, CRC(3666bead) SHA1(2067bb894b76be2b51649bb1144e84e6ff0ab378) )
+
+	ROM_REGION( 0x400, REGION_PROMS, ROMREGION_DISPOSE )	/* Color PROMs */
+	ROM_LOAD( "27-2_20h.19g", 0x000000, 0x000200, CRC(32d3f091) SHA1(ab9e8f467fc85357fb900bceae32909ce1f2d9c1) )
+	ROM_LOAD( "27-1_19h.18g", 0x000200, 0x000200, CRC(9382a2a1) SHA1(0d14eb85017f87ddbe66e4f6443028e91540b36e) )
+ROM_END
+
+
+/***************************************************************************
+
+	Mahjong Electron Base
+
+***************************************************************************/
+
+ROM_START( mjelctrn )
+	ROM_REGION( 0x30000, REGION_CPU1, 0 )	/* Z80 Code */
+	ROM_LOAD( "u27b-020", 0x00000, 0x20000, CRC(7773d382) SHA1(1d2ae799677e99c7cba09b0a2c49bb9310232e80) )
+	ROM_CONTINUE(         0x00000, 0x20000 )
+	ROM_RELOAD(           0x10000, 0x20000 )
+	ROM_CONTINUE(         0x28000, 0x08000 )
+	ROM_CONTINUE(         0x20000, 0x08000 )
+	ROM_CONTINUE(         0x18000, 0x08000 )
+	ROM_CONTINUE(         0x10000, 0x08000 )
+
+	ROM_REGION( 0x180000, REGION_GFX1, 0 )	/* blitter data */
+	ROM_LOAD( "eb-01.rom", 0x000000, 0x100000, CRC(e5c41448) SHA1(b8322e32b0cb3d771316c9c4f7be91de6e422a24) )
+	// eb-02 1st half = 2nd half with byte 0 replaced by 0 (wrong). Just use the 2nd half.
+	ROM_LOAD( "eb-02.rom", 0x100000, 0x040000, NO_DUMP )
+	ROM_CONTINUE(          0x100000, 0x040000 )
+	ROM_LOAD( "mj-1c020", 0x140000, 0x040000, CRC(f8e8d91b) SHA1(409e276157b328e7bbba5dda6a4c7adc020d519a) )
+ROM_END
+
+ROM_START( mjelct3 )
+	ROM_REGION( 0x30000, REGION_CPU1, 0 )	/* Z80 Code */
+	ROM_LOAD( "se-3010", 0x00000, 0x20000, CRC(370347e7) SHA1(2dc9f1fde4efaaff887722aae6507d7e9fac8eb6) )
+	ROM_RELOAD(          0x10000, 0x08000 )
+	ROM_CONTINUE(        0x28000, 0x08000 )
+	ROM_CONTINUE(        0x20000, 0x08000 )
+	ROM_CONTINUE(        0x18000, 0x08000 )
+
+	ROM_REGION( 0x140000, REGION_GFX1, 0 )	/* blitter data */
+	ROM_LOAD( "eb-01.rom", 0x000000, 0x100000, CRC(e5c41448) SHA1(b8322e32b0cb3d771316c9c4f7be91de6e422a24) )
+	// eb-02 1st half = 2nd half with byte 0 replaced by 0 (wrong). Just use the 2nd half.
+	ROM_LOAD( "eb-02.rom", 0x100000, 0x040000, CRC(f5b354d1) SHA1(d3f35d090de9af3f50aae9ff11de731950256212) )
+	ROM_CONTINUE(          0x100000, 0x040000 )
+ROM_END
+
+ROM_START( mjelct3a )
+	ROM_REGION( 0x30000, REGION_CPU1, 0 )	/* Z80 Code */
+	ROM_LOAD( "dz-00.rom", 0x00000, 0x20000, CRC(d28358f7) SHA1(995c16e0865048069f79411574256a88d58c6be9) )
+	ROM_RELOAD(            0x10000, 0x08000 )
+	ROM_CONTINUE(          0x28000, 0x08000 )
+	ROM_CONTINUE(          0x20000, 0x08000 )
+	ROM_CONTINUE(          0x18000, 0x08000 )
+
+	ROM_REGION( 0x140000, REGION_GFX1, 0 )	/* blitter data */
+	ROM_LOAD( "eb-01.rom", 0x000000, 0x100000, CRC(e5c41448) SHA1(b8322e32b0cb3d771316c9c4f7be91de6e422a24) )
+	// eb-02 1st half = 2nd half with byte 0 replaced by 0 (wrong). Just use the 2nd half.
+	ROM_LOAD( "eb-02.rom", 0x100000, 0x040000, CRC(f5b354d1) SHA1(d3f35d090de9af3f50aae9ff11de731950256212) )
+	ROM_CONTINUE(          0x100000, 0x040000 )
+ROM_END
+
+// Decrypted by yong
+static DRIVER_INIT( mjelct3 )
+{
+	int i;
+	data8_t	*rom = memory_region(REGION_CPU1);
+	size_t  size = memory_region_length(REGION_CPU1);
+	data8_t	*rom1 = malloc(size);
+	if (rom1)
+	{
+		memcpy(rom1,rom,size);
+		for (i = 0; i < size; i++)
+			rom[i] = BITSWAP8(rom1[BITSWAP24(i,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8, 1,6,5,4,3,2,7, 0)], 7,6, 1,4,3,2,5,0);
+		free(rom1);
+	}
+}
+
+static DRIVER_INIT( mjelct3a )
+{
+	int i,j;
+	data8_t	*rom = memory_region(REGION_CPU1);
+	size_t  size = memory_region_length(REGION_CPU1);
+	data8_t	*rom1 = malloc(size);
+	if (rom1)
+	{
+		memcpy(rom1,rom,size);
+		for (i = 0; i < size; i++)
+		{
+			j = i & ~0x7e00;
+			switch(i & 0x7000)
+			{
+				case 0x0000:	j |= 0x0400;	break;
+				case 0x1000:	j |= 0x4400;	break;
+				case 0x2000:	j |= 0x4200;	break;
+				case 0x3000:	j |= 0x0200;	break;
+				case 0x4000:	j |= 0x4600;	break;
+				case 0x5000:	j |= 0x4000;	break;
+//				case 0x6000:	j |= 0x0000;	break;
+				case 0x7000:	j |= 0x0600;	break;
+			}
+			switch(i & 0x0e00)
+			{
+				case 0x0000:	j |= 0x2000;	break;
+				case 0x0200:	j |= 0x3800;	break;
+				case 0x0400:	j |= 0x2800;	break;
+				case 0x0600:	j |= 0x0800;	break;
+				case 0x0800:	j |= 0x1800;	break;
+//				case 0x0a00:	j |= 0x0000;	break;
+				case 0x0c00:	j |= 0x1000;	break;
+				case 0x0e00:	j |= 0x3000;	break;
+			}
+			rom[j] = rom1[i];
+		}
+		free(rom1);
+	}
+
+	init_mjelct3();
+}
+
+
+/***************************************************************************
+
+Neruton Haikujiradan
+(c)1990 Dynax / Yukiyoshi Tokoro (Illustration)
+D4005208L1-1
+D4508308L-2 (sub board)
+
+CPU  : Z80?
+Sound: AY-3-8912A YM2413 M5205
+OSC  : 22MHz (near main CPU), 3.58MHz (Sound section)
+
+ROMs (all ROMs are 27C010 compatible):
+4501B.1A     [0e53eeee]
+4502.3A      [c296293f]
+4511.11A     [c4a96b6e]
+4512.13A     [d7ebbcb9]
+4513.14A     [e3bed454]
+4514.15A     [ee258483]
+4515.17A     [3bce0ca1]
+4516.18A     [ee6b7e3b]
+4517.19A     [b31f9694]
+4518.17C     [fa88668e]
+4519.18C     [68aca5f3]
+4520.19C     [7bb2b298]
+
+Subboard ROMs:
+4503.1A      [dcbe2805]
+4504.2A      [7b3387af]
+4505.3A      [6f9fd275]
+4506.4A      [6eac8b3c]
+4507.1B      [106e6133]
+4508.2B      [5c451ed4]
+4509.3B      [4e1e6a2d]
+4510.4B      [455305a1]
+
+
+PALs:
+10B (?)
+10E (?)
+15E (?)
+D45SUB.6A (16L8)
+
+CRT Controller:
+HD46505SP (6845)
+
+***************************************************************************/
+
+ROM_START( neruton )
+	ROM_REGION( 0x50000, REGION_CPU1, 0 )	/* Z80 Code */
+	ROM_LOAD( "4501b.1a",     0x000000, 0x020000, CRC(0e53eeee) SHA1(883138618a11295bfac148da4a092e01d92229b3) )
+	ROM_RELOAD(               0x010000, 0x020000 )
+	ROM_LOAD( "4502.3a",      0x030000, 0x020000, CRC(c296293f) SHA1(466e87f7eca102568f1f00c6ba77dacc3df300dd) )
+
+	ROM_REGION( 0x300000, REGION_GFX1, 0 )	/* blitter data */
+	ROM_LOAD( "4511.11a",     0x000000, 0x020000, CRC(c4a96b6e) SHA1(15a6776509e0d30929f6a261798afe7dc0401d4e) )
+	ROM_LOAD( "4512.13a",     0x020000, 0x020000, CRC(d7ebbcb9) SHA1(b8edd8b93eca8d36056c02f8b69ff8313c9ab120) )
+	ROM_LOAD( "4513.14a",     0x040000, 0x020000, CRC(e3bed454) SHA1(03a66d31b8f41abc4ce83ebe22f8d14414d92152) )
+	ROM_LOAD( "4514.15a",     0x060000, 0x020000, CRC(ee258483) SHA1(8c685fee4eaff5978f0ec222c33d55123a8fa496) )
+	ROM_LOAD( "4515.17a",     0x080000, 0x020000, CRC(3bce0ca1) SHA1(1d0bb379077c52a63aa982bbe77f89df7b5b7b14) )
+	ROM_LOAD( "4516.18a",     0x0a0000, 0x020000, CRC(ee6b7e3b) SHA1(5290fad850c7a52039cd9d26082bff8615bf3797) )
+	ROM_LOAD( "4517.19a",     0x0c0000, 0x020000, CRC(b31f9694) SHA1(f22fc44908be4f1ef8dada57860f95ee74495605) )
+	ROM_LOAD( "4519.18c",     0x0e0000, 0x020000, CRC(68aca5f3) SHA1(f03328362777e6d536f730bc3b52371d5daca54e) )
+	ROM_LOAD( "4520.19c",     0x100000, 0x020000, CRC(7bb2b298) SHA1(643d21f6a45640bad5ec84af9745339487a7408c) )
+	ROM_LOAD( "4518.17c",     0x120000, 0x020000, CRC(fa88668e) SHA1(fce80a8badacf39f30c36952cbe0a1491b8faef1) )
+
+	ROM_LOAD( "4510.4b",      0x200000, 0x020000, CRC(455305a1) SHA1(103e1eaac485b37786a1d1d411819788ed385467) )
+	ROM_LOAD( "4509.3b",      0x220000, 0x020000, CRC(4e1e6a2d) SHA1(04c71dd11594921142b6aa9554c0fe1b40254463) )
+	ROM_LOAD( "4508.2b",      0x240000, 0x020000, CRC(5c451ed4) SHA1(59a27ddfae541cb61dafb32bdb5de8ddbc5abb8d) )
+	ROM_LOAD( "4507.1b",      0x260000, 0x020000, CRC(106e6133) SHA1(d08deb17ea82fe43e458a11eea26ce98c26c51c1) )
+	ROM_LOAD( "4506.4a",      0x280000, 0x020000, CRC(6eac8b3c) SHA1(70dbe3af582384571872e7b6b51df4192daed227) )
+	ROM_LOAD( "4505.3a",      0x2a0000, 0x020000, CRC(6f9fd275) SHA1(123a928dcb60624d61a55b2fef25156975ba26c9) )
+	ROM_LOAD( "4504.2a",      0x2c0000, 0x020000, CRC(7b3387af) SHA1(403cf67287469ae6ce9a7f662f6d82f62dac349b) )
+	ROM_LOAD( "4503.1a",      0x2e0000, 0x020000, CRC(dcbe2805) SHA1(713edd2e3c950bc689446441eb85197bb7b1eb89) )
+ROM_END
+
+
+/***************************************************************************
+
 
 								Game Drivers
 
 
 ***************************************************************************/
 
-GAME ( 1988, hanamai,  0,        hanamai,  hanamai,  0,    ROT180, "Dynax",                  "Hana no Mai (Japan)"                                   )
-GAME ( 1989, hnkochou, hanamai,  hanamai,  hnkochou, 0,    ROT180, "Dynax",                  "Hana Kochou [BET] (Japan)"                             )
-GAMEX( 1989, hnoridur, 0,        hnoridur, hnoridur, 0,    ROT180, "Dynax",                  "Hana Oriduru (Japan)",                                 GAME_IMPERFECT_GRAPHICS ) // 1 rom is bad
-GAME ( 1989, drgpunch, 0,        sprtmtch, sprtmtch, 0,    ROT0,   "Dynax",                  "Dragon Punch (Japan)"                                  )
-GAME ( 1989, sprtmtch, drgpunch, sprtmtch, sprtmtch, 0,    ROT0,   "Dynax (Fabtek license)", "Sports Match"                                          )
-GAME ( 1989, mjfriday, 0,        mjfriday, mjfriday, 0,    ROT180, "Dynax",                  "Mahjong Friday (Japan)"                                )
-GAME ( 1990, mcnpshnt, 0,        mcnpshnt, mcnpshnt, 0,    ROT0,   "Dynax",                  "Mahjong Campus Hunting (Japan)"                        )
-GAMEX( 1990, 7jigen,   0,        nanajign, nanajign, 0,    ROT180, "Dynax",                  "7jigen no Youseitachi - Mahjong 7 Dimensions (Japan)", GAME_IMPERFECT_GRAPHICS )
-GAMEX( 1991, mjdialq2, 0,        mjdialq2, mjdialq2, 0,    ROT180, "Dynax",                  "Mahjong Dial Q2 (Japan)",                              GAME_IMPERFECT_GRAPHICS )
-GAME ( 1991, yarunara, 0,        yarunara, yarunara, 0,    ROT180, "Dynax",                  "Mahjong Yarunara (Japan)"                              )
-GAMEX( 1991, mjangels, 0,        yarunara, yarunara, 0,    ROT180, "Dynax",                  "Mahjong Angels - Comic Theater Vol.2 (Japan)",         GAME_IMPERFECT_GRAPHICS )
-GAME ( 1992, quiztvqq, 0,        yarunara, quiztvqq, 0,    ROT180, "Dynax",                  "Quiz TV Gassyuukoku Q&Q (Japan)"                       )
-GAME ( 1994, maya,     0,        sprtmtch, sprtmtch, maya, ROT0,   "Promat",                 "Maya"                                                  )
-
-
-// should move these to splash.c, its a protected bootleg of splash, not dynax stuff */
-GAMEX(1993, roldfrog, 0,        roldfrog, sprtmtch, 0,    ROT0,   "Microhard", "The Return of Lady Frog", GAME_NOT_WORKING )
-GAMEX(1993, roldfrga, roldfrog, roldfrog, sprtmtch, 0,    ROT0,   "Microhard", "The Return of Lady Frog (set 2)", GAME_NOT_WORKING )
+GAME ( 1988, hanamai,  0,        hanamai,  hanamai,  0,        ROT180, "Dynax",                   "Hana no Mai (Japan)"                                   )
+GAME ( 1989, hnkochou, hanamai,  hanamai,  hnkochou, 0,        ROT180, "Dynax",                   "Hana Kochou [BET] (Japan)"                             )
+GAMEX( 1989, hnoridur, 0,        hnoridur, hnoridur, 0,        ROT180, "Dynax",                   "Hana Oriduru (Japan)",                                 GAME_IMPERFECT_GRAPHICS ) // 1 rom is bad
+GAME ( 1989, drgpunch, 0,        sprtmtch, sprtmtch, 0,        ROT0,   "Dynax",                   "Dragon Punch (Japan)"                                  )
+GAME ( 1989, sprtmtch, drgpunch, sprtmtch, sprtmtch, 0,        ROT0,   "Dynax (Fabtek license)",  "Sports Match"                                          )
+GAME ( 1989, mjfriday, 0,        mjfriday, mjfriday, 0,        ROT180, "Dynax",                   "Mahjong Friday (Japan)"                                )
+GAME ( 1990, mcnpshnt, 0,        mcnpshnt, mcnpshnt, 0,        ROT0,   "Dynax",                   "Mahjong Campus Hunting (Japan)"                        )
+GAMEX( 1990, 7jigen,   0,        nanajign, nanajign, 0,        ROT180, "Dynax",                   "7jigen no Youseitachi - Mahjong 7 Dimensions (Japan)", GAME_IMPERFECT_GRAPHICS )
+GAME ( 1991, mjdialq2, 0,        mjdialq2, mjdialq2, 0,        ROT180, "Dynax",                   "Mahjong Dial Q2 (Japan)"                               )
+GAME ( 1991, yarunara, 0,        yarunara, yarunara, 0,        ROT180, "Dynax",                   "Mahjong Yarunara (Japan)"                              )
+GAME ( 1991, mjangels, 0,        yarunara, yarunara, 0,        ROT180, "Dynax",                   "Mahjong Angels - Comic Theater Vol.2 (Japan)"          )
+GAME ( 1992, quiztvqq, 0,        yarunara, quiztvqq, 0,        ROT180, "Dynax",                   "Quiz TV Gassyuukoku Q&Q (Japan)"                       )
+GAME ( 1994, maya,     0,        sprtmtch, sprtmtch, maya,     ROT0,   "Promat",                  "Maya"                                                  )
+GAME ( 1990, jantouki, 0,        jantouki, jantouki, 0,        ROT0,   "Dynax",                   "Jong Tou Ki (Japan)"                                   )
+GAMEX( 1993, mjelctrn, 0,        mjelctrn, mjelctrn, mjelct3,  ROT180, "Dynax",                   "Mahjong Electron Base (parts 2 & 4, Japan)",           GAME_IMPERFECT_GRAPHICS )	// part 4 title in the no_dump rom
+GAME ( 1990, mjelct3,  mjelctrn, mjelctrn, mjelct3,  mjelct3,  ROT180, "Dynax",                   "Mahjong Electron Base (parts 2 & 3, Japan)"            )
+GAME ( 1990, mjelct3a, mjelctrn, mjelctrn, mjelct3,  mjelct3a, ROT180, "Dynax",                   "Mahjong Electron Base (parts 2 & 3, alt., Japan)"      )
+GAMEX( 1990, neruton,  0,        neruton,  neruton,  mjelct3,  ROT180, "Dynax / Yukiyoshi Tokoro","Mahjong Neruton Haikujirada (Japan)",                         GAME_IMPERFECT_GRAPHICS )	// e.g. dynax logo

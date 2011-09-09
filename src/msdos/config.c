@@ -17,21 +17,21 @@ static FILE *logfile;
 
 extern int frontend_help(char *gamename);
 
-static char *osd_basename(char *filename);
-static char *osd_dirname(char *filename);
-static char *osd_strip_extension(char *filename);
+static char *dos_basename(char *filename);
+static char *dos_dirname(char *filename);
+static char *dos_strip_extension(char *filename);
 
 /* from video.c */
 extern int triple_buffer;
 extern int wait_vsync;
-extern float screen_aspect;
+extern double screen_aspect;
 extern int keep_aspect;
 
 extern int frameskip,autoframeskip,throttle;
 extern int vscanlines, hscanlines, use_tweaked, video_sync;
 extern int stretch, use_mmx;
 extern int vgafreq, always_synced, gfx_skiplines, gfx_skipcolumns;
-extern int gfx_mode, gfx_width, gfx_height, gfx_depth;
+extern int gfx_mode, gfx_depth;
 extern int monitor_type;
 extern int use_keyboard_leds;
 
@@ -98,6 +98,8 @@ static int showusage;
 static int ignorecfg;
 static const char *playbackname;
 static const char *recordname;
+static char *gamename;
+const char *g_s_resolution;
 
 /* from sound.c */
 int enable_sound;
@@ -106,12 +108,6 @@ extern int soundcard, usestereo, attenuation, sampleratedetect;
 /* from input.c */
 extern int use_mouse, joystick, steadykey;
 extern const char *ctrlrtype;
-/*start MAME:analog+*/
-extern int switchmice, switchaxes, splitmouse, resetmouse;
-#ifdef ANALOGPEDALON
-extern int analog_pedal;
-#endif	/* ANALOGPEDALON */
-/*end MAME:analog+  */
 
 /* from cheat.c */
 extern char *cheatfile;
@@ -173,7 +169,8 @@ struct { const char *name; int id; } joy_table[] =
 	{ "8button",        JOY_TYPE_8BUTTON },
 	{ "fspro",          JOY_TYPE_FSPRO },
 	{ "wingex",         JOY_TYPE_WINGEX },
-	{ "sidewinder",     JOY_TYPE_SIDEWINDER_AG },
+	{ "sidewinder",     JOY_TYPE_SIDEWINDER },
+	{ "sidewinderag",   JOY_TYPE_SIDEWINDER_AG },
 	{ "gamepadpro",     JOY_TYPE_GAMEPAD_PRO },
 	{ "grip",           JOY_TYPE_GRIP },
 	{ "grip4",          JOY_TYPE_GRIP4 },
@@ -186,15 +183,16 @@ struct { const char *name; int id; } joy_table[] =
 	{ "n64lpt1",        JOY_TYPE_N64PAD_LPT1 },
 	{ "n64lpt2",        JOY_TYPE_N64PAD_LPT2 },
 	{ "n64lpt3",        JOY_TYPE_N64PAD_LPT3 },
-	{ "wingwarrior",    JOY_TYPE_WINGWARRIOR },
-	{ "segaisa",        JOY_TYPE_IFSEGA_ISA },
-	{ "segapci",        JOY_TYPE_IFSEGA_PCI },
 	{ "db9lpt1",        JOY_TYPE_DB9_LPT1 },
 	{ "db9lpt2",        JOY_TYPE_DB9_LPT2 },
 	{ "db9lpt3",        JOY_TYPE_DB9_LPT3 },
 	{ "tgxlpt1",        JOY_TYPE_TURBOGRAFX_LPT1 },
 	{ "tgxlpt2",        JOY_TYPE_TURBOGRAFX_LPT2 },
 	{ "tgxlpt3",        JOY_TYPE_TURBOGRAFX_LPT3 },
+	{ "segaisa",        JOY_TYPE_IFSEGA_ISA },
+	{ "segapci",        JOY_TYPE_IFSEGA_PCI },
+	{ "segapcifast",    JOY_TYPE_IFSEGA_PCI_FAST },
+	{ "wingwarrior",    JOY_TYPE_WINGWARRIOR },
 	{ 0, 0 }
 } ;
 
@@ -489,28 +487,33 @@ static const char *get_string( const char *section, const char *option, const ch
 	return res;
 }
 
-static void extract_resolution( const char *_resolution )
+static void extract_resolution( const char *s_resolution )
 {
-	if( stricmp( _resolution, "auto" ) != 0 )
+	if( stricmp( s_resolution, "auto" ) != 0 )
 	{
+		int width;
+		int height;
 		char *tmp;
 		char tmpres[ 20 ];
-		strncpy( tmpres, _resolution, 20 );
+		strncpy( tmpres, s_resolution, 20 );
 		tmp = strtok( tmpres, "xX" );
-		gfx_width = atoi( tmp );
+		width = atoi( tmp );
 		tmp = strtok( 0, "xX" );
 		if( tmp != NULL )
 		{
-			gfx_height = atoi( tmp );
-			tmp = strtok( 0, "xX" );
-			if( tmp != NULL )
-			{
-				gfx_depth = atoi( tmp );
-			}
+			height = atoi( tmp );
+		}
+		else
+		{
+			height = 0;
 		}
 
-		options.vector_width = gfx_width;
-		options.vector_height = gfx_height;
+		options.debug_width = width;
+		options.debug_height = height;
+		options.vector_width = width;
+		options.vector_height = height;
+
+		g_s_resolution = s_resolution;
 	}
 }
 
@@ -745,14 +748,16 @@ static int video_set_intensity(struct rc_option *option, const char *arg, int pr
 
 static int video_set_resolution(struct rc_option *option, const char *arg, int priority)
 {
+	int width;
+	int height;
 	if (!strcmp(arg, "auto"))
 	{
-		gfx_width = gfx_height = gfx_depth = 0;
+		width = height = 0;
 		options.vector_width = options.vector_height = 0;
 	}
-	else if (sscanf(arg, "%dx%dx%d", &gfx_width, &gfx_height, &gfx_depth) < 2)
+	else if( sscanf( arg, "%dx%d", &width, &height ) < 2 )
 	{
-		gfx_width = gfx_height = gfx_depth = 0;
+		width = height = 0;
 		options.vector_width = options.vector_height = 0;
 		fprintf(stderr, "error: invalid value for resolution: %s\n", arg);
 		return -1;
@@ -762,13 +767,13 @@ static int video_set_resolution(struct rc_option *option, const char *arg, int p
 		(gfx_depth != 24) &&
 		(gfx_depth != 32))
 	{
-		gfx_width = gfx_height = gfx_depth = 0;
+		width = height = 0;
 		options.vector_width = options.vector_height = 0;
 		fprintf(stderr, "error: invalid value for resolution: %s\n", arg);
 		return -1;
 	}
-	options.vector_width = gfx_width;
-	options.vector_height = gfx_height;
+	options.vector_width = width;
+	options.vector_height = height;
 
 	option->priority = priority;
 	return 0;
@@ -776,9 +781,11 @@ static int video_set_resolution(struct rc_option *option, const char *arg, int p
 
 static int video_set_debugres(struct rc_option *option, const char *arg, int priority)
 {
+	options.debug_depth = 8;
 	if (!strcmp(arg, "auto"))
 	{
-		options.debug_width = options.debug_height = 0;
+		options.debug_width = 640;
+		options.debug_height = 480;
 	}
 	else if(sscanf(arg, "%dx%d", &options.debug_width, &options.debug_height) != 2)
 	{
@@ -930,18 +937,6 @@ struct rc_option config_opts[] =
 	{ "keyboard_leds", "leds", rc_bool, &use_keyboard_leds, "1", 0, 0, NULL, "enable keyboard LED emulation" },
 //	{ "a2d_deadzone", "a2d", rc_float, &a2d_deadzone, "0.3", 0.0, 1.0, NULL, "minimal analog value for digital input" },
 	{ "ctrlr", NULL, rc_string, &ctrlrtype, 0, 0, 0, NULL, "preconfigure for specified controller" },
-	
-/*start MAME:analog+*/
-	{ "Analog+ options", NULL, rc_seperator, NULL, NULL, 0, 0, NULL, NULL },
-#ifdef ANALOGPEDALON
-	{ "analogpedal", "anapedal", rc_bool, &analog_pedal, "1", 0, 0, NULL, "enable analog pedal" },
-#endif	/* ANALOGPEDALON */
-//	{ "singlemouse", "onemouse", rc_bool, &singlemouse, "0", 0, 0, NULL, "allow only one mouse device" },
-	{ "switchablemice", "switchmice", rc_bool, &switchmice, "0", 0, 0, NULL, "enable switching mouse -> player" },
-	{ "switchmiceaxes", "switchaxes", rc_bool, &switchaxes, "0", 0, 0, NULL, "enable assigning mouse axis -> player axis" },
-	{ "splitmouseaxes", "splitmouse", rc_bool, &splitmouse, "0", 0, 0, NULL, "automatically map one mouse axis per player from commandline/ini" },
-	{ "resetmouseaxes", "resetmouse", rc_bool, &resetmouse, "0", 0, 0, NULL, "reset analog+ mouse settings for this game" },
-/*end MAME:analog+  */
 
 #ifdef MESS
 	{ NULL, NULL, rc_link, mess_opts, NULL, 0, 0, NULL, NULL },
@@ -1076,17 +1071,6 @@ static void parse_cmdline( int argc, char **argv, int game_index )
 	steadykey					= get_bool( "config", "steadykey", "steady", 0 );
 	use_keyboard_leds			= get_bool( "config", "keyboard_leds", "leds", 1 );
 	ctrlrtype					= get_string( "config", "ctrlr", NULL, "standard" ,"", NULL, NULL );
- 
-/*start MAME:analog+*/
-	/* read Mame:analog+ input */
-#ifdef ANALOGPEDALON
-	analog_pedal = get_bool   ("config", "analogpedal",   NULL,  1);
-#endif	/* ANALOGPEDALON */
-	switchmice = get_bool   ("config", "switchmice",   NULL,  0);
-	switchaxes = get_bool   ("config", "switchaxes",   NULL,  0);
-	splitmouse = get_bool   ("config", "splitmouse",   NULL,  0);
-	resetmouse = get_bool   ("config", "resetmouse",   NULL,  0);
-/*end MAME:analog+  */
 
 	/* misc configuration */
 	options.cheat				= get_bool( "config", "cheat", "c", 0 );
@@ -1273,35 +1257,23 @@ static void parse_cmdline( int argc, char **argv, int game_index )
 		}
 	}
 
-	gfx_height = 0;
-	gfx_width = 0;
 	gfx_depth = atoi( s_depth );
-	options.vector_width = 0;
-	options.vector_height = 0;
 	if( options.mame_debug )
 	{
-		extract_resolution( debugres );
-		if( gfx_width == 0 )
-		{
-			gfx_width = 640;
-		}
-		if( gfx_height == 0 )
-		{
-			gfx_height = 480;
-		}
 		options.debug_depth = 8;
-		options.debug_width = gfx_width;
-		options.debug_height = gfx_height;
-		options.vector_width = gfx_width;
-		options.vector_height = gfx_height;
+		options.debug_width = 640;
+		options.debug_height = 480;
+		g_s_resolution = "640x480x0";
+		extract_resolution( debugres );
 		use_dirty = 0;
 	}
 	else
 	{
-		/* break up resolution into gfx_width and gfx_height */
+		g_s_resolution = "0x0x0";
+		/* break up resolution into width and height */
 		extract_resolution( resolution );
 
-		/* break up vector resolution into gfx_width and gfx_height */
+		/* break up vector resolution into width and height */
 		expand_machine_driver( drivers[ game ]->drv, &drv );
 		if( drv.video_attributes & VIDEO_TYPE_VECTOR )
 		{
@@ -1511,11 +1483,16 @@ static void parse_cmdline( int argc, char **argv, int game_index )
 	logerror("cheatfile = %s - cheatdir = %s\n",cheatfile,cheatdir);
 }
 
-/* fuzzy string compare, compare short string against long string        */
-/* e.g. astdel == "Asteroids Deluxe". The return code is the fuzz index, */
-/* we simply count the gaps between maching chars.                       */
+/*
+ * Penalty string compare, the result _should_ be a measure on
+ * how "close" two strings ressemble each other.
+ * The implementation is way too simple, but it sort of suits the
+ * purpose.
+ * This used to be called fuzzy matching, but there's no randomness
+ * involved and it is in fact a penalty method.
+ */
 
-static int fuzzycmp (const char *s, const char *l)
+int penalty_compare (const char *s, const char *l)
 {
 	int gaps = 0;
 	int match = 0;
@@ -1550,6 +1527,51 @@ static int fuzzycmp (const char *s, const char *l)
 	return gaps;
 }
 
+/*
+ * We compare the game name given on the CLI against the long and
+ * the short game names supported
+ */
+void show_approx_matches(void)
+{
+	struct { int penalty; int index; } topten[10];
+	int i,j;
+	int penalty; /* best fuzz factor so far */
+
+	for (i = 0; i < 10; i++)
+	{
+		topten[i].penalty = 9999;
+		topten[i].index = -1;
+	}
+
+	for (i = 0; (drivers[i] != 0); i++)
+	{
+		int tmp;
+
+		penalty = penalty_compare (gamename, drivers[i]->description);
+		tmp = penalty_compare (gamename, drivers[i]->name);
+		if (tmp < penalty) penalty = tmp;
+
+		/* eventually insert into table of approximate matches */
+		for (j = 0; j < 10; j++)
+		{
+			if (penalty >= topten[j].penalty) break;
+			if (j > 0)
+			{
+				topten[j-1].penalty = topten[j].penalty;
+				topten[j-1].index = topten[j].index;
+			}
+			topten[j].index = i;
+			topten[j].penalty = penalty;
+		}
+	}
+
+	for (i = 9; i >= 0; i--)
+	{
+		if (topten[i].index != -1)
+			fprintf (stderr, "%-10s%s\n", drivers[topten[i].index]->name, drivers[topten[i].index]->description);
+	}
+}
+
 void cli_frontend_exit( void )
 {
 	/* close open files */
@@ -1563,18 +1585,17 @@ int cli_frontend_init( int argc, char **argv )
 {
 	int i;
 	int game_index;
-	char *gamename;
 
 	mame_argc = argc;
 	mame_argv = argv;
 
+	gamename = NULL;
 	game_index = -1;
 
 	/* clear all core options */
 	memset(&options,0,sizeof(options));
 
 	/* these are not available in mame.cfg */
-	gamename = NULL;
 	ignorecfg = 0;
 	createconfig = 0;
 	showusage = 0;
@@ -1633,18 +1654,18 @@ int cli_frontend_init( int argc, char **argv )
 		char *cmd_name;
 		struct rc_struct *rc;
 
-		cmd_name = osd_strip_extension(osd_basename(argv[0]));
+		cmd_name = dos_strip_extension(dos_basename(argv[0]));
 		if (!cmd_name)
 		{
 			fprintf (stderr, "who am I? cannot determine the name I was called with\n");
-			exit(1);
+			return -1;
 		}
 		fprintf(stdout, "Usage: %s [game] [options]\n" "Options:\n", cmd_name);
 
 		if (!(rc = rc_create()))
 		{
 			fprintf (stderr, "error on rc creation\n");
-			exit(1);
+			return -1;
 		}
 
 		if (rc_register(rc, config_opts))
@@ -1654,19 +1675,20 @@ int cli_frontend_init( int argc, char **argv )
 		}
 		/* actual help message */
 		rc_print_help(rc, stdout);
-		exit(0);
+		return -1;
 	}
 
 	set_config_file( CONFIG_FILE );
 
 	if (playbackname != NULL)
 	{
-		mame_argc = argc;
-		mame_argv = argv;
-
 		get_fileio_opts();
-
 		options.playback = mame_fopen(playbackname,0,FILETYPE_INPUTLOG,0);
+		if (!options.playback)
+		{
+			fprintf(stderr, "failed to open %s for playback\n", playbackname);
+			return -1;
+		}
 	}
 
 	/* check for game name embedded in .inp header */
@@ -1686,6 +1708,7 @@ int cli_frontend_init( int argc, char **argv )
 				if (strcmp(drivers[i]->name, inp_header.name) == 0)
 				{
 					game_index = i;
+					gamename = (char *)drivers[i]->name;
 					printf("Playing back previously recorded game %s (%s) [press return]\n",
 						drivers[game_index]->name,drivers[game_index]->description);
 					getchar();
@@ -1708,11 +1731,11 @@ int cli_frontend_init( int argc, char **argv )
 #endif
 		if( frontend_help( gamename ) != 1234 )
 		{
-			exit( 0 );
+			return -1;
 		}
 	}
 
-	rompath_extra = osd_dirname( gamename );
+	rompath_extra = dos_dirname( gamename );
 
 	if( rompath_extra && strlen( rompath_extra ) == 0 )
 	{
@@ -1720,8 +1743,25 @@ int cli_frontend_init( int argc, char **argv )
 		rompath_extra = NULL;
 	}
 
-#ifdef MAME_DEBUG
+	gamename = dos_basename( gamename );
+	gamename = dos_strip_extension( gamename );
+
 	/* If not playing back a new .inp file */
+	if( game_index == -1 )
+	{
+		i = 0;
+		while( drivers[ i ] != NULL )
+		{
+			if( stricmp( gamename, drivers[i]->name ) == 0 )
+			{
+				game_index = i;
+				break;
+			}
+			i++;
+		}
+	}
+
+#ifdef MAME_DEBUG
 	if (game_index == -1)
 	{
 		/* pick a random game */
@@ -1741,60 +1781,12 @@ int cli_frontend_init( int argc, char **argv )
 		}
 	}
 #endif
-	if( game_index == -1 )
-	{
-		i = 0;
-		while( drivers[ i ] != NULL )
-		{
-			if( stricmp( gamename, drivers[i]->name ) == 0 )
-			{
-				game_index = i;
-				break;
-			}
-			i++;
-		}
-	}
-
-	/* educated guess on what the user wants to play */
+	/* we give up. print a few approximate matches */
 	if (game_index == -1)
 	{
-		int fuzz = 9999; /* best fuzz factor so far */
-
-		for (i = 0; (drivers[i] != 0); i++)
-		{
-			int tmp;
-			tmp = fuzzycmp(gamename, drivers[i]->description);
-			/* continue if the fuzz index is worse */
-			if (tmp > fuzz)
-				continue;
-
-			/* on equal fuzz index, we prefer working, original games */
-			if (tmp == fuzz)
-			{
-				/* game is a clone */
-				if (drivers[i]->clone_of != 0
-						&& !(drivers[i]->clone_of->flags & NOT_A_DRIVER))
-				{
-					/* if the game we already found works, why bother. */
-					/* and broken clones aren't very helpful either */
-					if ((!drivers[game_index]->flags & GAME_NOT_WORKING) ||
-						(drivers[i]->flags & GAME_NOT_WORKING))
-						continue;
-				}
-				else continue;
-			}
-
-			/* we found a better match */
-			game_index = i;
-			fuzz = tmp;
-		}
-
-		if (game_index != -1)
-			printf("fuzzy name compare, running %s\n",drivers[game_index]->name);
-	}
-	if( game_index == -1 )
-	{
-		printf( "Game \"%s\" not supported\n", gamename );
+		fprintf(stderr, "\n\"%s\" approximately matches the following\n"
+				"supported games (best match first):\n\n", gamename);
+		show_approx_matches();
 		return -1;
 	}
 
@@ -1820,7 +1812,7 @@ int cli_frontend_init( int argc, char **argv )
 		if (!options.record)
 		{
 			fprintf(stderr, "failed to open %s for recording\n", recordname);
-			exit(1);
+			return -1;
 		}
 	}
 
@@ -1896,10 +1888,10 @@ void CLIB_DECL osd_die(const char *text,...)
 
 
 //============================================================
-//	osd_basename
+//	dos_basename
 //============================================================
 
-static char *osd_basename(char *filename)
+static char *dos_basename(char *filename)
 {
 	char *c;
 
@@ -1919,10 +1911,10 @@ static char *osd_basename(char *filename)
 
 
 //============================================================
-//	osd_dirname
+//	dos_dirname
 //============================================================
 
-static char *osd_dirname(char *filename)
+static char *dos_dirname(char *filename)
 {
 	char *s_dirname;
 	char *c;
@@ -1935,7 +1927,7 @@ static char *osd_dirname(char *filename)
 	s_dirname = malloc(strlen(filename) + 1);
 	if (!s_dirname)
 	{
-		fprintf(stderr, "error: malloc failed in osd_dirname\n");
+		fprintf(stderr, "error: malloc failed in dos_dirname\n");
 		return NULL;
 	}
 
@@ -1959,10 +1951,10 @@ static char *osd_dirname(char *filename)
 
 
 //============================================================
-//	osd_strip_extension
+//	dos_strip_extension
 //============================================================
 
-static char *osd_strip_extension(char *filename)
+static char *dos_strip_extension(char *filename)
 {
 	char *newname;
 	char *c;

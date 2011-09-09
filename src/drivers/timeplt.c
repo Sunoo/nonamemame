@@ -70,32 +70,32 @@ static READ_HANDLER( psurge_protection_r )
 
 
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x5fff, MRA_ROM },
-	{ 0x6004, 0x6004, psurge_protection_r },	/* psurge only */
-	{ 0xa000, 0xbfff, MRA_RAM },
-	{ 0xc000, 0xc000, timeplt_scanline_r },
-	{ 0xc200, 0xc200, input_port_4_r },	/* DSW2 */
-	{ 0xc300, 0xc300, input_port_0_r },	/* IN0 */
-	{ 0xc320, 0xc320, input_port_1_r },	/* IN1 */
-	{ 0xc340, 0xc340, input_port_2_r },	/* IN2 */
-	{ 0xc360, 0xc360, input_port_3_r },	/* DSW1 */
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x6004, 0x6004) AM_READ(psurge_protection_r)	/* psurge only */
+	AM_RANGE(0xa000, 0xbfff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xc000, 0xc000) AM_READ(timeplt_scanline_r)
+	AM_RANGE(0xc200, 0xc200) AM_READ(input_port_4_r)	/* DSW2 */
+	AM_RANGE(0xc300, 0xc300) AM_READ(input_port_0_r)	/* IN0 */
+	AM_RANGE(0xc320, 0xc320) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0xc340, 0xc340) AM_READ(input_port_2_r)	/* IN2 */
+	AM_RANGE(0xc360, 0xc360) AM_READ(input_port_3_r)	/* DSW1 */
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x5fff, MWA_ROM },
-	{ 0xa000, 0xa3ff, timeplt_colorram_w, &timeplt_colorram },
-	{ 0xa400, 0xa7ff, timeplt_videoram_w, &timeplt_videoram },
-	{ 0xa800, 0xafff, MWA_RAM },
-	{ 0xb010, 0xb03f, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0xb410, 0xb43f, MWA_RAM, &spriteram_2 },
-	{ 0xc000, 0xc000, soundlatch_w },
-	{ 0xc200, 0xc200, watchdog_reset_w },
-	{ 0xc300, 0xc300, interrupt_enable_w },
-	{ 0xc302, 0xc302, timeplt_flipscreen_w },
-	{ 0xc304, 0xc304, timeplt_sh_irqtrigger_w },
-	{ 0xc30a, 0xc30c, timeplt_coin_counter_w },  /* c30b is not used */
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xa000, 0xa3ff) AM_WRITE(timeplt_colorram_w) AM_BASE(&timeplt_colorram)
+	AM_RANGE(0xa400, 0xa7ff) AM_WRITE(timeplt_videoram_w) AM_BASE(&timeplt_videoram)
+	AM_RANGE(0xa800, 0xafff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xb010, 0xb03f) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0xb410, 0xb43f) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram_2)
+	AM_RANGE(0xc000, 0xc000) AM_WRITE(soundlatch_w)
+	AM_RANGE(0xc200, 0xc200) AM_WRITE(watchdog_reset_w)
+	AM_RANGE(0xc300, 0xc300) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0xc302, 0xc302) AM_WRITE(timeplt_flipscreen_w)
+	AM_RANGE(0xc304, 0xc304) AM_WRITE(timeplt_sh_irqtrigger_w)
+	AM_RANGE(0xc30a, 0xc30c) AM_WRITE(timeplt_coin_counter_w)  /* c30b is not used */
+ADDRESS_MAP_END
 
 
 INPUT_PORTS_START( timeplt )
@@ -310,12 +310,12 @@ static MACHINE_DRIVER_START( timeplt )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 3072000)	/* 3.072 MHz (?) */
-	MDRV_CPU_MEMORY(readmem,writemem)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
 	MDRV_CPU_VBLANK_INT(timeplt_interrupt,256)
 
 	MDRV_CPU_ADD(Z80,14318180/8)
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)	/* 1.789772727 MHz */						\
-	MDRV_CPU_MEMORY(timeplt_sound_readmem,timeplt_sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(timeplt_sound_readmem,timeplt_sound_writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
@@ -437,9 +437,33 @@ ROM_START( psurge )
 	ROM_LOAD( "timeplt.e12",  0x0140, 0x0100, BAD_DUMP CRC(f7b7663e) SHA1(151bd2dff4e4ef76d6438c1ab2cae71f987b9dad)  ) /* char lookup table */
 ROM_END
 
+ROM_START( timeplta )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 ) /* 64k for code */
+	ROM_LOAD( "cd_e1.bin",         0x0000, 0x2000, CRC(a4513b35) SHA1(1b1944ec5317d71af86e21e0691caae180dee7b5) )
+	ROM_LOAD( "cd_e2.bin",         0x2000, 0x2000, CRC(38b0c72a) SHA1(8f0950deb2f9e2b65714318b9e837a1c837f52a9) )
+	ROM_LOAD( "cd_e3.bin",         0x4000, 0x2000, CRC(83846870) SHA1(b1741e7e5674f9e63e113ead0cb7f5ef874eac5f) )
+
+	ROM_REGION( 0x10000, REGION_CPU2, 0 ) /* 64k for the audio CPU */
+	ROM_LOAD( "tm7",          0x0000, 0x1000, CRC(d66da813) SHA1(408fca4515e8af84211df3e204c8776b2f8adb23) )
+
+	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "tm6",          0x0000, 0x2000, CRC(c2507f40) SHA1(07221875e3f81d9def67c57a7ccd82d52ce65e01) )
+
+	ROM_REGION( 0x4000, REGION_GFX2, ROMREGION_DISPOSE )
+	ROM_LOAD( "tm4",          0x0000, 0x2000, CRC(7e437c3e) SHA1(cbe2ccd2cd503af62f009cd5aab73aa7366230b1) )
+	ROM_LOAD( "tm5",          0x2000, 0x2000, CRC(e8ca87b9) SHA1(5dd30d3fb9fd8cf9e6a8e37e7ea858c7fd038a7e) )
+
+	ROM_REGION( 0x0240, REGION_PROMS, 0 )
+	ROM_LOAD( "timeplt.b4",   0x0000, 0x0020, CRC(34c91839) SHA1(f62e279e21fce171231d3139be7adabe1f4b8c2e) ) /* palette */
+	ROM_LOAD( "timeplt.b5",   0x0020, 0x0020, CRC(463b2b07) SHA1(9ad275365eba4869f94749f39ff8705d92056a10) ) /* palette */
+	ROM_LOAD( "timeplt.e9",   0x0040, 0x0100, CRC(4bbb2150) SHA1(678433b21aae1daa938e32d3293eeed529a42ef9) ) /* sprite lookup table */
+	ROM_LOAD( "timeplt.e12",  0x0140, 0x0100, CRC(f7b7663e) SHA1(151bd2dff4e4ef76d6438c1ab2cae71f987b9dad) ) /* char lookup table */
+ROM_END
+
 
 
 GAME( 1982, timeplt,  0,       timeplt, timeplt, 0, ROT90,  "Konami", "Time Pilot" )
 GAME( 1982, timepltc, timeplt, timeplt, timeplt, 0, ROT90,  "Konami (Centuri license)", "Time Pilot (Centuri)" )
+GAME( 1982, timeplta, timeplt, timeplt, timeplt, 0, ROT90,  "Konami (Atari license)", "Time Pilot (Atari)" )
 GAME( 1982, spaceplt, timeplt, timeplt, timeplt, 0, ROT90,  "bootleg", "Space Pilot" )
 GAME( 1988, psurge,   0,       timeplt, psurge,  0, ROT270, "<unknown>", "Power Surge" )

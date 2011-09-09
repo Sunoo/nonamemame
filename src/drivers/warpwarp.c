@@ -42,7 +42,7 @@ Address          Dir Data     Name      Description
 * = usually accessed using the in/out instructions
 
 Bomb Bee / Cutie Q memory map
-Warp Warp is the same but A13 is replaced with A15 to make space for more program ROM.
+Warp Warp is the same but A13 and A15 are swapped to make space for more program ROM.
 
 Address          Dir Data     Name      Description
 ---------------- --- -------- --------- -----------------------
@@ -67,11 +67,17 @@ Address          Dir Data     Name      Description
 -11-------11-011   W -------x n.c.
 -11-------11-100   W -------x LOCK OUT  coin lock out
 -11-------11-101   W -------x COUNTER   coin counter
--11-------11-110   W -------x BALL ON   ball enable + irq acknowledge
+-11-------11-110   W -------x BALL ON   ball enable + irq enable
 -11-------11-111   W -------x INV       screen flip
 
 
 Notes:
+- Warp Warp Easter egg:
+  - enter service mode
+  - keep B1 pressed and enter the following sequence:
+    2xR 6xD L 4xU
+  (c) 1981 NAMCO LTD. will be added at the bottom of the screen.
+
 - In the pinball games, there isn't a player 2 "serve" button - both players use
   the same input. I think this is correct behaviour, because there is nothing in
   the schematics suggesting otherwise (while there is a provision to switch from
@@ -89,7 +95,7 @@ Notes:
   test on startup, while kaiteik jumps straight into the game. kaitei is
   locked in cocktail mode, while kaiteik has support for a cabinet dip
   switch. The title screen in kaitei is nice and polished, while in kaiteik
-  it's confused, with fishes going over the text. ANd there are several other
+  it's confused, with fishes going over the text. There are several other
   differences.
   The code in kaiteik is longer (0x1800 bytes vs. just 0x1000 in kaitei) and
   less efficient, while kaitei has some clever space optimizations.
@@ -125,8 +131,8 @@ TODO:
 #include "vidhrdw/generic.h"
 
 
-
 /* from vidhrdw/warpwarp.c */
+extern data8_t *geebee_videoram,*warpwarp_videoram;
 extern int geebee_bgw;
 extern int warpwarp_ball_on;
 extern int warpwarp_ball_h, warpwarp_ball_v;
@@ -135,19 +141,24 @@ extern int geebee_handleoverlay;
 PALETTE_INIT( geebee );
 PALETTE_INIT( navarone );
 PALETTE_INIT( warpwarp );
+VIDEO_START( geebee );
+VIDEO_START( navarone );
+VIDEO_START( warpwarp );
 VIDEO_UPDATE( geebee );
 VIDEO_UPDATE( warpwarp );
+WRITE8_HANDLER( warpwarp_videoram_w );
+WRITE8_HANDLER( geebee_videoram_w );
 
 /* from sndhrdw/geebee.c */
-WRITE_HANDLER( geebee_sound_w );
+WRITE8_HANDLER( geebee_sound_w );
 int geebee_sh_start(const struct MachineSound *msound);
 void geebee_sh_stop(void);
 void geebee_sh_update(void);
 
 /* from sndhrdw/warpwarp.c */
-WRITE_HANDLER( warpwarp_sound_w );
-WRITE_HANDLER( warpwarp_music1_w );
-WRITE_HANDLER( warpwarp_music2_w );
+WRITE8_HANDLER( warpwarp_sound_w );
+WRITE8_HANDLER( warpwarp_music1_w );
+WRITE8_HANDLER( warpwarp_music2_w );
 int warpwarp_sh_start(const struct MachineSound *msound);
 void warpwarp_sh_stop(void);
 void warpwarp_sh_update(void);
@@ -189,7 +200,7 @@ OVERLAY_END
 
 static int handle_joystick;
 
-READ_HANDLER( geebee_in_r )
+READ8_HANDLER( geebee_in_r )
 {
 	int res;
 
@@ -209,7 +220,7 @@ READ_HANDLER( geebee_in_r )
 	return res;
 }
 
-WRITE_HANDLER( geebee_out6_w )
+WRITE8_HANDLER( geebee_out6_w )
 {
 	switch (offset & 3)
 	{
@@ -228,7 +239,7 @@ WRITE_HANDLER( geebee_out6_w )
 	}
 }
 
-WRITE_HANDLER( geebee_out7_w )
+WRITE8_HANDLER( geebee_out7_w )
 {
 	switch (offset & 7)
 	{
@@ -249,7 +260,7 @@ WRITE_HANDLER( geebee_out7_w )
 			break;
 		case 5:
 			if( geebee_bgw != (data & 1) )
-				memset(dirtybuffer, 1, videoram_size);
+				tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 			geebee_bgw = data & 1;
 			break;
 		case 6:
@@ -263,19 +274,19 @@ WRITE_HANDLER( geebee_out7_w )
 
 
 /* Read Switch Inputs */
-static READ_HANDLER( warpwarp_sw_r )
+static READ8_HANDLER( warpwarp_sw_r )
 {
 	return (readinputport(0) >> (offset & 7)) & 1;
 }
 
 /* Read Dipswitches */
-static READ_HANDLER( warpwarp_dsw1_r )
+static READ8_HANDLER( warpwarp_dsw1_r )
 {
 	return (readinputport(1) >> (offset & 7)) & 1;
 }
 
 /* Read mux Controller Inputs */
-static READ_HANDLER( warpwarp_vol_r )
+static READ8_HANDLER( warpwarp_vol_r )
 {
 	int res;
 
@@ -291,7 +302,7 @@ static READ_HANDLER( warpwarp_vol_r )
 	return res;
 }
 
-static WRITE_HANDLER( warpwarp_out0_w )
+static WRITE8_HANDLER( warpwarp_out0_w )
 {
 	switch (offset & 3)
 	{
@@ -310,7 +321,7 @@ static WRITE_HANDLER( warpwarp_out0_w )
 	}
 }
 
-static WRITE_HANDLER( warpwarp_out3_w )
+static WRITE8_HANDLER( warpwarp_out3_w )
 {
 	switch (offset & 7)
 	{
@@ -334,6 +345,7 @@ static WRITE_HANDLER( warpwarp_out3_w )
 			break;
 		case 6:
 			warpwarp_ball_on = data & 1;
+			cpu_interrupt_enable(0,data & 1);
 			if (~data & 1)
 				cpu_set_irq_line(0, 0, CLEAR_LINE);
 			break;
@@ -345,92 +357,90 @@ static WRITE_HANDLER( warpwarp_out3_w )
 
 
 
-static MEMORY_READ_START( readmem_geebee )
-	{ 0x0000, 0x1fff, MRA_ROM },
-	{ 0x2000, 0x23ff, MRA_RAM },
-	{ 0x3000, 0x37ff, MRA_ROM },	/* 3000-33ff in GeeBee */
-	{ 0x4000, 0x40ff, MRA_RAM },
-	{ 0x5000, 0x53ff, geebee_in_r },
-MEMORY_END
+static ADDRESS_MAP_START( readmem_geebee, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x1fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x2000, 0x23ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x3000, 0x37ff) AM_READ(MRA8_ROM)	/* 3000-33ff in GeeBee */
+	AM_RANGE(0x4000, 0x40ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x5000, 0x53ff) AM_READ(geebee_in_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem_geebee )
-	{ 0x0000, 0x1fff, MWA_ROM },
-	{ 0x2000, 0x23ff, videoram_w, &videoram, &videoram_size },
-	{ 0x2400, 0x27ff, videoram_w }, /* mirror used by kaiteik due to a bug */
-	{ 0x3000, 0x37ff, MWA_ROM },
-    { 0x4000, 0x40ff, MWA_RAM },
-	{ 0x6000, 0x6fff, geebee_out6_w },
-	{ 0x7000, 0x7fff, geebee_out7_w },
-MEMORY_END
+static ADDRESS_MAP_START( writemem_geebee, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x1fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x2000, 0x23ff) AM_WRITE(geebee_videoram_w) AM_BASE(&geebee_videoram)
+	AM_RANGE(0x2400, 0x27ff) AM_WRITE(geebee_videoram_w) /* mirror used by kaiteik due to a bug */
+	AM_RANGE(0x3000, 0x37ff) AM_WRITE(MWA8_ROM)
+    AM_RANGE(0x4000, 0x40ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x6000, 0x6fff) AM_WRITE(geebee_out6_w)
+	AM_RANGE(0x7000, 0x7fff) AM_WRITE(geebee_out7_w)
+ADDRESS_MAP_END
 
-static PORT_READ_START( readport_geebee )
-	{ 0x50, 0x53, geebee_in_r },
-PORT_END
+static ADDRESS_MAP_START( readport_geebee, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x50, 0x53) AM_READ(geebee_in_r)
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( writeport_geebee )
-	{ 0x60, 0x6f, geebee_out6_w },
-	{ 0x70, 0x7f, geebee_out7_w },
-PORT_END
+static ADDRESS_MAP_START( writeport_geebee, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x60, 0x6f) AM_WRITE(geebee_out6_w)
+	AM_RANGE(0x70, 0x7f) AM_WRITE(geebee_out7_w)
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( readmem_bombbee )
-	{ 0x0000, 0x1fff, MRA_ROM },
-	{ 0x2000, 0x23ff, MRA_RAM },
-	{ 0x4000, 0x47ff, MRA_RAM },
-	{ 0x4800, 0x4fff, MRA_ROM },
-	{ 0x6000, 0x600f, warpwarp_sw_r },
-	{ 0x6010, 0x601f, warpwarp_vol_r },
-	{ 0x6020, 0x602f, warpwarp_dsw1_r },
-MEMORY_END
+static ADDRESS_MAP_START( readmem_bombbee, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x1fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x2000, 0x23ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x4000, 0x47ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x4800, 0x4fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x6000, 0x600f) AM_READ(warpwarp_sw_r)
+	AM_RANGE(0x6010, 0x601f) AM_READ(warpwarp_vol_r)
+	AM_RANGE(0x6020, 0x602f) AM_READ(warpwarp_dsw1_r)
+ADDRESS_MAP_END
 
-static MEMORY_READ_START( readmem_warpwarp )
-	{ 0x0000, 0x3fff, MRA_ROM },
-	{ 0x8000, 0x83ff, MRA_RAM },
-	{ 0x4000, 0x47ff, MRA_RAM },
-	{ 0x4800, 0x4fff, MRA_ROM },
-	{ 0xc000, 0xc00f, warpwarp_sw_r },
-	{ 0xc010, 0xc01f, warpwarp_vol_r },
-	{ 0xc020, 0xc02f, warpwarp_dsw1_r },
-MEMORY_END
+static ADDRESS_MAP_START( readmem_warpwarp, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0x83ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x4000, 0x47ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x4800, 0x4fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0xc000, 0xc00f) AM_READ(warpwarp_sw_r)
+	AM_RANGE(0xc010, 0xc01f) AM_READ(warpwarp_vol_r)
+	AM_RANGE(0xc020, 0xc02f) AM_READ(warpwarp_dsw1_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem_bombbee )
-	{ 0x0000, 0x1fff, MWA_ROM },
-	{ 0x2000, 0x23ff, MWA_RAM },
-	{ 0x4000, 0x43ff, videoram_w, &videoram, &videoram_size },
-	{ 0x4400, 0x47ff, colorram_w, &colorram },
-	{ 0x4800, 0x4fff, MWA_ROM },
-	{ 0x6000, 0x600f, warpwarp_out0_w },
-	{ 0x6010, 0x601f, warpwarp_music1_w },
-	{ 0x6020, 0x602f, warpwarp_music2_w },
-	{ 0x6030, 0x603f, warpwarp_out3_w },
-MEMORY_END
+static ADDRESS_MAP_START( writemem_bombbee, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x1fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x2000, 0x23ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x4000, 0x47ff) AM_WRITE(warpwarp_videoram_w) AM_BASE(&warpwarp_videoram)
+	AM_RANGE(0x4800, 0x4fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x6000, 0x600f) AM_WRITE(warpwarp_out0_w)
+	AM_RANGE(0x6010, 0x601f) AM_WRITE(warpwarp_music1_w)
+	AM_RANGE(0x6020, 0x602f) AM_WRITE(warpwarp_music2_w)
+	AM_RANGE(0x6030, 0x603f) AM_WRITE(warpwarp_out3_w)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem_warpwarp )
-	{ 0x0000, 0x3fff, MWA_ROM },
-	{ 0x8000, 0x83ff, MWA_RAM },
-	{ 0x4000, 0x43ff, videoram_w, &videoram, &videoram_size },
-	{ 0x4400, 0x47ff, colorram_w, &colorram },
-	{ 0x4800, 0x4fff, MWA_ROM },
-	{ 0xc000, 0xc00f, warpwarp_out0_w },
-	{ 0xc010, 0xc01f, warpwarp_music1_w },
-	{ 0xc020, 0xc02f, warpwarp_music2_w },
-	{ 0xc030, 0xc03f, warpwarp_out3_w },
-MEMORY_END
+static ADDRESS_MAP_START( writemem_warpwarp, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x8000, 0x83ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x4000, 0x47ff) AM_WRITE(warpwarp_videoram_w) AM_BASE(&warpwarp_videoram)
+	AM_RANGE(0x4800, 0x4fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xc000, 0xc00f) AM_WRITE(warpwarp_out0_w)
+	AM_RANGE(0xc010, 0xc01f) AM_WRITE(warpwarp_music1_w)
+	AM_RANGE(0xc020, 0xc02f) AM_WRITE(warpwarp_music2_w)
+	AM_RANGE(0xc030, 0xc03f) AM_WRITE(warpwarp_out3_w)
+ADDRESS_MAP_END
 
 
 
 INPUT_PORTS_START( geebee )
 	PORT_START		/* IN0 SW0 */
-	PORT_BIT	( 0x01, IP_ACTIVE_LOW, IPT_COIN1   )
-	PORT_BIT	( 0x02, IP_ACTIVE_LOW, IPT_COIN2   )
-	PORT_BIT	( 0x04, IP_ACTIVE_LOW, IPT_START1  )
-	PORT_BIT	( 0x08, IP_ACTIVE_LOW, IPT_START2  )
-	PORT_BIT	( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1   )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2   )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1  )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2  )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_SERVICE( 0x20, IP_ACTIVE_LOW )
-	PORT_BIT	( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START      /* IN1 SW1 */
-	PORT_BIT	( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START      /* IN2 DSW2 */
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )
@@ -450,7 +460,7 @@ INPUT_PORTS_START( geebee )
 	PORT_DIPSETTING(    0x00, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x0c, DEF_STR( Free_Play ) )
-	PORT_BIT	( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START		/* IN3 VOLIN */
 	PORT_ANALOG( 0xff, 0x58, IPT_PADDLE | IPF_REVERSE, 30, 15, 0x10, 0xa0 )
@@ -461,16 +471,16 @@ INPUT_PORTS_END
 
 INPUT_PORTS_START( navarone )
 	PORT_START		/* IN0 SW0 */
-	PORT_BIT	( 0x01, IP_ACTIVE_LOW, IPT_COIN1   )
-	PORT_BIT	( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT	( 0x04, IP_ACTIVE_LOW, IPT_START1  )
-	PORT_BIT	( 0x08, IP_ACTIVE_LOW, IPT_START2  )
-	PORT_BIT	( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
-	PORT_BIT	( 0x20, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT	( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1   )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1  )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2  )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE1 )
+	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START      /* IN1 SW1 */
-	PORT_BIT	( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START      /* IN2 DSW2 */
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )
@@ -490,29 +500,29 @@ INPUT_PORTS_START( navarone )
 	PORT_DIPSETTING(    0x10, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(	0x20, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(	0x00, DEF_STR( Free_Play ) )
-	PORT_BIT	( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* Fake input port to support digital joystick */
-	PORT_BIT	( 0x01, 0x00, IPT_JOYSTICK_RIGHT )
-	PORT_BIT	( 0x02, 0x00, IPT_JOYSTICK_LEFT )
+	PORT_BIT( 0x01, 0x00, IPT_JOYSTICK_RIGHT )
+	PORT_BIT( 0x02, 0x00, IPT_JOYSTICK_LEFT )
 
 	PORT_START	/* Fake input port to support digital joystick */
-	PORT_BIT	( 0x01, 0x00, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
-	PORT_BIT	( 0x02, 0x00, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
+	PORT_BIT( 0x01, 0x00, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
+	PORT_BIT( 0x02, 0x00, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
 INPUT_PORTS_END
 
 INPUT_PORTS_START( kaitei )
 	PORT_START		/* IN0 SW0 */
-	PORT_BIT	( 0x01, IP_ACTIVE_LOW,	IPT_COIN1 )
-	PORT_BIT	( 0x02, IP_ACTIVE_LOW,	IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT	( 0x04, IP_ACTIVE_LOW,	IPT_START1 )
-	PORT_BIT	( 0x08, IP_ACTIVE_LOW,	IPT_START2 )
-	PORT_BIT	( 0x10, IP_ACTIVE_LOW,	IPT_BUTTON1 )
-	PORT_BIT	( 0x20, IP_ACTIVE_LOW,	IPT_SERVICE1 )
-	PORT_BIT	( 0xc0, IP_ACTIVE_LOW,	IPT_UNUSED )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,	IPT_COIN1 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,	IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,	IPT_START1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,	IPT_START2 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW,	IPT_BUTTON1 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW,	IPT_SERVICE1 )
+	PORT_BIT( 0xc0, IP_ACTIVE_LOW,	IPT_UNUSED )
 
 	PORT_START      /* IN1 SW1 */
-	PORT_BIT	( 0xff, IP_ACTIVE_LOW,	IPT_UNUSED )
+	PORT_BIT( 0xff, IP_ACTIVE_LOW,	IPT_UNUSED )
 
 	PORT_START      /* IN2 DSW2 */
 	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )
@@ -530,32 +540,32 @@ INPUT_PORTS_START( kaitei )
 	PORT_DIPSETTING(    0x10, DEF_STR( 1C_1C ) )
 	PORT_DIPSETTING(	0x20, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Free_Play ) )
-	PORT_BIT	( 0xc0, IP_ACTIVE_LOW,	IPT_UNUSED )
+	PORT_BIT( 0xc0, IP_ACTIVE_LOW,	IPT_UNUSED )
 
 	PORT_START	/* Fake input port to support digital joystick */
-	PORT_BIT	( 0x01, 0x00, IPT_JOYSTICK_RIGHT )
-	PORT_BIT	( 0x02, 0x00, IPT_JOYSTICK_LEFT )
+	PORT_BIT( 0x01, 0x00, IPT_JOYSTICK_RIGHT )
+	PORT_BIT( 0x02, 0x00, IPT_JOYSTICK_LEFT )
 
 	PORT_START	/* Fake input port to support digital joystick */
-	PORT_BIT	( 0x01, 0x00, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
-	PORT_BIT	( 0x02, 0x00, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
+	PORT_BIT( 0x01, 0x00, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
+	PORT_BIT( 0x02, 0x00, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
 INPUT_PORTS_END
 
 INPUT_PORTS_START( kaiteik )
 	PORT_START		/* IN0 SW0 */
-	PORT_BIT	( 0x01, IP_ACTIVE_LOW,	IPT_COIN1 )
-	PORT_BIT	( 0x04, IP_ACTIVE_LOW,	IPT_START1 )
-	PORT_BIT	( 0x08, IP_ACTIVE_LOW,	IPT_START2 )
-	PORT_BIT	( 0xf2, 0xa0, IPT_UNKNOWN )	// game verifies these bits and freezes if they don't match
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,	IPT_COIN1 )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,	IPT_START1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,	IPT_START2 )
+	PORT_BIT( 0xf2, 0xa0, IPT_UNKNOWN )	// game verifies these bits and freezes if they don't match
 
 	PORT_START      /* IN1 SW1 */
-	PORT_BIT	( 0x01, IP_ACTIVE_LOW,	IPT_JOYSTICK_RIGHT )
-	PORT_BIT	( 0x02, IP_ACTIVE_LOW,	IPT_JOYSTICK_LEFT )
-	PORT_BIT	( 0x04, IP_ACTIVE_LOW,	IPT_BUTTON1 )
-	PORT_BIT	( 0x08, IP_ACTIVE_LOW,	IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
-	PORT_BIT	( 0x10, IP_ACTIVE_LOW,	IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
-	PORT_BIT	( 0x20, IP_ACTIVE_LOW,	IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT	( 0xc0, 0x80, IPT_UNKNOWN )	// game verifies these two bits and freezes if they don't match
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,	IPT_JOYSTICK_RIGHT )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,	IPT_JOYSTICK_LEFT )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,	IPT_BUTTON1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,	IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW,	IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW,	IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0xc0, 0x80, IPT_UNKNOWN )	// game verifies these two bits and freezes if they don't match
 
 	PORT_START      /* IN2 DSW2 */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Cabinet ) )
@@ -574,29 +584,29 @@ INPUT_PORTS_START( kaiteik )
 	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Unused ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(	0x20, DEF_STR( On ) )
-	PORT_BIT	( 0xc0, 0x80, IPT_UNKNOWN )	// game verifies these two bits and freezes if they don't match
+	PORT_BIT( 0xc0, 0x80, IPT_UNKNOWN )	// game verifies these two bits and freezes if they don't match
 
 	PORT_START		/* IN3 VOLIN */
-	PORT_BIT	( 0x3f, 0x00, IPT_UNKNOWN )
-	PORT_BIT	( 0xc0, 0x80, IPT_UNKNOWN )	// game verifies these two bits and freezes if they don't match
+	PORT_BIT( 0x3f, 0x00, IPT_UNKNOWN )
+	PORT_BIT( 0xc0, 0x80, IPT_UNKNOWN )	// game verifies these two bits and freezes if they don't match
 
 	PORT_START		/* IN3 VOLIN */
-	PORT_BIT	( 0x3f, 0x00, IPT_UNKNOWN )
-	PORT_BIT	( 0xc0, 0x80, IPT_UNKNOWN )	// game verifies these two bits and freezes if they don't match
+	PORT_BIT( 0x3f, 0x00, IPT_UNKNOWN )
+	PORT_BIT( 0xc0, 0x80, IPT_UNKNOWN )	// game verifies these two bits and freezes if they don't match
 INPUT_PORTS_END
 
 INPUT_PORTS_START( sos )
 	PORT_START      /* IN0 SW0 */
-	PORT_BIT    ( 0x01, IP_ACTIVE_LOW, IPT_COIN1   )
-	PORT_BIT	( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT    ( 0x04, IP_ACTIVE_LOW, IPT_START1  )
-	PORT_BIT    ( 0x08, IP_ACTIVE_LOW, IPT_START2  )
-	PORT_BIT    ( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
-	PORT_BIT    ( 0x20, IP_ACTIVE_LOW, IPT_COIN2   )
-	PORT_BIT	( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1   )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1  )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2  )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE1   )
+	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START      /* IN1 SW1 */
-	PORT_BIT    ( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START      /* IN2 DSW2 */
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Cabinet ) )
@@ -615,15 +625,15 @@ INPUT_PORTS_START( sos )
 	PORT_DIPNAME( 0x20, 0x20, "Nudity" )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-	PORT_BIT	( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* Fake input port to support digital joystick */
-	PORT_BIT	( 0x01, 0x00, IPT_JOYSTICK_RIGHT )
-	PORT_BIT	( 0x02, 0x00, IPT_JOYSTICK_LEFT )
+	PORT_BIT( 0x01, 0x00, IPT_JOYSTICK_RIGHT )
+	PORT_BIT( 0x02, 0x00, IPT_JOYSTICK_LEFT )
 
 	PORT_START	/* Fake input port to support digital joystick */
-	PORT_BIT	( 0x01, 0x00, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
-	PORT_BIT	( 0x02, 0x00, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
+	PORT_BIT( 0x01, 0x00, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
+	PORT_BIT( 0x02, 0x00, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
 INPUT_PORTS_END
 
 INPUT_PORTS_START( bombbee )
@@ -725,7 +735,7 @@ INPUT_PORTS_START( warpwarp )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Cabinet ) )
 	PORT_DIPSETTING(	0x40, DEF_STR( Upright ) )
 	PORT_DIPSETTING(	0x00, DEF_STR( Cocktail ) )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )
 
 	PORT_START	/* DSW1 */
 	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Coinage ) )
@@ -784,7 +794,7 @@ INPUT_PORTS_START( warpwarr )
 	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Cabinet ) )
 	PORT_DIPSETTING(	0x40, DEF_STR( Upright ) )
 	PORT_DIPSETTING(	0x00, DEF_STR( Cocktail ) )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )
 
 	PORT_START		/* DSW1 */
 	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Coinage ) )
@@ -893,8 +903,8 @@ static MACHINE_DRIVER_START( geebee )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main", 8080,18432000/9) 		/* 18.432 MHz / 9 */
-	MDRV_CPU_MEMORY(readmem_geebee,writemem_geebee)
-	MDRV_CPU_PORTS(readport_geebee,writeport_geebee)
+	MDRV_CPU_PROGRAM_MAP(readmem_geebee,writemem_geebee)
+	MDRV_CPU_IO_MAP(readport_geebee,writeport_geebee)
 	MDRV_CPU_VBLANK_INT(irq0_line_pulse,1)	/* one interrupt per frame */
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -902,14 +912,14 @@ static MACHINE_DRIVER_START( geebee )
 
 	/* video hardware */
 	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER)
-	MDRV_SCREEN_SIZE(34*8, 32*8)
-	MDRV_VISIBLE_AREA(0*8, 34*8-1, 2*8, 30*8-1)
+	MDRV_SCREEN_SIZE(34*8, 28*8)
+	MDRV_VISIBLE_AREA(0*8, 34*8-1, 0*8, 28*8-1)
 	MDRV_GFXDECODE(gfxdecodeinfo_1k)
 	MDRV_PALETTE_LENGTH(3)
 	MDRV_COLORTABLE_LENGTH(4*2)
 
 	MDRV_PALETTE_INIT(geebee)
-	MDRV_VIDEO_START(generic)
+	MDRV_VIDEO_START(geebee)
 	MDRV_VIDEO_UPDATE(geebee)
 
 	/* sound hardware */
@@ -925,13 +935,14 @@ static MACHINE_DRIVER_START( navarone )
 	MDRV_COLORTABLE_LENGTH(2*2)
 
 	MDRV_PALETTE_INIT(navarone)
+	MDRV_VIDEO_START(navarone)
 MACHINE_DRIVER_END
 
 static MACHINE_DRIVER_START( bombbee )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main", 8080,18432000/9) 		/* 18.432 MHz / 9 */
-	MDRV_CPU_MEMORY(readmem_bombbee,writemem_bombbee)
+	MDRV_CPU_PROGRAM_MAP(readmem_bombbee,writemem_bombbee)
 	MDRV_CPU_VBLANK_INT(irq0_line_assert,1)
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -939,14 +950,14 @@ static MACHINE_DRIVER_START( bombbee )
 
 	/* video hardware */
 	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER)
-	MDRV_SCREEN_SIZE(34*8, 32*8)
-	MDRV_VISIBLE_AREA(0*8, 34*8-1, 2*8, 30*8-1)
+	MDRV_SCREEN_SIZE(34*8, 28*8)
+	MDRV_VISIBLE_AREA(0*8, 34*8-1, 0*8, 28*8-1)
 	MDRV_GFXDECODE(gfxdecodeinfo_color)
 	MDRV_PALETTE_LENGTH(256)
 	MDRV_COLORTABLE_LENGTH(2*256)
 
 	MDRV_PALETTE_INIT(warpwarp)
-	MDRV_VIDEO_START(generic)
+	MDRV_VIDEO_START(warpwarp)
 	MDRV_VIDEO_UPDATE(warpwarp)
 
 	/* sound hardware */
@@ -958,7 +969,7 @@ static MACHINE_DRIVER_START( warpwarp )
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM(bombbee)
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(readmem_warpwarp,writemem_warpwarp)
+	MDRV_CPU_PROGRAM_MAP(readmem_warpwarp,writemem_warpwarp)
 MACHINE_DRIVER_END
 
 

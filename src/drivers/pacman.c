@@ -35,6 +35,7 @@
 	0000-3fff ROM
 	4000-43ff Video RAM
 	4400-47ff Color RAM
+	4800-4bff RAM (Dream Shopper only)
 	4c00-4fff RAM
 	8000-9fff ROM (Ms Pac-Man and Ponpoko only)
 	a000-bfff ROM (Ponpoko only)
@@ -602,12 +603,12 @@ static INTERRUPT_GEN( s2650_interrupt )
 
 static READ_HANDLER( s2650_mirror_r )
 {
-	return cpu_readmem16(0x1000 + offset);
+	return program_read_byte(0x1000 + offset);
 }
 
 static WRITE_HANDLER( s2650_mirror_w )
 {
-	cpu_writemem16(0x1000 + offset, data);
+	program_write_byte(0x1000 + offset, data);
 }
 
 static READ_HANDLER( drivfrcp_port1_r )
@@ -652,241 +653,241 @@ static READ_HANDLER( porky_port1_r )
  *
  *************************************/
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x3fff, MRA_ROM },
-	{ 0x4000, 0x47ff, MRA_RAM },	/* video and color RAM */
-	{ 0x4c00, 0x4fff, MRA_RAM },	/* including sprite codes at 4ff0-4fff */
-	{ 0x5000, 0x503f, input_port_0_r },	/* IN0 */
-	{ 0x5040, 0x507f, input_port_1_r },	/* IN1 */
-	{ 0x5080, 0x50bf, input_port_2_r },	/* DSW1 */
-	{ 0x50c0, 0x50ff, input_port_3_r },	/* DSW2 */
-	{ 0x8000, 0xbfff, MRA_ROM },	/* Ms. Pac-Man / Ponpoko only */
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x4000, 0x47ff) AM_READ(MRA8_RAM)	/* video and color RAM */
+	AM_RANGE(0x4c00, 0x4fff) AM_READ(MRA8_RAM)	/* including sprite codes at 4ff0-4fff */
+	AM_RANGE(0x5000, 0x503f) AM_READ(input_port_0_r)	/* IN0 */
+	AM_RANGE(0x5040, 0x507f) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0x5080, 0x50bf) AM_READ(input_port_2_r)	/* DSW1 */
+	AM_RANGE(0x50c0, 0x50ff) AM_READ(input_port_3_r)	/* DSW2 */
+	AM_RANGE(0x8000, 0xbfff) AM_READ(MRA8_ROM)	/* Ms. Pac-Man / Ponpoko only */
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x3fff, MWA_ROM },
-	{ 0x4000, 0x43ff, videoram_w, &videoram, &videoram_size },
-	{ 0x4400, 0x47ff, colorram_w, &colorram },
-	{ 0x4c00, 0x4fef, MWA_RAM },
-	{ 0x4ff0, 0x4fff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0x5000, 0x5000, interrupt_enable_w },
-	{ 0x5001, 0x5001, pengo_sound_enable_w },
-	{ 0x5002, 0x5002, MWA_NOP },
-	{ 0x5003, 0x5003, pengo_flipscreen_w },
- 	{ 0x5004, 0x5005, pacman_leds_w },
-// 	{ 0x5006, 0x5006, pacman_coin_lockout_global_w },	this breaks many games
- 	{ 0x5007, 0x5007, pacman_coin_counter_w },
-	{ 0x5040, 0x505f, pengo_sound_w, &pengo_soundregs },
-	{ 0x5060, 0x506f, MWA_RAM, &spriteram_2 },
-	{ 0x50c0, 0x50c0, watchdog_reset_w },
-	{ 0x8000, 0xbfff, MWA_ROM },	/* Ms. Pac-Man / Ponpoko only */
-	{ 0xc000, 0xc3ff, videoram_w }, /* mirror address for video ram, */
-	{ 0xc400, 0xc7ef, colorram_w }, /* used to display HIGH SCORE and CREDITS */
-	{ 0xffff, 0xffff, MWA_NOP },	/* Eyes writes to this location to simplify code */
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x4000, 0x43ff) AM_WRITE(videoram_w) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+	AM_RANGE(0x4400, 0x47ff) AM_WRITE(colorram_w) AM_BASE(&colorram)
+	AM_RANGE(0x4c00, 0x4fef) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x4ff0, 0x4fff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x5000, 0x5000) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0x5001, 0x5001) AM_WRITE(pengo_sound_enable_w)
+	AM_RANGE(0x5002, 0x5002) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0x5003, 0x5003) AM_WRITE(pengo_flipscreen_w)
+ 	AM_RANGE(0x5004, 0x5005) AM_WRITE(pacman_leds_w)
+// 	AM_RANGE(0x5006, 0x5006) AM_WRITE(pacman_coin_lockout_global_w)	this breaks many games
+ 	AM_RANGE(0x5007, 0x5007) AM_WRITE(pacman_coin_counter_w)
+	AM_RANGE(0x5040, 0x505f) AM_WRITE(pengo_sound_w) AM_BASE(&pengo_soundregs)
+	AM_RANGE(0x5060, 0x506f) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram_2)
+	AM_RANGE(0x50c0, 0x50c0) AM_WRITE(watchdog_reset_w)
+	AM_RANGE(0x8000, 0xbfff) AM_WRITE(MWA8_ROM)	/* Ms. Pac-Man / Ponpoko only */
+	AM_RANGE(0xc000, 0xc3ff) AM_WRITE(videoram_w) /* mirror address for video ram, */
+	AM_RANGE(0xc400, 0xc7ef) AM_WRITE(colorram_w) /* used to display HIGH SCORE and CREDITS */
+	AM_RANGE(0xffff, 0xffff) AM_WRITE(MWA8_NOP)	/* Eyes writes to this location to simplify code */
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( mschamp_readmem )
-	{ 0x0000, 0x3fff, MRA_BANK1 },		/* By Sil: Zola/Ms. Champ */
-	{ 0x4000, 0x47ff, MRA_RAM },		/* video and color RAM */
-	{ 0x4c00, 0x4fff, MRA_RAM },		/* including sprite codes at 4ff0-4fff */
-	{ 0x5000, 0x503f, input_port_0_r },	/* IN0 */
-	{ 0x5040, 0x507f, input_port_1_r },	/* IN1 */
-	{ 0x5080, 0x50bf, input_port_2_r },	/* DSW */
-	{ 0x8000, 0x9fff, MRA_BANK2 },		/* By Sil: Zola/Ms. Champ */
-MEMORY_END
+static ADDRESS_MAP_START( mschamp_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_BANK1)		/* By Sil: Zola/Ms. Champ */
+	AM_RANGE(0x4000, 0x47ff) AM_READ(MRA8_RAM)		/* video and color RAM */
+	AM_RANGE(0x4c00, 0x4fff) AM_READ(MRA8_RAM)		/* including sprite codes at 4ff0-4fff */
+	AM_RANGE(0x5000, 0x503f) AM_READ(input_port_0_r)	/* IN0 */
+	AM_RANGE(0x5040, 0x507f) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0x5080, 0x50bf) AM_READ(input_port_2_r)	/* DSW */
+	AM_RANGE(0x8000, 0x9fff) AM_READ(MRA8_BANK2)		/* By Sil: Zola/Ms. Champ */
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( mspacman_readmem )
-	{ 0x0000, 0x3fff, MRA_BANK1 },
-	{ 0x4000, 0x47ff, MRA_RAM },	/* video and color RAM */
-	{ 0x4c00, 0x4fff, MRA_RAM },	/* including sprite codes at 4ff0-4fff */
-	{ 0x5000, 0x503f, input_port_0_r },	/* IN0 */
-	{ 0x5040, 0x507f, input_port_1_r },	/* IN1 */
-	{ 0x5080, 0x50bf, input_port_2_r },	/* DSW1 */
-	{ 0x50c0, 0x50ff, input_port_3_r },	/* DSW2 */
-	{ 0x8000, 0xbfff, MRA_BANK1 },
-MEMORY_END
+static ADDRESS_MAP_START( mspacman_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_BANK1)
+	AM_RANGE(0x4000, 0x47ff) AM_READ(MRA8_RAM)	/* video and color RAM */
+	AM_RANGE(0x4c00, 0x4fff) AM_READ(MRA8_RAM)	/* including sprite codes at 4ff0-4fff */
+	AM_RANGE(0x5000, 0x503f) AM_READ(input_port_0_r)	/* IN0 */
+	AM_RANGE(0x5040, 0x507f) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0x5080, 0x50bf) AM_READ(input_port_2_r)	/* DSW1 */
+	AM_RANGE(0x50c0, 0x50ff) AM_READ(input_port_3_r)	/* DSW2 */
+	AM_RANGE(0x8000, 0xbfff) AM_READ(MRA8_BANK1)
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( mspacman_writemem )
-	{ 0x0000, 0x3fff, MWA_BANK1 },
-	{ 0x4000, 0x43ff, videoram_w, &videoram, &videoram_size },
-	{ 0x4400, 0x47ff, colorram_w, &colorram },
-	{ 0x4c00, 0x4fef, MWA_RAM },
-	{ 0x4ff0, 0x4fff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0x5000, 0x5000, interrupt_enable_w },
-	{ 0x5001, 0x5001, pengo_sound_enable_w },
-	{ 0x5002, 0x5002, MWA_NOP },
-	{ 0x5003, 0x5003, pengo_flipscreen_w },
- 	{ 0x5004, 0x5005, pacman_leds_w },
-	{ 0x5006, 0x5006, mspacman_activate_rom },	/* Not actually, just handy */
-// 	{ 0x5006, 0x5006, pacman_coin_lockout_global_w },	this breaks many games
- 	{ 0x5007, 0x5007, pacman_coin_counter_w },
-	{ 0x5040, 0x505f, pengo_sound_w, &pengo_soundregs },
-	{ 0x5060, 0x506f, MWA_RAM, &spriteram_2 },
-	{ 0x50c0, 0x50c0, watchdog_reset_w },
-	{ 0x8000, 0xbfff, MWA_BANK1 },	/* Ms. Pac-Man / Ponpoko only */
-	{ 0xc000, 0xc3ff, videoram_w }, /* mirror address for video ram, */
-	{ 0xc400, 0xc7ef, colorram_w }, /* used to display HIGH SCORE and CREDITS */
-	{ 0xffff, 0xffff, MWA_NOP },	/* Eyes writes to this location to simplify code */
-MEMORY_END
+static ADDRESS_MAP_START( mspacman_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_WRITE(MWA8_BANK1)
+	AM_RANGE(0x4000, 0x43ff) AM_WRITE(videoram_w) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+	AM_RANGE(0x4400, 0x47ff) AM_WRITE(colorram_w) AM_BASE(&colorram)
+	AM_RANGE(0x4c00, 0x4fef) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x4ff0, 0x4fff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x5000, 0x5000) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0x5001, 0x5001) AM_WRITE(pengo_sound_enable_w)
+	AM_RANGE(0x5002, 0x5002) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0x5003, 0x5003) AM_WRITE(pengo_flipscreen_w)
+ 	AM_RANGE(0x5004, 0x5005) AM_WRITE(pacman_leds_w)
+	AM_RANGE(0x5006, 0x5006) AM_WRITE(mspacman_activate_rom)	/* Not actually, just handy */
+// 	AM_RANGE(0x5006, 0x5006) AM_WRITE(pacman_coin_lockout_global_w)	this breaks many games
+ 	AM_RANGE(0x5007, 0x5007) AM_WRITE(pacman_coin_counter_w)
+	AM_RANGE(0x5040, 0x505f) AM_WRITE(pengo_sound_w) AM_BASE(&pengo_soundregs)
+	AM_RANGE(0x5060, 0x506f) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram_2)
+	AM_RANGE(0x50c0, 0x50c0) AM_WRITE(watchdog_reset_w)
+	AM_RANGE(0x8000, 0xbfff) AM_WRITE(MWA8_BANK1)	/* Ms. Pac-Man / Ponpoko only */
+	AM_RANGE(0xc000, 0xc3ff) AM_WRITE(videoram_w) /* mirror address for video ram, */
+	AM_RANGE(0xc400, 0xc7ef) AM_WRITE(colorram_w) /* used to display HIGH SCORE and CREDITS */
+	AM_RANGE(0xffff, 0xffff) AM_WRITE(MWA8_NOP)	/* Eyes writes to this location to simplify code */
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( alibaba_readmem )
-	{ 0x0000, 0x3fff, MRA_ROM },
-	{ 0x4000, 0x47ff, MRA_RAM },	/* video and color RAM */
-	{ 0x4c00, 0x4fff, MRA_RAM },	/* including sprite codes at 4ef0-4eff */
-	{ 0x5000, 0x503f, input_port_0_r },	/* IN0 */
-	{ 0x5040, 0x507f, input_port_1_r },	/* IN1 */
-	{ 0x5080, 0x50bf, input_port_2_r },	/* DSW1 */
-	{ 0x50c0, 0x50c0, alibaba_mystery_1_r },
-	{ 0x50c1, 0x50c1, alibaba_mystery_2_r },
-	{ 0x8000, 0x8fff, MRA_ROM },
-	{ 0x9000, 0x93ff, MRA_RAM },
-	{ 0xa000, 0xa7ff, MRA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( alibaba_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x4000, 0x47ff) AM_READ(MRA8_RAM)	/* video and color RAM */
+	AM_RANGE(0x4c00, 0x4fff) AM_READ(MRA8_RAM)	/* including sprite codes at 4ef0-4eff */
+	AM_RANGE(0x5000, 0x503f) AM_READ(input_port_0_r)	/* IN0 */
+	AM_RANGE(0x5040, 0x507f) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0x5080, 0x50bf) AM_READ(input_port_2_r)	/* DSW1 */
+	AM_RANGE(0x50c0, 0x50c0) AM_READ(alibaba_mystery_1_r)
+	AM_RANGE(0x50c1, 0x50c1) AM_READ(alibaba_mystery_2_r)
+	AM_RANGE(0x8000, 0x8fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x9000, 0x93ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xa000, 0xa7ff) AM_READ(MRA8_ROM)
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( alibaba_writemem )
-	{ 0x0000, 0x3fff, MWA_ROM },
-	{ 0x4000, 0x43ff, videoram_w, &videoram, &videoram_size },
-	{ 0x4400, 0x47ff, colorram_w, &colorram },
-	{ 0x4ef0, 0x4eff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0x4c00, 0x4fff, MWA_RAM },
-	{ 0x5000, 0x5000, watchdog_reset_w },
- 	{ 0x5004, 0x5005, pacman_leds_w },
- 	{ 0x5006, 0x5006, pacman_coin_lockout_global_w },
- 	{ 0x5007, 0x5007, pacman_coin_counter_w },
-	{ 0x5040, 0x506f, alibaba_sound_w, &pengo_soundregs },  /* the sound region is not contiguous */
-	{ 0x5060, 0x506f, MWA_RAM, &spriteram_2 }, /* actually at 5050-505f, here to point to free RAM */
-	{ 0x50c0, 0x50c0, pengo_sound_enable_w },
-	{ 0x50c1, 0x50c1, pengo_flipscreen_w },
-	{ 0x50c2, 0x50c2, interrupt_enable_w },
-	{ 0x8000, 0x8fff, MWA_ROM },
-	{ 0x9000, 0x93ff, MWA_RAM },
-	{ 0xa000, 0xa7ff, MWA_ROM },
-	{ 0xc000, 0xc3ff, videoram_w }, /* mirror address for video ram, */
-	{ 0xc400, 0xc7ef, colorram_w }, /* used to display HIGH SCORE and CREDITS */
-MEMORY_END
+static ADDRESS_MAP_START( alibaba_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x4000, 0x43ff) AM_WRITE(videoram_w) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+	AM_RANGE(0x4400, 0x47ff) AM_WRITE(colorram_w) AM_BASE(&colorram)
+	AM_RANGE(0x4ef0, 0x4eff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x4c00, 0x4fff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x5000, 0x5000) AM_WRITE(watchdog_reset_w)
+ 	AM_RANGE(0x5004, 0x5005) AM_WRITE(pacman_leds_w)
+ 	AM_RANGE(0x5006, 0x5006) AM_WRITE(pacman_coin_lockout_global_w)
+ 	AM_RANGE(0x5007, 0x5007) AM_WRITE(pacman_coin_counter_w)
+	AM_RANGE(0x5040, 0x506f) AM_WRITE(alibaba_sound_w) AM_BASE(&pengo_soundregs)  /* the sound region is not contiguous */
+	AM_RANGE(0x5060, 0x506f) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram_2) /* actually at 5050-505f, here to point to free RAM */
+	AM_RANGE(0x50c0, 0x50c0) AM_WRITE(pengo_sound_enable_w)
+	AM_RANGE(0x50c1, 0x50c1) AM_WRITE(pengo_flipscreen_w)
+	AM_RANGE(0x50c2, 0x50c2) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0x8000, 0x8fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x9000, 0x93ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xa000, 0xa7ff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xc000, 0xc3ff) AM_WRITE(videoram_w) /* mirror address for video ram, */
+	AM_RANGE(0xc400, 0xc7ef) AM_WRITE(colorram_w) /* used to display HIGH SCORE and CREDITS */
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( theglobp_readmem )
-	{ 0x0000, 0x3fff, MRA_BANK1 },
-	{ 0x4000, 0x47ff, MRA_RAM },	/* video and color RAM */
-	{ 0x4c00, 0x4fff, MRA_RAM },	/* including sprite codes at 4ff0-4fff */
-	{ 0x5000, 0x503f, input_port_0_r },	/* IN0 */
-	{ 0x5040, 0x507f, input_port_1_r },	/* IN1 */
-	{ 0x5080, 0x50bf, input_port_2_r },	/* DSW1 */
-	{ 0x50c0, 0x50ff, input_port_3_r },	/* DSW2 */
-MEMORY_END
+static ADDRESS_MAP_START( theglobp_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_BANK1)
+	AM_RANGE(0x4000, 0x47ff) AM_READ(MRA8_RAM)	/* video and color RAM */
+	AM_RANGE(0x4c00, 0x4fff) AM_READ(MRA8_RAM)	/* including sprite codes at 4ff0-4fff */
+	AM_RANGE(0x5000, 0x503f) AM_READ(input_port_0_r)	/* IN0 */
+	AM_RANGE(0x5040, 0x507f) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0x5080, 0x50bf) AM_READ(input_port_2_r)	/* DSW1 */
+	AM_RANGE(0x50c0, 0x50ff) AM_READ(input_port_3_r)	/* DSW2 */
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( vanvan_readmem )
-	{ 0x0000, 0x3fff, MRA_ROM },
-	{ 0x4000, 0x47ff, MRA_RAM },	/* video and color RAM */
-	{ 0x4800, 0x4fff, MRA_RAM },	/* including sprite codes at 4ff0-4fff */
-	{ 0x5000, 0x5000, input_port_0_r },	/* IN0 */
-	{ 0x5040, 0x5040, input_port_1_r },	/* IN1 */
-	{ 0x5080, 0x5080, input_port_2_r },	/* DSW1 */
-	{ 0x50c0, 0x50c0, input_port_3_r },	/* DSW2 */
-	{ 0x8000, 0x8fff, MRA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( vanvan_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x4000, 0x47ff) AM_READ(MRA8_RAM)	/* video and color RAM */
+	AM_RANGE(0x4800, 0x4fff) AM_READ(MRA8_RAM)	/* including sprite codes at 4ff0-4fff */
+	AM_RANGE(0x5000, 0x5000) AM_READ(input_port_0_r)	/* IN0 */
+	AM_RANGE(0x5040, 0x5040) AM_READ(input_port_1_r)	/* IN1 */
+	AM_RANGE(0x5080, 0x5080) AM_READ(input_port_2_r)	/* DSW1 */
+	AM_RANGE(0x50c0, 0x50c0) AM_READ(input_port_3_r)	/* DSW2 */
+	AM_RANGE(0x8000, 0x8fff) AM_READ(MRA8_ROM)
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( vanvan_writemem )
-	{ 0x0000, 0x3fff, MWA_ROM },
-	{ 0x4000, 0x43ff, videoram_w, &videoram, &videoram_size },
-	{ 0x4400, 0x47ff, colorram_w, &colorram },
-	{ 0x4800, 0x4fef, MWA_RAM },
-	{ 0x4ff0, 0x4fff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0x5000, 0x5000, interrupt_enable_w },
-	{ 0x5001, 0x5001, vanvan_bgcolor_w },
-	{ 0x5003, 0x5003, pengo_flipscreen_w },
-	{ 0x5005, 0x5006, MWA_NOP },	/* always written together with 5001 */
- 	{ 0x5007, 0x5007, pacman_coin_counter_w },
-	{ 0x5060, 0x506f, MWA_RAM, &spriteram_2 },
-	{ 0x5080, 0x5080, MWA_NOP },	/* ??? toggled before reading 5000 */
-	{ 0x50c0, 0x50c0, watchdog_reset_w },
-	{ 0x8000, 0x8fff, MWA_ROM },
-	{ 0xb800, 0xb87f, MWA_NOP },	/* probably a leftover from development: the Sanritsu version */
+static ADDRESS_MAP_START( vanvan_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x4000, 0x43ff) AM_WRITE(videoram_w) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+	AM_RANGE(0x4400, 0x47ff) AM_WRITE(colorram_w) AM_BASE(&colorram)
+	AM_RANGE(0x4800, 0x4fef) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x4ff0, 0x4fff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x5000, 0x5000) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0x5001, 0x5001) AM_WRITE(vanvan_bgcolor_w)
+	AM_RANGE(0x5003, 0x5003) AM_WRITE(pengo_flipscreen_w)
+	AM_RANGE(0x5005, 0x5006) AM_WRITE(MWA8_NOP)	/* always written together with 5001 */
+ 	AM_RANGE(0x5007, 0x5007) AM_WRITE(pacman_coin_counter_w)
+	AM_RANGE(0x5060, 0x506f) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram_2)
+	AM_RANGE(0x5080, 0x5080) AM_WRITE(MWA8_NOP)	/* ??? toggled before reading 5000 */
+	AM_RANGE(0x50c0, 0x50c0) AM_WRITE(watchdog_reset_w)
+	AM_RANGE(0x8000, 0x8fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xb800, 0xb87f) AM_WRITE(MWA8_NOP)	/* probably a leftover from development: the Sanritsu version */
 									/* writes the color lookup table here, while the Karateko version */
 									/* writes garbage. */
-MEMORY_END
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( acitya_readmem )
-	{ 0x0000, 0x3fff, MRA_BANK1 },
-	{ 0x4000, 0x47ff, MRA_RAM }, /* video and color RAM */
-	{ 0x4c00, 0x4fff, MRA_RAM }, /* including sprite codes at 4ff0-4fff */
-	{ 0x5000, 0x503f, input_port_0_r }, /* IN0 */
-	{ 0x5040, 0x507f, input_port_1_r }, /* IN1 */
-	{ 0x5080, 0x50bf, input_port_2_r }, /* DSW1 */
-	{ 0x50c0, 0x50ff, input_port_3_r }, /* DSW2 */
-	{ 0x8000, 0xbfff, MRA_ROM }, /* Ms. Pac-Man / Ponpoko only */
-MEMORY_END
+static ADDRESS_MAP_START( acitya_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_BANK1)
+	AM_RANGE(0x4000, 0x47ff) AM_READ(MRA8_RAM) /* video and color RAM */
+	AM_RANGE(0x4c00, 0x4fff) AM_READ(MRA8_RAM) /* including sprite codes at 4ff0-4fff */
+	AM_RANGE(0x5000, 0x503f) AM_READ(input_port_0_r) /* IN0 */
+	AM_RANGE(0x5040, 0x507f) AM_READ(input_port_1_r) /* IN1 */
+	AM_RANGE(0x5080, 0x50bf) AM_READ(input_port_2_r) /* DSW1 */
+	AM_RANGE(0x50c0, 0x50ff) AM_READ(input_port_3_r) /* DSW2 */
+	AM_RANGE(0x8000, 0xbfff) AM_READ(MRA8_ROM) /* Ms. Pac-Man / Ponpoko only */
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( bigbucks_writemem )
-	{ 0x0000, 0x3fff, MWA_ROM },
-	{ 0x4000, 0x43ff, videoram_w, &videoram, &videoram_size },
-	{ 0x4400, 0x47ff, colorram_w, &colorram },
-	{ 0x4c00, 0x4fbf, MWA_RAM },
-	{ 0x5000, 0x5000, interrupt_enable_w },
-	{ 0x5001, 0x5001, pengo_sound_enable_w },
-	{ 0x5003, 0x5003, pengo_flipscreen_w },
-	{ 0x5007, 0x5007, MWA_NOP }, //?
-	{ 0x5040, 0x505f, pengo_sound_w, &pengo_soundregs },
-	{ 0x50c0, 0x50c0, watchdog_reset_w },
-	{ 0x5100, 0x5100, MWA_NOP }, //?
-	{ 0x6000, 0x6000, bigbucks_bank_w },
-	{ 0x8000, 0x9fff, MWA_ROM },
-MEMORY_END
+static ADDRESS_MAP_START( bigbucks_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x4000, 0x43ff) AM_WRITE(videoram_w) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+	AM_RANGE(0x4400, 0x47ff) AM_WRITE(colorram_w) AM_BASE(&colorram)
+	AM_RANGE(0x4c00, 0x4fbf) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x5000, 0x5000) AM_WRITE(interrupt_enable_w)
+	AM_RANGE(0x5001, 0x5001) AM_WRITE(pengo_sound_enable_w)
+	AM_RANGE(0x5003, 0x5003) AM_WRITE(pengo_flipscreen_w)
+	AM_RANGE(0x5007, 0x5007) AM_WRITE(MWA8_NOP) //?
+	AM_RANGE(0x5040, 0x505f) AM_WRITE(pengo_sound_w) AM_BASE(&pengo_soundregs)
+	AM_RANGE(0x50c0, 0x50c0) AM_WRITE(watchdog_reset_w)
+	AM_RANGE(0x5100, 0x5100) AM_WRITE(MWA8_NOP) //?
+	AM_RANGE(0x6000, 0x6000) AM_WRITE(bigbucks_bank_w)
+	AM_RANGE(0x8000, 0x9fff) AM_WRITE(MWA8_ROM)
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( s2650games_readmem )
-	{ 0x0000, 0x0fff, MRA_ROM },
-	{ 0x1500, 0x1500, input_port_0_r },
-	{ 0x1540, 0x1540, input_port_1_r },
-	{ 0x1580, 0x1580, input_port_2_r },
-	{ 0x1c00, 0x1fef, MRA_RAM },
-	{ 0x2000, 0x2fff, MRA_ROM },
-	{ 0x3000, 0x3fff, s2650_mirror_r },
-	{ 0x4000, 0x4fff, MRA_ROM },
-	{ 0x5000, 0x5fff, s2650_mirror_r },
-	{ 0x6000, 0x6fff, MRA_ROM },
-	{ 0x7000, 0x7fff, s2650_mirror_r },
-MEMORY_END
+static ADDRESS_MAP_START( s2650games_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x0fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x1500, 0x1500) AM_READ(input_port_0_r)
+	AM_RANGE(0x1540, 0x1540) AM_READ(input_port_1_r)
+	AM_RANGE(0x1580, 0x1580) AM_READ(input_port_2_r)
+	AM_RANGE(0x1c00, 0x1fef) AM_READ(MRA8_RAM)
+	AM_RANGE(0x2000, 0x2fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x3000, 0x3fff) AM_READ(s2650_mirror_r)
+	AM_RANGE(0x4000, 0x4fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x5000, 0x5fff) AM_READ(s2650_mirror_r)
+	AM_RANGE(0x6000, 0x6fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x7000, 0x7fff) AM_READ(s2650_mirror_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( s2650games_writemem )
-	{ 0x0000, 0x0fff, MWA_ROM },
-	{ 0x1000, 0x13ff, s2650games_colorram_w },
-	{ 0x1400, 0x141f, s2650games_scroll_w },
-	{ 0x1420, 0x148f, MWA_RAM },
-	{ 0x1490, 0x149f, MWA_RAM, &sprite_bank },
-	{ 0x14a0, 0x14bf, s2650games_tilesbank_w, &tiles_bankram },
-	{ 0x14c0, 0x14ff, MWA_RAM },
-	{ 0x1500, 0x1502, MWA_NOP },
-	{ 0x1503, 0x1503, s2650games_flipscreen_w },
-	{ 0x1504, 0x1506, MWA_NOP },
-	{ 0x1507, 0x1507, pacman_coin_counter_w },
-	{ 0x1508, 0x155f, MWA_RAM },
-	{ 0x1560, 0x156f, MWA_RAM, &spriteram_2 },
-	{ 0x1570, 0x157f, MWA_RAM },
-	{ 0x1586, 0x1587, MWA_NOP },
-	{ 0x15c0, 0x15c0, watchdog_reset_w },
-	{ 0x15c7, 0x15c7, MWA_RAM },
-	{ 0x1800, 0x1bff, s2650games_videoram_w, &videoram },
-	{ 0x1c00, 0x1fef, MWA_RAM },
-	{ 0x1ff0, 0x1fff, MWA_RAM, &spriteram, &spriteram_size },
-	{ 0x2000, 0x2fff, MWA_ROM },
-	{ 0x3000, 0x3fff, s2650_mirror_w },
-	{ 0x4000, 0x4fff, MWA_ROM },
-	{ 0x5000, 0x5fff, s2650_mirror_w },
-	{ 0x6000, 0x6fff, MWA_ROM },
-	{ 0x7000, 0x7fff, s2650_mirror_w },
-MEMORY_END
+static ADDRESS_MAP_START( s2650games_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x0fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x1000, 0x13ff) AM_WRITE(s2650games_colorram_w)
+	AM_RANGE(0x1400, 0x141f) AM_WRITE(s2650games_scroll_w)
+	AM_RANGE(0x1420, 0x148f) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x1490, 0x149f) AM_WRITE(MWA8_RAM) AM_BASE(&sprite_bank)
+	AM_RANGE(0x14a0, 0x14bf) AM_WRITE(s2650games_tilesbank_w) AM_BASE(&tiles_bankram)
+	AM_RANGE(0x14c0, 0x14ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x1500, 0x1502) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0x1503, 0x1503) AM_WRITE(s2650games_flipscreen_w)
+	AM_RANGE(0x1504, 0x1506) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0x1507, 0x1507) AM_WRITE(pacman_coin_counter_w)
+	AM_RANGE(0x1508, 0x155f) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x1560, 0x156f) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram_2)
+	AM_RANGE(0x1570, 0x157f) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x1586, 0x1587) AM_WRITE(MWA8_NOP)
+	AM_RANGE(0x15c0, 0x15c0) AM_WRITE(watchdog_reset_w)
+	AM_RANGE(0x15c7, 0x15c7) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x1800, 0x1bff) AM_WRITE(s2650games_videoram_w) AM_BASE(&videoram)
+	AM_RANGE(0x1c00, 0x1fef) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x1ff0, 0x1fff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size)
+	AM_RANGE(0x2000, 0x2fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x3000, 0x3fff) AM_WRITE(s2650_mirror_w)
+	AM_RANGE(0x4000, 0x4fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x5000, 0x5fff) AM_WRITE(s2650_mirror_w)
+	AM_RANGE(0x6000, 0x6fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x7000, 0x7fff) AM_WRITE(s2650_mirror_w)
+ADDRESS_MAP_END
 
 
 /*************************************
@@ -895,65 +896,65 @@ MEMORY_END
  *
  *************************************/
 
-static PORT_WRITE_START( writeport )
-	{ 0x00, 0x00, interrupt_vector_w },	/* Pac-Man only */
-PORT_END
+static ADDRESS_MAP_START( writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_WRITE(interrupt_vector_w)	/* Pac-Man only */
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( vanvan_writeport )
-	{ 0x01, 0x01, SN76496_0_w },
-	{ 0x02, 0x02, SN76496_1_w },
-PORT_END
+static ADDRESS_MAP_START( vanvan_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x01, 0x01) AM_WRITE(SN76496_0_w)
+	AM_RANGE(0x02, 0x02) AM_WRITE(SN76496_1_w)
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( dremshpr_writeport )
-	{ 0x06, 0x06, AY8910_write_port_0_w },
-	{ 0x07, 0x07, AY8910_control_port_0_w },
-PORT_END
+static ADDRESS_MAP_START( dremshpr_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x06, 0x06) AM_WRITE(AY8910_write_port_0_w)
+	AM_RANGE(0x07, 0x07) AM_WRITE(AY8910_control_port_0_w)
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( piranha_writeport )
-	{ 0x00, 0x00, piranha_interrupt_vector_w },
-PORT_END
+static ADDRESS_MAP_START( piranha_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_WRITE(piranha_interrupt_vector_w)
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( nmouse_writeport )
-	{ 0x00, 0x00, nmouse_interrupt_vector_w },
-PORT_END
+static ADDRESS_MAP_START( nmouse_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_WRITE(nmouse_interrupt_vector_w)
+ADDRESS_MAP_END
 
-static PORT_READ_START( theglobp_readport )
-	{ 0x00, 0xff, theglobp_decrypt_rom },	/* Switch protection logic */
-PORT_END
+static ADDRESS_MAP_START( theglobp_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0xff) AM_READ(theglobp_decrypt_rom)	/* Switch protection logic */
+ADDRESS_MAP_END
 
-static PORT_READ_START( acitya_readport )
-	{ 0x00, 0xff, acitya_decrypt_rom }, /* Switch protection logic */
-PORT_END
+static ADDRESS_MAP_START( acitya_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0xff) AM_READ(acitya_decrypt_rom) /* Switch protection logic */
+ADDRESS_MAP_END
 
-static PORT_READ_START( mschamp_readport )
-	{ 0x00,0x00, mschamp_kludge_r },
-PORT_END
+static ADDRESS_MAP_START( mschamp_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_READ(mschamp_kludge_r)
+ADDRESS_MAP_END
 
-static PORT_READ_START( bigbucks_readport )
-	{ 0x0000, 0xffff, bigbucks_question_r },
-PORT_END
+static ADDRESS_MAP_START( bigbucks_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x0000, 0xffff) AM_READ(bigbucks_question_r)
+ADDRESS_MAP_END
 
-static PORT_READ_START( drivfrcp_readport )
-	{ 0x00, 0x00, MRA_NOP },
-	{ 0x01, 0x01, drivfrcp_port1_r },
-	{ S2650_SENSE_PORT, S2650_SENSE_PORT, input_port_3_r },
-PORT_END
+static ADDRESS_MAP_START( drivfrcp_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_READ(MRA8_NOP)
+	AM_RANGE(0x01, 0x01) AM_READ(drivfrcp_port1_r)
+	AM_RANGE(S2650_SENSE_PORT, S2650_SENSE_PORT) AM_READ(input_port_3_r)
+ADDRESS_MAP_END
 
-static PORT_READ_START( _8bpm_readport )
-	{ 0x00, 0x00, MRA_NOP },
-	{ 0x01, 0x01, _8bpm_port1_r },
-	{ 0xe0, 0xe0, MRA_NOP },
-	{ S2650_SENSE_PORT, S2650_SENSE_PORT, input_port_3_r },
-PORT_END
+static ADDRESS_MAP_START( _8bpm_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_READ(MRA8_NOP)
+	AM_RANGE(0x01, 0x01) AM_READ(_8bpm_port1_r)
+	AM_RANGE(0xe0, 0xe0) AM_READ(MRA8_NOP)
+	AM_RANGE(S2650_SENSE_PORT, S2650_SENSE_PORT) AM_READ(input_port_3_r)
+ADDRESS_MAP_END
 
-static PORT_READ_START( porky_readport )
-	{ 0x01, 0x01, porky_port1_r },
-	{ S2650_SENSE_PORT, S2650_SENSE_PORT, input_port_3_r },
-PORT_END
+static ADDRESS_MAP_START( porky_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x01, 0x01) AM_READ(porky_port1_r)
+	AM_RANGE(S2650_SENSE_PORT, S2650_SENSE_PORT) AM_READ(input_port_3_r)
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( s2650games_writeport )
-	{ S2650_DATA_PORT, S2650_DATA_PORT, SN76496_0_w },
-PORT_END
+static ADDRESS_MAP_START( s2650games_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(S2650_DATA_PORT, S2650_DATA_PORT) AM_WRITE(SN76496_0_w)
+ADDRESS_MAP_END
 
 
 /*************************************
@@ -2507,8 +2508,8 @@ static MACHINE_DRIVER_START( pacman )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main", Z80, 18432000/6)
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(0,writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(0,writeport)
 	MDRV_CPU_VBLANK_INT(pacman_interrupt,1)
 
 	MDRV_FRAMES_PER_SECOND(60.606060)
@@ -2550,7 +2551,7 @@ static MACHINE_DRIVER_START( mspacman )
 	MDRV_IMPORT_FROM(pacman)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(mspacman_readmem,mspacman_writemem)
+	MDRV_CPU_PROGRAM_MAP(mspacman_readmem,mspacman_writemem)
 	MDRV_CPU_VBLANK_INT(mspacman_interrupt,1)
 
 	MDRV_MACHINE_INIT(mspacman)
@@ -2575,8 +2576,8 @@ static MACHINE_DRIVER_START( mschamp )
 	MDRV_IMPORT_FROM(pacman)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(mschamp_readmem,writemem)
-	MDRV_CPU_PORTS(mschamp_readport,writeport)
+	MDRV_CPU_PROGRAM_MAP(mschamp_readmem,writemem)
+	MDRV_CPU_IO_MAP(mschamp_readport,writeport)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
 
 	MDRV_MACHINE_INIT(mschamp)
@@ -2592,8 +2593,8 @@ static MACHINE_DRIVER_START( theglobp )
 	MDRV_IMPORT_FROM(pacman)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(theglobp_readmem,writemem)
-	MDRV_CPU_PORTS(theglobp_readport,writeport)
+	MDRV_CPU_PROGRAM_MAP(theglobp_readmem,writemem)
+	MDRV_CPU_IO_MAP(theglobp_readport,writeport)
 
 	MDRV_MACHINE_INIT(theglobp)
 MACHINE_DRIVER_END
@@ -2605,8 +2606,8 @@ static MACHINE_DRIVER_START( vanvan )
 	MDRV_IMPORT_FROM(pacman)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(vanvan_readmem,vanvan_writemem)
-	MDRV_CPU_PORTS(0,vanvan_writeport)
+	MDRV_CPU_PROGRAM_MAP(vanvan_readmem,vanvan_writemem)
+	MDRV_CPU_IO_MAP(0,vanvan_writeport)
 	MDRV_CPU_VBLANK_INT(nmi_line_pulse,1)
 
 	MDRV_MACHINE_INIT(NULL)
@@ -2626,7 +2627,7 @@ static MACHINE_DRIVER_START( dremshpr )
 	MDRV_IMPORT_FROM(pacman)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_PORTS(0,dremshpr_writeport)
+	MDRV_CPU_IO_MAP(0,dremshpr_writeport)
 	MDRV_CPU_VBLANK_INT(nmi_line_pulse,1)
 
 	MDRV_MACHINE_INIT(NULL)
@@ -2642,7 +2643,7 @@ static MACHINE_DRIVER_START( alibaba )
 	MDRV_IMPORT_FROM(pacman)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(alibaba_readmem,alibaba_writemem)
+	MDRV_CPU_PROGRAM_MAP(alibaba_readmem,alibaba_writemem)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
 
 	MDRV_MACHINE_INIT(NULL)
@@ -2654,8 +2655,8 @@ static MACHINE_DRIVER_START( piranha )
 	MDRV_IMPORT_FROM(pacman)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(0,piranha_writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(0,piranha_writeport)
 
 	MDRV_MACHINE_INIT(piranha)
 MACHINE_DRIVER_END
@@ -2667,8 +2668,8 @@ static MACHINE_DRIVER_START( nmouse )
 	MDRV_IMPORT_FROM(pacman)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(0,nmouse_writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(0,nmouse_writeport)
 
 	MDRV_MACHINE_INIT(NULL)
 MACHINE_DRIVER_END
@@ -2680,8 +2681,8 @@ static MACHINE_DRIVER_START( acitya )
 	MDRV_IMPORT_FROM(pacman)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(acitya_readmem,writemem)
-	MDRV_CPU_PORTS(acitya_readport,writeport)
+	MDRV_CPU_PROGRAM_MAP(acitya_readmem,writemem)
+	MDRV_CPU_IO_MAP(acitya_readport,writeport)
 
 	MDRV_MACHINE_INIT(acitya)
 MACHINE_DRIVER_END
@@ -2694,8 +2695,8 @@ static MACHINE_DRIVER_START( bigbucks )
 
 	MDRV_CPU_MODIFY("main")
 	MDRV_CPU_FLAGS(CPU_16BIT_PORT)
-	MDRV_CPU_MEMORY(readmem,bigbucks_writemem)
-	MDRV_CPU_PORTS(bigbucks_readport,0)
+	MDRV_CPU_PROGRAM_MAP(readmem,bigbucks_writemem)
+	MDRV_CPU_IO_MAP(bigbucks_readport,0)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,20)
 
 	MDRV_MACHINE_INIT(NULL)
@@ -2711,7 +2712,7 @@ static MACHINE_DRIVER_START( s2650games )
 
 	MDRV_CPU_REMOVE("main")
 	MDRV_CPU_ADD_TAG("main", S2650, 18432000/6/2/3)	/* ??? */
-	MDRV_CPU_MEMORY(s2650games_readmem,s2650games_writemem)
+	MDRV_CPU_PROGRAM_MAP(s2650games_readmem,s2650games_writemem)
 	MDRV_CPU_VBLANK_INT(s2650_interrupt,1)
 
 	MDRV_SCREEN_SIZE(32*8, 32*8)
@@ -2734,7 +2735,7 @@ static MACHINE_DRIVER_START( drivfrcp )
 	MDRV_IMPORT_FROM(s2650games)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_PORTS(drivfrcp_readport,s2650games_writeport)
+	MDRV_CPU_IO_MAP(drivfrcp_readport,s2650games_writeport)
 MACHINE_DRIVER_END
 
 
@@ -2744,7 +2745,7 @@ static MACHINE_DRIVER_START( 8bpm )
 	MDRV_IMPORT_FROM(s2650games)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_PORTS(_8bpm_readport,s2650games_writeport)
+	MDRV_CPU_IO_MAP(_8bpm_readport,s2650games_writeport)
 MACHINE_DRIVER_END
 
 
@@ -2754,107 +2755,9 @@ static MACHINE_DRIVER_START( porky )
 	MDRV_IMPORT_FROM(s2650games)
 
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_PORTS(porky_readport,s2650games_writeport)
+	MDRV_CPU_IO_MAP(porky_readport,s2650games_writeport)
 MACHINE_DRIVER_END
 
-
-ROM_START( bigbucks )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "p.rom",        0x0000, 0x4000, CRC(eea6c1c9) SHA1(eaea4ffbcdfbb38364887830fd00ac87fe838006) )
-	ROM_LOAD( "m.rom",        0x8000, 0x2000, CRC(bb8f7363) SHA1(11ebdb1a3c589515240d006646f2fb3ead06bdcf) )
-
-	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "5e.cpu",       0x0000, 0x1000, CRC(18442c37) SHA1(fac445d15731532364315852492b48470039c0ca) )
-
-	ROM_REGION( 0x1000, REGION_GFX2, 0 )
-	/* Not Used */
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) SHA1(8d0268dee78e47c712202b0ec4f1f51109b1f2a5) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) SHA1(19097b5f60d1030f8b82d9f1d3a241f93e5c75d6) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) SHA1(bbcec0570aeceb582ff8238a4bc8546a23430081) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )	/* timing - not used */
-
-	ROM_REGION( 0x60000, REGION_USER1, 0 )	/* Question ROMs */
-	ROM_LOAD( "rom1.rom",     0x00000, 0x8000, CRC(90b7785f) SHA1(7fc5aa2be868b87ffb9e957c204dabf1508e212e) )
-	ROM_LOAD( "rom2.rom",     0x08000, 0x8000, CRC(60172d77) SHA1(92cb2312c6f3395f7ddb45e58695dd000d6ec756) )
-	ROM_LOAD( "rom3.rom",     0x10000, 0x8000, CRC(a2207320) SHA1(18ad94b62e7e611ab8a1cbf2d2c6576b8840da2f) )
-	ROM_LOAD( "rom4.rom",     0x18000, 0x8000, CRC(5a74c1f9) SHA1(0c55a27a492099ac98daefe0c199761ab1ccce82) )
-	ROM_LOAD( "rom5.rom",     0x20000, 0x8000, CRC(93bc1080) SHA1(53e40b8bbc82b3be044f8a39b71fbb811e9263d8) )
-	ROM_LOAD( "rom6.rom",     0x28000, 0x8000, CRC(eea2423f) SHA1(34de5495061be7d498773f9a723052c4f13d4a0c) )
-	ROM_LOAD( "rom7.rom",     0x30000, 0x8000, CRC(96694055) SHA1(64ebbd85c2a60936f60345b5d573cd9eda196d3f) )
-	ROM_LOAD( "rom8.rom",     0x38000, 0x8000, CRC(e68ebf8e) SHA1(cac17ac0231a0526e7f4a58bcb2cae3d05727ee6) )
-	ROM_LOAD( "rom9.rom",     0x40000, 0x8000, CRC(fd20921d) SHA1(eedf93841b5ebe9afc4184e089d6694bbdb64445) )
-	ROM_LOAD( "rom10.rom",    0x48000, 0x8000, CRC(5091b951) SHA1(224b65795d11599cdbd78e984ac2c71e8847041c) )
-	ROM_LOAD( "rom11.rom",    0x50000, 0x8000, CRC(705128db) SHA1(92d45bfd09f61a1a3ac46c2e0ec1f634f04cf049) )
-	ROM_LOAD( "rom12.rom",    0x58000, 0x8000, CRC(74c776e7) SHA1(03860d90461b01df4b734b784dddb20843ba811a) )
-ROM_END
-
-
-ROM_START( drivfrcp )
-	ROM_REGION( 0x8000, REGION_CPU1, 0 )	/* 32k for code */
-	ROM_LOAD( "drivforc.1",   0x0000, 0x1000, CRC(10b59d27) SHA1(fa09f3b95319a3487fa54b72198f41211663e087) )
-	ROM_CONTINUE(			  0x2000, 0x1000 )
-	ROM_CONTINUE(			  0x4000, 0x1000 )
-	ROM_CONTINUE(			  0x6000, 0x1000 )
-
-	ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "drivforc.2",   0x0000, 0x1000, CRC(56331cb5) SHA1(520f2a18ebbdfb093c8e4d144749a3f5cbce19bf) )
-	ROM_CONTINUE(			  0x2000, 0x1000 )
-	ROM_CONTINUE(			  0x1000, 0x1000 )
-	ROM_CONTINUE(			  0x3000, 0x1000 )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "drivforc.pr1", 0x0000, 0x0020, CRC(045aa47f) SHA1(ea9034f441937df43a7c0bdb502165fb27d06635) )
-	ROM_LOAD( "drivforc.pr2", 0x0020, 0x0100, CRC(9e6d2f1d) SHA1(7bcbcd4c0a40264c3b0667fc6a39ed4f2a86cafe) )
-ROM_END
-
-
-ROM_START( 8bpm )
-	ROM_REGION( 0x8000, REGION_CPU1, 0 )	/* 32k for code */
-	ROM_LOAD( "8bpmp.bin",    0x0000, 0x1000, CRC(b4f7eba7) SHA1(9b15543895c70f5ee2b4f91b8af78a884453e4f1) )
-	ROM_CONTINUE(			  0x2000, 0x1000 )
-	ROM_CONTINUE(			  0x4000, 0x1000 )
-	ROM_CONTINUE(			  0x6000, 0x1000 )
-
-	ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "8bpmc.bin",    0x0000, 0x1000, CRC(1c894a6d) SHA1(04e5c548290095d1d0f873b6c2e639e6dbe8ff35) )
-	ROM_CONTINUE(			  0x2000, 0x1000 )
-	ROM_CONTINUE(			  0x1000, 0x1000 )
-	ROM_CONTINUE(			  0x3000, 0x1000 )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "8bpm.pr1", 0x0000, 0x0020, NO_DUMP )
-	ROM_LOAD( "8bpm.pr2", 0x0020, 0x0100, NO_DUMP )
-	/* used only to display something until we have the dumps */
-	ROM_LOAD( "drivforc.pr1", 0x0000, 0x0020, CRC(045aa47f) SHA1(ea9034f441937df43a7c0bdb502165fb27d06635) )
-	ROM_LOAD( "drivforc.pr2", 0x0020, 0x0100, CRC(9e6d2f1d) SHA1(7bcbcd4c0a40264c3b0667fc6a39ed4f2a86cafe) )
-ROM_END
-
-
-ROM_START( porky )
-	ROM_REGION( 0x8000, REGION_CPU1, 0 )	/* 32k for code */
-	ROM_LOAD( "pp",			  0x0000, 0x1000, CRC(00592624) SHA1(41e554178a89b95bed1f570fab28e2a04f7a68d6) )
-	ROM_CONTINUE(			  0x2000, 0x1000 )
-	ROM_CONTINUE(			  0x4000, 0x1000 )
-	ROM_CONTINUE(			  0x6000, 0x1000 )
-
-	/* what is it used for ? */
-	ROM_REGION( 0x4000, REGION_USER1, 0 )
-	ROM_LOAD( "ps",			  0x0000, 0x4000, CRC(2efb9861) SHA1(8c5a23ed15bd985af78a54d2121fe058e53703bb) )
-
-	ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "pc",			  0x0000, 0x1000, CRC(a20e3d39) SHA1(3762289a495d597d6b9540ea7fa663128a9d543c) )
-	ROM_CONTINUE(			  0x2000, 0x1000 )
-	ROM_CONTINUE(			  0x1000, 0x1000 )
-	ROM_CONTINUE(			  0x3000, 0x1000 )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "7f",			  0x0000, 0x0020, CRC(98bce7cc) SHA1(e461862ccaf7526421631ac6ebb9b09cd0bc9909) )
-	ROM_LOAD( "4a",			  0x0020, 0x0100, CRC(30fe0266) SHA1(5081a19ceaeb937ee1378f3374e9d5949d17c3e8) )
-ROM_END
 
 /*************************************
  *
@@ -3918,12 +3821,17 @@ ROM_START( alibaba )
 	ROM_LOAD( "5k",           0x0800, 0x0800, CRC(713086b3) SHA1(a1609bae637207a82920678f05bcc10a5ff096de) )
 
 	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "alibaba.7f",   0x0000, 0x0020, NO_DUMP )  /* missing */
-	ROM_LOAD( "alibaba.4a",   0x0020, 0x0100, NO_DUMP )
+	ROM_LOAD( "82s123.e7",    0x0000, 0x0020, CRC(2fc650bd) SHA1(8d0268dee78e47c712202b0ec4f1f51109b1f2a5) )
+	ROM_LOAD( "82s129.a4",    0x0020, 0x0100, CRC(3eb3a8e4) SHA1(19097b5f60d1030f8b82d9f1d3a241f93e5c75d6) )
 
 	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
 	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) SHA1(bbcec0570aeceb582ff8238a4bc8546a23430081) )
 	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )	/* timing - not used */
+
+	// unknown, used for the mistery items ?
+	// 1ST AND 2ND HALF IDENTICAL
+	ROM_REGION( 0x1000, REGION_USER1, 0 )
+	ROM_LOAD( "7.p6",         0x000, 0x1000, CRC(d8eb7cbd) SHA1(fe482d36d81de5c5034e18b91bfa6b43111e683e) )
 ROM_END
 
 
@@ -4129,3436 +4037,104 @@ ROM_START( nmouseb )
 	ROM_LOAD( "82s126.3m", 0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )   /*timing - not used */
 ROM_END
 
-/* PacMAME Games */
-ROM_START( superabc )
-	ROM_REGION( 0x80000, REGION_CPU1, 0 )
-	ROM_LOAD( "u14.rom",   0x0000, 0x80000, CRC(a560efe6) )
 
-	ROM_REGION( 0x80000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "u1.rom",   0x0000, 0x80000, CRC(45caace0) )
-
-/*
-	ROM_LOAD( "u18.rom",   0x0020, 0x0100, CRC(3eb3a8e4) )
-*/
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "7f.rom",    0x0000, 0x0020, CRC(3a188666) )
-	ROM_LOAD( "4a.rom",    0x0020, 0x0100, CRC(4382c049) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( multi14 )
-	ROM_REGION( 0x80000, REGION_CPU1, 0 )
-	ROM_LOAD( "Mpac1_4.bin",   0x0000, 0x80000, CRC(23de184d) )
-
-	ROM_REGION( 0x2000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "menuclay.gfx",   0x0000, 0x2000, CRC(04a1167e) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( multi15 )
-	ROM_REGION( 0x80000, REGION_CPU1, 0 )
-	ROM_LOAD( "mpexe15.bin",   0x0000, 0x80000, CRC(eb181a29) )
-
-	ROM_REGION( 0x20000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "mpgfx15.bin",   0x0000, 0x20000, CRC(012fb9ec) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( hanglyb )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "01",           0x0000, 0x0800, CRC(9d027c4a) )
-	ROM_LOAD( "05",           0x0800, 0x0800, CRC(194c7189) )
-	ROM_LOAD( "02",           0x1000, 0x0800, CRC(5ba228bb) )
-	ROM_LOAD( "06",           0x1800, 0x0800, CRC(70810ccf) )
-	ROM_LOAD( "03",           0x2000, 0x0800, CRC(08419c4a) )
-	ROM_LOAD( "07",           0x2800, 0x0800, CRC(3f250c58) )
-	ROM_LOAD( "04",           0x3000, 0x0800, CRC(603b70b7) )
-	ROM_LOAD( "08",           0x3800, 0x0800, CRC(71293b1f) )
+ROM_START( bigbucks )
+	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
+	ROM_LOAD( "p.rom",        0x0000, 0x4000, CRC(eea6c1c9) SHA1(eaea4ffbcdfbb38364887830fd00ac87fe838006) )
+	ROM_LOAD( "m.rom",        0x8000, 0x2000, CRC(bb8f7363) SHA1(11ebdb1a3c589515240d006646f2fb3ead06bdcf) )
 
 	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "09",           0x0000, 0x0800, CRC(c62bbabf) )
-	ROM_LOAD( "11",           0x0800, 0x0800, CRC(777c70d3) )
+	ROM_LOAD( "5e.cpu",       0x0000, 0x1000, CRC(18442c37) SHA1(fac445d15731532364315852492b48470039c0ca) )
 
-	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "10",         0x0000, 0x0800, CRC(ca8c184c) )
-	ROM_LOAD( "12",           0x0800, 0x0800, CRC(7dc75a81) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( udpacman )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(817d94e3) )
-
-	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( sueworld )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(677adea7) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(6c975345) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(2c809842) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacjr1 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(fcfb21a3) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(9f3c32d4) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(c2310808) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( pacjr2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(cc26c905) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(9f3c32d4) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(c2310808) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( pacjr3 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(d4d8cb9b) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(9f3c32d4) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(c2310808) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( pacjr4 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(42ca024b) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(9f3c32d4) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(c2310808) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( caterpil )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "puckman.6e",   0x0000, 0x1000, CRC(b53c5650) )
-	ROM_LOAD( "puckman.6f",   0x1000, 0x1000, CRC(53845efb) )
-	ROM_LOAD( "puckman.6h",   0x2000, 0x1000, CRC(a474357e) )
-	ROM_LOAD( "puckman.6j",   0x3000, 0x1000, CRC(5df0ea3b) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5e",    0x0000, 0x1000, CRC(0387907d) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5f",    0x0000, 0x1000, CRC(aa450714) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacmulti )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacmulti.6e",    0x0000, 0x1000, CRC(cfb721a8) )
-	ROM_LOAD( "pacmulti.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacmulti.6h",    0x2000, 0x1000, CRC(e55d5230) )
-	ROM_LOAD( "pacmulti.6j",    0x3000, 0x1000, CRC(29ba4b53) )
-	ROM_LOAD( "pacmulti.8",     0x8000, 0x1000, CRC(5a4b59dc) )
-	ROM_LOAD( "pacmulti.9",     0x9000, 0x1000, CRC(3b939b12) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacmulti.5e",    0x0000, 0x1000, CRC(46cdda4a) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacmulti.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacstrm )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(720dc3ee) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(817d94e3) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(b2940b89) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(5c65865f) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( mshangly )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(5c281d01) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(615af909) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( chtmsatk )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "mspacatk.2",   0x1000, 0x1000, CRC(0af09d31) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "mspacatk.5",   0x8000, 0x1000, CRC(e6e06954) )
-	ROM_LOAD( "mspacatk.6",   0x9000, 0x1000, CRC(3b5db308) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(5c281d01) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(615af909) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( fstmsatk )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "mspacatk.2",   0x1000, 0x1000, CRC(a8d6c227) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "mspacatk.5",   0x8000, 0x1000, CRC(e6e06954) )
-	ROM_LOAD( "mspacatk.6",   0x9000, 0x1000, CRC(3b5db308) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(5c281d01) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(615af909) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( ultra2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(83da903e) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msatk2ad )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "mspacatk.1",   0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "mspacatk.2",   0x1000, 0x1000, CRC(0af09d31) )
-	ROM_LOAD( "mspacatk.3",   0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "mspacatk.4",   0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "mspacatk.5",   0x8000, 0x1000, CRC(5a72a7a6) )
-	ROM_LOAD( "mspacatk.6",   0x9000, 0x1000, CRC(bd0c3e94) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(dc70ed2e) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(643d5523) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msatkad )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "mspacatk.2",   0x1000, 0x1000, CRC(0af09d31) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "mspacatk.5",   0x8000, 0x1000, CRC(e6e06954) )
-	ROM_LOAD( "mspacatk.6",   0x9000, 0x1000, CRC(3b5db308) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(dc70ed2e) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(643d5523) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( hanglyad )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	
-	ROM_LOAD( "hangly.6e",    0x0000, 0x1000, CRC(5fe8610a) )
-	ROM_LOAD( "hangly.6f",    0x1000, 0x1000, CRC(73726586) )
-	ROM_LOAD( "hangly.6h",    0x2000, 0x1000, CRC(4e7ef99f) )
-	ROM_LOAD( "hangly.6j",    0x3000, 0x1000, CRC(7f4147e6) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(93fd3682) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(c2310808) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( vhangly )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	
-	ROM_LOAD( "hangly.6e",    0x0000, 0x1000, CRC(5fe8610a) )
-	ROM_LOAD( "hangly.6f",    0x1000, 0x1000, CRC(73726586) )
-	ROM_LOAD( "hangly.6h",    0x2000, 0x1000, CRC(4e7ef99f) )
-	ROM_LOAD( "hangly.6j",    0x3000, 0x1000, CRC(7f4147e6) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(936d0475) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(022d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	
-ROM_END
-
-ROM_START( xensad )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(64a10b6c) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(315f7131) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(157a6c0f) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vectxens )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(64a10b6c) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(936d0475) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(022d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( punleash )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(eddb20e7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(57fe8b4d) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(94c63bb1) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(fe7734d5) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(ef155ffb) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(70d15899) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(713a4ba4) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(98d3d364) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(357c2523) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(5ff3b85a) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( fpnleash )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(eddb20e7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(57fe8b4d) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(94c63bb1) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(fe7734d5) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(ef155ffb) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(70d15899) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "flat.5e",           0x0000, 0x1000, CRC(1f69d1d0) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(98d3d364) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(357c2523) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(5ff3b85a) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( sumelton )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(c1fe2c7d) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(10894f38) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(debef8a9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacweird )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman6.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman6.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman6.6h",    0x2000, 0x1000, CRC(aee79ea1) )
-	ROM_LOAD( "pacman6.6j",    0x3000, 0x1000, CRC(581ae70b) )
-	ROM_LOAD( "pacmaps.rom",   0x8000, 0x1000, CRC(92fac825) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5e",    0x0000, 0x1000, CRC(11077f3e) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5f",    0x0000, 0x1000, CRC(7c213ab4) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msnes6m2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(513f4d5c) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(e21c81ff) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(b8f8edda) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(5d7888bc) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(3abb116b) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(6a4db98d) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(63dd53a) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(e271a166) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msnes6m3 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(513f4d5c) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(e21c81ff) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(20833779) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(a047e68f) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(3abb116b) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(6a4db98d) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(63dd53a) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(e271a166) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msnes6m4 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(513f4d5c) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(e21c81ff) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(23c0db46) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(daafdb39) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(22e5b64e) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(6a4db98d) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(63dd53a) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(e271a166) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msnes4a )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(513f4d5c) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(e21c81ff) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(d16b9605) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(e6b58707) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(22e5b64e) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(6a4db98d) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(63dd53a) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(e271a166) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacmn6m2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman6.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman6.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman6.6h",    0x2000, 0x1000, CRC(aee79ea1) )
-	ROM_LOAD( "pacman6.6j",    0x3000, 0x1000, CRC(581ae70b) )
-	ROM_LOAD( "pacmaps.rom",   0x8000, 0x1000, CRC(aadee235) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5e",    0x0000, 0x1000, CRC(60ada878) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msmini )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(7787a3f6) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(98ab3c44) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	/* timing - not used */
-ROM_END
-
-ROM_START( msminia )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "mspacatk.2",   0x1000, 0x1000, CRC(0af09d31) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "mspacatk.5",   0x8000, 0x1000, CRC(e6e06954) )
-	ROM_LOAD( "mspacatk.6",   0x9000, 0x1000, CRC(3b5db308) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(7787a3f6) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(98ab3c44) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	/* timing - not used */
-ROM_END
-
-ROM_START( mspc6mad )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(513f4d5c) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(e21c81ff) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(b556fe78) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(4dbe1939) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(92ea9860) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(713cc17e) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	/* timing - not used */
-ROM_END
-
-ROM_START( msvctr6m )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(513f4d5c) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(e21c81ff) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(d0bd89d9) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(c5662407) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(64b35a5a) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(57cb31e3) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )	/* timing - not used */
-ROM_END
-
-ROM_START( pmad6m )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman6.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman6.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman6.6h",    0x2000, 0x1000, CRC(aee79ea1) )
-	ROM_LOAD( "pacman6.6j",    0x3000, 0x1000, CRC(581ae70b) )
-	ROM_LOAD( "pacmaps.rom",   0x8000, 0x1000, CRC(d6a0d7f2) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5e",    0x0000, 0x1000, CRC(93fd3682) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5f",    0x0000, 0x1000, CRC(c2310808) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( snakeyes )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman6.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman6.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman6.6h",    0x2000, 0x1000, CRC(aee79ea1) )
-	ROM_LOAD( "pacman6.6j",    0x3000, 0x1000, CRC(581ae70b) )
-	ROM_LOAD( "pacmaps.rom",   0x8000, 0x1000, CRC(7e506e78) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5e",    0x0000, 0x1000, CRC(46cdda4a) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( tbone )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman6.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman6.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman6.6h",    0x2000, 0x1000, CRC(aee79ea1) )
-	ROM_LOAD( "pacman6.6j",    0x3000, 0x1000, CRC(581ae70b) )
-	ROM_LOAD( "pacmaps.rom",   0x8000, 0x1000, CRC(e7377f2d) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5e",    0x0000, 0x1000, CRC(afd44c48) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vectr6m )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman6.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman6.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman6.6h",    0x2000, 0x1000, CRC(aee79ea1) )
-	ROM_LOAD( "pacman6.6j",    0x3000, 0x1000, CRC(581ae70b) )
-	ROM_LOAD( "pacmaps.rom",   0x8000, 0x1000, CRC(de753fd9) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5e",    0x0000, 0x1000, CRC(f7be09ba) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5f",    0x0000, 0x1000, CRC(22d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vectr6tb )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman6.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman6.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman6.6h",    0x2000, 0x1000, CRC(aee79ea1) )
-	ROM_LOAD( "pacman6.6j",    0x3000, 0x1000, CRC(581ae70b) )
-	ROM_LOAD( "pacmaps.rom",   0x8000, 0x1000, CRC(bdbbb207) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5e",    0x0000, 0x1000, CRC(f7be09ba) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5f",    0x0000, 0x1000, CRC(22d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( snowpac )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(4f9e1d02) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(2cc60a94) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(41ba87bd) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msultra )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(36b5e9fd) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(cf609615) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(7cd365) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(508af5b0) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(db5a4630) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msnes63 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(513f4d5c) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(f4ea7d2c) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(1ea43bba) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(d3a28769) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(6a4db98d) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(63dd53a) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(e271a166) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msnes62 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(513f4d5c) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(52120bc9) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(8fd36e02) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(d3a28769) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(6a4db98d) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(63dd53a) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(e271a166) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msnes6m )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(513f4d5c) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(e21c81ff) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(bc091971) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(23ebe9a1) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(3abb116b) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(6a4db98d) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(63dd53a) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(e271a166) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( ms2600 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(c2a293df) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(4852db05) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(f32b076f) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(6b07b97a) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(f844608b) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( mspacren )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(efe80423) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(f513ae17) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(ce3b842b) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(31b134a0) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(22f61d1) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(7b6aa3c9) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(64fe1dbf) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( baby2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(260b87b8) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(6f7d8d57) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(b6d77a1e) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( baby3 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(6c0e22c8) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(22174b65) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(b6d77a1e) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( baby4 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(f8cd7ebb) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(22174b65) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(b6d77a1e) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msbaby )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(17aea21d) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(c08aa7f) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(e28aaa1f) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(e764738d) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(3d316ad0) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msbaby1 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(17aea21d) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(c08aa7f) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(e28aaa1f) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(e764738d) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(3d316ad0) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacman6 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman6.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman6.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman6.6h",    0x2000, 0x1000, CRC(aee79ea1) )
-	ROM_LOAD( "pacman6.6j",    0x3000, 0x1000, CRC(581ae70b) )
-	ROM_LOAD( "pacmaps.rom",   0x8000, 0x1000, CRC(de753fd9) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5e",    0x0000, 0x1000, CRC(46cdda4a) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( ultrapac )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman6.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman6.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman6.6h",    0x2000, 0x1000, CRC(aee79ea1) )
-	ROM_LOAD( "pacman6.6j",    0x3000, 0x1000, CRC(84c6c23b) )
-	ROM_LOAD( "pacmaps.rom",   0x8000, 0x1000, CRC(be212894) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5e",    0x0000, 0x1000, CRC(d46efbcf) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman6.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( crazypac )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(9f754a51) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( dizzy )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(bf05bf15) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(f999a8d9) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(7cb7b9b1) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msrumble )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(15b02313) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(e2473a86) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(17abb097) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(5c281d01) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(615af909) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( mrpacman )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(65c0526c) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(4078d9b2) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(c1637f1c) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(83e6a3a9) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(45dadf0) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vcrunchy )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(c21c6c52) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(936d0475) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(22d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vpacbell )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(4b428215) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(936d0475) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(22d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vpacelec )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(9e5c763d) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(936d0475) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(22d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vpacjail )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(cc31f185) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(936d0475) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(22d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vpacshuf )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(55cc4d87) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(936d0475) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(22d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vpspeed )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(e7946d1) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(936d0475) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(22d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vpacms1 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(c5da3887) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(35f0597) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(306b24f0) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vpacms2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(b0a107ea) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(35f0597) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(306b24f0) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vpacms3 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(c7d8325a) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(35f0597) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(306b24f0) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vpacms4 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(7b63ff9b) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(35f0597) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(306b24f0) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vpacmsa1 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(7163b97) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(35f0597) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(306b24f0) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vpacmsa2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(15e83c24) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(35f0597) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(306b24f0) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vpacmsa3 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(5762f9cf) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(35f0597) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(306b24f0) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vpacmsa4 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(d9c2a669) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(35f0597) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(306b24f0) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vecbaby )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "babypac.6j",    0x3000, 0x1000, CRC(4e4ac798) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(936d0475) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(22d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vecbaby2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "babypac2.6j",    0x3000, 0x1000, CRC(742453ba) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(936d0475) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(22d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vecbaby3 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "babypac3.6j",    0x3000, 0x1000, CRC(b82f2b73) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(936d0475) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(22d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( puckren )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(f5ecf67) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(70ea1149) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(c6bb6ea6) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(dc90f1dc) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(a502e25f) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(18d44098) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(7b6aa3c9) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(64fe1dbf) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( puckrenc )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(f5ecf67) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(8a75a7e2) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(c6bb6ea6) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(dc90f1dc) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(a502e25f) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(18d44098) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(7b6aa3c9) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(64fe1dbf) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( mspacatb )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "mspacatk.2",   0x1000, 0x1000, CRC(0af09d31) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "mspacatk.5b",   0x8000, 0x1000, CRC(5a72a7a6) )
-	ROM_LOAD( "mspacatk.6b",   0x9000, 0x1000, CRC(7a8c4dfe) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(5c281d01) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(615af909) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacms1 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(c5da3887) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(7394868b) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(ce1a3264) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacms2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(b0a107ea) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(7394868b) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(ce1a3264) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacms3 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(c7d8325a) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(7394868b) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(ce1a3264) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacms4 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(7b63ff9b) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(7394868b) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(ce1a3264) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacmsa1 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(7163b97) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(7394868b) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(ce1a3264) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacmsa2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(15e83c24) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(7394868b) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(ce1a3264) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacmsa3 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(5762f9cf) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(7394868b) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(ce1a3264) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacmsa4 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(d9c2a669) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(7394868b) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(ce1a3264) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( fastplus )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-/*	ROM_LOAD( "mspacatk.2",   0x1000, 0x1000, CRC(0af09d31) ) */
-	ROM_LOAD( "boot2",   	  0x1000, 0x1000, CRC(a8d6c227) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "mspacatk.5",   0x8000, 0x1000, CRC(e6e06954) )
-	ROM_LOAD( "mspacatk.6",   0x9000, 0x1000, CRC(3b5db308) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(5c281d01) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(615af909) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacbaby )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "babypac.6j",    0x3000, 0x1000, CRC(4e4ac798) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacbaby2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "babypac2.6j",  0x3000, 0x1000, CRC(742453ba) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacbaby3 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "babypac3.6j",    0x3000, 0x1000, CRC(b82f2b73) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pmanaltm )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(fee263b3) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(c5ec2352) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(2083b03) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(57a07f6e) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( faststrm )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(a8d6c227) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(b2940b89) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(5c65865f) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( mshearts )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(b5cf081) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(615af909) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vectplus )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacplus.6e",   0x0000, 0x1000, CRC(d611ef68) )
-	ROM_LOAD( "pacplus.6f",   0x1000, 0x1000, CRC(c7207556) )
-	ROM_LOAD( "pacplus.6h",   0x2000, 0x1000, CRC(ae379430) )
-	ROM_LOAD( "pacplus.6j",   0x3000, 0x1000, CRC(5a6dff7b) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacplus.5e",    0x0000, 0x1000, CRC(330abcc6) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacplus.5f",    0x0000, 0x1000, CRC(61da12cf) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "pacplus.7f",    0x0000, 0x0020, CRC(63dd53a) )
-	ROM_LOAD( "pacplus.4a",    0x0020, 0x0100, CRC(e271a166) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacbell )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(4b428215) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacelec )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(9e5c763d) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacinvis )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(1b4e96dc) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacjail )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(cc31f185) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacshuf )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(55cc4d87) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacspeed )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(e7946d1) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pcrunchy )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(c21c6c52) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacm255 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(d3640977) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(817d94e3) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacn255 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "namcopac.6e",  0x0000, 0x1000, CRC(fee263b3) )
-	ROM_LOAD( "namcopac.6f",  0x1000, 0x1000, CRC(39d1fc83) )
-	ROM_LOAD( "namcopac.6h",  0x2000, 0x1000, CRC(6dac9e8f) )
-	ROM_LOAD( "namcopac.6j",  0x3000, 0x1000, CRC(7a36fe55) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( hearts )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(817d94e3) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(5be0a4e4) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacplusc )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacplusc.rom",   0x0000, 0x4000, CRC(a0d25591) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacplus.5e",    0x0000, 0x1000, CRC(22c35da) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacplus.5f",    0x0000, 0x1000, CRC(4de65cdd) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "pacplus.7f",    0x0000, 0x0020, CRC(63dd53a) )
-	ROM_LOAD( "pacplus.4a",    0x0020, 0x0100, CRC(e271a166) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pmad00 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(dd2eb43d) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(5f1aea94) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(315f7131) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(157a6c0f) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msf1pac )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(e255428b) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(c7183fd2) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(a355e061) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( eltonpac )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(817d94e3) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(9c093e5b) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(c2825641) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( xensrev )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(64a10b6c) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(40e3522d) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pengman )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(37e7f3ba) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(2f5f5e6) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(5cd3db2e) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( europac )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(a4e82007) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(208da4) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(d36dabf) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pac2600 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(0a27d11d) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(ab23fe0c) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(87d8f5ce) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(91bd671f) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( roboman )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(a909673e) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(e386213e) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(d8db5788) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pmad )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(dd2eb43d) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(ff3f4866) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(5b794d59) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(59a9362c) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pmada )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(dd2eb43d) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(24e43519) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(9f3c32d4) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(c2310808) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacmini )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(5e04f9c5) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(5520b393) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(30e6024c) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacmini2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(092dd5fa) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(130eff7b) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(30e6024c) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pacman3d )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(96364259) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(959e930e) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(aa203d45) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(d1830540) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vectrpac )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(817d94e3) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(936d0475) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(22d0686) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( brakman )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(1a6fb2d4) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(2d2af2e5) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(a004abe7) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(30ed6264) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( chtpac )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(72cea888) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(817d94e3) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( fastpop )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(720dc3ee) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(817d94e3) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(af2b610b) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( chtpop )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacman.6e",    0x0000, 0x1000, CRC(c1e6ab10) )
-	ROM_LOAD( "pacman.6f",    0x1000, 0x1000, CRC(72cea888) )
-	ROM_LOAD( "pacman.6h",    0x2000, 0x1000, CRC(bcdd1beb) )
-	ROM_LOAD( "pacman.6j",    0x3000, 0x1000, CRC(817d94e3) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacman.5f",    0x0000, 0x1000, CRC(af2b610b) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pmanalt )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "namcopac.6e",    0x0000, 0x1000, CRC(fee263b3) )
-	ROM_LOAD( "namcopac.6f",    0x1000, 0x1000, CRC(c5ec2352) )
-	ROM_LOAD( "namcopac.6h",    0x2000, 0x1000, CRC(02083b03) )
-	ROM_LOAD( "namcopac.6j",    0x3000, 0x1000, CRC(57a07f6e) )
-/*
-	ROM_REGION_DISPOSE(0x2000)
-	ROM_LOAD( "namcopac.5e",    0x0000, 0x1000, CRC(0c944964) )
-	ROM_LOAD( "namcopac.5f",    0x1000, 0x1000, CRC(958fedf9) )
-*/
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "namcopac.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "namcopac.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( fasthang )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "hangly.6e",    0x0000, 0x1000, CRC(5fe8610a) )
-	ROM_LOAD( "hangly.6f",    0x1000, 0x1000, CRC(1b1014bc) )
-	ROM_LOAD( "hangly.6h",    0x2000, 0x1000, CRC(4e7ef99f) )
-	ROM_LOAD( "hangly.6j",    0x3000, 0x1000, CRC(7f4147e6) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "hangly.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "hangly.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( chthang )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "hangly.6e",    0x0000, 0x1000, CRC(5fe8610a) )
-	ROM_LOAD( "hangly.6f",    0x1000, 0x1000, CRC(73726586) )
-	ROM_LOAD( "hangly.6h",    0x2000, 0x1000, CRC(4e7ef99f) )
-	ROM_LOAD( "hangly.6j",    0x3000, 0x1000, CRC(7f4147e6) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "hangly.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "hangly.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( mazeman )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "puckman.6e",   0x0000, 0x1000, CRC(a8ae23c5) )
-	ROM_LOAD( "puckman.6f",   0x1000, 0x1000, CRC(77e44852) )
-	ROM_LOAD( "puckman.6h",   0x2000, 0x1000, CRC(6d16a528) )
-	ROM_LOAD( "puckman.6j",   0x3000, 0x1000, CRC(3c3ff208) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5e",    0x0000, 0x1000, CRC(38870a32) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5f",    0x0000, 0x1000, CRC(1fd18b80) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( fastpuck )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "puckman.6e",   0x0000, 0x1000, CRC(a8ae23c5) )
-	ROM_LOAD( "puckman.6f",   0x1000, 0x1000, CRC(720dc3ee) )
-	ROM_LOAD( "puckman.6h",   0x2000, 0x1000, CRC(197443f8) )
-	ROM_LOAD( "puckman.6j",   0x3000, 0x1000, CRC(2e64a3ba) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( chtpuck )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "puckman.6e",   0x0000, 0x1000, CRC(a8ae23c5) )
-	ROM_LOAD( "puckman.6f",   0x1000, 0x1000, CRC(72cea888) )
-	ROM_LOAD( "puckman.6h",   0x2000, 0x1000, CRC(197443f8) )
-	ROM_LOAD( "puckman.6j",   0x3000, 0x1000, CRC(2e64a3ba) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( puckman2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "puckman.6e",   0x0000, 0x1000, CRC(a8ae23c5) )
-	ROM_LOAD( "puckman.6f",   0x1000, 0x1000, CRC(720dc3ee) )
-	ROM_LOAD( "puckman.6h",   0x2000, 0x1000, CRC(197443f8) )
-	ROM_LOAD( "puckman.6j",   0x3000, 0x1000, CRC(0e3bdbde) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( fstpman2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "puckman.6e",   0x0000, 0x1000, CRC(a8ae23c5) )
-	ROM_LOAD( "puckman.6f",   0x1000, 0x1000, CRC(720dc3ee) )
-	ROM_LOAD( "puckman.6h",   0x2000, 0x1000, CRC(197443f8) )
-	ROM_LOAD( "puckman.6j",   0x3000, 0x1000, CRC(0e3bdbde) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( chtpman2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "puckman.6e",   0x0000, 0x1000, CRC(a8ae23c5) )
-	ROM_LOAD( "puckman.6f",   0x1000, 0x1000, CRC(72cea888) )
-	ROM_LOAD( "puckman.6h",   0x2000, 0x1000, CRC(197443f8) )
-	ROM_LOAD( "puckman.6j",   0x3000, 0x1000, CRC(0e3bdbde) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5e",    0x0000, 0x1000, CRC(0c944964) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "puckman.5f",    0x0000, 0x1000, CRC(958fedf9) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( pplusad )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "pacplus.6e",   0x0000, 0x1000, CRC(d611ef68) )
-	ROM_LOAD( "pacplus.6f",   0x1000, 0x1000, CRC(c7207556) )
-	ROM_LOAD( "pacplus.6h",   0x2000, 0x1000, CRC(ae379430) )
-	ROM_LOAD( "pacplus.6j",   0x3000, 0x1000, CRC(5a6dff7b) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacplus.5e",    0x0000, 0x1000, CRC(ce684d85) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "pacplus.5f",    0x0000, 0x1000, CRC(b86d002) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "pacplus.7f",    0x0000, 0x0020, CRC(63dd53a) )
-	ROM_LOAD( "pacplus.4a",    0x0020, 0x0100, CRC(e271a166) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( mssilad )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(79d241dd) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(2e2fcde0) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(22c6d19a) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(dc70ed2e) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(643d5523) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( mspac6m )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "1.cpu",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "2.cpu",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "3.cpu",        0x2000, 0x1000, CRC(513f4d5c) )
-	ROM_LOAD( "4.cpu",        0x3000, 0x1000, CRC(e21c81ff) )
-	ROM_LOAD( "52.cpu",       0x8000, 0x1000, CRC(d0bd89d9) )
-	ROM_LOAD( "62.cpu",       0x9000, 0x1000, CRC(c5662407) )
-
-	ROM_REGION( 0x2000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "7.cpu",           0x0000, 0x0800, CRC(2850148a) )
-	ROM_LOAD( "9.cpu",           0x0800, 0x0800, CRC(6c3c6ebb) )
-
-	ROM_REGION( 0x2000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "8.cpu",           0x0000, 0x0800, CRC(5596b345) )
-	ROM_LOAD( "10.cpu",          0x0800, 0x0800, CRC(50c7477d) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "pacplus.7f",    0x0000, 0x0020, CRC(63dd53a) )
-	ROM_LOAD( "pacplus.4a",    0x0020, 0x0100, CRC(e271a166) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( mspacad )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(c3dca510) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(57cb31e3) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-
-ROM_START( msberzk )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(795b1d20) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(9fc2a679) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(6749a32d) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(92692429) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(7c32ed2e) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msdstorm )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(b2940b89) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(5c65865f) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msindy )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(8e234b3a) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(c7183fd2) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(a355e061) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( mspacrip )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(5fb1ee61) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(5aa9eb83) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(ceb3785d) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msyakman )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(827892bb) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(1108ba96) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( msvectr )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(56560aef) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(57cb31e3) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( mselton )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(5c281d01) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(30d0b19f) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( fasthear )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(a8d6c227) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(28eb876c) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(50fc9966) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( heartbrn )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0d32de5e) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(28eb876c) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(50fc9966) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( fastmspa )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(a8d6c227) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(5c281d01) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(615af909) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( chtmspa )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot2",        0x1000, 0x1000, CRC(0af09d31) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "boot5",        0x8000, 0x1000, CRC(8c3e6de6) )
-	ROM_LOAD( "boot6",        0x9000, 0x1000, CRC(368cb165) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(5c281d01) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(615af909) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( mspacat2 )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "mspacatk.1",   0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "mspacatk.2",   0x1000, 0x1000, CRC(0af09d31) )
-	ROM_LOAD( "mspacatk.3",   0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "mspacatk.4",   0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "mspacatk.5",   0x8000, 0x1000, CRC(5a72a7a6) )
-	ROM_LOAD( "mspacatk.6",   0x9000, 0x1000, CRC(bd0c3e94) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(5c281d01) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(615af909) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( vectratk )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )
-	ROM_LOAD( "mspacatk.1",   0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "mspacatk.2",   0x1000, 0x1000, CRC(0af09d31) )
-	ROM_LOAD( "mspacatk.3",   0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "mspacatk.4",   0x3000, 0x1000, CRC(165a9dd8) )
-	ROM_LOAD( "mspacatk.5",   0x8000, 0x1000, CRC(e6e06954) )
-	ROM_LOAD( "mspacatk.6",   0x9000, 0x1000, CRC(3b5db308) )
-	ROM_LOAD( "boot1",        0x0000, 0x1000, CRC(d16b31b7) )
-	ROM_LOAD( "boot3",        0x2000, 0x1000, CRC(1821ee0b) )
-	ROM_LOAD( "boot4",        0x3000, 0x1000, CRC(165a9dd8) )
-
-	ROM_REGION( 0x1000, REGION_GFX1 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5e",           0x0000, 0x1000, CRC(56560aef) )
-
-	ROM_REGION( 0x1000, REGION_GFX2 , ROMREGION_DISPOSE )
-	ROM_LOAD( "5f",           0x0000, 0x1000, CRC(57cb31e3) )
-
-	ROM_REGION( 0x0120, REGION_PROMS, 0 )
-	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) )
-	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) )
-
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )
-	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) )
-ROM_END
-
-ROM_START( bucaneer )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	
-	ROM_LOAD( "6e.cpu",      0x0000, 0x1000, CRC(fee263b3) SHA1(87117ba5082cd7a615b4ec7c02dd819003fbd669) )
-	ROM_LOAD( "6f.cpu",      0x1000, 0x1000, CRC(39d1fc83) SHA1(326dbbf94c6fa2e96613dedb53702f8832b47d59) )
-	ROM_LOAD( "6h.cpu",      0x2000, 0x1000, CRC(197443f8) SHA1(119aab12a9e1052c7b9a1f81e563740b41429a8c) )
-	ROM_LOAD( "6k.cpu",      0x3000, 0x1000, CRC(c4d9169a) SHA1(f34a51d9fa90739214ab9e837b2602c992a73576) )
-
-	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "5e.cpu",      0x0000, 0x0800, CRC(4060c077) SHA1(78d4aa5243246f73533fc0886438dc1fa6f7ebe5) )
-	ROM_LOAD( "5h.cpu",      0x0800, 0x0800, CRC(e3861283) SHA1(61cf8ed24902910e98438d9e2e2745f226ad2a13) )
-
-	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "5f.cpu",      0x0000, 0x0800, CRC(09f66dec) SHA1(2d3649341fed19bac15ec274f7d747de46a3edb2) )
-	ROM_LOAD( "5k.cpu",      0x0800, 0x0800, CRC(653314e7) SHA1(c466a421917b3502e9115ebda1b2d11f7f586de8) )
+	ROM_REGION( 0x1000, REGION_GFX2, 0 )
+	/* Not Used */
 
 	ROM_REGION( 0x0120, REGION_PROMS, 0 )
 	ROM_LOAD( "82s123.7f",    0x0000, 0x0020, CRC(2fc650bd) SHA1(8d0268dee78e47c712202b0ec4f1f51109b1f2a5) )
 	ROM_LOAD( "82s126.4a",    0x0020, 0x0100, CRC(3eb3a8e4) SHA1(19097b5f60d1030f8b82d9f1d3a241f93e5c75d6) )
 
-	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	
+	ROM_REGION( 0x0200, REGION_SOUND1, 0 )	/* sound PROMs */
 	ROM_LOAD( "82s126.1m",    0x0000, 0x0100, CRC(a9cc86bf) SHA1(bbcec0570aeceb582ff8238a4bc8546a23430081) )
-	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )
+	ROM_LOAD( "82s126.3m",    0x0100, 0x0100, CRC(77245b66) SHA1(0c4d0bee858b97632411c440bea6948a74759746) )	/* timing - not used */
+
+	ROM_REGION( 0x60000, REGION_USER1, 0 )	/* Question ROMs */
+	ROM_LOAD( "rom1.rom",     0x00000, 0x8000, CRC(90b7785f) SHA1(7fc5aa2be868b87ffb9e957c204dabf1508e212e) )
+	ROM_LOAD( "rom2.rom",     0x08000, 0x8000, CRC(60172d77) SHA1(92cb2312c6f3395f7ddb45e58695dd000d6ec756) )
+	ROM_LOAD( "rom3.rom",     0x10000, 0x8000, CRC(a2207320) SHA1(18ad94b62e7e611ab8a1cbf2d2c6576b8840da2f) )
+	ROM_LOAD( "rom4.rom",     0x18000, 0x8000, CRC(5a74c1f9) SHA1(0c55a27a492099ac98daefe0c199761ab1ccce82) )
+	ROM_LOAD( "rom5.rom",     0x20000, 0x8000, CRC(93bc1080) SHA1(53e40b8bbc82b3be044f8a39b71fbb811e9263d8) )
+	ROM_LOAD( "rom6.rom",     0x28000, 0x8000, CRC(eea2423f) SHA1(34de5495061be7d498773f9a723052c4f13d4a0c) )
+	ROM_LOAD( "rom7.rom",     0x30000, 0x8000, CRC(96694055) SHA1(64ebbd85c2a60936f60345b5d573cd9eda196d3f) )
+	ROM_LOAD( "rom8.rom",     0x38000, 0x8000, CRC(e68ebf8e) SHA1(cac17ac0231a0526e7f4a58bcb2cae3d05727ee6) )
+	ROM_LOAD( "rom9.rom",     0x40000, 0x8000, CRC(fd20921d) SHA1(eedf93841b5ebe9afc4184e089d6694bbdb64445) )
+	ROM_LOAD( "rom10.rom",    0x48000, 0x8000, CRC(5091b951) SHA1(224b65795d11599cdbd78e984ac2c71e8847041c) )
+	ROM_LOAD( "rom11.rom",    0x50000, 0x8000, CRC(705128db) SHA1(92d45bfd09f61a1a3ac46c2e0ec1f634f04cf049) )
+	ROM_LOAD( "rom12.rom",    0x58000, 0x8000, CRC(74c776e7) SHA1(03860d90461b01df4b734b784dddb20843ba811a) )
 ROM_END
 
-/* End PacMAME */
+
+ROM_START( drivfrcp )
+	ROM_REGION( 0x8000, REGION_CPU1, 0 )	/* 32k for code */
+	ROM_LOAD( "drivforc.1",   0x0000, 0x1000, CRC(10b59d27) SHA1(fa09f3b95319a3487fa54b72198f41211663e087) )
+	ROM_CONTINUE(			  0x2000, 0x1000 )
+	ROM_CONTINUE(			  0x4000, 0x1000 )
+	ROM_CONTINUE(			  0x6000, 0x1000 )
+
+	ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "drivforc.2",   0x0000, 0x1000, CRC(56331cb5) SHA1(520f2a18ebbdfb093c8e4d144749a3f5cbce19bf) )
+	ROM_CONTINUE(			  0x2000, 0x1000 )
+	ROM_CONTINUE(			  0x1000, 0x1000 )
+	ROM_CONTINUE(			  0x3000, 0x1000 )
+
+	ROM_REGION( 0x0120, REGION_PROMS, 0 )
+	ROM_LOAD( "drivforc.pr1", 0x0000, 0x0020, CRC(045aa47f) SHA1(ea9034f441937df43a7c0bdb502165fb27d06635) )
+	ROM_LOAD( "drivforc.pr2", 0x0020, 0x0100, CRC(9e6d2f1d) SHA1(7bcbcd4c0a40264c3b0667fc6a39ed4f2a86cafe) )
+ROM_END
+
+
+ROM_START( 8bpm )
+	ROM_REGION( 0x8000, REGION_CPU1, 0 )	/* 32k for code */
+	ROM_LOAD( "8bpmp.bin",    0x0000, 0x1000, CRC(b4f7eba7) SHA1(9b15543895c70f5ee2b4f91b8af78a884453e4f1) )
+	ROM_CONTINUE(			  0x2000, 0x1000 )
+	ROM_CONTINUE(			  0x4000, 0x1000 )
+	ROM_CONTINUE(			  0x6000, 0x1000 )
+
+	ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "8bpmc.bin",    0x0000, 0x1000, CRC(1c894a6d) SHA1(04e5c548290095d1d0f873b6c2e639e6dbe8ff35) )
+	ROM_CONTINUE(			  0x2000, 0x1000 )
+	ROM_CONTINUE(			  0x1000, 0x1000 )
+	ROM_CONTINUE(			  0x3000, 0x1000 )
+
+	ROM_REGION( 0x0120, REGION_PROMS, 0 )
+	ROM_LOAD( "8bpm.pr1", 0x0000, 0x0020, NO_DUMP )
+	ROM_LOAD( "8bpm.pr2", 0x0020, 0x0100, NO_DUMP )
+	/* used only to display something until we have the dumps */
+	ROM_LOAD( "drivforc.pr1", 0x0000, 0x0020, CRC(045aa47f) SHA1(ea9034f441937df43a7c0bdb502165fb27d06635) )
+	ROM_LOAD( "drivforc.pr2", 0x0020, 0x0100, CRC(9e6d2f1d) SHA1(7bcbcd4c0a40264c3b0667fc6a39ed4f2a86cafe) )
+ROM_END
+
+
+ROM_START( porky )
+	ROM_REGION( 0x8000, REGION_CPU1, 0 )	/* 32k for code */
+	ROM_LOAD( "pp",			  0x0000, 0x1000, CRC(00592624) SHA1(41e554178a89b95bed1f570fab28e2a04f7a68d6) )
+	ROM_CONTINUE(			  0x2000, 0x1000 )
+	ROM_CONTINUE(			  0x4000, 0x1000 )
+	ROM_CONTINUE(			  0x6000, 0x1000 )
+
+	/* what is it used for ? */
+	ROM_REGION( 0x4000, REGION_USER1, 0 )
+	ROM_LOAD( "ps",			  0x0000, 0x4000, CRC(2efb9861) SHA1(8c5a23ed15bd985af78a54d2121fe058e53703bb) )
+
+	ROM_REGION( 0x4000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "pc",			  0x0000, 0x1000, CRC(a20e3d39) SHA1(3762289a495d597d6b9540ea7fa663128a9d543c) )
+	ROM_CONTINUE(			  0x2000, 0x1000 )
+	ROM_CONTINUE(			  0x1000, 0x1000 )
+	ROM_CONTINUE(			  0x3000, 0x1000 )
+
+	ROM_REGION( 0x0120, REGION_PROMS, 0 )
+	ROM_LOAD( "7f",			  0x0000, 0x0020, CRC(98bce7cc) SHA1(e461862ccaf7526421631ac6ebb9b09cd0bc9909) )
+	ROM_LOAD( "4a",			  0x0020, 0x0100, CRC(30fe0266) SHA1(5081a19ceaeb937ee1378f3374e9d5949d17c3e8) )
+ROM_END
 
 /*************************************
  *
@@ -7747,6 +4323,12 @@ static DRIVER_INIT( porky )
 
 }
 
+static DRIVER_INIT( dremshpr )
+{
+	install_mem_read_handler(0, 0x4800, 0x4bff, MRA8_RAM);
+	install_mem_write_handler(0, 0x4800, 0x4bff, MWA8_RAM);
+}
+
 
 /*************************************
  *
@@ -7799,180 +4381,14 @@ GAME( 1985, lizwiz,   0,        pacman,   lizwiz,   0,        ROT90,  "Techstar 
 GAME( 1983, theglobp, suprglob, theglobp, theglobp, 0,        ROT90,  "Epos Corporation", "The Glob (Pac-Man hardware)" )
 GAME( 1984, beastf,   suprglob, theglobp, theglobp, 0,        ROT90,  "Epos Corporation", "Beastie Feastie" )
 GAME( 1983, bwcasino, 0,        acitya,   bwcasino, 0,        ROT90,  "Epos Corporation", "Boardwalk Casino" )
-GAME( 1982, dremshpr, 0,        dremshpr, dremshpr, 0,        ROT270, "Sanritsu", "Dream Shopper" )
+GAME( 1982, dremshpr, 0,        dremshpr, dremshpr, dremshpr, ROT270, "Sanritsu", "Dream Shopper" )
 GAME( 1983, acitya,   bwcasino, acitya,   acitya,   0,        ROT90,  "Epos Corporation", "Atlantic City Action" )
 GAME( 1983, vanvan,   0,        vanvan,   vanvan,   0,        ROT270, "Sanritsu", "Van-Van Car" )
 GAME( 1983, vanvank,  vanvan,   vanvan,   vanvank,  0,        ROT270, "Karateco", "Van-Van Car (Karateco)" )
-GAMEX(1982, alibaba,  0,        alibaba,  alibaba,  0,        ROT90,  "Sega", "Ali Baba and 40 Thieves", GAME_WRONG_COLORS | GAME_UNEMULATED_PROTECTION )
+GAMEX(1982, alibaba,  0,        alibaba,  alibaba,  0,        ROT90,  "Sega", "Ali Baba and 40 Thieves", GAME_UNEMULATED_PROTECTION )
 GAME( 1985, jumpshot, 0,        pacman,   jumpshot, jumpshot, ROT90,  "Bally Midway", "Jump Shot" )
 GAME( 1985, shootbul, 0,        pacman,   shootbul, jumpshot, ROT90,  "Bally Midway", "Shoot the Bull" )
 GAME( 1986, bigbucks, 0,		bigbucks, bigbucks, 0,        ROT90,  "Dynasoft Inc.", "Big Bucks" )
 GAME( 1984, drivfrcp, 0,        drivfrcp, drivfrcp, 0,        ROT90,  "Shinkai Inc. (Magic Eletronics Inc. licence)", "Driving Force (Pac-Man conversion)" )
 GAMEX(1985, 8bpm,	  8ballact,	8bpm,	  8bpm,		8bpm,     ROT90,  "Seatongrove Ltd (Magic Eletronics USA licence)", "Eight Ball Action (Pac-Man conversion)", GAME_WRONG_COLORS )
 GAMEX(1985, porky,	  0,        porky,	  porky,	porky,    ROT90,  "Shinkai Inc. (Magic Eletronics Inc. licence)", "Porky", GAME_NO_SOUND )
-
-/* PacMAME Drivers */
-/* I have added the parent of each set to each game, this is needed for my PacTray frontend */
-/* and the automatic update feature to work. Once a new PacMAME is released, PacTray will issue */
-/* the 'pacmame -listclones > list.dat' and rebuild the pacmame.lst file from this. The pacmame.lst */
-/* file contains the 'name,rom name, screenshot, cabinet, flyer, hi score format' list. */
-/* The name & rom name are pretty straight forward, the others are based off of the parent set */
-/* name, for example, pacbell is a clone of pacman, therefore the parent is pacman, so, when */
-/* PacTray rebuilds the pacmame.lst file the entry for pacbell will look like this */
-
-/* Pacman (The Bell),pacbell,pacbell.png,pacman.png,pacman.png,pacman */
-/*                                           ^-----------^--------^------- from parent name */
-/* Make sense ? I hope. */
-/* I know other emus remove this (ie EmuPlus, which kicks ass BTW), but if there is another way */
-/* to accomplish what I need, then I can change it */
-/* I've updated FRONTHLP.C so that the -listfull display will include the 'clone of' display */
-
-/*    Year  Name      Parent    Machine  Input     Init	     Monitor Company    Full Name */
-GAME( 2000, udpacman, pacman,   pacman,  pacman,   0,        ROT90,  "PacMAME", "Upside-Down Pacman" )
-GAME( 1981, hanglyb,  pacman,   pacman,  pacman,   0,        ROT90, "hack", "Hangly-Man (Hearts)" )
-
-GAME( 2000, baby2,    pacman,   pacman,  pacman,   0,        ROT90,  "T-Bone", "Baby Pacman 2 (Alt)" )
-GAME( 2000, baby3,    pacman,   pacman,  pacman,   0,        ROT90,  "T-Bone", "Baby Pacman 3 (Alt)" )
-GAME( 2000, baby4,    pacman,   pacman,  pacman,   0,        ROT90,  "T-Bone", "Pacman (Baby Maze 4)" )
-GAME( 2000, brakman,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Brakman" )
-GAME( 2000, caterpil, pacman,   pacman,  pacman,   0,        ROT90,  "Phi", "Caterpillar" )
-GAME( 2000, chtmsatk, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Man Plus (Cheat)" )
-GAME( 2000, chtmspa,  mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Man (Cheat)" )
-GAME( 2000, chtpac,   pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man (Cheat)" )
-GAME( 2000, chtpman2, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Puck-Man II (Cheat)" )
-GAME( 2000, chtpop,   pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man / Popeye (Cheat)" )
-GAME( 2000, chtpuck,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Puck-Man (Cheat)" )
-GAME( 2000, crazypac, pacman,   pacman,  pacman,   0,        ROT90,  "Tim Appleton a.k.a. medragon", "Crazy Pac" )
-GAME( 2000, dizzy,    pacman,   pacman,  pacman,   0,        ROT90,  "Tim Appleton a.k.a. medragon", "Dizzy Ghost - A Reversal of Roles" )
-GAME( 2000, eltonpac, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Elton Pac" )
-GAME( 2000, europac,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Euro Pac" )
-GAME( 2000, fasthear, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Heart Burn (Fast)" )
-GAME( 2000, fastmspa, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Man (Fast)" )
-GAME( 2000, fastplus, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Man Plus (Fast)" )
-GAME( 2000, faststrm, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Desert Storm (Fast)" )
-GAME( 2000, fpnleash, mspacman, pacman,  mspacman, 0,        ROT90,  "Peter Storey", "Pacman Unleashed (Flat)" )
-GAME( 2000, fstmsatk, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Man Attack (Fast)" )
-GAME( 2000, hanglyad, pacman,   pacman,  pacman,   0,        ROT90,  "hack", "Hangly-Man (set 1) After Dark" )
-GAME( 2000, heartbrn, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Heart Burn" )
-GAME( 2000, hearts,   pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Hearts Bootleg)" )
-GAME( 2000, mazeman,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Maze Man" )
-GAME( 2000, mrpacman, mspacman, pacman,  mspacman, 0,        ROT90,  "Tim Appleton a.k.a. medragon", "Mr. Pac-Man - Another Kind of Role Reversal" )
-GAME( 2000, ms2600,   mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Pacman 2600" )
-GAME( 2000, msatk2ad, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Man Plus / Attack After Dark" )
-GAME( 2000, msatkad,  mspacman, pacman,  mspacman, 0,        ROT90,  "hack", "Ms. Pac-Man Plus After Dark" )
-GAME( 2000, msbaby,   mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Baby Pacman" )
-GAME( 2000, msbaby1,  mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Baby Pacman (Alt)" )
-GAME( 2000, msberzk,  mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Man Berzerk" )
-GAME( 2000, msdstorm, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Desert Storm" )
-GAME( 2000, mselton,  mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Elton" )
-GAME( 2000, msf1pac,  mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. F1 Pac-Man" )
-GAME( 2000, mshangly, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Hangly Man" )
-GAME( 2000, mshearts, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Man Hearts" )
-GAME( 2000, msindy,   mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Indy" )
-GAME( 2000, msmini,   mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Pac-Mini" )
-GAME( 2000, msminia,  mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Pac-Attack Mini" )
-GAME( 2000, msnes4a,  mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Pacman SNES (Tall Alternate)" )
-GAME( 2000, msnes62,  mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Pacman NES (Set 2)" )
-GAME( 2000, msnes63,  mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Pacman NES (Set 3)" )
-GAME( 2000, msnes6m,  mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Pacman NES" )
-GAME( 2000, msnes6m2, mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Pacman SNES (New Mazes)" )
-GAME( 2000, msnes6m3, mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Pacman SNES (Regular / Tall" )
-GAME( 2000, msnes6m4, mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Pacman SNES (Regular)" )
-GAME( 2000, mspac6m,  mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Man 6M (Six Maze)" )
-GAME( 2000, mspacad,  mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Man After Dark" )
-GAME( 2000, mspacat2, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Man Plus / Attack" )
-GAME( 2000, mspacatb, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Man Plus (Set B)" )
-GAME( 2000, mspacren, mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Pacman Renaissance" )
-GAME( 2000, mspacrip, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Mortem" )
-GAME( 2000, mspc6mad, mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Ms. Pacman After Dark (6 Mazes)" )
-GAME( 2000, msrumble, mspacman, pacman,  mspacman, 0,        ROT90,  "Tim Appleton a.k.a. medragon", "Ms. Pac Rumble" )
-GAME( 2000, mssilad,  mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Pac-Man After Dark (Sil)" )
-GAME( 2000, msultra,  mspacman, pacman,  mspacman, 0,        ROT90,  "PacFan", "Ms. Ultra Pacman" )
-GAME( 2000, msvctr6m, mspacman, pacman,  mspacman, 0,        ROT90,  "T-Bone", "Vector Ms. Pacman (6 Mazes)" )
-GAME( 2000, msvectr,  mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Vector Ms. Pac-Man" )
-GAME( 2000, msyakman, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Ms. Yak Man" )
-GAME( 2000, pac2600,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac 2600" )
-GAME( 2000, pacbaby,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Baby Maze 1)" )
-GAME( 2000, pacbaby2, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Baby Maze 2)" )
-GAME( 2000, pacbaby3, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Baby Maze 3)" )
-GAME( 2000, pacbell,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Bell)" )
-GAME( 2000, pacelec,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Electric Cownboy)" )
-GAME( 2000, pacinvis, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Original Inviso)" )
-GAME( 2000, pacjail,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Jail)" )
-GAME( 2000, pacjr1,   pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman Jr. (Maze 1)" )
-GAME( 2000, pacjr2,   pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman Jr. (Maze 2)" )
-GAME( 2000, pacjr3,   pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman Jr. (Maze 3)" )
-GAME( 2000, pacjr4,   pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman Jr. (Maze 4)" )
-GAME( 2000, pacm255,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man (Midway 255th Maze)" )
-GAME( 2000, pacman3d, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man 3D" )
-GAME( 2000, pacman6,  mspacman, pacman,  mspacman, 0,        ROT90,  "Sil", "Pacman 6" )
-GAME( 2000, pacmini,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Mini Pac-Man" )
-GAME( 2000, pacmini2, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Mini Pac-Man 2" )
-GAME( 2000, pacmn6m2, pacman,   pacman,  pacman,   0,        ROT90,  "Sil", "Pacman 2000 (Set 2)" )
-GAME( 2000, pacms1,   pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Ms. Pacman Maze 1)" )
-GAME( 2000, pacms2,   pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Ms. Pacman Maze 2)" )
-GAME( 2000, pacms3,   pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Ms. Pacman Maze 3)" )
-GAME( 2000, pacms4,   pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Ms. Pacman Maze 4)" )
-GAME( 2000, pacmsa1,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Ms. Pacman Attack 1)" )
-GAME( 2000, pacmsa2,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Ms. Pacman Attack 2)" )
-GAME( 2000, pacmsa3,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Ms. Pacman Attack 3)" )
-GAME( 2000, pacmsa4,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Ms. Pacman Attack 4)" )
-GAME( 2000, pacmulti, pacman,   pacman,  pacman,   0,        ROT90,  "Sil", "PacMulti (Pacman)" )
-GAME( 2000, pacn255,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man (Namco 255th Maze)" )
-GAME( 2000, pacplusc, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man Plus (Unencrypted)" )
-GAME( 2000, pacshuf,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Shuffle)" )
-GAME( 2000, pacspeed, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Speedy)" )
-GAME( 2000, pacstrm,  pacman,   pacman,  pacman,   0,        ROT90,  "PacMAME", "Desert Storm Pac-Man" )
-GAME( 2000, pacweird, pacman,   pacman,  pacman,   0,        ROT90,  "Staizitto", "Pacman (Six Map Weird)" )
-GAME( 2000, pcrunchy, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pacman (Crunchy)" )
-GAME( 2000, pengman,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pengo Man" )
-GAME( 2000, pmad,     pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man After Dark" )
-GAME( 2000, pmad00,   pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man After Dark 2000" )
-GAME( 2000, pmad6m,   pacman,   pacman,  pacman,   0,        ROT90,  "T-Bone", "Pacman 2000 After Dark" )
-GAME( 2000, pmada,    pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man After Dark (Alternate)" )
-GAME( 2000, pmanalt,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man Vertical Tunnels (Cheat)" )
-GAME( 2000, pmanaltm, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Pac-Man (Midway Vertical Tunnels)" )
-GAME( 2000, pplusad,  pacman,   pacman,  pacman,   pacplus,  ROT90,  "[Namco] (Midway license)", "Pac-Man Plus After Dark" )
-GAME( 2000, puckman2, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Puck-Man II" )
-GAME( 2000, puckren,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Puckman Renaissance" )
-GAME( 2000, puckrenc, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Puckman Renaissance (Cheat)" )
-GAME( 2000, punleash, mspacman, pacman,  mspacman, 0,        ROT90,  "Peter Storey", "Pacman Unleashed" )
-GAME( 2000, roboman,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Robo Man" )
-GAME( 2000, snakeyes, pacman,   pacman,  pacman,   0,        ROT90,  "T-Bone", "Pacman 2000 (Snake Eyes Mazes)")
-GAME( 2000, snowpac,  pacman,   pacman,  pacman,   0,        ROT90,  "T-Bone", "Snowy Day Pacman" )
-GAME( 2000, sueworld, mspacman, pacman,  mspacman, 0,        ROT90,  "PacFay", "Sue's World" )
-GAME( 2000, sumelton, pacman,   pacman,  pacman,   0,        ROT90,  "Staizitto", "Summertime Elton" )
-GAME( 2000, tbone,    pacman,   pacman,  pacman,   0,        ROT90,  "T-Bone", "Pacman 2000 (T-Bone Mazes)")
-GAME( 2000, ultra2,   pacman,   pacman,  pacman,   0,        ROT90,  "PacMAME", "Ultra Pacman (TwoBit Score Mazes)" )
-GAME( 2000, ultrapac, pacman,   pacman,  pacman,   0,        ROT90,  "PacFan", "UltraPac" )
-GAME( 2000, vcrunchy, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Crunchy)" )
-GAME( 2000, vecbaby,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Baby Maze 1)" )
-GAME( 2000, vecbaby2, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Baby Maze 2)" )
-GAME( 2000, vecbaby3, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Baby Maze 3)" )
-GAME( 2000, vectplus, pacman,   pacman,  pacman,   pacplus,  ROT90,  "[Namco] (Midway license)", "Vector Pac-Man Plus" )
-GAME( 2000, vectr6m,  pacman,   pacman,  pacman,   0,        ROT90,  "T-Bone", "Vector Pacman 2000")
-GAME( 2000, vectr6tb, pacman,   pacman,  pacman,   0,        ROT90,  "T-Bone", "Vector Pacman 2000 (T-Bone Mazes)")
-GAME( 2000, vectratk, mspacman, pacman,  mspacman, 0,        ROT90,  "PacMAME", "Vector Attack" )
-GAME( 2000, vectrpac, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pac-Man" )
-GAME( 2000, vectxens, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Xens Revenge" )
-GAME( 2000, vhangly,  pacman,   pacman,  pacman,   0,        ROT90,  "hack", "Vector Hangly-Man (set 1)" )
-GAME( 2000, vpacbell, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Bell)" )
-GAME( 2000, vpacelec, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Electric Cowboy)" )
-GAME( 2000, vpacjail, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Jail)" )
-GAME( 2000, vpacms1,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Ms. Pacman Maze 1)" )
-GAME( 2000, vpacms2,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Ms. Pacman Maze 2)" )
-GAME( 2000, vpacms3,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Ms. Pacman Maze 3)" )
-GAME( 2000, vpacms4,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Ms. Pacman Maze 4)" )
-GAME( 2000, vpacmsa1, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Ms. Pacman Attack 1)" )
-GAME( 2000, vpacmsa2, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Ms. Pacman Attack 2)" )
-GAME( 2000, vpacmsa3, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Ms. Pacman Attack 3)" )
-GAME( 2000, vpacmsa4, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Ms. Pacman Attack 4)" )
-GAME( 2000, vpacshuf, pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Shuffle)" )
-GAME( 2000, vpspeed,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Vector Pacman (Speedy)" )
-GAME( 2000, xensad,   pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Xens Revenge After Dark" )
-GAME( 2000, xensrev,  pacman,   pacman,  pacman,   0,        ROT90,  "[Namco] (Midway license)", "Xens Revenge" )
-GAME( 1998, multi14, mspacman,  pacman,  mspacman, 0,        ROT90,  "Clay Cowgill", "MultiPac 1.4" )
-GAME( 1998, multi15, mspacman,  pacman,  mspacman, 0,        ROT90,  "PacMAME", "MultiPac 1.5" )
-GAME( 1998, superabc, mspacman, pacman,  mspacman, 0,        ROT90,  "TwoBit Score", "Super ABC Pacman" )
-GAME (1981, bucaneer, puckman,  pacman,  mspacman, 0,        ROT90,  "PacMAME", "Bucaneer" )
-/* End PacMAME */

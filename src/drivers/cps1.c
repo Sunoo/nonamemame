@@ -302,82 +302,82 @@ WRITE16_HANDLER( cps1_eeprom_port_w )
 
 
 
-static MEMORY_READ16_START( cps1_readmem )
-	{ 0x000000, 0x1fffff, MRA16_ROM }, /* 68000 ROM */
-	{ 0x800000, 0x800001, input_port_4_word_r }, /* Player input ports */
-	{ 0x800010, 0x800011, input_port_4_word_r }, /* ?? */
-	{ 0x800018, 0x80001f, cps1_input_r }, /* Input ports */
-	{ 0x800020, 0x800021, MRA16_NOP }, /* ? Used by Rockman ? */
-	{ 0x800052, 0x800055, forgottn_dial_0_r }, /* forgotten worlds */
-	{ 0x80005a, 0x80005d, forgottn_dial_1_r }, /* forgotten worlds */
-	{ 0x800176, 0x800177, cps1_input2_r }, /* Extra input ports */
-	{ 0x800178, 0x800179, cps1_input3_r }, /* Captain Commando player 4 controls */
-	{ 0x8001fc, 0x8001fd, cps1_input2_r }, /* Input ports (SF Rev E) */
-	{ 0x800100, 0x8001ff, cps1_output_r },   /* Output ports */
-	{ 0x900000, 0x92ffff, MRA16_RAM },	/* SF2CE executes code from here */
-	{ 0xf00000, 0xf0ffff, qsound_rom_r },		/* Slammasters protection */
-	{ 0xf18000, 0xf19fff, qsound_sharedram1_r },	/* Q RAM */
-	{ 0xf1c000, 0xf1c001, cps1_input2_r },   /* Player 3 controls (later games) */
-	{ 0xf1c002, 0xf1c003, cps1_input3_r },   /* Player 4 controls (later games - muscle bombers) */
-	{ 0xf1c006, 0xf1c007, cps1_eeprom_port_r },
-	{ 0xf1e000, 0xf1ffff, qsound_sharedram2_r },	/* Q RAM */
-	{ 0xff0000, 0xffffff, MRA16_RAM },   /* RAM */
-MEMORY_END
+static ADDRESS_MAP_START( cps1_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x1fffff) AM_READ(MRA16_ROM) /* 68000 ROM */
+	AM_RANGE(0x800000, 0x800001) AM_READ(input_port_4_word_r) /* Player input ports */
+	AM_RANGE(0x800010, 0x800011) AM_READ(input_port_4_word_r) /* ?? */
+	AM_RANGE(0x800018, 0x80001f) AM_READ(cps1_input_r) /* Input ports */
+	AM_RANGE(0x800020, 0x800021) AM_READ(MRA16_NOP) /* ? Used by Rockman ? */
+	AM_RANGE(0x800052, 0x800055) AM_READ(forgottn_dial_0_r) /* forgotten worlds */
+	AM_RANGE(0x80005a, 0x80005d) AM_READ(forgottn_dial_1_r) /* forgotten worlds */
+	AM_RANGE(0x800176, 0x800177) AM_READ(cps1_input2_r) /* Extra input ports */
+	AM_RANGE(0x800178, 0x800179) AM_READ(cps1_input3_r) /* Captain Commando player 4 controls */
+	AM_RANGE(0x8001fc, 0x8001fd) AM_READ(cps1_input2_r) /* Input ports (SF Rev E) */
+	AM_RANGE(0x800100, 0x8001ff) AM_READ(cps1_output_r)   /* Output ports */
+	AM_RANGE(0x900000, 0x92ffff) AM_READ(MRA16_RAM)	/* SF2CE executes code from here */
+	AM_RANGE(0xf00000, 0xf0ffff) AM_READ(qsound_rom_r)		/* Slammasters protection */
+	AM_RANGE(0xf18000, 0xf19fff) AM_READ(qsound_sharedram1_r)	/* Q RAM */
+	AM_RANGE(0xf1c000, 0xf1c001) AM_READ(cps1_input2_r)   /* Player 3 controls (later games) */
+	AM_RANGE(0xf1c002, 0xf1c003) AM_READ(cps1_input3_r)   /* Player 4 controls (later games - muscle bombers) */
+	AM_RANGE(0xf1c006, 0xf1c007) AM_READ(cps1_eeprom_port_r)
+	AM_RANGE(0xf1e000, 0xf1ffff) AM_READ(qsound_sharedram2_r)	/* Q RAM */
+	AM_RANGE(0xff0000, 0xffffff) AM_READ(MRA16_RAM)   /* RAM */
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( cps1_writemem )
-	{ 0x000000, 0x1fffff, MWA16_ROM },      /* ROM */
-	{ 0x800030, 0x800031, cps1_coinctrl_w },
-	{ 0x800040, 0x800041, forgottn_dial_0_reset_w },
-	{ 0x800048, 0x800049, forgottn_dial_1_reset_w },
-	{ 0x800180, 0x800181, cps1_sound_command_w },  /* Sound command */
-	{ 0x800188, 0x800189, cps1_sound_fade_w },
-	{ 0x800100, 0x8001ff, cps1_output_w, &cps1_output, &cps1_output_size },  /* Output ports */
-	{ 0x900000, 0x92ffff, cps1_gfxram_w, &cps1_gfxram, &cps1_gfxram_size },
-	{ 0xf18000, 0xf19fff, qsound_sharedram1_w }, /* Q RAM */
-	{ 0xf1c004, 0xf1c005, cpsq_coinctrl2_w },   /* Coin control2 (later games) */
-	{ 0xf1c006, 0xf1c007, cps1_eeprom_port_w },
-	{ 0xf1e000, 0xf1ffff, qsound_sharedram2_w }, /* Q RAM */
-	{ 0xff0000, 0xffffff, MWA16_RAM },        /* RAM */
-MEMORY_END
+static ADDRESS_MAP_START( cps1_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x1fffff) AM_WRITE(MWA16_ROM)      /* ROM */
+	AM_RANGE(0x800030, 0x800031) AM_WRITE(cps1_coinctrl_w)
+	AM_RANGE(0x800040, 0x800041) AM_WRITE(forgottn_dial_0_reset_w)
+	AM_RANGE(0x800048, 0x800049) AM_WRITE(forgottn_dial_1_reset_w)
+	AM_RANGE(0x800180, 0x800181) AM_WRITE(cps1_sound_command_w)  /* Sound command */
+	AM_RANGE(0x800188, 0x800189) AM_WRITE(cps1_sound_fade_w)
+	AM_RANGE(0x800100, 0x8001ff) AM_WRITE(cps1_output_w) AM_BASE(&cps1_output) AM_SIZE(&cps1_output_size)  /* Output ports */
+	AM_RANGE(0x900000, 0x92ffff) AM_WRITE(cps1_gfxram_w) AM_BASE(&cps1_gfxram) AM_SIZE(&cps1_gfxram_size)
+	AM_RANGE(0xf18000, 0xf19fff) AM_WRITE(qsound_sharedram1_w) /* Q RAM */
+	AM_RANGE(0xf1c004, 0xf1c005) AM_WRITE(cpsq_coinctrl2_w)   /* Coin control2 (later games) */
+	AM_RANGE(0xf1c006, 0xf1c007) AM_WRITE(cps1_eeprom_port_w)
+	AM_RANGE(0xf1e000, 0xf1ffff) AM_WRITE(qsound_sharedram2_w) /* Q RAM */
+	AM_RANGE(0xff0000, 0xffffff) AM_WRITE(MWA16_RAM)        /* RAM */
+ADDRESS_MAP_END
 
 
-static MEMORY_READ_START( sound_readmem )
-	{ 0x0000, 0x7fff, MRA_ROM },
-	{ 0x8000, 0xbfff, MRA_BANK1 },
-	{ 0xd000, 0xd7ff, MRA_RAM },
-	{ 0xf001, 0xf001, YM2151_status_port_0_r },
-	{ 0xf002, 0xf002, OKIM6295_status_0_r },
-	{ 0xf008, 0xf008, soundlatch_r },
-	{ 0xf00a, 0xf00a, cps1_snd_fade_timer_r }, /* Sound timer fade */
-MEMORY_END
+static ADDRESS_MAP_START( sound_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0xbfff) AM_READ(MRA8_BANK1)
+	AM_RANGE(0xd000, 0xd7ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xf001, 0xf001) AM_READ(YM2151_status_port_0_r)
+	AM_RANGE(0xf002, 0xf002) AM_READ(OKIM6295_status_0_r)
+	AM_RANGE(0xf008, 0xf008) AM_READ(soundlatch_r)
+	AM_RANGE(0xf00a, 0xf00a) AM_READ(cps1_snd_fade_timer_r) /* Sound timer fade */
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( sound_writemem )
-	{ 0x0000, 0xbfff, MWA_ROM },
-	{ 0xd000, 0xd7ff, MWA_RAM },
-	{ 0xf000, 0xf000, YM2151_register_port_0_w },
-	{ 0xf001, 0xf001, YM2151_data_port_0_w },
-	{ 0xf002, 0xf002, OKIM6295_data_0_w },
-	{ 0xf004, 0xf004, cps1_snd_bankswitch_w },
-//	{ 0xf006, 0xf006, MWA_NOP }, /* ???? Unknown ???? */
-MEMORY_END
+static ADDRESS_MAP_START( sound_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xbfff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xd000, 0xd7ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0xf000, 0xf000) AM_WRITE(YM2151_register_port_0_w)
+	AM_RANGE(0xf001, 0xf001) AM_WRITE(YM2151_data_port_0_w)
+	AM_RANGE(0xf002, 0xf002) AM_WRITE(OKIM6295_data_0_w)
+	AM_RANGE(0xf004, 0xf004) AM_WRITE(cps1_snd_bankswitch_w)
+//	AM_RANGE(0xf006, 0xf006) AM_WRITE(MWA8_NOP) /* ???? Unknown ???? */
+ADDRESS_MAP_END
 
-MEMORY_READ_START( qsound_readmem )
-	{ 0x0000, 0x7fff, MRA_ROM },
-	{ 0x8000, 0xbfff, MRA_BANK1 },  /* banked (contains music data) */
-	{ 0xc000, 0xcfff, MRA_RAM },
-	{ 0xd007, 0xd007, qsound_status_r },
-	{ 0xf000, 0xffff, MRA_RAM },
-MEMORY_END
+ADDRESS_MAP_START( qsound_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0xbfff) AM_READ(MRA8_BANK1)  /* banked (contains music data) */
+	AM_RANGE(0xc000, 0xcfff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xd007, 0xd007) AM_READ(qsound_status_r)
+	AM_RANGE(0xf000, 0xffff) AM_READ(MRA8_RAM)
+ADDRESS_MAP_END
 
-MEMORY_WRITE_START( qsound_writemem )
-	{ 0x0000, 0xbfff, MWA_ROM },
-	{ 0xc000, 0xcfff, MWA_RAM, &qsound_sharedram1 },
-	{ 0xd000, 0xd000, qsound_data_h_w },
-	{ 0xd001, 0xd001, qsound_data_l_w },
-	{ 0xd002, 0xd002, qsound_cmd_w },
-	{ 0xd003, 0xd003, qsound_banksw_w },
-	{ 0xf000, 0xffff, MWA_RAM, &qsound_sharedram2 },
-MEMORY_END
+ADDRESS_MAP_START( qsound_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xbfff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xc000, 0xcfff) AM_WRITE(MWA8_RAM) AM_BASE(&qsound_sharedram1)
+	AM_RANGE(0xd000, 0xd000) AM_WRITE(qsound_data_h_w)
+	AM_RANGE(0xd001, 0xd001) AM_WRITE(qsound_data_l_w)
+	AM_RANGE(0xd002, 0xd002) AM_WRITE(qsound_cmd_w)
+	AM_RANGE(0xd003, 0xd003) AM_WRITE(qsound_banksw_w)
+	AM_RANGE(0xf000, 0xffff) AM_WRITE(MWA8_RAM) AM_BASE(&qsound_sharedram2)
+ADDRESS_MAP_END
 
 /***********************************************************
 			 INPUT PORTS, DIPs
@@ -3594,95 +3594,6 @@ INPUT_PORTS_START( rockmanj )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
 INPUT_PORTS_END
 
-INPUT_PORTS_START( sfzch )
-	PORT_START      /* IN0 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER2 )
-	PORT_BITX(0x04, IP_ACTIVE_LOW, IPT_SERVICE, "Pause", KEYCODE_F1, IP_JOY_NONE )	/* pause */
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE  )	/* pause */
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER2  )
-
-	PORT_START      /* DSWA */
-	PORT_DIPNAME( 0xff, 0xff, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0xff, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-
-	PORT_START      /* DSWB */
-	PORT_DIPNAME( 0xff, 0xff, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0xff, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-
-	PORT_START      /* DSWC */
-	PORT_DIPNAME( 0xff, 0xff, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0xff, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-
-	PORT_START
-	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 )
-	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
-INPUT_PORTS_END
-
-INPUT_PORTS_START( sfach )
-	PORT_START      /* IN0 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER2 )
-	PORT_BITX(0x04, IP_ACTIVE_LOW, IPT_SERVICE, "Pause", KEYCODE_F1, IP_JOY_NONE )	/* pause */
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE  )	/* pause */
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER2  )
-
-	PORT_START      /* DSWA */
-	PORT_DIPNAME( 0xff, 0xff, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0xff, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-
-	PORT_START      /* DSWB */
-	PORT_DIPNAME( 0xff, 0xff, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0xff, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-
-	PORT_START      /* DSWC */
-	PORT_DIPNAME( 0xff, 0xff, DEF_STR( Unknown ) )
-	PORT_DIPSETTING(    0xff, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-
-	PORT_START
-	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 )
-	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
-INPUT_PORTS_END
 
 static struct GfxLayout layout8x8 =
 {
@@ -3772,12 +3683,12 @@ static MACHINE_DRIVER_START( cps1 )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main", M68000, 10000000)
-	MDRV_CPU_MEMORY(cps1_readmem,cps1_writemem)
+	MDRV_CPU_PROGRAM_MAP(cps1_readmem,cps1_writemem)
 	MDRV_CPU_VBLANK_INT(cps1_interrupt,1)
 
 	MDRV_CPU_ADD_TAG("sound", Z80, 4000000)	/* 4 MHz ??? TODO: find real FRQ */
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
-	MDRV_CPU_MEMORY(sound_readmem,sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(sound_readmem,sound_writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
@@ -3834,7 +3745,7 @@ static MACHINE_DRIVER_START( qsound )
 
 	MDRV_CPU_REPLACE("sound", Z80, 6000000)
 	MDRV_CPU_FLAGS(0)	/* can't use CPU_AUDIO_CPU, slammast requires the Z80 for protection */
-	MDRV_CPU_MEMORY(qsound_readmem,qsound_writemem)
+	MDRV_CPU_PROGRAM_MAP(qsound_readmem,qsound_writemem)
 	MDRV_CPU_PERIODIC_INT(irq0_line_hold,250)	/* ?? */
 
 	MDRV_NVRAM_HANDLER(qsound)
@@ -7450,232 +7361,6 @@ ROM_START( rockmanj )
 	ROM_LOAD( "rcm_19.rom",    0x20000, 0x20000, CRC(f257dbe1) SHA1(967def6b6f93039dbc46373caabeb3301577be75) )
 ROM_END
 
-ROM_START( sfzch )
-	ROM_REGION( CODE_SIZE, REGION_CPU1,0 )      /* 68000 code */
-	ROM_LOAD16_WORD_SWAP( "sfzch23",        0x000000, 0x80000, CRC(1140743f) )
-	ROM_LOAD16_WORD_SWAP( "sfza22",         0x080000, 0x80000, CRC(8d9b2480) )
-	ROM_LOAD16_WORD_SWAP( "sfzch21",        0x100000, 0x80000, CRC(5435225d) )
-	ROM_LOAD16_WORD_SWAP( "sfza20",         0x180000, 0x80000, CRC(806e8f38) )
-
-	ROM_REGION( 0x800000, REGION_GFX1, 0 )
-	ROMX_LOAD( "sfz01",         0x000000, 0x80000, CRC(0dd53e62), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz02",         0x000002, 0x80000, CRC(94c31e3f), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz03",         0x000004, 0x80000, CRC(9584ac85), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz04",         0x000006, 0x80000, CRC(b983624c), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz05",         0x200000, 0x80000, CRC(2b47b645), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz06",         0x200002, 0x80000, CRC(74fd9fb1), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz07",         0x200004, 0x80000, CRC(bb2c734d), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz08",         0x200006, 0x80000, CRC(454f7868), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz10",         0x400000, 0x80000, CRC(2a7d675e), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz11",         0x400002, 0x80000, CRC(e35546c8), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz12",         0x400004, 0x80000, CRC(f122693a), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz13",         0x400006, 0x80000, CRC(7cf942c8), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz14",         0x600000, 0x80000, CRC(09038c81), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz15",         0x600002, 0x80000, CRC(1aa17391), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz16",         0x600004, 0x80000, CRC(19a5abd6), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz17",         0x600006, 0x80000, CRC(248b3b73), ROM_GROUPWORD | ROM_SKIP(6) )
-
-
-	ROM_REGION( 0x18000, REGION_CPU2,0 ) /* 64k for the audio CPU (+banks) */
-	ROM_LOAD( "sfz09",         0x00000, 0x08000, CRC(c772628b) )
-	ROM_CONTINUE(              0x10000, 0x08000 )
-
-	ROM_REGION( 0x40000, REGION_SOUND1,0 )	/* Samples */
-	ROM_LOAD( "sfz18",         0x00000, 0x20000, CRC(61022b2d) )
-	ROM_LOAD( "sfz19",         0x20000, 0x20000, CRC(3b5886d5) )
-ROM_END
-
-ROM_START( sfach )
-	ROM_REGION( CODE_SIZE, REGION_CPU1,0 )      /* 68000 code */
-	ROM_LOAD16_WORD_SWAP( "sfach23",        0x000000, 0x80000, CRC(02a1a853) )
-	ROM_LOAD16_WORD_SWAP( "sfza22",         0x080000, 0x80000, CRC(8d9b2480) )
-	ROM_LOAD16_WORD_SWAP( "sfzch21",        0x100000, 0x80000, CRC(5435225d) )
-	ROM_LOAD16_WORD_SWAP( "sfza20",         0x180000, 0x80000, CRC(806e8f38) )
-
-	ROM_REGION( 0x800000, REGION_GFX1, 0 )
-	ROMX_LOAD( "sfz01",         0x000000, 0x80000, CRC(0dd53e62), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz02",         0x000002, 0x80000, CRC(94c31e3f), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz03",         0x000004, 0x80000, CRC(9584ac85), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz04",         0x000006, 0x80000, CRC(b983624c), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz05",         0x200000, 0x80000, CRC(2b47b645), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz06",         0x200002, 0x80000, CRC(74fd9fb1), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz07",         0x200004, 0x80000, CRC(bb2c734d), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz08",         0x200006, 0x80000, CRC(454f7868), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz10",         0x400000, 0x80000, CRC(2a7d675e), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz11",         0x400002, 0x80000, CRC(e35546c8), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz12",         0x400004, 0x80000, CRC(f122693a), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz13",         0x400006, 0x80000, CRC(7cf942c8), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz14",         0x600000, 0x80000, CRC(09038c81), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz15",         0x600002, 0x80000, CRC(1aa17391), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz16",         0x600004, 0x80000, CRC(19a5abd6), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "sfz17",         0x600006, 0x80000, CRC(248b3b73), ROM_GROUPWORD | ROM_SKIP(6) )
-
-
-	ROM_REGION( 0x18000, REGION_CPU2,0 ) /* 64k for the audio CPU (+banks) */
-	ROM_LOAD( "sfz09",         0x00000, 0x08000, CRC(c772628b) )
-	ROM_CONTINUE(              0x10000, 0x08000 )
-
-	ROM_REGION( 0x40000, REGION_SOUND1,0 )	/* Samples */
-	ROM_LOAD( "sfz18",         0x00000, 0x20000, CRC(61022b2d) )
-	ROM_LOAD( "sfz19",         0x20000, 0x20000, CRC(3b5886d5) )
-ROM_END
-
-ROM_START( pnicku )
-	ROM_REGION( CODE_SIZE, REGION_CPU1, 0 )      /* 68000 code */
-	ROM_LOAD16_BYTE( "pnij36.bin",   0x00000, 0x20000, CRC(2d4ffb2b) )
-	ROM_LOAD16_BYTE( "pniu42.bin",   0x00001, 0x20000, CRC(22d20227) )
-
-	ROM_REGION( 0x200000, REGION_GFX1, 0 )
-	ROMX_LOAD( "pnij09.bin",   0x000000, 0x20000, CRC(48177b0a), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij01.bin",   0x000001, 0x20000, CRC(01a0f311), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij13.bin",   0x000002, 0x20000, CRC(406451b0), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij05.bin",   0x000003, 0x20000, CRC(8c515dc0), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij26.bin",   0x000004, 0x20000, CRC(e2af981e), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij18.bin",   0x000005, 0x20000, CRC(f17a0e56), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij38.bin",   0x000006, 0x20000, CRC(eb75bd8c), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij32.bin",   0x000007, 0x20000, CRC(84560bef), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij10.bin",   0x100000, 0x20000, CRC(c2acc171), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij02.bin",   0x100001, 0x20000, CRC(0e21fc33), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij14.bin",   0x100002, 0x20000, CRC(7fe59b19), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij06.bin",   0x100003, 0x20000, CRC(79f4bfe3), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij27.bin",   0x100004, 0x20000, CRC(83d5cb0e), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij19.bin",   0x100005, 0x20000, CRC(af08b230), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij39.bin",   0x100006, 0x20000, CRC(70fbe579), ROM_SKIP(7) )
-	ROMX_LOAD( "pnij33.bin",   0x100007, 0x20000, CRC(3ed2c680), ROM_SKIP(7) )
-
-	ROM_REGION( 0x8000, REGION_GFX2, 0 )
-	ROM_COPY( REGION_GFX1, 0x000000, 0x000000, 0x8000 )	/* stars */
-
-	ROM_REGION( 0x18000, REGION_CPU2, 0 ) /* 64k for the audio CPU (+banks) */
-	ROM_LOAD( "pnij17.bin",    0x00000, 0x08000, CRC(e86f787a) )
-	ROM_CONTINUE(              0x10000, 0x08000 )
-
-	ROM_REGION( 0x40000, REGION_SOUND1, 0 )	/* Samples */
-	ROM_LOAD( "pnij24.bin",   0x00000, 0x20000, CRC(5092257d) )
-	ROM_LOAD( "pnij25.bin",   0x20000, 0x20000, CRC(22109aaa) )
-ROM_END
-
-ROM_START( knightsh )
-	ROM_REGION( CODE_SIZE, REGION_CPU1, 0 )      /* 68000 code */
-	ROM_LOAD16_WORD_SWAP( "krh_23.rom",   0x00000, 0x80000, CRC(fa2ff63d) )
-	ROM_LOAD16_WORD_SWAP( "krh_22.rom",   0x80000, 0x80000, CRC(1438d070) )
-
-	ROM_REGION( 0x400000, REGION_GFX1, 0 )
-	ROMX_LOAD( "kr_gfx1.rom",  0x000000, 0x80000, CRC(9e36c1a4), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "kr_gfx3.rom",  0x000002, 0x80000, CRC(c5832cae), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "kr_gfx2.rom",  0x000004, 0x80000, CRC(f095be2d), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "kr_gfx4.rom",  0x000006, 0x80000, CRC(179dfd96), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "kr_gfx5.rom",  0x200000, 0x80000, CRC(1f4298d2), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "kr_gfx7.rom",  0x200002, 0x80000, CRC(37fa8751), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "kr_gfx6.rom",  0x200004, 0x80000, CRC(0200bc3d), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "kr_gfx8.rom",  0x200006, 0x80000, CRC(0bb2b4e7), ROM_GROUPWORD | ROM_SKIP(6) )
-
-	ROM_REGION( 0x8000, REGION_GFX2, 0 )
-	ROM_COPY( REGION_GFX1, 0x000000, 0x000000, 0x8000 )	/* stars */
-
-	ROM_REGION( 0x18000, REGION_CPU2, 0 ) /* 64k for the audio CPU (+banks) */
-	ROM_LOAD( "kr_09.rom",     0x00000, 0x08000, CRC(5e44d9ee) )
-	ROM_CONTINUE(              0x10000, 0x08000 )
-
-	ROM_REGION( 0x40000, REGION_SOUND1, 0 )	/* Samples */
-	ROM_LOAD( "kr_18.rom",    0x00000, 0x20000, CRC(da69d15f) )
-	ROM_LOAD( "kr_19.rom",    0x20000, 0x20000, CRC(bfc654e9) )
-ROM_END
-
-ROM_START( dinoh )
-	ROM_REGION( CODE_SIZE, REGION_CPU1, 0 )      /* 68000 code */
-	ROM_LOAD16_WORD_SWAP( "cda_23h.rom",  0x000000, 0x80000, CRC(8e2a9cf0) )
-	ROM_LOAD16_WORD_SWAP( "cda_22h.rom",  0x080000, 0x80000, CRC(f72cd219) )
-	ROM_LOAD16_WORD_SWAP( "cda_21h.rom",  0x100000, 0x80000, CRC(bc275b76) )
-	ROM_LOAD16_WORD_SWAP( "cda_20h.rom",  0x180000, 0x80000, CRC(8987c975) )
-
-	ROM_REGION( 0x400000, REGION_GFX1, 0 )
-	ROMX_LOAD( "cd_gfx01.rom",   0x000000, 0x80000, CRC(8da4f917), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "cd_gfx03.rom",   0x000002, 0x80000, CRC(6c40f603), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "cd_gfx02.rom",   0x000004, 0x80000, CRC(09c8fc2d), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "cd_gfx04.rom",   0x000006, 0x80000, CRC(637ff38f), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "cd_gfx05.rom",   0x200000, 0x80000, CRC(470befee), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "cd_gfx07.rom",   0x200002, 0x80000, CRC(22bfb7a3), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "cd_gfx06.rom",   0x200004, 0x80000, CRC(e7599ac4), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "cd_gfx08.rom",   0x200006, 0x80000, CRC(211b4b15), ROM_GROUPWORD | ROM_SKIP(6) )
-
-	ROM_REGION( 0x8000, REGION_GFX2, 0 )
-	ROM_COPY( REGION_GFX1, 0x000000, 0x000000, 0x8000 )	/* stars */
-
-	ROM_REGION( 2*0x28000, REGION_CPU2, 0 ) /* QSound Z80 code + space for decrypted opcodes */
-	ROM_LOAD( "cd_q.rom",       0x00000, 0x08000, CRC(605fdb0b) )
-	ROM_CONTINUE(               0x10000, 0x18000 )
-
-	ROM_REGION( 0x200000, REGION_SOUND1, 0 ) /* QSound samples */
-	ROM_LOAD( "cd_q1.rom",      0x000000, 0x80000, CRC(60927775) )
-	ROM_LOAD( "cd_q2.rom",      0x080000, 0x80000, CRC(770f4c47) )
-	ROM_LOAD( "cd_q3.rom",      0x100000, 0x80000, CRC(2f273ffc) )
-	ROM_LOAD( "cd_q4.rom",      0x180000, 0x80000, CRC(2c67821d) )
-ROM_END
-
-
-ROM_START( kouryu )
-ROM_REGION( CODE_SIZE, REGION_CPU1, 0 ) /* 68000 code */
-ROM_LOAD16_BYTE( "u222.rom", 0x000000, 0x80000, CRC(9236a79a) )
-ROM_LOAD16_BYTE( "u196.rom", 0x000001, 0x80000, CRC(b23a869d) )
-ROM_LOAD16_BYTE( "u221.rom", 0x100000, 0x20000, CRC(64e6e091) )
-ROM_LOAD16_BYTE( "u195.rom", 0x100001, 0x20000, CRC(c95e4443) )
-
-ROM_REGION( 0x600000, REGION_GFX1, 0 )
-ROMX_LOAD( "s92_01.bin", 0x000000, 0x80000, CRC(03b0d852), ROM_GROUPWORD | ROM_SKIP(6) )
-ROMX_LOAD( "s92_02.bin", 0x000002, 0x80000, CRC(840289ec), ROM_GROUPWORD | ROM_SKIP(6) ) /* sf2.03 */
-ROMX_LOAD( "s92_03.bin", 0x000004, 0x80000, CRC(cdb5f027), ROM_GROUPWORD | ROM_SKIP(6) ) /* sf2.02 */
-ROMX_LOAD( "s92_04.bin", 0x000006, 0x80000, CRC(e2799472), ROM_GROUPWORD | ROM_SKIP(6) )
-ROMX_LOAD( "s92_05.bin", 0x200000, 0x80000, CRC(ba8a2761), ROM_GROUPWORD | ROM_SKIP(6) )
-ROMX_LOAD( "s92_06.bin", 0x200002, 0x80000, CRC(e584bfb5), ROM_GROUPWORD | ROM_SKIP(6) ) /* sf2.07 */
-ROMX_LOAD( "s92_07.bin", 0x200004, 0x80000, CRC(21e3f87d), ROM_GROUPWORD | ROM_SKIP(6) ) /* sf2.06 */
-ROMX_LOAD( "s92_08.bin", 0x200006, 0x80000, CRC(befc47df), ROM_GROUPWORD | ROM_SKIP(6) )
-ROMX_LOAD( "s92_10.bin", 0x400000, 0x80000, CRC(960687d5), ROM_GROUPWORD | ROM_SKIP(6) )
-ROMX_LOAD( "s92_11.bin", 0x400002, 0x80000, CRC(978ecd18), ROM_GROUPWORD | ROM_SKIP(6) ) /* sf2.11 */
-ROMX_LOAD( "s92_12.bin", 0x400004, 0x80000, CRC(d6ec9a0a), ROM_GROUPWORD | ROM_SKIP(6) ) /* sf2.12 */
-ROMX_LOAD( "s92_13.bin", 0x400006, 0x80000, CRC(ed2c67f6), ROM_GROUPWORD | ROM_SKIP(6) )
-
-ROM_REGION( 0x8000, REGION_GFX2, 0 )
-ROM_COPY( REGION_GFX1, 0x000000, 0x000000, 0x8000 ) /* stars */
-
-ROM_REGION( 0x18000, REGION_CPU2, 0 ) /* 64k for the audio CPU (+banks) */
-ROM_LOAD( "s92_09.bin", 0x00000, 0x08000, CRC(08f6b60e) )
-ROM_CONTINUE( 0x10000, 0x08000 )
-
-ROM_REGION( 0x40000, REGION_SOUND1, 0 ) /* Samples */
-ROM_LOAD( "s92_18.bin", 0x00000, 0x20000, CRC(7f162009) )
-ROM_LOAD( "s92_19.bin", 0x20000, 0x20000, CRC(beade53f) )
-ROM_END
-
-ROM_START( hwofa )
-	ROM_REGION( CODE_SIZE, REGION_CPU1, 0 )      /* 68000 code */
-	ROM_LOAD16_WORD_SWAP( "htk2a_23b.rom",  0x000000, 0x80000, CRC(1b17fc85) )
-	ROM_LOAD16_WORD_SWAP( "htk2a_22b.rom",  0x080000, 0x80000, CRC(900ad4cd) )
-
-	ROM_REGION( 0x400000, REGION_GFX1, 0 )
-	ROMX_LOAD( "tk2_gfx1.rom",   0x000000, 0x80000, CRC(0d9cb9bf), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "tk2_gfx3.rom",   0x000002, 0x80000, CRC(45227027), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "tk2_gfx2.rom",   0x000004, 0x80000, CRC(c5ca2460), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "tk2_gfx4.rom",   0x000006, 0x80000, CRC(e349551c), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "tk2_gfx5.rom",   0x200000, 0x80000, CRC(291f0f0b), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "tk2_gfx7.rom",   0x200002, 0x80000, CRC(3edeb949), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "tk2_gfx6.rom",   0x200004, 0x80000, CRC(1abd14d6), ROM_GROUPWORD | ROM_SKIP(6) )
-	ROMX_LOAD( "tk2_gfx8.rom",   0x200006, 0x80000, CRC(b27948e3), ROM_GROUPWORD | ROM_SKIP(6) )
-
-	ROM_REGION( 0x8000, REGION_GFX2, 0 )
-	ROM_COPY( REGION_GFX1, 0x000000, 0x000000, 0x8000 )	/* stars */
-
-	ROM_REGION( 2*0x28000, REGION_CPU2, 0 ) /* QSound Z80 code + space for decrypted opcodes */
-	ROM_LOAD( "tk2_qa.rom",     0x00000, 0x08000, CRC(c9183a0d) )
-	ROM_CONTINUE(               0x10000, 0x18000 )
-
-	ROM_REGION( 0x200000, REGION_SOUND1, 0 ) /* QSound samples */
-	ROM_LOAD( "tk2_q1.rom",     0x000000, 0x80000, CRC(611268cf) )
-	ROM_LOAD( "tk2_q2.rom",     0x080000, 0x80000, CRC(20f55ca9) )
-	ROM_LOAD( "tk2_q3.rom",     0x100000, 0x80000, CRC(bfcf6f52) )
-	ROM_LOAD( "tk2_q4.rom",     0x180000, 0x80000, CRC(36642e88) )
-ROM_END
-
 
 
 static DRIVER_INIT( wof )
@@ -7841,10 +7526,3 @@ GAME( 1994, pnickj,   0,        cps1,     pnickj,   cps1,     ROT0,   "Compile (
 /* Japanese version of Pang 3 is encrypted, Euro version is not */
 GAME( 1995, pang3,    0,        pang3,    pang3,    cps1,     ROT0,   "Mitchell", "Pang! 3 (Euro 950511)" )
 GAME( 1995, pang3j,   pang3,    pang3,    pang3,    pang3,    ROT0,   "Mitchell", "Pang! 3 (Japan 950511)" )
-GAME( 1995, sfzch,    0,        cps1,     sfzch,    cps1,     0,      "Capcom", "Street Fighter ZERO - CPS Changer" )
-GAME( 1995, sfach,    sfzch,    cps1,     sfach,    cps1,     0,      "Capcom", "Street Fighter ALPHA (Publicity CPS Changer)" )
-GAME( 1994, pnicku,   0,        cps1,     pnickj,   cps1,     ROT0,   "Compile (Capcom license)", "Pnickies (USA)" )
-GAME( 1991, knightsh, knights,  cps1,     knights,  cps1,     ROT0,   "hack",   "Knights of the Round (hack)" )
-GAME( 1992, kouryu,   sf2ce,    sf2,      sf2,      cps1,     ROT0,   "Bootleg", "Street Fighter 2 Kouryuv2" )
-GAME( 1993, dinoh,    dino,     qsound,   dino,     dino ,    ROT0,   "Hack", "Cadillacs Kyouryuu-Shinseiki (Japan)" )
-GAME( 1992, hwofa,    wof,      qsound,   wof,      wof,      ROT0,   "Hack", "Sangokushi II (Asia)(Hack)" )

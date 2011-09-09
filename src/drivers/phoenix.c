@@ -64,55 +64,55 @@ void pleiads_sh_stop(void);
 void pleiads_sh_update(void);
 
 
-static MEMORY_READ_START( phoenix_readmem )
-	{ 0x0000, 0x3fff, MRA_ROM },
-	{ 0x4000, 0x4fff, phoenix_videoram_r },		/* 2 pages selected by bit 0 of the video register */
-	{ 0x7000, 0x73ff, phoenix_input_port_0_r }, /* IN0 or IN1 */
-	{ 0x7800, 0x7bff, input_port_2_r }, 		/* DSW */
-MEMORY_END
+static ADDRESS_MAP_START( phoenix_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x4000, 0x4fff) AM_READ(phoenix_videoram_r)		/* 2 pages selected by bit 0 of the video register */
+	AM_RANGE(0x7000, 0x73ff) AM_READ(phoenix_input_port_0_r) /* IN0 or IN1 */
+	AM_RANGE(0x7800, 0x7bff) AM_READ(input_port_2_r) 		/* DSW */
+ADDRESS_MAP_END
 
-static MEMORY_READ_START( pleiads_readmem )
-	{ 0x0000, 0x3fff, MRA_ROM },
-	{ 0x4000, 0x4fff, phoenix_videoram_r },		/* 2 pages selected by bit 0 of the video register */
-	{ 0x7000, 0x73ff, pleiads_input_port_0_r }, /* IN0 or IN1 + protection */
-	{ 0x7800, 0x7bff, input_port_2_r }, 		/* DSW */
-MEMORY_END
+static ADDRESS_MAP_START( pleiads_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x4000, 0x4fff) AM_READ(phoenix_videoram_r)		/* 2 pages selected by bit 0 of the video register */
+	AM_RANGE(0x7000, 0x73ff) AM_READ(pleiads_input_port_0_r) /* IN0 or IN1 + protection */
+	AM_RANGE(0x7800, 0x7bff) AM_READ(input_port_2_r) 		/* DSW */
+ADDRESS_MAP_END
 
-static MEMORY_READ_START( survival_readmem )
-	{ 0x0000, 0x3fff, MRA_ROM },
-	{ 0x4000, 0x4fff, phoenix_videoram_r },		/* 2 pages selected by bit 0 of the video register */
-	{ 0x6900, 0x69ff, AY8910_read_port_0_r },
-	{ 0x7000, 0x73ff, survival_input_port_0_r },/* IN0 or IN1 */
-	{ 0x7800, 0x7bff, input_port_2_r },			/* DSW */
-MEMORY_END
+static ADDRESS_MAP_START( survival_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x4000, 0x4fff) AM_READ(phoenix_videoram_r)		/* 2 pages selected by bit 0 of the video register */
+	AM_RANGE(0x6900, 0x69ff) AM_READ(AY8910_read_port_0_r)
+	AM_RANGE(0x7000, 0x73ff) AM_READ(survival_input_port_0_r)/* IN0 or IN1 */
+	AM_RANGE(0x7800, 0x7bff) AM_READ(input_port_2_r)			/* DSW */
+ADDRESS_MAP_END
 
 
-static MEMORY_WRITE_START( phoenix_writemem )
-	{ 0x0000, 0x3fff, MWA_ROM },
-	{ 0x4000, 0x4fff, phoenix_videoram_w },		/* 2 pages selected by bit 0 of the video register */
-	{ 0x5000, 0x53ff, phoenix_videoreg_w },
-	{ 0x5800, 0x5bff, phoenix_scroll_w },
-	{ 0x6000, 0x63ff, phoenix_sound_control_a_w },
-	{ 0x6800, 0x6bff, phoenix_sound_control_b_w },
-MEMORY_END
+static ADDRESS_MAP_START( phoenix_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x4000, 0x4fff) AM_WRITE(phoenix_videoram_w)		/* 2 pages selected by bit 0 of the video register */
+	AM_RANGE(0x5000, 0x53ff) AM_WRITE(phoenix_videoreg_w)
+	AM_RANGE(0x5800, 0x5bff) AM_WRITE(phoenix_scroll_w)
+	AM_RANGE(0x6000, 0x63ff) AM_WRITE(phoenix_sound_control_a_w)
+	AM_RANGE(0x6800, 0x6bff) AM_WRITE(phoenix_sound_control_b_w)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( pleiads_writemem )
-	{ 0x0000, 0x3fff, MWA_ROM },
-	{ 0x4000, 0x4fff, phoenix_videoram_w },		/* 2 pages selected by bit 0 of the video register */
-	{ 0x5000, 0x53ff, pleiads_videoreg_w },
-	{ 0x5800, 0x5bff, phoenix_scroll_w },
-	{ 0x6000, 0x63ff, pleiads_sound_control_a_w },
-	{ 0x6800, 0x6bff, pleiads_sound_control_b_w },
-MEMORY_END
+static ADDRESS_MAP_START( pleiads_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x4000, 0x4fff) AM_WRITE(phoenix_videoram_w)		/* 2 pages selected by bit 0 of the video register */
+	AM_RANGE(0x5000, 0x53ff) AM_WRITE(pleiads_videoreg_w)
+	AM_RANGE(0x5800, 0x5bff) AM_WRITE(phoenix_scroll_w)
+	AM_RANGE(0x6000, 0x63ff) AM_WRITE(pleiads_sound_control_a_w)
+	AM_RANGE(0x6800, 0x6bff) AM_WRITE(pleiads_sound_control_b_w)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( survival_writemem )
-	{ 0x0000, 0x3fff, MWA_ROM },
-	{ 0x4000, 0x4fff, phoenix_videoram_w },		/* 2 pages selected by bit 0 of the video register */
-	{ 0x5000, 0x53ff, phoenix_videoreg_w },
-	{ 0x5800, 0x5bff, phoenix_scroll_w },
-	{ 0x6800, 0x68ff, AY8910_control_port_0_w },
-	{ 0x6900, 0x69ff, AY8910_write_port_0_w },
-MEMORY_END
+static ADDRESS_MAP_START( survival_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x3fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x4000, 0x4fff) AM_WRITE(phoenix_videoram_w)		/* 2 pages selected by bit 0 of the video register */
+	AM_RANGE(0x5000, 0x53ff) AM_WRITE(phoenix_videoreg_w)
+	AM_RANGE(0x5800, 0x5bff) AM_WRITE(phoenix_scroll_w)
+	AM_RANGE(0x6800, 0x68ff) AM_WRITE(AY8910_control_port_0_w)
+	AM_RANGE(0x6900, 0x69ff) AM_WRITE(AY8910_write_port_0_w)
+ADDRESS_MAP_END
 
 
 
@@ -624,7 +624,7 @@ static MACHINE_DRIVER_START( phoenix )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main", 8085A, 11000000/4)	/* 2.75 MHz */
-	MDRV_CPU_MEMORY(phoenix_readmem,phoenix_writemem)
+	MDRV_CPU_PROGRAM_MAP(phoenix_readmem,phoenix_writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)	/* frames per second, vblank duration */
@@ -652,7 +652,7 @@ static MACHINE_DRIVER_START( pleiads )
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM(phoenix)
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(pleiads_readmem,pleiads_writemem)
+	MDRV_CPU_PROGRAM_MAP(pleiads_readmem,pleiads_writemem)
 
 	/* video hardware */
 	MDRV_GFXDECODE(pleiads_gfxdecodeinfo)
@@ -672,7 +672,7 @@ static MACHINE_DRIVER_START( survival )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(8085A,11000000/4)	/* 2.75 MHz */
-	MDRV_CPU_MEMORY(survival_readmem,survival_writemem)
+	MDRV_CPU_PROGRAM_MAP(survival_readmem,survival_writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)
@@ -1021,30 +1021,6 @@ ROM_START( survival )
 	ROM_LOAD( "clr.u41",      0x0100, 0x0100, CRC(abddf69a) SHA1(e22c380a94fb491bec95c4f4c2d4f072839c09cf) )   /* palette high bits */
 ROM_END
 
-ROM_START( phoenixr )
-	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "ic45",         0x0000, 0x0800, CRC(5b8c55a8) )
-	ROM_LOAD( "ic46",         0x0800, 0x0800, CRC(5748f486) )
-	ROM_LOAD( "ic47",         0x1000, 0x0800, CRC(cbbb8839) )
-	ROM_LOAD( "ic48",         0x1800, 0x0800, CRC(9253e642) )
-	ROM_LOAD( "ic49",         0x2000, 0x0800, CRC(a105e4e7) )
-	ROM_LOAD( "ic50",         0x2800, 0x0800, CRC(ac5e9ec1) )
-	ROM_LOAD( "ic51",         0x3000, 0x0800, CRC(2eab35b4) )
-	ROM_LOAD( "ic52",         0x3800, 0x0800, CRC(d2c5c984) )
-
-	ROM_REGION( 0x1000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "ic23",         0x0000, 0x0800, CRC(02bc87ea) )
-	ROM_LOAD( "ic24",         0x0800, 0x0800, CRC(675388ee) )
-
-	ROM_REGION( 0x1000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "ic39",         0x0000, 0x0800, CRC(8b1653ba) )
-	ROM_LOAD( "ic40",         0x0800, 0x0800, CRC(3b811dfb) )
-
-	ROM_REGION( 0x0200, REGION_PROMS, 0 )
-	ROM_LOAD( "ic40_b.bin",   0x0000, 0x0100, CRC(79350b25) )  /* palette low bits */
-	ROM_LOAD( "ic41_a.bin",   0x0100, 0x0100, CRC(e176b768) )  /* palette high bits */
-ROM_END
-
 
 static DRIVER_INIT( survival )
 {
@@ -1070,4 +1046,3 @@ GAMEX( 1981, pleiadbl, pleiads, pleiads,  pleiads,  0,        ROT90, "bootleg", 
 GAMEX( 1981, pleiadce, pleiads, pleiads,  pleiadce, 0,        ROT90, "Tehkan (Centuri license)", "Pleiads (Centuri)", GAME_IMPERFECT_COLORS )
 GAMEX( 1981, capitol,  pleiads, phoenix,  capitol,  0,        ROT90, "Universal Video Spiel", "Capitol", GAME_IMPERFECT_COLORS )
 GAMEX( 1982, survival, 0,       survival, survival, survival, ROT90, "Rock-ola", "Survival", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
-GAMEX( 2000, phoenixr, phoenix, phoenix, phoenix, 0, ROT90, "CYBERYOGI =CO= Windler hack", "PhoenixR (German Democratic Republic version)", GAME_NO_COCKTAIL ) 

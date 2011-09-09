@@ -60,8 +60,6 @@ static const char *mame_default_text[] =
 	"Overclock",
 	"ALL CPUS",
 #ifndef MESS
-	"Mameinfo not available",
-	"Driverinfo not available",
 	"History not available",
 #else
 	"System Info not available",
@@ -106,10 +104,7 @@ static const char *mame_default_text[] =
 #ifndef MESS
 	"Input (this game)",
 	"Game Information",
-	"Game Mameinfo",
-	"Game Driverinfo",
 	"Game History",
-	"MAME Statistics",
 	"Reset Game",
 	"Return to Game",
 #else
@@ -122,27 +117,11 @@ static const char *mame_default_text[] =
 
 	"Cheat",
 	"Memory Card",
-	"Mouse Controls",
-	"Mouse Axes",
-	"Analog Joystick Controls",
 
-	/* analog input stuff */
+	/* input */
 	"Key/Joy Speed",
 	"Reverse",
 	"Sensitivity",
-
-	/* analog+ input stuff */
-	"Mouse control",
-	"Mouse",
-	"AnalogJoy",
-	"x-axis",
-	"y-axis",
-	"z-axis",
-#if 0
-	"rX-axis",
-	"rY-axis",
-	"rZ-axis",
-#endif
 
 	/* stats */
 	"Tickets dispensed",

@@ -165,9 +165,6 @@ WRITE_HANDLER( decocass_sound_data_ack_reset_w )
 
 WRITE_HANDLER( decocass_nmi_reset_w )
 {
-	Machine->sample_rate = options.samplerate;
-	throttle = 1;
-	frameskip = 0;
 	cpu_set_nmi_line( 0, CLEAR_LINE );
 }
 
@@ -1455,10 +1452,6 @@ void decocass_init_common(void)
 {
 	UINT8 *image = memory_region(REGION_USER2);
 	int i, offs;
-
-	Machine->sample_rate = 0;
-	throttle = 0;
-	frameskip = 11;
 
 	tape_dir = 0;
 	tape_speed = 0;

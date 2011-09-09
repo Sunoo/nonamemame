@@ -210,35 +210,35 @@ static WRITE16_HANDLER( grdians_lockout_w )
 //	usrintf_showmessage("%04X", data & 0xffff);
 }
 
-static MEMORY_READ16_START( grdians_readmem )
-	{ 0x000000, 0x1fffff, MRA16_ROM					},	// ROM
-	{ 0x200000, 0x20ffff, MRA16_RAM					},	// RAM
-	{ 0x304000, 0x30ffff, MRA16_RAM					},	// ? seems tile data
-	{ 0x600000, 0x600001, input_port_0_word_r		},	// DSW 1
-	{ 0x600002, 0x600003, input_port_1_word_r		},	// DSW 2
-	{ 0x700000, 0x700001, input_port_2_word_r		},	// P1
-	{ 0x700002, 0x700003, input_port_3_word_r		},	// P2
-	{ 0x700004, 0x700005, input_port_4_word_r		},	// Coins
-	{ 0x70000c, 0x70000d, watchdog_reset16_r		},	// Watchdog
-	{ 0xb00000, 0xb03fff, seta_sound_word_r 		},	// Sound
-	{ 0xc00000, 0xc3ffff, MRA16_RAM					},	// Sprites
-	{ 0xc40000, 0xc4ffff, MRA16_RAM					},	// Palette
-	{ 0xfffc00, 0xffffff, MRA16_RAM					},	// TMP68301 Registers
-MEMORY_END
+static ADDRESS_MAP_START( grdians_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x1fffff) AM_READ(MRA16_ROM					)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_READ(MRA16_RAM					)	// RAM
+	AM_RANGE(0x304000, 0x30ffff) AM_READ(MRA16_RAM					)	// ? seems tile data
+	AM_RANGE(0x600000, 0x600001) AM_READ(input_port_0_word_r		)	// DSW 1
+	AM_RANGE(0x600002, 0x600003) AM_READ(input_port_1_word_r		)	// DSW 2
+	AM_RANGE(0x700000, 0x700001) AM_READ(input_port_2_word_r		)	// P1
+	AM_RANGE(0x700002, 0x700003) AM_READ(input_port_3_word_r		)	// P2
+	AM_RANGE(0x700004, 0x700005) AM_READ(input_port_4_word_r		)	// Coins
+	AM_RANGE(0x70000c, 0x70000d) AM_READ(watchdog_reset16_r		)	// Watchdog
+	AM_RANGE(0xb00000, 0xb03fff) AM_READ(seta_sound_word_r 		)	// Sound
+	AM_RANGE(0xc00000, 0xc3ffff) AM_READ(MRA16_RAM					)	// Sprites
+	AM_RANGE(0xc40000, 0xc4ffff) AM_READ(MRA16_RAM					)	// Palette
+	AM_RANGE(0xfffc00, 0xffffff) AM_READ(MRA16_RAM					)	// TMP68301 Registers
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( grdians_writemem )
-	{ 0x000000, 0x1fffff, MWA16_ROM							},	// ROM
-	{ 0x200000, 0x20ffff, MWA16_RAM							},	// RAM
-	{ 0x304000, 0x30ffff, MWA16_RAM							},	// ? seems tile data
-	{ 0x800000, 0x800001, grdians_lockout_w					},
-	{ 0xb00000, 0xb03fff, seta_sound_word_w 				},	// Sound
-	{ 0xc00000, 0xc3ffff, MWA16_RAM, &spriteram16,  &spriteram_size	},	// Sprites
-	{ 0xc40000, 0xc4ffff, paletteram16_xRRRRRGGGGGBBBBB_word_w, &paletteram16	},	// Palette
-	{ 0xc50000, 0xc5ffff, MWA16_RAM							},	// cleared
-	{ 0xc60000, 0xc6003f, seta2_vregs_w, &seta2_vregs		},	// Video Registers
-	{ 0xe00010, 0xe0001f, seta2_sound_bank_w				},	// Samples Banks
-	{ 0xfffc00, 0xffffff, tmp68301_regs_w, &tmp68301_regs	},	// TMP68301 Registers
-MEMORY_END
+static ADDRESS_MAP_START( grdians_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x1fffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_WRITE(MWA16_RAM							)	// RAM
+	AM_RANGE(0x304000, 0x30ffff) AM_WRITE(MWA16_RAM							)	// ? seems tile data
+	AM_RANGE(0x800000, 0x800001) AM_WRITE(grdians_lockout_w					)
+	AM_RANGE(0xb00000, 0xb03fff) AM_WRITE(seta_sound_word_w 				)	// Sound
+	AM_RANGE(0xc00000, 0xc3ffff) AM_WRITE(MWA16_RAM) AM_BASE(&spriteram16) AM_SIZE(&spriteram_size	)	// Sprites
+	AM_RANGE(0xc40000, 0xc4ffff) AM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE(&paletteram16	)	// Palette
+	AM_RANGE(0xc50000, 0xc5ffff) AM_WRITE(MWA16_RAM							)	// cleared
+	AM_RANGE(0xc60000, 0xc6003f) AM_WRITE(seta2_vregs_w) AM_BASE(&seta2_vregs		)	// Video Registers
+	AM_RANGE(0xe00010, 0xe0001f) AM_WRITE(seta2_sound_bank_w				)	// Samples Banks
+	AM_RANGE(0xfffc00, 0xffffff) AM_WRITE(tmp68301_regs_w) AM_BASE(&tmp68301_regs	)	// TMP68301 Registers
+ADDRESS_MAP_END
 
 /***************************************************************************
 						Mobile Suit Gundam EX Revue
@@ -281,36 +281,36 @@ WRITE16_HANDLER( gundamex_eeprom_w )
 		EEPROM_set_cs_line((data & 0x4) ? CLEAR_LINE : ASSERT_LINE);
 }
 
-static MEMORY_READ16_START( gundamex_readmem )
-	{ 0x000000, 0x1fffff, MRA16_ROM					},	// ROM
-	{ 0x200000, 0x20ffff, MRA16_RAM					},	// RAM
-	{ 0x400000, 0x5fffff, MRA16_ROM					},	// ROM
-	{ 0x600000, 0x600001, input_port_0_word_r		},	// DSW 1
-	{ 0x600002, 0x600003, input_port_1_word_r		},	// DSW 2
-	{ 0x700000, 0x700001, input_port_2_word_r		},	// P1
-	{ 0x700002, 0x700003, input_port_3_word_r		},	// P2
-	{ 0x700004, 0x700005, input_port_4_word_r		},	// Coins
-	{ 0x700008, 0x700009, input_port_5_word_r		},	// P1
-	{ 0x70000a, 0x70000b, input_port_6_word_r		},	// P2
-	{ 0xb00000, 0xb03fff, seta_sound_word_r 		},	// Sound
-	{ 0xfffd0a, 0xfffd0b, gundamex_eeprom_r 		},  // parallel data register
-MEMORY_END
+static ADDRESS_MAP_START( gundamex_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x1fffff) AM_READ(MRA16_ROM					)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_READ(MRA16_RAM					)	// RAM
+	AM_RANGE(0x400000, 0x5fffff) AM_READ(MRA16_ROM					)	// ROM
+	AM_RANGE(0x600000, 0x600001) AM_READ(input_port_0_word_r		)	// DSW 1
+	AM_RANGE(0x600002, 0x600003) AM_READ(input_port_1_word_r		)	// DSW 2
+	AM_RANGE(0x700000, 0x700001) AM_READ(input_port_2_word_r		)	// P1
+	AM_RANGE(0x700002, 0x700003) AM_READ(input_port_3_word_r		)	// P2
+	AM_RANGE(0x700004, 0x700005) AM_READ(input_port_4_word_r		)	// Coins
+	AM_RANGE(0x700008, 0x700009) AM_READ(input_port_5_word_r		)	// P1
+	AM_RANGE(0x70000a, 0x70000b) AM_READ(input_port_6_word_r		)	// P2
+	AM_RANGE(0xb00000, 0xb03fff) AM_READ(seta_sound_word_r 		)	// Sound
+	AM_RANGE(0xfffd0a, 0xfffd0b) AM_READ(gundamex_eeprom_r		)	// parallel data register
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( gundamex_writemem )
-	{ 0x000000, 0x1fffff, MWA16_ROM							},	// ROM
-	{ 0x200000, 0x20ffff, MWA16_RAM							},	// RAM
-	{ 0x400000, 0x5fffff, MWA16_ROM							},	// ROM
-	{ 0x70000c, 0x70000d, watchdog_reset16_w				},
-	{ 0x800000, 0x800001, grdians_lockout_w					},
-	{ 0xb00000, 0xb03fff, seta_sound_word_w 				},	// Sound
-	{ 0xc00000, 0xc3ffff, MWA16_RAM, &spriteram16,  &spriteram_size	},	// Sprites
-	{ 0xc40000, 0xc4ffff, paletteram16_xRRRRRGGGGGBBBBB_word_w, &paletteram16	},	// Palette
-	{ 0xc50000, 0xc5ffff, MWA16_RAM							},	// cleared
-	{ 0xc60000, 0xc6003f, seta2_vregs_w, &seta2_vregs		},	// Video Registers
-	{ 0xe00010, 0xe0001f, seta2_sound_bank_w				},	// Samples Banks
-	{ 0xfffd0a, 0xfffd0b, gundamex_eeprom_w 				},  // parallel data register
-	{ 0xfffc00, 0xffffff, tmp68301_regs_w, &tmp68301_regs	},	// TMP68301 Registers
-MEMORY_END
+static ADDRESS_MAP_START( gundamex_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x1fffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_WRITE(MWA16_RAM							)	// RAM
+	AM_RANGE(0x400000, 0x5fffff) AM_WRITE(MWA16_ROM							)	// ROM
+	AM_RANGE(0x70000c, 0x70000d) AM_WRITE(watchdog_reset16_w				)
+	AM_RANGE(0x800000, 0x800001) AM_WRITE(grdians_lockout_w					)
+	AM_RANGE(0xb00000, 0xb03fff) AM_WRITE(seta_sound_word_w 				)	// Sound
+	AM_RANGE(0xc00000, 0xc3ffff) AM_WRITE(MWA16_RAM) AM_BASE(&spriteram16) AM_SIZE(&spriteram_size	)	// Sprites
+	AM_RANGE(0xc40000, 0xc4ffff) AM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE(&paletteram16	)	// Palette
+	AM_RANGE(0xc50000, 0xc5ffff) AM_WRITE(MWA16_RAM							)	// cleared
+	AM_RANGE(0xc60000, 0xc6003f) AM_WRITE(seta2_vregs_w) AM_BASE(&seta2_vregs		)	// Video Registers
+	AM_RANGE(0xe00010, 0xe0001f) AM_WRITE(seta2_sound_bank_w				)	// Samples Banks
+	AM_RANGE(0xfffd0a, 0xfffd0b) AM_WRITE(gundamex_eeprom_w 				)   // parallel data register
+	AM_RANGE(0xfffc00, 0xffffff) AM_WRITE(tmp68301_regs_w) AM_BASE(&tmp68301_regs	)	// TMP68301 Registers
+ADDRESS_MAP_END
 
 /***************************************************************************
                       Wakakusamonogatari Mahjong Yonshimai
@@ -337,97 +337,97 @@ static WRITE16_HANDLER( mj4simai_keyboard_w )
 		keyboard_row = data & 0xff;
 }
 
-static MEMORY_READ16_START( mj4simai_readmem )
-	{ 0x000000, 0x1fffff, MRA16_ROM					},	// ROM
-	{ 0x200000, 0x20ffff, MRA16_RAM					},	// RAM
-	{ 0x600000, 0x600001, mj4simai_p1_r				},	// P1
-	{ 0x600002, 0x600003, mj4simai_p1_r				},	// P2, but I'm using P1 again
-	{ 0x600006, 0x600007, watchdog_reset16_r		},	// Watchdog
-	{ 0x600100, 0x600101, input_port_2_word_r		},	//
-	{ 0x600300, 0x600301, input_port_0_word_r		},	// DSW 1
-	{ 0x600302, 0x600303, input_port_1_word_r		},	// DSW 2
-	{ 0xb00000, 0xb03fff, seta_sound_word_r 		},	// Sound
-	{ 0xc00000, 0xc3ffff, MRA16_RAM					},	// Sprites
-	{ 0xc40000, 0xc4ffff, MRA16_RAM					},	// Palette
-	{ 0xfffc00, 0xffffff, MRA16_RAM					},	// TMP68301 Registers
-MEMORY_END
+static ADDRESS_MAP_START( mj4simai_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x1fffff) AM_READ(MRA16_ROM					)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_READ(MRA16_RAM					)	// RAM
+	AM_RANGE(0x600000, 0x600001) AM_READ(mj4simai_p1_r				)	// P1
+	AM_RANGE(0x600002, 0x600003) AM_READ(mj4simai_p1_r				)	// P2, but I'm using P1 again
+	AM_RANGE(0x600006, 0x600007) AM_READ(watchdog_reset16_r		)	// Watchdog
+	AM_RANGE(0x600100, 0x600101) AM_READ(input_port_2_word_r		)	//
+	AM_RANGE(0x600300, 0x600301) AM_READ(input_port_0_word_r		)	// DSW 1
+	AM_RANGE(0x600302, 0x600303) AM_READ(input_port_1_word_r		)	// DSW 2
+	AM_RANGE(0xb00000, 0xb03fff) AM_READ(seta_sound_word_r 		)	// Sound
+	AM_RANGE(0xc00000, 0xc3ffff) AM_READ(MRA16_RAM					)	// Sprites
+	AM_RANGE(0xc40000, 0xc4ffff) AM_READ(MRA16_RAM					)	// Palette
+	AM_RANGE(0xfffc00, 0xffffff) AM_READ(MRA16_RAM					)	// TMP68301 Registers
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( mj4simai_writemem )
-	{ 0x000000, 0x1fffff, MWA16_ROM						},	// ROM
-	{ 0x200000, 0x20ffff, MWA16_RAM						},	// RAM
-	{ 0x600004, 0x600005, mj4simai_keyboard_w			},	// select keyboard row to read
-	{ 0x600200, 0x600201, MWA16_NOP						},	// Leds? Coins?
-	{ 0x600300, 0x60030f, seta2_sound_bank_w			},	// Samples Banks
-	{ 0xb00000, 0xb03fff, seta_sound_word_w 			},	// Sound
-	{ 0xc00000, 0xc3ffff, MWA16_RAM, &spriteram16,  &spriteram_size	},	// Sprites
-	{ 0xc40000, 0xc4ffff, paletteram16_xRRRRRGGGGGBBBBB_word_w, &paletteram16	},	// Palette
-	{ 0xc60000, 0xc6003f, seta2_vregs_w, &seta2_vregs	},	// Video Registers
-	{ 0xfffc00, 0xffffff, tmp68301_regs_w, &tmp68301_regs	},	// TMP68301 Registers
-MEMORY_END
+static ADDRESS_MAP_START( mj4simai_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x1fffff) AM_WRITE(MWA16_ROM						)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_WRITE(MWA16_RAM						)	// RAM
+	AM_RANGE(0x600004, 0x600005) AM_WRITE(mj4simai_keyboard_w			)	// select keyboard row to read
+	AM_RANGE(0x600200, 0x600201) AM_WRITE(MWA16_NOP						)	// Leds? Coins?
+	AM_RANGE(0x600300, 0x60030f) AM_WRITE(seta2_sound_bank_w			)	// Samples Banks
+	AM_RANGE(0xb00000, 0xb03fff) AM_WRITE(seta_sound_word_w 			)	// Sound
+	AM_RANGE(0xc00000, 0xc3ffff) AM_WRITE(MWA16_RAM) AM_BASE(&spriteram16) AM_SIZE(&spriteram_size	)	// Sprites
+	AM_RANGE(0xc40000, 0xc4ffff) AM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE(&paletteram16	)	// Palette
+	AM_RANGE(0xc60000, 0xc6003f) AM_WRITE(seta2_vregs_w) AM_BASE(&seta2_vregs	)	// Video Registers
+	AM_RANGE(0xfffc00, 0xffffff) AM_WRITE(tmp68301_regs_w) AM_BASE(&tmp68301_regs	)	// TMP68301 Registers
+ADDRESS_MAP_END
 
 
 /***************************************************************************
 							Kosodate Quiz My Angel
 ***************************************************************************/
 
-static MEMORY_READ16_START( myangel_readmem )
-	{ 0x000000, 0x1fffff, MRA16_ROM					},	// ROM
-	{ 0x200000, 0x20ffff, MRA16_RAM					},	// RAM
-	{ 0x700000, 0x700001, input_port_2_word_r		},	// P1
-	{ 0x700002, 0x700003, input_port_3_word_r		},	// P2
-	{ 0x700004, 0x700005, input_port_4_word_r		},	// Coins
-	{ 0x700006, 0x700007, watchdog_reset16_r		},	// Watchdog
-	{ 0x700300, 0x700301, input_port_0_word_r		},	// DSW 1
-	{ 0x700302, 0x700303, input_port_1_word_r		},	// DSW 2
-	{ 0xb00000, 0xb03fff, seta_sound_word_r 		},	// Sound
-	{ 0xc00000, 0xc3ffff, MRA16_RAM					},	// Sprites
-	{ 0xc40000, 0xc4ffff, MRA16_RAM					},	// Palette
-	{ 0xfffc00, 0xffffff, MRA16_RAM					},	// TMP68301 Registers
-MEMORY_END
+static ADDRESS_MAP_START( myangel_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x1fffff) AM_READ(MRA16_ROM					)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_READ(MRA16_RAM					)	// RAM
+	AM_RANGE(0x700000, 0x700001) AM_READ(input_port_2_word_r		)	// P1
+	AM_RANGE(0x700002, 0x700003) AM_READ(input_port_3_word_r		)	// P2
+	AM_RANGE(0x700004, 0x700005) AM_READ(input_port_4_word_r		)	// Coins
+	AM_RANGE(0x700006, 0x700007) AM_READ(watchdog_reset16_r		)	// Watchdog
+	AM_RANGE(0x700300, 0x700301) AM_READ(input_port_0_word_r		)	// DSW 1
+	AM_RANGE(0x700302, 0x700303) AM_READ(input_port_1_word_r		)	// DSW 2
+	AM_RANGE(0xb00000, 0xb03fff) AM_READ(seta_sound_word_r 		)	// Sound
+	AM_RANGE(0xc00000, 0xc3ffff) AM_READ(MRA16_RAM					)	// Sprites
+	AM_RANGE(0xc40000, 0xc4ffff) AM_READ(MRA16_RAM					)	// Palette
+	AM_RANGE(0xfffc00, 0xffffff) AM_READ(MRA16_RAM					)	// TMP68301 Registers
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( myangel_writemem )
-	{ 0x000000, 0x1fffff, MWA16_ROM						},	// ROM
-	{ 0x200000, 0x20ffff, MWA16_RAM						},	// RAM
-	{ 0x700200, 0x700201, MWA16_NOP						},	// Leds? Coins?
-	{ 0x700310, 0x70031f, seta2_sound_bank_w			},	// Samples Banks
-	{ 0xb00000, 0xb03fff, seta_sound_word_w 			},	// Sound
-	{ 0xc00000, 0xc3ffff, MWA16_RAM, &spriteram16,  &spriteram_size	},	// Sprites
-	{ 0xc40000, 0xc4ffff, paletteram16_xRRRRRGGGGGBBBBB_word_w, &paletteram16	},	// Palette
-	{ 0xc60000, 0xc6003f, seta2_vregs_w, &seta2_vregs	},	// Video Registers
-	{ 0xfffc00, 0xffffff, tmp68301_regs_w, &tmp68301_regs	},	// TMP68301 Registers
-MEMORY_END
+static ADDRESS_MAP_START( myangel_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x1fffff) AM_WRITE(MWA16_ROM						)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_WRITE(MWA16_RAM						)	// RAM
+	AM_RANGE(0x700200, 0x700201) AM_WRITE(MWA16_NOP						)	// Leds? Coins?
+	AM_RANGE(0x700310, 0x70031f) AM_WRITE(seta2_sound_bank_w			)	// Samples Banks
+	AM_RANGE(0xb00000, 0xb03fff) AM_WRITE(seta_sound_word_w 			)	// Sound
+	AM_RANGE(0xc00000, 0xc3ffff) AM_WRITE(MWA16_RAM) AM_BASE(&spriteram16) AM_SIZE(&spriteram_size	)	// Sprites
+	AM_RANGE(0xc40000, 0xc4ffff) AM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE(&paletteram16	)	// Palette
+	AM_RANGE(0xc60000, 0xc6003f) AM_WRITE(seta2_vregs_w) AM_BASE(&seta2_vregs	)	// Video Registers
+	AM_RANGE(0xfffc00, 0xffffff) AM_WRITE(tmp68301_regs_w) AM_BASE(&tmp68301_regs	)	// TMP68301 Registers
+ADDRESS_MAP_END
 
 
 /***************************************************************************
 							Kosodate Quiz My Angel 2
 ***************************************************************************/
 
-static MEMORY_READ16_START( myangel2_readmem )
-	{ 0x000000, 0x1fffff, MRA16_ROM					},	// ROM
-	{ 0x200000, 0x20ffff, MRA16_RAM					},	// RAM
-	{ 0x600000, 0x600001, input_port_2_word_r		},	// P1
-	{ 0x600002, 0x600003, input_port_3_word_r		},	// P2
-	{ 0x600004, 0x600005, input_port_4_word_r		},	// Coins
-	{ 0x600006, 0x600007, watchdog_reset16_r		},	// Watchdog
-	{ 0x600300, 0x600301, input_port_0_word_r		},	// DSW 1
-	{ 0x600302, 0x600303, input_port_1_word_r		},	// DSW 2
-	{ 0xb00000, 0xb03fff, seta_sound_word_r 		},	// Sound
-	{ 0xd00000, 0xd3ffff, MRA16_RAM					},	// Sprites
-	{ 0xd40000, 0xd4ffff, MRA16_RAM					},	// Palette
-	{ 0xfffc00, 0xffffff, MRA16_RAM					},	// TMP68301 Registers
-MEMORY_END
+static ADDRESS_MAP_START( myangel2_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x1fffff) AM_READ(MRA16_ROM					)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_READ(MRA16_RAM					)	// RAM
+	AM_RANGE(0x600000, 0x600001) AM_READ(input_port_2_word_r		)	// P1
+	AM_RANGE(0x600002, 0x600003) AM_READ(input_port_3_word_r		)	// P2
+	AM_RANGE(0x600004, 0x600005) AM_READ(input_port_4_word_r		)	// Coins
+	AM_RANGE(0x600006, 0x600007) AM_READ(watchdog_reset16_r		)	// Watchdog
+	AM_RANGE(0x600300, 0x600301) AM_READ(input_port_0_word_r		)	// DSW 1
+	AM_RANGE(0x600302, 0x600303) AM_READ(input_port_1_word_r		)	// DSW 2
+	AM_RANGE(0xb00000, 0xb03fff) AM_READ(seta_sound_word_r 		)	// Sound
+	AM_RANGE(0xd00000, 0xd3ffff) AM_READ(MRA16_RAM					)	// Sprites
+	AM_RANGE(0xd40000, 0xd4ffff) AM_READ(MRA16_RAM					)	// Palette
+	AM_RANGE(0xfffc00, 0xffffff) AM_READ(MRA16_RAM					)	// TMP68301 Registers
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( myangel2_writemem )
-	{ 0x000000, 0x1fffff, MWA16_ROM						},	// ROM
-	{ 0x200000, 0x20ffff, MWA16_RAM						},	// RAM
-	{ 0x600200, 0x600201, MWA16_NOP						},	// Leds? Coins?
-	{ 0x600300, 0x60030f, seta2_sound_bank_w			},	// Samples Banks
-	{ 0xb00000, 0xb03fff, seta_sound_word_w 			},	// Sound
-	{ 0xd00000, 0xd3ffff, MWA16_RAM, &spriteram16,  &spriteram_size	},	// Sprites
-	{ 0xd40000, 0xd4ffff, paletteram16_xRRRRRGGGGGBBBBB_word_w, &paletteram16	},	// Palette
-	{ 0xd60000, 0xd6003f, seta2_vregs_w, &seta2_vregs	},	// Video Registers
-	{ 0xfffc00, 0xffffff, tmp68301_regs_w, &tmp68301_regs	},	// TMP68301 Registers
-MEMORY_END
+static ADDRESS_MAP_START( myangel2_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x1fffff) AM_WRITE(MWA16_ROM						)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_WRITE(MWA16_RAM						)	// RAM
+	AM_RANGE(0x600200, 0x600201) AM_WRITE(MWA16_NOP						)	// Leds? Coins?
+	AM_RANGE(0x600300, 0x60030f) AM_WRITE(seta2_sound_bank_w			)	// Samples Banks
+	AM_RANGE(0xb00000, 0xb03fff) AM_WRITE(seta_sound_word_w 			)	// Sound
+	AM_RANGE(0xd00000, 0xd3ffff) AM_WRITE(MWA16_RAM) AM_BASE(&spriteram16) AM_SIZE(&spriteram_size	)	// Sprites
+	AM_RANGE(0xd40000, 0xd4ffff) AM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE(&paletteram16	)	// Palette
+	AM_RANGE(0xd60000, 0xd6003f) AM_WRITE(seta2_vregs_w) AM_BASE(&seta2_vregs	)	// Video Registers
+	AM_RANGE(0xfffc00, 0xffffff) AM_WRITE(tmp68301_regs_w) AM_BASE(&tmp68301_regs	)	// TMP68301 Registers
+ADDRESS_MAP_END
 
 
 /***************************************************************************
@@ -438,7 +438,7 @@ MEMORY_END
 	The offset to use is stored in RAM at address 0x20BA16 */
 READ16_HANDLER( pzlbowl_protection_r )
 {
-	UINT32 address = (cpu_readmem24bew_word(0x20ba16) << 16) | cpu_readmem24bew_word(0x20ba18);
+	UINT32 address = (program_read_word(0x20ba16) << 16) | program_read_word(0x20ba18);
 	return memory_region(REGION_CPU1)[address - 2];
 }
 
@@ -456,70 +456,70 @@ WRITE16_HANDLER( pzlbowl_coin_counter_w )
 	}
 }
 
-static MEMORY_READ16_START( pzlbowl_readmem )
-	{ 0x000000, 0x0fffff, MRA16_ROM					},	// ROM
-	{ 0x200000, 0x20ffff, MRA16_RAM					},	// RAM
-	{ 0x400300, 0x400301, input_port_0_word_r		},	// DSW 1
-	{ 0x400302, 0x400303, input_port_1_word_r		},	// DSW 2
-	{ 0x500000, 0x500001, input_port_2_word_r		},	// P1
-	{ 0x500002, 0x500003, input_port_3_word_r		},	// P2
-	{ 0x500004, 0x500005, pzlbowl_coins_r			},	// Coins + Protection?
-	{ 0x500006, 0x500007, watchdog_reset16_r		},	// Watchdog
-	{ 0x700000, 0x700001, pzlbowl_protection_r		},	// Protection
-	{ 0x800000, 0x83ffff, MRA16_RAM					},	// Sprites
-	{ 0x840000, 0x84ffff, MRA16_RAM					},	// Palette
-	{ 0x900000, 0x903fff, seta_sound_word_r 		},	// Sound
-	{ 0xfffc00, 0xffffff, MRA16_RAM					},	// TMP68301 Registers
-MEMORY_END
+static ADDRESS_MAP_START( pzlbowl_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x0fffff) AM_READ(MRA16_ROM					)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_READ(MRA16_RAM					)	// RAM
+	AM_RANGE(0x400300, 0x400301) AM_READ(input_port_0_word_r		)	// DSW 1
+	AM_RANGE(0x400302, 0x400303) AM_READ(input_port_1_word_r		)	// DSW 2
+	AM_RANGE(0x500000, 0x500001) AM_READ(input_port_2_word_r		)	// P1
+	AM_RANGE(0x500002, 0x500003) AM_READ(input_port_3_word_r		)	// P2
+	AM_RANGE(0x500004, 0x500005) AM_READ(pzlbowl_coins_r			)	// Coins + Protection?
+	AM_RANGE(0x500006, 0x500007) AM_READ(watchdog_reset16_r		)	// Watchdog
+	AM_RANGE(0x700000, 0x700001) AM_READ(pzlbowl_protection_r		)	// Protection
+	AM_RANGE(0x800000, 0x83ffff) AM_READ(MRA16_RAM					)	// Sprites
+	AM_RANGE(0x840000, 0x84ffff) AM_READ(MRA16_RAM					)	// Palette
+	AM_RANGE(0x900000, 0x903fff) AM_READ(seta_sound_word_r 		)	// Sound
+	AM_RANGE(0xfffc00, 0xffffff) AM_READ(MRA16_RAM					)	// TMP68301 Registers
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( pzlbowl_writemem )
-	{ 0x000000, 0x0fffff, MWA16_ROM						},	// ROM
-	{ 0x200000, 0x20ffff, MWA16_RAM						},	// RAM
-	{ 0x400300, 0x40030f, seta2_sound_bank_w			},	// Samples Banks
-	{ 0x500004, 0x500005, pzlbowl_coin_counter_w		},	// Coins Counter
-	{ 0x800000, 0x83ffff, MWA16_RAM, &spriteram16,  &spriteram_size	},	// Sprites
-	{ 0x840000, 0x84ffff, paletteram16_xRRRRRGGGGGBBBBB_word_w, &paletteram16	},	// Palette
-	{ 0x860000, 0x86003f, seta2_vregs_w, &seta2_vregs	},	// Video Registers
-	{ 0x900000, 0x903fff, seta_sound_word_w 			},	// Sound
-	{ 0xfffc00, 0xffffff, tmp68301_regs_w, &tmp68301_regs	},	// TMP68301 Registers
-MEMORY_END
+static ADDRESS_MAP_START( pzlbowl_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x0fffff) AM_WRITE(MWA16_ROM						)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_WRITE(MWA16_RAM						)	// RAM
+	AM_RANGE(0x400300, 0x40030f) AM_WRITE(seta2_sound_bank_w			)	// Samples Banks
+	AM_RANGE(0x500004, 0x500005) AM_WRITE(pzlbowl_coin_counter_w		)	// Coins Counter
+	AM_RANGE(0x800000, 0x83ffff) AM_WRITE(MWA16_RAM) AM_BASE(&spriteram16) AM_SIZE(&spriteram_size	)	// Sprites
+	AM_RANGE(0x840000, 0x84ffff) AM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE(&paletteram16	)	// Palette
+	AM_RANGE(0x860000, 0x86003f) AM_WRITE(seta2_vregs_w) AM_BASE(&seta2_vregs	)	// Video Registers
+	AM_RANGE(0x900000, 0x903fff) AM_WRITE(seta_sound_word_w 			)	// Sound
+	AM_RANGE(0xfffc00, 0xffffff) AM_WRITE(tmp68301_regs_w) AM_BASE(&tmp68301_regs	)	// TMP68301 Registers
+ADDRESS_MAP_END
 
 
 /***************************************************************************
 							Penguin Bros
 ***************************************************************************/
 
-static MEMORY_READ16_START( penbros_readmem )
-	{ 0x000000, 0x0fffff, MRA16_ROM					},	// ROM
-	{ 0x200000, 0x20ffff, MRA16_RAM					},	// RAM
-	{ 0x210000, 0x23ffff, MRA16_RAM					},	// RAM
-	{ 0x300000, 0x30ffff, MRA16_RAM					},	// RAM
-	{ 0x500300, 0x500301, input_port_0_word_r		},	// DSW 1
-	{ 0x500302, 0x500303, input_port_1_word_r		},	// DSW 2
-	{ 0x600000, 0x600001, input_port_2_word_r		},	// P1
-	{ 0x600002, 0x600003, input_port_3_word_r		},	// P2
-	{ 0x600004, 0x600005, input_port_4_word_r		},	// Coins
-	{ 0x600006, 0x600007, watchdog_reset16_r		},	// Watchdog
-//	{ 0x700000, 0x700001, pzlbowl_protection_r		},	// Protection
-	{ 0xb00000, 0xb3ffff, MRA16_RAM					},	// Sprites
-	{ 0xb40000, 0xb4ffff, MRA16_RAM					},	// Palette
-	{ 0xa00000, 0xa03fff, seta_sound_word_r 		},	// Sound
-	{ 0xfffc00, 0xffffff, MRA16_RAM					},	// TMP68301 Registers
-MEMORY_END
+static ADDRESS_MAP_START( penbros_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x0fffff) AM_READ(MRA16_ROM					)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_READ(MRA16_RAM					)	// RAM
+	AM_RANGE(0x210000, 0x23ffff) AM_READ(MRA16_RAM					)	// RAM
+	AM_RANGE(0x300000, 0x30ffff) AM_READ(MRA16_RAM					)	// RAM
+	AM_RANGE(0x500300, 0x500301) AM_READ(input_port_0_word_r		)	// DSW 1
+	AM_RANGE(0x500302, 0x500303) AM_READ(input_port_1_word_r		)	// DSW 2
+	AM_RANGE(0x600000, 0x600001) AM_READ(input_port_2_word_r		)	// P1
+	AM_RANGE(0x600002, 0x600003) AM_READ(input_port_3_word_r		)	// P2
+	AM_RANGE(0x600004, 0x600005) AM_READ(input_port_4_word_r		)	// Coins
+	AM_RANGE(0x600006, 0x600007) AM_READ(watchdog_reset16_r		)	// Watchdog
+//	AM_RANGE(0x700000, 0x700001) AM_READ(pzlbowl_protection_r		)	// Protection
+	AM_RANGE(0xb00000, 0xb3ffff) AM_READ(MRA16_RAM					)	// Sprites
+	AM_RANGE(0xb40000, 0xb4ffff) AM_READ(MRA16_RAM					)	// Palette
+	AM_RANGE(0xa00000, 0xa03fff) AM_READ(seta_sound_word_r 		)	// Sound
+	AM_RANGE(0xfffc00, 0xffffff) AM_READ(MRA16_RAM					)	// TMP68301 Registers
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( penbros_writemem )
-	{ 0x000000, 0x0fffff, MWA16_ROM						},	// ROM
-	{ 0x200000, 0x20ffff, MWA16_RAM						},	// RAM
-	{ 0x300000, 0x30ffff, MWA16_RAM						},	// RAM
-	{ 0x210000, 0x23ffff, MWA16_RAM						},	// RAM
-	{ 0x500300, 0x50030f, seta2_sound_bank_w			},	// Samples Banks
-	{ 0x600004, 0x600005, pzlbowl_coin_counter_w		},	// Coins Counter
-	{ 0xb00000, 0xb3ffff, MWA16_RAM, &spriteram16,  &spriteram_size	},	// Sprites
-	{ 0xb40000, 0xb4ffff, paletteram16_xRRRRRGGGGGBBBBB_word_w, &paletteram16	},	// Palette
-	{ 0xb60000, 0xb6003f, seta2_vregs_w, &seta2_vregs	},	// Video Registers
-	{ 0xa00000, 0xa03fff, seta_sound_word_w 			},	// Sound
-	{ 0xfffc00, 0xffffff, tmp68301_regs_w, &tmp68301_regs	},	// TMP68301 Registers
-MEMORY_END
+static ADDRESS_MAP_START( penbros_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x0fffff) AM_WRITE(MWA16_ROM						)	// ROM
+	AM_RANGE(0x200000, 0x20ffff) AM_WRITE(MWA16_RAM						)	// RAM
+	AM_RANGE(0x300000, 0x30ffff) AM_WRITE(MWA16_RAM						)	// RAM
+	AM_RANGE(0x210000, 0x23ffff) AM_WRITE(MWA16_RAM						)	// RAM
+	AM_RANGE(0x500300, 0x50030f) AM_WRITE(seta2_sound_bank_w			)	// Samples Banks
+	AM_RANGE(0x600004, 0x600005) AM_WRITE(pzlbowl_coin_counter_w		)	// Coins Counter
+	AM_RANGE(0xb00000, 0xb3ffff) AM_WRITE(MWA16_RAM) AM_BASE(&spriteram16) AM_SIZE(&spriteram_size	)	// Sprites
+	AM_RANGE(0xb40000, 0xb4ffff) AM_WRITE(paletteram16_xRRRRRGGGGGBBBBB_word_w) AM_BASE(&paletteram16	)	// Palette
+	AM_RANGE(0xb60000, 0xb6003f) AM_WRITE(seta2_vregs_w) AM_BASE(&seta2_vregs	)	// Video Registers
+	AM_RANGE(0xa00000, 0xa03fff) AM_WRITE(seta_sound_word_w 			)	// Sound
+	AM_RANGE(0xfffc00, 0xffffff) AM_WRITE(tmp68301_regs_w) AM_BASE(&tmp68301_regs	)	// TMP68301 Registers
+ADDRESS_MAP_END
 
 
 
@@ -1386,7 +1386,7 @@ static MACHINE_DRIVER_START( mj4simai )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD_TAG("main",M68000,32530400 / 2)			/* !! TMP68301 !! */
-	MDRV_CPU_MEMORY(mj4simai_readmem,mj4simai_writemem)
+	MDRV_CPU_PROGRAM_MAP(mj4simai_readmem,mj4simai_writemem)
 	MDRV_CPU_VBLANK_INT(seta2_interrupt,1)
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -1416,7 +1416,7 @@ static MACHINE_DRIVER_START( gundamex )
 	MDRV_IMPORT_FROM(mj4simai)
 	MDRV_CPU_MODIFY("main")
 	MDRV_CPU_REPLACE("main",M68000,16000000)
-	MDRV_CPU_MEMORY(gundamex_readmem,gundamex_writemem)
+	MDRV_CPU_PROGRAM_MAP(gundamex_readmem,gundamex_writemem)
 
 	MDRV_NVRAM_HANDLER(93C46_gundamex)
 
@@ -1428,7 +1428,7 @@ static MACHINE_DRIVER_START( grdians )
 
 	MDRV_IMPORT_FROM(mj4simai)
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(grdians_readmem,grdians_writemem)
+	MDRV_CPU_PROGRAM_MAP(grdians_readmem,grdians_writemem)
 
 	/* video hardware */
 	MDRV_VISIBLE_AREA(0x80, 0x80 + 0x130 -1, 0x80, 0x80 + 0xe8 -1)
@@ -1440,7 +1440,7 @@ static MACHINE_DRIVER_START( myangel )
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM(mj4simai)
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(myangel_readmem,myangel_writemem)
+	MDRV_CPU_PROGRAM_MAP(myangel_readmem,myangel_writemem)
 
 	/* video hardware */
 	MDRV_VISIBLE_AREA(0, 0x178-1, 0x00, 0xf0-1)
@@ -1454,7 +1454,7 @@ static MACHINE_DRIVER_START( myangel2 )
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM(mj4simai)
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(myangel2_readmem,myangel2_writemem)
+	MDRV_CPU_PROGRAM_MAP(myangel2_readmem,myangel2_writemem)
 
 	/* video hardware */
 	MDRV_VISIBLE_AREA(0, 0x178-1, 0x00, 0xf0-1)
@@ -1468,7 +1468,7 @@ static MACHINE_DRIVER_START( pzlbowl )
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM(mj4simai)
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(pzlbowl_readmem,pzlbowl_writemem)
+	MDRV_CPU_PROGRAM_MAP(pzlbowl_readmem,pzlbowl_writemem)
 
 	/* video hardware */
 	MDRV_VISIBLE_AREA(0x10, 0x190-1, 0x100, 0x1f0-1)
@@ -1480,7 +1480,7 @@ static MACHINE_DRIVER_START( penbros )
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM(mj4simai)
 	MDRV_CPU_MODIFY("main")
-	MDRV_CPU_MEMORY(penbros_readmem,penbros_writemem)
+	MDRV_CPU_PROGRAM_MAP(penbros_readmem,penbros_writemem)
 
 	/* video hardware */
 	MDRV_VISIBLE_AREA(0, 0x140-1, 0x80, 0x160-1)

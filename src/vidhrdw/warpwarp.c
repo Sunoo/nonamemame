@@ -8,15 +8,17 @@
 
 #include "driver.h"
 #include "artwork.h"
-#include "vidhrdw/generic.h"
 
 
 
+data8_t *geebee_videoram,*warpwarp_videoram;
 int geebee_handleoverlay;
 int geebee_bgw;
 int warpwarp_ball_on;
 int warpwarp_ball_h,warpwarp_ball_v;
 int warpwarp_ball_sizex, warpwarp_ball_sizey;
+
+static struct tilemap *bg_tilemap;
 
 
 static unsigned char geebee_palette[] =
@@ -80,10 +82,10 @@ PALETTE_INIT( navarone )
   Moreover, the bullet is pure white, obtained with three 220 ohm resistors.
 
 ***************************************************************************/
+
 PALETTE_INIT( warpwarp )
 {
 	int i;
-
 
 	for (i = 0;i < Machine->drv->total_colors;i++)
 	{
@@ -118,6 +120,130 @@ PALETTE_INIT( warpwarp )
 
 
 
+/***************************************************************************
+
+  Callbacks for the TileMap code
+
+***************************************************************************/
+
+/* convert from 32x32 to 34x28 */
+static UINT32 tilemap_scan(UINT32 col,UINT32 row,UINT32 num_cols,UINT32 num_rows)
+{
+	int offs;
+
+	row += 2;
+	col--;
+	if (col & 0x20)
+		offs = row + ((col & 1) << 5);
+	else
+		offs = col + (row << 5);
+
+	return offs;
+}
+
+static void geebee_get_tile_info(int tile_index)
+{
+	int code = geebee_videoram[tile_index];
+	int color = (geebee_bgw & 1) | ((code & 0x80) >> 6);
+	SET_TILE_INFO(
+			0,
+			code,
+			color,
+			0)
+}
+
+static void navarone_get_tile_info(int tile_index)
+{
+	int code = geebee_videoram[tile_index];
+	int color = geebee_bgw & 1;
+	SET_TILE_INFO(
+			0,
+			code,
+			color,
+			0)
+}
+
+static void warpwarp_get_tile_info(int tile_index)
+{
+	SET_TILE_INFO(
+			0,
+			warpwarp_videoram[tile_index],
+			warpwarp_videoram[tile_index + 0x400],
+			0)
+}
+
+
+
+/***************************************************************************
+
+  Start the video hardware emulation.
+
+***************************************************************************/
+
+VIDEO_START( geebee )
+{
+	bg_tilemap = tilemap_create(geebee_get_tile_info,tilemap_scan,TILEMAP_OPAQUE,8,8,34,28);
+
+	if (!bg_tilemap)
+		return 1;
+
+	return 0;
+}
+
+VIDEO_START( navarone )
+{
+	bg_tilemap = tilemap_create(navarone_get_tile_info,tilemap_scan,TILEMAP_OPAQUE,8,8,34,28);
+
+	if (!bg_tilemap)
+		return 1;
+
+	return 0;
+}
+
+VIDEO_START( warpwarp )
+{
+	bg_tilemap = tilemap_create(warpwarp_get_tile_info,tilemap_scan,TILEMAP_TRANSPARENT,8,8,34,28);
+
+	if (!bg_tilemap)
+		return 1;
+
+	return 0;
+}
+
+
+
+/***************************************************************************
+
+  Memory handlers
+
+***************************************************************************/
+
+WRITE8_HANDLER( geebee_videoram_w )
+{
+	if (geebee_videoram[offset] != data)
+	{
+		geebee_videoram[offset] = data;
+		tilemap_mark_tile_dirty(bg_tilemap,offset & 0x3ff);
+	}
+}
+
+WRITE8_HANDLER( warpwarp_videoram_w )
+{
+	if (warpwarp_videoram[offset] != data)
+	{
+		warpwarp_videoram[offset] = data;
+		tilemap_mark_tile_dirty(bg_tilemap,offset & 0x3ff);
+	}
+}
+
+
+
+/***************************************************************************
+
+  Display refresh
+
+***************************************************************************/
+
 INLINE void geebee_plot(struct mame_bitmap *bitmap, const struct rectangle *cliprect, int x, int y, int pen)
 {
 	if (x >= cliprect->min_x && x <= cliprect->max_x && y >= cliprect->min_y && y <= cliprect->max_y)
@@ -129,7 +255,7 @@ static void draw_ball(struct mame_bitmap *bitmap, const struct rectangle *clipre
 	if (warpwarp_ball_on)
 	{
 		int x = 256+8 - warpwarp_ball_h;
-		int y = 256 - warpwarp_ball_v;
+		int y = 240 - warpwarp_ball_v;
 		int i,j;
 
 		for (i = warpwarp_ball_sizey;i > 0;i--)
@@ -144,60 +270,11 @@ static void draw_ball(struct mame_bitmap *bitmap, const struct rectangle *clipre
 
 VIDEO_UPDATE( geebee )
 {
-	int offs;
-
 	/* use an overlay only in upright mode */
 	if (geebee_handleoverlay)
 		artwork_show(OVERLAY_TAG, (readinputport(2) & 0x01) == 0);
 
-	if (get_vh_global_attribute_changed())
-        memset(dirtybuffer, 1, videoram_size);
-
-	for (offs = 0; offs < videoram_size; offs++)
-	{
-		if( dirtybuffer[offs] )
-		{
-			int mx,my,sx,sy,code,color;
-
-			dirtybuffer[offs] = 0;
-
-			mx = offs % 32;
-			my = offs / 32;
-
-			if (my == 0)
-			{
-				sx = 33;
-				sy = mx;
-			}
-			else if (my == 1)
-			{
-				sx = 0;
-				sy = mx;
-			}
-			else
-			{
-				sx = mx+1;
-				sy = my;
-			}
-
-			if (flip_screen)
-			{
-				sx = 33 - sx;
-				sy = 31 - sy;
-			}
-
-			code = videoram[offs];
-			color = (geebee_bgw & 1) | ((code & 0x80) >> 6);
-			drawgfx(tmpbitmap,Machine->gfx[0],
-					code,
-					color,
-					flip_screen,flip_screen,
-					8*sx,8*sy,
-					&Machine->visible_area,TRANSPARENCY_NONE,0);
-		}
-	}
-
-	copybitmap(bitmap,tmpbitmap,0,0,0,0,cliprect,TRANSPARENCY_NONE,0);
+	tilemap_draw(bitmap,cliprect,bg_tilemap,0,0);
 
 	draw_ball(bitmap,cliprect,1);
 }
@@ -206,54 +283,7 @@ VIDEO_UPDATE( geebee )
 
 VIDEO_UPDATE( warpwarp )
 {
-	int offs;
-
-	if (get_vh_global_attribute_changed())
-        memset(dirtybuffer, 1, videoram_size);
-
-	for (offs = 0; offs < videoram_size; offs++)
-	{
-		if (dirtybuffer[offs])
-		{
-			int mx,my,sx,sy;
-
-			dirtybuffer[offs] = 0;
-
-			mx = offs % 32;
-			my = offs / 32;
-
-			if (my == 0)
-			{
-				sx = 33;
-				sy = mx;
-			}
-			else if (my == 1)
-			{
-				sx = 0;
-				sy = mx;
-			}
-			else
-			{
-				sx = mx + 1;
-				sy = my;
-			}
-
-			if (flip_screen)
-			{
-				sx = 33 - sx;
-				sy = 31 - sy;
-			}
-
-			drawgfx(tmpbitmap,Machine->gfx[0],
-					videoram[offs],
-					colorram[offs],
-					flip_screen,flip_screen,
-					8*sx,8*sy,
-					&Machine->visible_area,TRANSPARENCY_NONE,0);
-		}
-	}
-
-	copybitmap(bitmap,tmpbitmap,0,0,0,0,cliprect,TRANSPARENCY_NONE,0);
+	tilemap_draw(bitmap,cliprect,bg_tilemap,0,0);
 
 	draw_ball(bitmap,cliprect,0xf6);
 }

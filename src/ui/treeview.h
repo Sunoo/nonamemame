@@ -75,9 +75,12 @@ void CreateSourceFolders(int parent_index);
 void CreateCPUFolders(int parent_index);
 void CreateSoundFolders(int parent_index);
 void CreateOrientationFolders(int parent_index);
+void CreateDeficiencyFolders(int parent_index);
 
 /***************************************************************************/
 
+#define MAX_EXTRA_FOLDERS 256
+#define MAX_EXTRA_SUBFOLDERS 256
 
 /* TreeView structures */
 enum
@@ -85,7 +88,9 @@ enum
 	FOLDER_NONE = 0,
 	FOLDER_ALLGAMES,
 	FOLDER_AVAILABLE,
+#ifdef SHOW_UNAVAILABLE_FOLDER
 	FOLDER_UNAVAILABLE,
+#endif
 #ifdef MESS
 	FOLDER_CONSOLE,
 	FOLDER_COMPUTER,
@@ -96,6 +101,8 @@ enum
 	FOLDER_SOURCE,
 	FOLDER_CPU,
 	FOLDER_SND,
+	FOLDER_ORIENTATION,
+	FOLDER_DEFICIENCY,
 	FOLDER_WORKING,
 	FOLDER_NONWORKING,
 	FOLDER_ORIGINAL,
@@ -103,9 +110,10 @@ enum
 	FOLDER_RASTER,
 	FOLDER_VECTOR,
 	FOLDER_TRACKBALL,
+	FOLDER_LIGHTGUN,
 	FOLDER_STEREO,
+ 	FOLDER_MULTIMON,
 	FOLDER_HARDDISK,
-	FOLDER_ORIENTATION,
 	MAX_FOLDERS,
 };
 
@@ -158,6 +166,7 @@ LPTREEFOLDER GetCurrentFolder(void);
 int GetNumFolders(void);
 LPTREEFOLDER GetFolder(UINT nFolder);
 LPTREEFOLDER GetFolderByID(UINT nID);
+LPTREEFOLDER GetFolderByName(int iParentIndex, char *cFolderName);
 
 void AddGame(LPTREEFOLDER lpFolder, UINT nGame);
 void RemoveGame(LPTREEFOLDER lpFolder, UINT nGame);

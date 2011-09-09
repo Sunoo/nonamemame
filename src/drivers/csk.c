@@ -190,64 +190,63 @@ WRITE_HANDLER( custom_io_w )
 }
 
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0xefff, MRA_ROM },
-	{ 0xf000, 0xffff, MRA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xefff) AM_READ(MRA8_ROM)
+	AM_RANGE(0xf000, 0xffff) AM_READ(MRA8_RAM)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0xefff, MWA_ROM },
-	{ 0xf000, 0xffff, MWA_RAM },
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0xefff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0xf000, 0xffff) AM_WRITE(MWA8_RAM)
+ADDRESS_MAP_END
+
+static ADDRESS_MAP_START( csk227_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x4000, 0x4000) AM_READ(input_port_0_r)	/* DSW1 */
+	AM_RANGE(0x4001, 0x4001) AM_READ(input_port_1_r)	/* DSW2 */
+	AM_RANGE(0x4002, 0x4002) AM_READ(input_port_2_r)	/* DSW3 */
+	AM_RANGE(0x4003, 0x4003) AM_READ(input_port_3_r)	/* DSW4 */
+	AM_RANGE(0x4004, 0x4004) AM_READ(input_port_4_r)	/* DSW5 */
+	AM_RANGE(0x5081, 0x5081) AM_READ(input_port_5_r)	/* Services */
+	AM_RANGE(0x5082, 0x5082) AM_READ(input_port_6_r)	/* Coing & Kbd */
+	AM_RANGE(0x5091, 0x5091) AM_READ(input_port_7_r)	/* Keyboard */
+	AM_RANGE(0x50a0, 0x50a0) AM_READ(input_port_8_r)	/* Not connected */
+	AM_RANGE(0x7000, 0x77ff) AM_READ(cpk_videoram_r)
+	AM_RANGE(0x7800, 0x7fff) AM_READ(cpk_colorram_r)
+	AM_RANGE(0x8000, 0xffff) AM_READ(cpk_expansion_r)
+ADDRESS_MAP_END
+
+static ADDRESS_MAP_START( csk227_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x2000, 0x27ff) AM_WRITE(cpk_palette_w)
+	AM_RANGE(0x2800, 0x2fff) AM_WRITE(cpk_palette2_w)
+	AM_RANGE(0x6800, 0x6fff) AM_WRITE(cpk_expansion_w)
+	AM_RANGE(0x7000, 0x77ff) AM_WRITE(cpk_videoram_w)
+	AM_RANGE(0x7800, 0x7fff) AM_WRITE(cpk_colorram_w)
+ADDRESS_MAP_END
 
 
-static PORT_READ_START( csk227_readport )
-	{ 0x4000, 0x4000, input_port_0_r },		/* DSW1 */
-	{ 0x4001, 0x4001, input_port_1_r },		/* DSW2 */
-	{ 0x4002, 0x4002, input_port_2_r },		/* DSW3 */
-	{ 0x4003, 0x4003, input_port_3_r },		/* DSW4 */
-	{ 0x4004, 0x4004, input_port_4_r },		/* DSW5 */
-	{ 0x5081, 0x5081, input_port_5_r },		/* Services */
-	{ 0x5082, 0x5082, input_port_6_r },		/* Coing & Kbd */
-	{ 0x5091, 0x5091, input_port_7_r },		/* Keyboard */
-	{ 0x50a0, 0x50a0, input_port_8_r },		/* Not connected */
-	{ 0x7000, 0x77ff, cpk_videoram_r },
-	{ 0x7800, 0x7fff, cpk_colorram_r },
-	{ 0x8000, 0xffff, cpk_expansion_r },
-PORT_END
+static ADDRESS_MAP_START( csk234_readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x4000, 0x4000) AM_READ(input_port_0_r)	/* DSW1 */
+	AM_RANGE(0x4001, 0x4001) AM_READ(input_port_1_r)	/* DSW2 */
+	AM_RANGE(0x4002, 0x4002) AM_READ(input_port_2_r)	/* DSW3 */
+	AM_RANGE(0x4003, 0x4003) AM_READ(input_port_3_r)	/* DSW4 */
+	AM_RANGE(0x4004, 0x4004) AM_READ(input_port_4_r)	/* DSW5 */
+	AM_RANGE(0x5081, 0x5081) AM_READ(input_port_5_r)	/* Services */
+	AM_RANGE(0x5082, 0x5082) AM_READ(input_port_6_r)	/* Coin & Kbd */
+	AM_RANGE(0x5091, 0x5091) AM_READ(custom_io_r)		/* used for protection and other */
+	AM_RANGE(0x50a0, 0x50a0) AM_READ(input_port_8_r) 	/* Not connected */
+	AM_RANGE(0x7000, 0x77ff) AM_READ(cpk_videoram_r)
+	AM_RANGE(0x7800, 0x7fff) AM_READ(cpk_colorram_r)
+	AM_RANGE(0x8000, 0xffff) AM_READ(cpk_expansion_r)
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( csk227_writeport )
-	{ 0x2000, 0x27ff, cpk_palette_w  },
-	{ 0x2800, 0x2fff, cpk_palette2_w },
-	{ 0x6800, 0x6fff, cpk_expansion_w },
-	{ 0x7000, 0x77ff, cpk_videoram_w },
-	{ 0x7800, 0x7fff, cpk_colorram_w },
-PORT_END
-
-
-static PORT_READ_START( csk234_readport )
-	{ 0x4000, 0x4000, input_port_0_r },		/* DSW1 */
-	{ 0x4001, 0x4001, input_port_1_r },		/* DSW2 */
-	{ 0x4002, 0x4002, input_port_2_r },		/* DSW3 */
-	{ 0x4003, 0x4003, input_port_3_r },		/* DSW4 */
-	{ 0x4004, 0x4004, input_port_4_r },		/* DSW5 */
-	{ 0x5081, 0x5081, input_port_5_r },		/* Services */
-	{ 0x5082, 0x5082, input_port_6_r },		/* Coing & Kbd */
-	{ 0x5091, 0x5091, custom_io_r },		/* used for protection and other */
-	{ 0x50a0, 0x50a0, input_port_8_r },		/* Not connected */
-	{ 0x7000, 0x77ff, cpk_videoram_r },
-	{ 0x7800, 0x7fff, cpk_colorram_r },
-	{ 0x8000, 0xffff, cpk_expansion_r },
-PORT_END
-
-static PORT_WRITE_START( csk234_writeport )
-	{ 0x2000, 0x27ff, cpk_palette_w  },
-	{ 0x2800, 0x2fff, cpk_palette2_w },
-	{ 0x5090, 0x5090, custom_io_w },
-	{ 0x6800, 0x6fff, cpk_expansion_w },
-	{ 0x7000, 0x77ff, cpk_videoram_w },
-	{ 0x7800, 0x7fff, cpk_colorram_w },
-PORT_END
+static ADDRESS_MAP_START( csk234_writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x2000, 0x27ff) AM_WRITE(cpk_palette_w)
+	AM_RANGE(0x2800, 0x2fff) AM_WRITE(cpk_palette2_w)
+	AM_RANGE(0x5090, 0x5090) AM_WRITE(custom_io_w)
+	AM_RANGE(0x6800, 0x6fff) AM_WRITE(cpk_expansion_w)
+	AM_RANGE(0x7000, 0x77ff) AM_WRITE(cpk_videoram_w)
+	AM_RANGE(0x7800, 0x7fff) AM_WRITE(cpk_colorram_w)
+ADDRESS_MAP_END
 
 
 
@@ -603,8 +602,8 @@ static MACHINE_DRIVER_START( csk227it )
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 4000000)	/* ? */
 	MDRV_CPU_FLAGS(CPU_16BIT_PORT)
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(csk227_readport,csk227_writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(csk227_readport,csk227_writeport)
 	MDRV_CPU_VBLANK_INT(cska_interrupt,6)
 
 	MDRV_FRAMES_PER_SECOND(57)
@@ -632,8 +631,8 @@ static MACHINE_DRIVER_START( csk234it )
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 4000000)	/* ? */
 	MDRV_CPU_FLAGS(CPU_16BIT_PORT)
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(csk234_readport,csk234_writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(csk234_readport,csk234_writeport)
 	MDRV_CPU_VBLANK_INT(cska_interrupt,6)
 
 	MDRV_FRAMES_PER_SECOND(57)
@@ -662,41 +661,39 @@ MACHINE_DRIVER_END
 
 ROM_START( csk227it )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "v227i.bin",   0x0000, 0x10000, CRC(df1ebf49) )
+	ROM_LOAD( "v227i.bin",   0x0000, 0x10000, CRC(df1ebf49) SHA1(829c7575d3d3780557405b3a61859901df6dbe4f) )
 
 	ROM_REGION( 0x60000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "6.227",  0x00000, 0x20000, CRC(e9aad93b) )
-	ROM_LOAD( "5.227",  0x20000, 0x20000, CRC(e4c4c8da) )
-	ROM_LOAD( "4.227",  0x40000, 0x20000, CRC(afb365dd) )
+	ROM_LOAD( "6.227",  0x00000, 0x20000, CRC(e9aad93b) SHA1(72116759cd8ddd9828f534e8f8a3f9f96ad2e002) )
+	ROM_LOAD( "5.227",  0x20000, 0x20000, CRC(e4c4c8da) SHA1(0442b0de68f3b69e613506348e00c3cf9139edcf) )
+	ROM_LOAD( "4.227",  0x40000, 0x20000, CRC(afb365dd) SHA1(930a4cd516258e703a75afc25ef6b2655b8b696a) )
 
 	ROM_REGION( 0x30000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "3.bin",  0x00000, 0x10000, CRC(fcb115ac) )	/* extension charset, used for ability game */
-	ROM_LOAD( "2.bin",  0x10000, 0x10000, CRC(848343a3) )
-	ROM_LOAD( "1.bin",  0x20000, 0x10000, CRC(921ad5de) )
+	ROM_LOAD( "3.bin",  0x00000, 0x10000, CRC(fcb115ac) SHA1(a9f2b9762413840669cd44f8e54b47a7c4350d11) )	/* extension charset, used for ability game */
+	ROM_LOAD( "2.bin",  0x10000, 0x10000, CRC(848343a3) SHA1(b12f9bc2feb470d2fa8b085621fa60c0895109d4) )
+	ROM_LOAD( "1.bin",  0x20000, 0x10000, CRC(921ad5de) SHA1(b06ab2e63b31361dcb0367110f47bf2453ecdca6) )
 
 	ROM_REGION( 0x10000, REGION_GFX3, 0 )	/* expansion rom - contains backgrounds and pictures charmaps */
-	ROM_LOAD( "7.227",   0x0000, 0x10000, CRC(a10786ad) )
+	ROM_LOAD( "7.227",   0x0000, 0x10000, CRC(a10786ad) SHA1(82f5f81808ca70d67a2710cc66fbbf78588b33b5) )
 ROM_END
-
 
 ROM_START( csk234it )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )	/* 64k for code */
-	ROM_LOAD( "v234it.bin",   0x0000, 0x10000, CRC(344b7059) )
+	ROM_LOAD( "v234it.bin",   0x0000, 0x10000, CRC(344b7059)  SHA1(990cb84e35c0c50d3be9fbb76a11395114dc6c9b) )
 
 	ROM_REGION( 0x60000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "6.234",  0x00000, 0x20000, CRC(23b855a4) )
-	ROM_LOAD( "5.234",  0x20000, 0x20000, CRC(189039d7) )
-	ROM_LOAD( "4.234",  0x40000, 0x20000, CRC(c82b0ffc) )
+	ROM_LOAD( "6.234",  0x00000, 0x20000, CRC(23b855a4) SHA1(8217bac61ad09483d8789113cf394d0e525ab28a) )
+	ROM_LOAD( "5.234",  0x20000, 0x20000, CRC(189039d7) SHA1(146fd1ddb23ceaa4192e0382b0ab82f5cfbdabfe) )
+	ROM_LOAD( "4.234",  0x40000, 0x20000, CRC(c82b0ffc) SHA1(5ebd7da76d402b7111cbe9012cfa3b8a8ff1a86e) )
 
 	ROM_REGION( 0x30000, REGION_GFX2, ROMREGION_DISPOSE )
-	ROM_LOAD( "3.bin",  0x00000, 0x10000, CRC(fcb115ac) )	/* extension charset, used for ability game */
-	ROM_LOAD( "2.bin",  0x10000, 0x10000, CRC(848343a3) )
-	ROM_LOAD( "1.bin",  0x20000, 0x10000, CRC(921ad5de) )
+	ROM_LOAD( "3.bin",  0x00000, 0x10000, CRC(fcb115ac) SHA1(a9f2b9762413840669cd44f8e54b47a7c4350d11) )	/* extension charset, used for ability game */
+	ROM_LOAD( "2.bin",  0x10000, 0x10000, CRC(848343a3) SHA1(b12f9bc2feb470d2fa8b085621fa60c0895109d4) )
+	ROM_LOAD( "1.bin",  0x20000, 0x10000, CRC(921ad5de) SHA1(b06ab2e63b31361dcb0367110f47bf2453ecdca6) )
 
 	ROM_REGION( 0x10000, REGION_GFX3, 0 )	/* expansion rom - contains backgrounds and pictures charmaps */
-	ROM_LOAD( "7.234",   0x0000, 0x10000, CRC(ae6dd4ad) )
+	ROM_LOAD( "7.234",   0x0000, 0x10000, CRC(ae6dd4ad) SHA1(4772d5c150d64d1ef3b68e16214f594eea0b3c1b) )
 ROM_END
-
 
 
 
@@ -720,6 +717,6 @@ static void init_cska(void)
 }
 
 
-GAME( ????, csk227it, 0,        csk227it, csk227, cska, ROT0, "IGS", "Champion Skill (with Ability)" )
-GAME( ????, csk234it, csk227it, csk234it, csk234, cska, ROT0, "IGS", "Champion Skill (Ability, Poker & Symbols)" )
+GAMEX( ????, csk227it, 0,        csk227it, csk227, cska, ROT0, "IGS", "Champion Skill (with Ability)", GAME_NO_SOUND )               /* SU 062 */
+GAMEX( ????, csk234it, csk227it, csk234it, csk234, cska, ROT0, "IGS", "Champion Skill (Ability, Poker & Symbols)", GAME_NO_SOUND )   /* SU 062 */
 

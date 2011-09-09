@@ -74,42 +74,42 @@ static WRITE_HANDLER( okibank_w )
 
 
 
-static MEMORY_READ16_START( diverboy_readmem )
-	{ 0x000000, 0x03ffff, MRA16_ROM },
-	{ 0x040000, 0x04ffff, MRA16_RAM },
-	{ 0x080000, 0x083fff, MRA16_RAM },
-	{ 0x180000, 0x180001, input_port_0_word_r },
-	{ 0x180002, 0x180003, input_port_1_word_r },
-	{ 0x180008, 0x180009, input_port_2_word_r },
-//	{ 0x18000a, 0x18000b, MRA16_NOP },
-MEMORY_END
+static ADDRESS_MAP_START( diverboy_readmem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_READ(MRA16_ROM)
+	AM_RANGE(0x040000, 0x04ffff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x080000, 0x083fff) AM_READ(MRA16_RAM)
+	AM_RANGE(0x180000, 0x180001) AM_READ(input_port_0_word_r)
+	AM_RANGE(0x180002, 0x180003) AM_READ(input_port_1_word_r)
+	AM_RANGE(0x180008, 0x180009) AM_READ(input_port_2_word_r)
+//	AM_RANGE(0x18000a, 0x18000b) AM_READ(MRA16_NOP)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE16_START( diverboy_writemem )
-	{ 0x000000, 0x03ffff, MWA16_ROM },
-	{ 0x040000, 0x04ffff, MWA16_RAM }, /* main ram */
-	{ 0x080000, 0x083fff, MWA16_RAM, &diverboy_spriteram, &diverboy_spriteram_size },
-	{ 0x100000, 0x100001, soundcmd_w },
-	{ 0x140000, 0x1407ff, paletteram16_xxxxBBBBGGGGRRRR_word_w, &paletteram16 },
-//	{ 0x18000c, 0x18000d, MWA16_NOP },
-	{ 0x320000, 0x3207ff, MWA16_RAM }, /* ?? */
-	{ 0x322000, 0x3227ff, MWA16_RAM }, /* ?? */
-//	{ 0x340000, 0x340001, MWA16_NOP },
-//	{ 0x340002, 0x340003, MWA16_NOP },
-MEMORY_END
+static ADDRESS_MAP_START( diverboy_writemem, ADDRESS_SPACE_PROGRAM, 16 )
+	AM_RANGE(0x000000, 0x03ffff) AM_WRITE(MWA16_ROM)
+	AM_RANGE(0x040000, 0x04ffff) AM_WRITE(MWA16_RAM) /* main ram */
+	AM_RANGE(0x080000, 0x083fff) AM_WRITE(MWA16_RAM) AM_BASE(&diverboy_spriteram) AM_SIZE(&diverboy_spriteram_size)
+	AM_RANGE(0x100000, 0x100001) AM_WRITE(soundcmd_w)
+	AM_RANGE(0x140000, 0x1407ff) AM_WRITE(paletteram16_xxxxBBBBGGGGRRRR_word_w) AM_BASE(&paletteram16)
+//	AM_RANGE(0x18000c, 0x18000d) AM_WRITE(MWA16_NOP)
+	AM_RANGE(0x320000, 0x3207ff) AM_WRITE(MWA16_RAM) /* ?? */
+	AM_RANGE(0x322000, 0x3227ff) AM_WRITE(MWA16_RAM) /* ?? */
+//	AM_RANGE(0x340000, 0x340001) AM_WRITE(MWA16_NOP)
+//	AM_RANGE(0x340002, 0x340003) AM_WRITE(MWA16_NOP)
+ADDRESS_MAP_END
 
-static MEMORY_READ_START( snd_readmem )
-	{ 0x0000, 0x7fff, MRA_ROM },
-	{ 0x8000, 0x87ff, MRA_RAM },
-	{ 0x9800, 0x9800, OKIM6295_status_0_r },
-	{ 0xa000, 0xa000, soundlatch_r },
-MEMORY_END
+static ADDRESS_MAP_START( snd_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x8000, 0x87ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x9800, 0x9800) AM_READ(OKIM6295_status_0_r)
+	AM_RANGE(0xa000, 0xa000) AM_READ(soundlatch_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( snd_writemem )
-	{ 0x0000, 0x7fff, MWA_ROM },
-	{ 0x8000, 0x87ff, MWA_RAM },
-	{ 0x9000, 0x9000, okibank_w },
-	{ 0x9800, 0x9800, OKIM6295_data_0_w },
-MEMORY_END
+static ADDRESS_MAP_START( snd_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x8000, 0x87ff) AM_WRITE(MWA8_RAM)
+	AM_RANGE(0x9000, 0x9000) AM_WRITE(okibank_w)
+	AM_RANGE(0x9800, 0x9800) AM_WRITE(OKIM6295_data_0_w)
+ADDRESS_MAP_END
 
 
 
@@ -204,12 +204,12 @@ static struct OKIM6295interface okim6295_interface =
 
 static MACHINE_DRIVER_START( diverboy )
 	MDRV_CPU_ADD(M68000, 12000000) /* guess */
-	MDRV_CPU_MEMORY(diverboy_readmem,diverboy_writemem)
+	MDRV_CPU_PROGRAM_MAP(diverboy_readmem,diverboy_writemem)
 	MDRV_CPU_VBLANK_INT(irq6_line_hold,1)
 
 	MDRV_CPU_ADD(Z80, 4000000)
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
-	MDRV_CPU_MEMORY(snd_readmem,snd_writemem)
+	MDRV_CPU_PROGRAM_MAP(snd_readmem,snd_writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)

@@ -64,41 +64,41 @@ READ_HANDLER( clshroad_input_r )
 }
 
 
-static MEMORY_READ_START( clshroad_readmem )
-	{ 0x0000, 0x7fff, MRA_ROM				},	// ROM
-	{ 0x8000, 0x95ff, MRA_RAM				},	// Work   RAM
-	{ 0x9600, 0x97ff, clshroad_sharedram_r	},	// Shared RAM
-	{ 0x9800, 0x9dff, MRA_RAM				},	// Work   RAM
-	{ 0x9e00, 0x9fff, MRA_RAM				},	// Sprite RAM
-	{ 0xa100, 0xa107, clshroad_input_r		},	// Inputs
-	{ 0xa800, 0xafff, MRA_RAM				},	// Layer  1
-	{ 0xc000, 0xc7ff, MRA_RAM				},	// Layers 0
-MEMORY_END
+static ADDRESS_MAP_START( clshroad_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_READ(MRA8_ROM				)	// ROM
+	AM_RANGE(0x8000, 0x95ff) AM_READ(MRA8_RAM				)	// Work   RAM
+	AM_RANGE(0x9600, 0x97ff) AM_READ(clshroad_sharedram_r	)	// Shared RAM
+	AM_RANGE(0x9800, 0x9dff) AM_READ(MRA8_RAM				)	// Work   RAM
+	AM_RANGE(0x9e00, 0x9fff) AM_READ(MRA8_RAM				)	// Sprite RAM
+	AM_RANGE(0xa100, 0xa107) AM_READ(clshroad_input_r		)	// Inputs
+	AM_RANGE(0xa800, 0xafff) AM_READ(MRA8_RAM				)	// Layer  1
+	AM_RANGE(0xc000, 0xc7ff) AM_READ(MRA8_RAM				)	// Layers 0
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( clshroad_writemem )
-	{ 0x0000, 0x7fff, MWA_ROM									},	// ROM
-	{ 0x8000, 0x95ff, MWA_RAM									},	// Work   RAM
-	{ 0x9600, 0x97ff, clshroad_sharedram_w, &clshroad_sharedram	},	// Shared RAM
-	{ 0x9800, 0x9dff, MWA_RAM									},	// Work   RAM
-	{ 0x9e00, 0x9fff, MWA_RAM, &spriteram, &spriteram_size		},	// Sprite RAM
-	{ 0xa001, 0xa001, MWA_NOP									},	// ? Interrupt related
-	{ 0xa004, 0xa004, clshroad_flipscreen_w						},	// Flip Screen
-	{ 0xa800, 0xafff, clshroad_vram_1_w, &clshroad_vram_1		},	// Layer 1
-	{ 0xb000, 0xb003, MWA_RAM, &clshroad_vregs					},	// Scroll
-	{ 0xc000, 0xc7ff, clshroad_vram_0_w, &clshroad_vram_0		},	// Layers 0
-MEMORY_END
+static ADDRESS_MAP_START( clshroad_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x7fff) AM_WRITE(MWA8_ROM									)	// ROM
+	AM_RANGE(0x8000, 0x95ff) AM_WRITE(MWA8_RAM									)	// Work   RAM
+	AM_RANGE(0x9600, 0x97ff) AM_WRITE(clshroad_sharedram_w) AM_BASE(&clshroad_sharedram	)	// Shared RAM
+	AM_RANGE(0x9800, 0x9dff) AM_WRITE(MWA8_RAM									)	// Work   RAM
+	AM_RANGE(0x9e00, 0x9fff) AM_WRITE(MWA8_RAM) AM_BASE(&spriteram) AM_SIZE(&spriteram_size		)	// Sprite RAM
+	AM_RANGE(0xa001, 0xa001) AM_WRITE(MWA8_NOP									)	// ? Interrupt related
+	AM_RANGE(0xa004, 0xa004) AM_WRITE(clshroad_flipscreen_w						)	// Flip Screen
+	AM_RANGE(0xa800, 0xafff) AM_WRITE(clshroad_vram_1_w) AM_BASE(&clshroad_vram_1		)	// Layer 1
+	AM_RANGE(0xb000, 0xb003) AM_WRITE(MWA8_RAM) AM_BASE(&clshroad_vregs					)	// Scroll
+	AM_RANGE(0xc000, 0xc7ff) AM_WRITE(clshroad_vram_0_w) AM_BASE(&clshroad_vram_0		)	// Layers 0
+ADDRESS_MAP_END
 
-static MEMORY_READ_START( clshroad_sound_readmem )
-	{ 0x0000, 0x1fff, MRA_ROM				},	// ROM
-	{ 0x9600, 0x97ff, clshroad_sharedram_r	},	// Shared RAM
-MEMORY_END
+static ADDRESS_MAP_START( clshroad_sound_readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x1fff) AM_READ(MRA8_ROM				)	// ROM
+	AM_RANGE(0x9600, 0x97ff) AM_READ(clshroad_sharedram_r	)	// Shared RAM
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( clshroad_sound_writemem )
-	{ 0x0000, 0x1fff, MWA_ROM				},	// ROM
-	{ 0x4000, 0x7fff, wiping_sound_w, &wiping_soundregs },
-	{ 0x9600, 0x97ff, clshroad_sharedram_w	},	// Shared RAM
-	{ 0xa003, 0xa003, MWA_NOP				},	// ? Interrupt related
-MEMORY_END
+static ADDRESS_MAP_START( clshroad_sound_writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x1fff) AM_WRITE(MWA8_ROM				)	// ROM
+	AM_RANGE(0x4000, 0x7fff) AM_WRITE(wiping_sound_w) AM_BASE(&wiping_soundregs)
+	AM_RANGE(0x9600, 0x97ff) AM_WRITE(clshroad_sharedram_w	)	// Shared RAM
+	AM_RANGE(0xa003, 0xa003) AM_WRITE(MWA8_NOP				)	// ? Interrupt related
+ADDRESS_MAP_END
 
 
 
@@ -234,21 +234,20 @@ INPUT_PORTS_START( firebatl )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START	// IN3 - DSW 2
-	PORT_DIPNAME( 0x01, 0x01, "Unknown 2-0" )
-	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x02, 0x02, "Unknown 2-1" )
-	PORT_DIPSETTING(    0x02, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x04, 0x04, "Unknown 2-2" )
-	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x08, 0x08, "Unknown 2-3" )
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( 3C_1C ) )
+	PORT_DIPSETTING(    0x01, DEF_STR( 2C_1C ) )
+	PORT_DIPSETTING(    0x03, DEF_STR( 1C_1C ) )
+	PORT_DIPSETTING(    0x02, DEF_STR( 1C_2C ) )
+	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Cabinet ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
+	PORT_DIPSETTING(    0x04, DEF_STR( Cocktail ) )
+	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Demo_Sounds ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_DIPNAME( 0x10, 0x10, "Unknown 2-4" )
-	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
-	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Bonus_Life ) )
+	PORT_DIPSETTING(    0x10, "10K 30K+" )
+	PORT_DIPSETTING(    0x00, "20K 30K+" )
 	PORT_DIPNAME( 0x20, 0x20, "Unknown 2-5" )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -325,12 +324,12 @@ static MACHINE_DRIVER_START( firebatl )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 3000000)	/* ? */
-	MDRV_CPU_MEMORY(clshroad_readmem,clshroad_writemem)
+	MDRV_CPU_PROGRAM_MAP(clshroad_readmem,clshroad_writemem)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)	/* IRQ, no NMI */
 
 	MDRV_CPU_ADD(Z80, 3000000)	/* ? */
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
-	MDRV_CPU_MEMORY(clshroad_sound_readmem,clshroad_sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(clshroad_sound_readmem,clshroad_sound_writemem)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)	/* IRQ, no NMI */
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -358,12 +357,12 @@ static MACHINE_DRIVER_START( clshroad )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 18432000/6)	/* ? */
-	MDRV_CPU_MEMORY(clshroad_readmem,clshroad_writemem)
+	MDRV_CPU_PROGRAM_MAP(clshroad_readmem,clshroad_writemem)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)	/* IRQ, no NMI */
 
 	MDRV_CPU_ADD(Z80, 18432000/6)	/* ? */
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
-	MDRV_CPU_MEMORY(clshroad_sound_readmem,clshroad_sound_writemem)
+	MDRV_CPU_PROGRAM_MAP(clshroad_sound_readmem,clshroad_sound_writemem)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)	/* IRQ, no NMI */
 
 	MDRV_FRAMES_PER_SECOND(60)

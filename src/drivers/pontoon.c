@@ -57,11 +57,11 @@ static size_t nvram_size;
 static NVRAM_HANDLER( pontoon )
 {
 	if (read_or_write)
-                mame_fwrite(file,nvram,nvram_size);
+		mame_fwrite(file,nvram,nvram_size);
 	else
 	{
 		if (file)
-                        mame_fread(file,nvram,nvram_size);
+			mame_fread(file,nvram,nvram_size);
 		else
 			memset(nvram,0xff,nvram_size);
 	}
@@ -69,31 +69,31 @@ static NVRAM_HANDLER( pontoon )
 
 
 
-static MEMORY_READ_START( readmem )
-	{ 0x0000, 0x5fff, MRA_ROM },
-	{ 0x6000, 0x67ff, MRA_RAM },
-	{ 0x8000, 0x87ff, MRA_RAM },
-	{ 0xa000, 0xa000, input_port_0_r },
-	{ 0xa001, 0xa001, input_port_1_r },
-	{ 0xa002, 0xa002, input_port_2_r },
-MEMORY_END
+static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_READ(MRA8_ROM)
+	AM_RANGE(0x6000, 0x67ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0x8000, 0x87ff) AM_READ(MRA8_RAM)
+	AM_RANGE(0xa000, 0xa000) AM_READ(input_port_0_r)
+	AM_RANGE(0xa001, 0xa001) AM_READ(input_port_1_r)
+	AM_RANGE(0xa002, 0xa002) AM_READ(input_port_2_r)
+ADDRESS_MAP_END
 
-static MEMORY_WRITE_START( writemem )
-	{ 0x0000, 0x5fff, MWA_ROM },
-	{ 0x6000, 0x67ff, MWA_RAM, &nvram, &nvram_size },
-	{ 0x8000, 0x83ff, videoram_w, &videoram, &videoram_size },
-	{ 0x8400, 0x87ff, colorram_w, &colorram },
-	{ 0xa001, 0xa002, MWA_NOP },  /* Probably lights and stuff */
-MEMORY_END
+static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
+	AM_RANGE(0x0000, 0x5fff) AM_WRITE(MWA8_ROM)
+	AM_RANGE(0x6000, 0x67ff) AM_WRITE(MWA8_RAM) AM_BASE(&nvram) AM_SIZE(&nvram_size)
+	AM_RANGE(0x8000, 0x83ff) AM_WRITE(videoram_w) AM_BASE(&videoram) AM_SIZE(&videoram_size)
+	AM_RANGE(0x8400, 0x87ff) AM_WRITE(colorram_w) AM_BASE(&colorram)
+	AM_RANGE(0xa001, 0xa002) AM_WRITE(MWA8_NOP)			  /* Probably lights and stuff */
+ADDRESS_MAP_END
 
-static PORT_READ_START( readport )
-	{ 0x00, 0x00, AY8910_read_port_0_r },
-PORT_END
+static ADDRESS_MAP_START( readport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_READ(AY8910_read_port_0_r)
+ADDRESS_MAP_END
 
-static PORT_WRITE_START( writeport )
-	{ 0x00, 0x00, AY8910_write_port_0_w },
-	{ 0x01, 0x01, AY8910_control_port_0_w },
-PORT_END
+static ADDRESS_MAP_START( writeport, ADDRESS_SPACE_IO, 8 )
+	AM_RANGE(0x00, 0x00) AM_WRITE(AY8910_write_port_0_w)
+	AM_RANGE(0x01, 0x01) AM_WRITE(AY8910_control_port_0_w)
+ADDRESS_MAP_END
 
 INPUT_PORTS_START( pontoon )
 	PORT_START      /* IN0 */
@@ -213,8 +213,8 @@ static MACHINE_DRIVER_START( pontoon )
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(Z80, 4608000)	/* 18.432000 / 4 (???) */
-	MDRV_CPU_MEMORY(readmem,writemem)
-	MDRV_CPU_PORTS(readport,writeport)
+	MDRV_CPU_PROGRAM_MAP(readmem,writemem)
+	MDRV_CPU_IO_MAP(readport,writeport)
 	MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
 
 	MDRV_FRAMES_PER_SECOND(60)
@@ -246,21 +246,19 @@ MACHINE_DRIVER_END
 
 ROM_START( pontoon )
 	ROM_REGION( 0x10000, REGION_CPU1, 0 )         /* 64k for code */
-	ROM_LOAD( "ponttekh.001",   0x0000, 0x4000, CRC(1f8c1b38) )
-	ROM_LOAD( "ponttekh.002",   0x4000, 0x2000, CRC(befb4f48) )
+	ROM_LOAD( "ponttekh.001",   0x0000, 0x4000, CRC(1f8c1b38) SHA1(3776ddd695741223bd9ad41f74187bff31f2cd3b) )
+	ROM_LOAD( "ponttekh.002",   0x4000, 0x2000, CRC(befb4f48) SHA1(8ca146c8b52afab5deb6f0ff52bdbb2b1ff3ded7) )
 
 	ROM_REGION( 0x8000, REGION_GFX1, ROMREGION_DISPOSE )
-	ROM_LOAD( "ponttekh.003",   0x0000, 0x2000, CRC(a6a91b3d) )
-	ROM_LOAD( "ponttekh.004",   0x2000, 0x2000, CRC(976ed924) )
-	ROM_LOAD( "ponttekh.005",   0x4000, 0x2000, CRC(2b8e8ca7) )
-	ROM_LOAD( "ponttekh.006",   0x6000, 0x2000, CRC(6bc23965) )
+	ROM_LOAD( "ponttekh.003",   0x0000, 0x2000, CRC(a6a91b3d) SHA1(d180eabe67efd3fd1205570b661a74acf7ed93b3) )
+	ROM_LOAD( "ponttekh.004",   0x2000, 0x2000, CRC(976ed924) SHA1(4d305694b3e157411068baf3052e3aac7d0b32d5) )
+	ROM_LOAD( "ponttekh.005",   0x4000, 0x2000, CRC(2b8e8ca7) SHA1(dd86d3b4fd1627bdaa0603ffd2f1bc2953bc51f8) )
+	ROM_LOAD( "ponttekh.006",   0x6000, 0x2000, CRC(6bc23965) SHA1(b73a584fc5b2dd9436bbb8bc1620f5a51d351aa8) )
 
 	ROM_REGION( 0x0300, REGION_PROMS, 0 )
-	ROM_LOAD( "pon24s10.003",   0x0000, 0x0100, CRC(4623b7f3) )  /* red component */
-	ROM_LOAD( "pon24s10.002",   0x0100, 0x0100, CRC(117e1b67) )  /* green component */
-	ROM_LOAD( "pon24s10.001",   0x0200, 0x0100, CRC(c64ecee8) )  /* blue component */
+	ROM_LOAD( "pon24s10.003",   0x0000, 0x0100, CRC(4623b7f3) SHA1(55948753dec09d0a476b90ca75e7e092ce0f68ee) )  /* red component */
+	ROM_LOAD( "pon24s10.002",   0x0100, 0x0100, CRC(117e1b67) SHA1(b753137878fe5cd650722cf526cd4929821240a8) )  /* green component */
+	ROM_LOAD( "pon24s10.001",   0x0200, 0x0100, CRC(c64ecee8) SHA1(80c9ec21e135235f7f2d41ce7900cf3904123823) )  /* blue component */
 ROM_END
-
-
 
 GAME( 1985, pontoon, 0, pontoon, pontoon, 0, ROT0, "Tehkan", "Pontoon" )
