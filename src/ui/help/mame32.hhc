@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<!-- Sitemap 1.0 -->
+</HEAD><BODY>
+<OBJECT type="text/site properties">
+	<param name="Window Styles" value="0x800625">
+	<param name="ImageType" value="Folder">
+<param name="Font" value="Arial,8,0">
+</OBJECT>
+<UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Mame32 Overview &amp; History">
+		<param name="Local" value="html\mame32_overview.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Mame32 Changes">
+		<param name="Local" value="html\mame32_whatsnew32.htm">
+		<param name="New" value="1">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Mame32 Installation">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="System Requirements">
+			<param name="Local" value="html\mame32_systemreq.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Download Locations">
+			<param name="Local" value="html\mame32_download.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Installation Procedures">
+			<param name="Local" value="html\mame32_installprocedures.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Art and Support Files">
+			<param name="Local" value="html\mame32_art.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Mame32 Usage">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Playing a Game &amp; Internal Controls">
+			<param name="Local" value="html\mame32_playing.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Toolbar, Status Bar, &amp; Windows">
+			<param name="Local" value="html\mame32_visual_elements.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="File Menu">
+			<param name="Local" value="html\mame32_filemenu.htm">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Game Properties">
+				<param name="Local" value="html\mame32_properties.htm">
+				</OBJECT>
+		</UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="View Menu">
+			<param name="Local" value="html\mame32_viewmenu.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Options Menu">
+			<param name="Local" value="html\mame32_optionsmenu.htm">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Game Properties">
+				<param name="Local" value="html\mame32_properties.htm">
+				</OBJECT>
+		</UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Help Menu">
+			<param name="Local" value="html\mame32_help.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Mame32 Troubleshooting">
+		<param name="Local" value="html\mame32_support.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Mame32 Credits &amp; Resources">
+		<param name="Local" value="html\mame32_credits.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Game Changes">
+		<param name="Local" value="html\mame32_changes.htm">
+		<param name="New" value="1">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Mame Documents">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Mame License">
+			<param name="Local" value="docs\mame.txt">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Mame Controller Mapping">
+			<param name="Local" value="docs\ctrlr.txt">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Mame Usage &amp; Configuration">
+			<param name="Local" value="docs\windows.txt">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Mame Release Notes">
+			<param name="Local" value="docs\whatsnew.txt">
+			</OBJECT>
+	</UL>
+</UL>
+</BODY></HTML>

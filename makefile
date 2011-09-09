@@ -10,6 +10,14 @@ ifeq ($(TARGET),)
 TARGET = noname
 endif
 
+# MAME32 front end switch
+ifeq ($(FE),1)
+WINUI = 1
+SUFFIX = 32
+else
+SUFFIX =
+endif
+
 # analog pedal compile option: if defined, use new analog code
 # uncomment next line to disable, or "ANALOGPEDALON=0" in make commandline
 # ANALOGPEDALON = 0
@@ -68,8 +76,11 @@ RM = @rm -f
 #PERL = @perl -w
 
 
-
-
+ifeq ($(MAMEOS),msdos)
+PREFIX = d
+else
+PREFIX =
+endif
 
 ifdef DEBUG
 NAME = $(PREFIX)$(TARGET)$(SUFFIX)d

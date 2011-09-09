@@ -1,3 +1,9 @@
+0.72u2.06 "Back to School":
+ - Last release before school starts, contains various minor fixes/updates
+ - Added DOS version
+ - Added MAME32 version
+ - Started looking into Unix and Macintosh versions
+
 0.72u2.05:
  - Updated to MAME 0.72u2 source code
  - Added all of SirPoonga's hacks

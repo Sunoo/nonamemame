@@ -1,0 +1,182 @@
+.topic HIDC_A2D
+Analog joystick deadzone
+.topic HIDC_ANTIALIAS
+Anti-alias vectors
+.topic HIDC_ARTWORK_CROP
+Crop artwork to game dimensions
+.topic HIDC_ARTRES
+Artwork resolution [higher = slower]
+.topic HIDC_ARTWORK
+Use background artwork
+.topic HIDC_ASPECTRATIOD
+Set aspect ratio, 4:3, 5:4
+.topic HIDC_ASPECTRATION
+Set aspect ratio, 4:3, 5:4
+.topic HIDC_AUTOFRAMESKIP
+Skip frames as needed to maintain full speed
+.topic HIDC_BACKDROPS
+Use backdrop artwork if available 
+.topic HIDC_BEAM 
+Set the beam width in pixels for vector games
+.topic HIDC_BEZELS
+Use bezel artwork if available
+.topic HIDC_BRIGHTNESS
+Adjust the DDraw brightness of full-screen game
+.topic HIDC_BRIGHTCORRECT
+Adjust brightness of game screen
+.topic HIDC_BROADCAST
+Allow other programs to see game played
+.topic HIDC_CHEAT
+Enable built in game cheats
+.topic HIDC_DDRAW 
+Use Direct Draw for graphic routines
+.topic HIDC_DEFAULT_INPUT
+Set game key control mapping method
+.topic HIDC_EFFECT
+Use effects to simulate original monitor resolution
+.topic HIDC_FILTER_CLONES
+Hide Clones and show Original games
+.topic HIDC_FILTER_EDIT
+Display games based on text input
+.topic HIDC_FILTER_NONWORKING
+Hide Non-Working and show Working games
+.topic HIDC_FILTER_ORIGINALS
+Hide Original games and show Clones
+.topic HIDC_FILTER_RASTER
+Hide Raster games and show Vector games
+.topic HIDC_FILTER_UNAVAILABLE
+Hide Available game
+.topic HIDC_FILTER_VECTOR
+Hide Vector games and show Raster game
+.topic HIDC_FILTER_WORKING
+Hide Working games and show Non-Working games
+.topic HIDC_FLICKER
+Adjust the amount of flicker in vector games
+.topic HIDC_FLIPX
+Flip the display sideways
+.topic HIDC_FLIPY
+Flip the display upside down
+.topic HIDC_FRAMESKIP
+Allows skipping frames
+.topic HIDC_GAMMA
+Adjust gamma correction in games
+.topic HIDC_HISTORY
+Display contents of history.dat if present
+.topic HIDC_HWSTRETCH
+Enable hardware stretch if supported by videocard [use 16bpp, or 32bpp]
+.topic HIDC_INTENSITY
+Adjust the intensity/brightness of vectors
+.topic HIDC_JOYSTICK
+Use direct joystick as input device
+.topic HIDC_JOY_GUI
+Allows navigating the UI with the joystick
+.topic HIDC_KEEPASPECT
+Enforce set aspect ratio when sizing windowed game
+.topic HIDC_LANGUAGECHECK
+Notes language used for in-game menus
+.topic HIDC_LANGUAGEEDIT
+Select and choose language for in-game menus
+.topic HIDC_LEDS
+Use keyboard LEDs as game indicators
+.topic HIDC_LOG
+Turn on error logging
+.topic HIDC_MATCHREFRESH
+Adjust monitor refresh to match original game's refresh
+.topic HIDC_MAXIMIZE
+Start game at maximum size in windowed mode
+.topic HIDC_OVERLAYS
+Use overlay artwork if available
+.topic HIDC_PROP_RESET
+Reset all properties to the original values
+.topic HIDC_REFRESH 
+Set monitor refresh rate
+.topic HIDC_RESDEPTH
+Set video color depth
+.topic HIDC_RESET_DEFAULT
+Reset default game options to installation defaults
+.topic HIDC_RESET_FILTERS
+Remove custom filters from all game folders
+.topic HIDC_RESET_GAMES
+Reset all games to use default options
+.topic HIDC_RESET_UI
+Reset the User Interface to its default state for fonts, colors, window position, and splitter position
+.topic HIDC_ROTATE
+Rotate the game screen
+.topic HIDC_SAMPLERATE
+Sample rate: 11025, 22050 or 44100
+.topic HIDC_SAMPLES
+Use sound samples
+.topic HIDC_SCANLINES
+Horizontal Scan Lines [cannot use with hardware stretch]
+.topic HIDC_SIZES
+Available screen resolutions in full screen mode
+.topic HIDC_SLEEP
+Use less CPU time slices when possible
+.topic HIDC_START_GAME_CHECK
+Search for new games
+.topic HIDC_STEADYKEY 
+Enable multiple key presses at the expense of more sluggish control
+.topic HIDC_SWITCHBPP
+Allow changing from Windows desktop color depth
+.topic HIDC_SWITCHRES
+Allow changing from Windows desktop resolution
+.topic HIDC_SYNCREFRESH
+Sync game to monitor's refresh rate
+.topic HIDC_THROTTLE
+Throttle games to original FPS speed
+.topic HIDC_TRANSLUCENCY
+Enable vector game translucency
+.topic HIDC_TRIPLE_BUFFER
+Enable triplebuffering to potentially alleviate tearing in scrolling games
+.topic HIDC_USE_DEFAULT
+Restore all properties to default option values
+.topic HIDC_USE_FILTER
+Resample sounds if not an integer match
+.topic HIDC_USE_MOUSE
+Allow mouse use for analog control based games
+.topic HIDC_USE_SOUND
+Enable sound in games
+.topic HIDC_VOLUME
+Adjust initial sound volume
+.topic HIDC_WAITVSYNC
+Wait for monitors vertical sync before drawing frame
+.topic HIDC_WINDOWED
+Play game in a window
+.topic HIDC_LIGHTGUN
+Allow use of lightgun for analog shooting games
+.topic HIDC_PAUSEBRIGHT
+Brightness of the screen when paused
+.topic HIDC_OLD_TIMING
+Toggle on for Desktop systems, off for Laptops.
+.topic HIDC_RANDOM_BG
+Use a different background image on each run.
+.topic HIDC_SKIP_DISCLAIMER
+Skips the MAME disclaimer screen when the emulation starts.
+.topic HIDC_SKIP_GAME_INFO
+Skips the game information screen when the emulation starts.
+.topic HIDC_HIGH_PRIORITY
+Runs the emulation at a higher than normal thread priority. This allows the emulation to run more smoothly when other applications are running in the background.
+.topic HIDC_D3D
+Utilise hardware assisted Direct3D [may or may not be faster than DirectDraw counterparts].
+.topic HIDC_D3D_FILTER
+Apply various filtering methods to stretched game image.
+.topic HIDC_D3D_TEXTURE_MANAGEMENT
+To be toggled only on certain video configurations where the D3D effects aren't working well or very slowly. 
+.topic HIDC_AUDIO_LATENCY
+Adjusting this can often eliminate desync of the sound and associated scratchiness.
+.topic HIDC_D3D_EFFECT
+Apply various masks to stretched image to simulate an arcade monitor grill.
+.topic HIDC_D3D_PRESCALE
+Apply sharpening prior to stretch, results in less blury effects.
+.topic HIDC_D3D_SCANLINES
+Adjust the scanline intensity. 
+.topic HIDC_D3D_FEEDBACK
+Adjust feedback/phosphor trail simulation.
+.topic HIDC_BIOS
+Select from various supported NeoGeo BIOSes.
+.topic HIDC_ZOOM
+Use in conjunction with auto resolution.
+.topic HIDC_CLEAN_STRETCH
+Do a non-aspect ratio corrected fullscreen stretch.
+.topic HIDC_D3D_ROTATE_EFFECTS
+De-select to allow horizontal scanlines & effects in vertical games.

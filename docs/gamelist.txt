@@ -1,4 +1,4 @@
-This is the complete list of games supported by MAME 0.72u2.05 (Aug 29 2003).
+This is the complete list of games supported by MAME 0.72u2.06 "Back to School" (Sep  1 2003).
 Variants of the same game are not included, you can use the -listclones command
 to get a list of the alternate versions of a given game.
 
@@ -304,9 +304,9 @@ Internal Name
 | Breakers                         |  Yes  |  Yes  |  Yes  |  Yes  | breakers |
 | Brute Force                      |  Yes  |  Yes  |  Yes  |  Yes  | brutforc |
 | Bubble 2000                      |  Yes  |  Yes  |  Yes  |  Yes  | bubl2000 |
-| Bubble Bobble                    |  Yes  |  Yes  |  Yes  |  Yes  | bublbobl |
 | Bubble Bobble                    |  Yes  |  Yes  |  Yes  |  Yes  | bb2bmh   |
 | Bubble Bobble                    |  Yes  |  Yes  |  Yes  |  Yes  | bbhackv1 |
+| Bubble Bobble                    |  Yes  |  Yes  |  Yes  |  Yes  | bublbobl |
 | Bubble Bobble 2                  |  Yes  |  Yes  |  Yes  |  Yes  | bublbob2 |
 | Bubble Memories - The Story Of Bu|  Yes  |  Yes  |  Yes  |  Yes  | bubblem  |
 | Bubbles                          |  Yes  |  Yes  |  Yes  |  Yes  | bubbles  |
@@ -329,8 +329,8 @@ Internal Name
 | Caliber 50                       |  Yes  |  Yes  |  Yes  |  Yes  | calibr50 |
 | Calipso                          |  Yes  |  Yes  |  Yes  |  Yes  | calipso  |
 | Cameltry                         |  Yes  |  Yes  |  Yes  |  Yes  | cameltry |
-| Cannon Ball                      |  Yes  |  Yes  |  Yes  |  Yes  | cannonb  |
 | Cannon Ball                      |  Yes  |  Yes  |Partial|  Yes  | cannball |
+| Cannon Ball                      |  Yes  |  Yes  |  Yes  |  Yes  | cannonb  |
 | Canyon Bomber                    |  Yes  |  Yes  |  Yes  |  Yes  | canyon   |
 | Capcom Baseball                  |  Yes  |  Yes  |  Yes  |  Yes  | cbasebal |
 | Capcom Bowling                   |  Yes  |  Yes  |  Yes  |  Yes  | capbowl  |
@@ -425,8 +425,8 @@ Internal Name
 | Combat                           |  Yes  |  Yes  |  Yes  |  Yes  | combat   |
 | Combat School                    |  Yes  |  Yes  |  Yes  |  Yes  | combasc  |
 | Combatribes, The                 |  Yes  |  Yes  |  Yes  |   No  | ctribe   |
-| Commando                         |  Yes  |  Yes  |  Yes  |  Yes  | commsega |
 | Commando                         |  Yes  |  Yes  |  Yes  |  Yes  | commando |
+| Commando                         |  Yes  |  Yes  |  Yes  |  Yes  | commsega |
 | Comotion                         |  Yes  |  Yes  |Part(2)|  Yes  | comotion |
 | Complex X                        |  Yes  |  Yes  |  Yes  |  Yes  | complexx |
 | Congo Bongo                      |  Yes  |  Yes  | Yes(2)|  Yes  | congo    |
@@ -546,8 +546,8 @@ Internal Name
 | Dorodon                          |  Yes  |  Yes  |  Yes  |  Yes  | dorodon  |
 | Dottori Kun                      |  Yes  |  Yes  |   No  |  Yes  | dotrikun |
 | Double Axle                      |  Yes  |  Yes  |  Yes  |  Yes  | dblaxle  |
-| Double Dragon                    |  Yes  |  Yes  |  Yes  |  Yes  | doubledr |
 | Double Dragon                    |  Yes  |  Yes  |  Yes  |  Yes  | ddragon  |
+| Double Dragon                    |  Yes  |  Yes  |  Yes  |  Yes  | doubledr |
 | Double Dragon 3 - The Rosetta Sto|  Yes  |  Yes  |  Yes  |   No  | ddragon3 |
 | Double Dragon II - The Revenge   |  Yes  |  Yes  |  Yes  |  Yes  | ddragon2 |
 | Double Dribble                   |  Yes  |  Yes  |  Yes  |  Yes  | ddribble |
@@ -928,8 +928,8 @@ Internal Name
 | Joust                            |  Yes  |  Yes  |  Yes  |  Yes  | joust    |
 | Joust 2 - Survival of the Fittest|  Yes  |  Yes  |  Yes  |  Yes  | joust2   |
 | Joyful Road                      |  Yes  |  Yes  |Partial|   No  | joyfulr  |
-| Jr. Pac-Man                      |  Yes  |  Yes  |  Yes  |  Yes  | fastjr   |
 | Jr. Pac-Man                      |  Yes  |  Yes  |  Yes  |  Yes  | jrpacman |
+| Jr. Pac-Man                      |  Yes  |  Yes  |  Yes  |  Yes  | fastjr   |
 | Jr. Pac-Man 1000                 |  Yes  |  Yes  |  Yes  |  Yes  | jr1000   |
 | Jr. Pac-Man 2000                 |  Yes  |  Yes  |  Yes  |  Yes  | jr2000   |
 | Jr. Pac-Man 2001                 |  Yes  |  Yes  |  Yes  |  Yes  | jr2001   |
@@ -1463,9 +1463,9 @@ Internal Name
 | P.O.W. - Prisoners of War        |  Yes  |  Yes  |  Yes  |  Yes  | pow      |
 | Pac & Pal                        |  Yes  |  Yes  |  Yes  |  Yes  | pacnpal  |
 | Pac'n'Chase                      |  Yes  |  Yes  |  Yes  |  Yes  | pnc      |
+| Pac-Land                         |  Yes  |  Yes  |  Yes  |  Yes  | paclandd |
 | Pac-Land                         |  Yes  |  Yes  |  Yes  |   No  | pacland  |
 | Pac-Land                         |  Yes  |  Yes  |  Yes  |  Yes  | paclandb |
-| Pac-Land                         |  Yes  |  Yes  |  Yes  |  Yes  | paclandd |
 | Pac-Man Plus                     |  Yes  |  Yes  |  Yes  |  Yes  | pacplus  |
 | Pac-Mania                        |  Yes  |  Yes  |  Yes  |  Yes  | pacmania |
 | Pachinko Sexy Reaction           |  Yes  |  Yes  |  Yes  |   No  | sxyreact |
@@ -2165,8 +2165,8 @@ Internal Name
 | Terminator 2 - Judgment Day      |  Yes  |  Yes  |  Yes  |  Yes  | term2    |
 | Terra Cresta                     |  Yes  |  Yes  |  Yes  |  Yes  | terracre |
 | Terra Force                      |   No  |  Yes  |  Yes  |  Yes  | terraf   |
-| Tetris                           | No(1) |  Yes  |  Yes  |  Yes  | tetris   |
 | Tetris                           |  Yes  |  Yes  |  Yes  |  Yes  | atetris  |
+| Tetris                           | No(1) |  Yes  |  Yes  |  Yes  | tetris   |
 | Tetris Plus                      |  Yes  |  Yes  |   No  |  Yes  | tetrisp  |
 | Tetris Plus 2                    |  Yes  |  Yes  |  Yes  |  Yes  | tetrisp2 |
 | Thief                            |  Yes  |  Yes  | Yes(2)|  Yes  | thief    |
@@ -2234,11 +2234,11 @@ Internal Name
 | Triple Hunt                      |  Yes  |  Yes  |   No  |  Yes  | triplhnt |
 | Triple Punch                     |  Yes  |  Yes  |  Yes  |  Yes  | triplep  |
 | Triv Quiz                        |  Yes  |   No  |  Yes  |  Yes  | trivquiz |
-| Trivial Pursuit                  |  Yes  |  Yes  |  Yes  |  Yes  | triviabb |
-| Trivial Pursuit                  |  Yes  |  Yes  |  Yes  |  Yes  | triviayp |
-| Trivial Pursuit                  |  Yes  |  Yes  |  Yes  |  Yes  | triviag2 |
 | Trivial Pursuit                  |  Yes  |  Yes  |  Yes  |  Yes  | triviag1 |
+| Trivial Pursuit                  |  Yes  |  Yes  |  Yes  |  Yes  | triviayp |
 | Trivial Pursuit                  |  Yes  |  Yes  |  Yes  |  Yes  | triviasp |
+| Trivial Pursuit                  |  Yes  |  Yes  |  Yes  |  Yes  | triviag2 |
+| Trivial Pursuit                  |  Yes  |  Yes  |  Yes  |  Yes  | triviabb |
 | Trog                             |  Yes  |  Yes  |  Yes  |  Yes  | trog     |
 | Trojan                           |  Yes  |  Yes  |  Yes  |  Yes  | trojan   |
 | Tron                             |  Yes  |  Yes  |  Yes  |  Yes  | tron     |
@@ -2346,8 +2346,8 @@ Internal Name
 | Vs. Slalom                       |  Yes  |  Yes  |  Yes  |  Yes  | vsslalom |
 | Vs. Soccer                       |  Yes  |  Yes  |  Yes  |  Yes  | vssoccer |
 | Vs. Star Luster                  |  Yes  |  Yes  |  Yes  |  Yes  | starlstr |
-| Vs. Stroke and Match Golf        |  Yes  |  Yes  |  Yes  |  Yes  | ladygolf |
 | Vs. Stroke and Match Golf        |  Yes  |  Yes  |  Yes  |  Yes  | smgolf   |
+| Vs. Stroke and Match Golf        |  Yes  |  Yes  |  Yes  |  Yes  | ladygolf |
 | Vs. Super Mario Bros.            |  Yes  |  Yes  |  Yes  |  Yes  | suprmrio |
 | Vs. Super SkyKid                 |  Yes  |  Yes  |  Yes  |  Yes  | vsskykid |
 | Vs. TKO Boxing                   |  Yes  |   No  |  Yes  |  Yes  | tkoboxng |

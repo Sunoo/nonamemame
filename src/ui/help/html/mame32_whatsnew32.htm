@@ -1,0 +1,457 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Mame32 Whatsnew32</title>
+<style>
+<!--
+p
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:10.0pt;
+	font-family:Arial;
+	color:black}
+h1
+	{margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	page-break-after:avoid;
+	font-size:16.0pt;
+	font-family:Arial;
+	color:windowtext;
+	font-weight:bold}
+h2
+	{margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	page-break-after:avoid;
+	font-size:14.0pt;
+	font-family:Arial;
+	font-style:italic}
+ p.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:Arial;
+	margin-left:0in; margin-right:0in; margin-top:0in}
+ div.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:Arial;
+	margin-left:0in; margin-right:0in; margin-top:0in}
+-->
+</style>
+</head>
+
+<body background="../images/bkground.gif">
+
+<h1>Changes to Mame32</h1>
+
+<h2><font size="3">v.72</font></h2>
+
+<ul type="square">
+  <li><font face="Arial" size="2">Added the ability to scale the right side art 
+  pane contents upwards as 
+  the window size increases, toggle on Options • Interface Options. [<b>René 
+  Single / Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Expanded the reach of the ctrl-f text filter, 
+  it can now act on name, driver name e.g. 'cps2.c', and manufacturer.&nbsp; 
+  This is a quick method for immediately seeing a driver family instead of 
+  drilling down through the source folder on the left. [<b>René 
+  Single / Chris Kirmse</b>]</font></li>
+</ul>
+
+<h2><font size="3">v.71</font></h2>
+
+<ul type="square">
+  <li><font face="Arial" size="2">Added the ability to selectively disable built 
+  in folder views on the left pane, secondary click in the window area for the 
+  dialogue box. [<b>Chris 
+  Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added control panel art tab. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Fixed audit control overflow issue. [<b>René 
+  Single</b>]</font></li>
+  <li><font face="Arial" size="2">Designed art tab state toggles to be more 
+  readable in mame32ui.ini. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added the ability to have Mame32 automatically 
+  cycle the selected art views at an interval, in seconds.&nbsp; Accessible in Options 
+  • Interface Options. [<b>René 
+  Single / Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added the ability to track the amount of time 
+  spent playing each game in minutes and seconds.&nbsp; Displays in details or 
+  grouped view.&nbsp; Add the column in View • Customize fields. [<b>René 
+  Single / Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added the ability to view game's icon on title 
+  bar in windowed mode. [<b>René 
+  Single / Chris Kirmse</b>]</font></li>
+</ul>
+
+<h2><font size="3">v.70.1</font></h2>
+
+<ul type="square">
+  <li><font face="Arial" size="2">Removed  saturate slider from D3D tab. [<b>Chris 
+  Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Fixed cleanstretch and prescale settings not 
+  holding. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Implemented BIOS selection on per game basis 
+  [only Neo Geo games currently] and allowed temporary global settings for BIOS 
+  via number. [<b>Chris Kirmse</b>]</font></li>
+</ul>
+
+<h2><font size="3">v.70</font></h2>
+
+<ul type="square">
+  <li><font face="Arial" size="2">Added art tab with only history.dat.&nbsp; If 
+  this tab is enabled and history.dat is present history text will no longer appear 
+  beneath the screenshot. [<b>Tor Arne Vestbø / Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added option to hide the mouse cursor on 
+  launch in full screen on Options • Interface Options. [<b>Tor Arne Vestbø</b>]</font></li>
+  <li><font face="Arial" size="2">Addressed some long standing bugs dealing with 
+  icon decimation and windows title bar size, and details/grouped view not 
+  holding the column size on return from large icon view post-session restart. [<b>René 
+  Single</b>]</font></li>
+  <li><font face="Arial" size="2">Added option to expand Mame32 to full screen 
+  kiosk mode without any windows controls [F11]. [<b>Tor Arne Vestbø / Chris 
+  Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Created new Berzerk homage about.bmp. 
+  [<b>John IV</b>]</font></li>
+  <li><font face="Arial" size="2">Reworked drop down for D3D prescale effect, 
+  now allowing various levels of sharpness to be used. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Updated win32ui.c to pull certain information 
+  more appropriately out of layout.c. [<b>Nathan Woods/MESS32</b>]</font></li>
+  <li><font face="Arial" size="2">Removed obsoleted version mismatch toggle. [<b>Chris 
+  Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added a built in orientation folder view for 
+  displaying vertical and horizontal games. [<b>René 
+  Single</b>]</font></li>
+  <li><font face="Arial" size="2">Added support for the new cleanstretch 
+  options. [<b>Chris Kirmse</b>]</font></li>
+  <li><font SIZE="2"><font face="Arial">Added ability to map joystick actions in 
+  mame32ui.ini to control GUI navigation instead of being hard coded:<br>
+  <b>Format</b>: joystick_number, stick_type, axis_or_button, direction<br>
+  <br>
+  #define JOYCODE_STICK_BTN 0<br>
+  #define JOYCODE_STICK_AXIS 1<br>
+  #define JOYCODE_STICK_POV 2<br>
+  #define JOYCODE_DIR_BTN 0<br>
+  #define JOYCODE_DIR_NEG 1<br>
+  #define JOYCODE_DIR_POS 2</font><p><font face="Arial">So, pressing button 3 on 
+  joystick one would be: 1,0,3,0<br>
+  <br>
+  ui_joy_up 1,1,2,1<br>
+  ui_joy_down 1,1,2,2<br>
+  ui_joy_left 1,1,1,1<br>
+  ui_joy_right 1,1,1,2<br>
+  ui_joy_start 1,0,1,0<br>
+  ui_joy_pgup 2,1,2,1<br>
+  ui_joy_pgdwn 2,1,2,2<br>
+  ui_joy_home 0,0,0,0<br>
+  ui_joy_end 0,0,0,0<br>
+  ui_joy_ss_change 2,0,3,0<br>
+  ui_joy_history_up 2,0,4,0<br>
+  ui_joy_history_down 2,0,1,0<br>
+  ui_joy_exec 0,0,0,0</font></p>
+  <p><font face="Arial">For stick type POV there are no directions, only four 
+  axes (0-3) </font><font face="Arial" size="2">[<b>Tor Arne Vestbø</b>]</font></font></li>
+</ul>
+
+<h2><font size="3">v.69</font></h2>
+
+<ul type="square">
+  <li><font face="Arial" size="2">Added support for the new D3D filter and 
+  effects options in Options • Default Game Options • Direct3D, see help menu 
+  contents for further descriptions of the new features. [<b>John IV / Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added support for the new core toggle -bios to 
+  allow selection of the various supported Neo Geo BIOSes. [<b>Chris Kirmse</b>]</font></li>
+</ul>
+
+<h2><font size="3">v.68</font></h2>
+
+<ul type="square">
+  <li><font face="Arial" size="2">Added code to allow clicking anywhere in the 
+  screenshot window to toggle the art views.&nbsp; No longer necessary to click 
+  directly on the default image. [<b>K&amp;K</b>]</font></li>
+  <li><font face="Arial" size="2">Added code to allow disabling / toggling 
+  individual art views on the view menu and the context menu of the art window. 
+  [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added support for the new core D3D items, 
+  accessible on the Options • Default Game Options • Direct3D. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added support for the new core audio latency 
+  settings. [<b>Chris Kirmse</b>]</font></li>
+</ul>
+
+<h2><font size="3">v.67</font></h2>
+
+<ul type="square">
+  <li><font face="Arial" size="2">Re-worked the rotation options to a drop down, 
+  and included the new switches for auto-clockwise / auto-anti-clockwise for 
+  pivot monitors. [<b>Chris 
+  Kirmse</b>]</font></li>
+</ul>
+
+<h2><font size="3">v.66</font></h2>
+
+<ul type="square">
+  <li><font face="Arial" size="2">Moved towards an *.ini based 
+  settings storage scheme to more closely match the Mame.exe core, individual 
+  game *.inis whose settings are altered are stored in the \ini directory. The 
+  Mame32 GUI settings are stored in Mame32ui.ini in the root w/ Mame32.exe, and 
+  Mame32.ini is stored in the \ini directory and should be interchangeable with 
+  a regular Mame.ini.&nbsp; Purge these two items to 
+  return to baseline, the registry is no longer used for Mame32. [<b>Chris 
+  Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Provided an additional 'migration' version of 
+  Mame32 which will copy the contents of the registry key and write it out to 
+  the new *.ini scheme when exiting.&nbsp; Useful for people who have a large 
+  number of individual game customizations. [<b>John IV / Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added toggle for high thread priority in 
+  Options • Interface Options to match the core's new -high_priority switch.&nbsp; 
+  This will devote more system resources and time to Mame32 at the expense of 
+  other already running programs. [<b>Chris Kirmse</b>]</font></li>
+</ul>
+
+<h2><font size="3">v.65</font></h2>
+
+<ul type="square">
+  <li><font face="Arial" size="2">Updated columnedit.c to allow for MESS32 usage 
+  in software view. [<b>Nathan Woods/MESS32</b>]</font></li>
+  <li><font face="Arial" size="2">Reworked F5/refresh routines to utilise more audit 
+  code and logic. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Reworked -lightgun handling, enabling 
+  independently selectable mouse control for those games. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Custom icons are included in the distribution 
+  \icons directory to show what the control/tree icons are without having to go 
+  through the source. [<b>John IV</b>]</font></li>
+</ul>
+
+<h2><font size="3">v.63.1</font></h2>
+
+<ul type="square">
+  <li><font face="Arial" size="2">Fixed analogue dead-zone not being maintained, 
+  and pre-0.63 timing not being maintained. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added folder view for hard drive based games. [<b>Chris 
+  Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Addressed missing/blank custom icon display indexing issue 
+  on F5/refresh. 
+  [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Sped up Mame32 launch / folder reading 
+  routine. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Fixed screenshot area decimation when resizing 
+  images larger than the viewable area. [<b>John IV / Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added additional help topic IDs and tool tips. 
+  [<b>Chris Kirmse</b>]</font></li>
+</ul>
+
+<h2><font size="3">v.63</font></h2>
+
+<ul type="square">
+  <li><font face="Arial" size="2">Added code to ROM loading dialogue to visually 
+  indicate user intervention when the game being launched may not work due to 
+  'no good dump' this will match the baseline Mame [press ok to continue].&nbsp; 
+  Examples include the game Astyanax, 64th Street etc. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Return to baseline non-I686 compile as it 
+  prevented Mame32 working on a variety of machines. [<b>John IV</b>]</font></li>
+  <li><font face="Arial" size="2">Made numerous code changes to allow Mame32 to 
+  be compiled with the new MinGW 2.0 package. [<b>Chris Kirmse / Mike Haaland</b>]</font></li>
+  <li><font face="Arial" size="2">Distribution compiles are now done using above 
+  mentioned MinGW 2.0 package. [<b>John IV</b>]</font></li>
+  <li><font face="Arial" size="2">Added code to allow for a tool tip to appear 
+  showing the full name of a game whose description is cut-off by column width 
+  in details/grouped view.&nbsp; Hover cursor over game to activate. [<b>Andrew 
+  Kirmse / Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">The default \folders\Favorites.ini has been 
+  cleaned out.&nbsp; Now that it is easy to drag 
+  and drop or secondary click to add games from the main list to the custom 
+  folders, it no longer needs to serve as an example using  
+  personal favorites. Be sure to backup existing \folders\Favorites.ini if using 
+  the built in installer version of the Mame32 distribution. [<b>John IV</b>]</font></li>
+  <li><font face="Arial" size="2">Tweaked code for drag &amp; drop of games into 
+  custom folders.&nbsp; In a custom folder to drag an item out for deletion, it 
+  must go out of the game list pane either left, right, up, or down beneath the 
+  last item in the pane or further out of the GUI. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Reworked internal file handling code to 
+  interface with Aaron's substantial core updates. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Submitted code suggestion to allow for more 
+  granular sorting and display of items in the Manufacturers view, so companies 
+  will no longer be grouped with others incorrectly. [<b>René Single</b>]</font></li>
+  <li><font face="Arial" size="2">Created new main icon and about.bmp 'Ladybug 
+  Homage'. [<b>John IV</b>]</font></li>
+  <li><font face="Arial" size="2">Fixed ascending/descending toggle via View • 
+  Arrange Icons for columns other than Game.&nbsp; Added some logic to the 
+  -listsourcefile column display. Prevented color depth and refresh rate 
+  settings from being displayed if games are played in windowed mode. [<b>René Single 
+  / Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Made Misc. art option gray properly when its 
+  parent control was deselected. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Submitted code to clean up some issues with 
+  the list and small icons view and icons squishing in details view upon return 
+  from another view like large icons. [<b>René Single / Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Upgraded Mame32 to utilize the new common 
+  controls from Windows XP, allowing the proper look of an XP application 
+  without the need for an external manifest file. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added ability to rename custom folders from 
+  the tree view, secondary click on them and choose rename folder from the 
+  context menu, or click the name of the folder three times quickly. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added the 'Source' folder view, this will 
+  display all the driver.c files and all the games within each family. [<b>Mike 
+  Haaland</b>]</font></li>
+  <li><font face="Arial" size="2">Removed the \folders\BIOS.ini as it is now 
+  obviated by the built-in Source folder view. [<b>John IV</b>]</font></li>
+  <li><font face="Arial" size="2">Added -sourcefileinfo information to the 
+  general tab for each games' properties, to easily and quickly see what driver 
+  family a game belongs to. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added the long requested clone offset a.k.a 
+  'Grouped' view.&nbsp; 
+  This will display the parent games flush left, with all their clones 
+  alphabetized beneath them indented inward. Excellent for grouping the clones 
+  whose names may be considerably different than their parents, and allowing 
+  typing the name of the game to go to the parent set immediately.&nbsp; [<b>John 
+  IV / Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Reworked the Startup Options to now be 
+  Interface Options, and added checkboxes to support Aaron's new disclaimer / 
+  info screen toggle. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Added new switches -rdtsc / -pause_brightness 
+  to match the core. [<b>Chris Kirmse</b>]</font></li>
+</ul>
+
+<h2><font size="3">v.62</font></h2>
+
+<ul type="square">
+  <li><font size="2" face="Arial">Internalized the code for rotate.exe, Mame32 
+  can now choose its background images from Options • Background Image, and 
+  choose a random one on startup.&nbsp; Options • Startup Options • Select 
+  Random Background Image. [<b>K&amp;K</b>]</font></li>
+  <li><font face="Arial" size="2">Added tabs for the screenshot art area, toggle 
+  with alt-b. [<b>K&amp;K</b>]</font></li>
+  <li><font face="Arial" size="2">Added code to increase speed of audit. [<b>K&amp;K</b>]</font></li>
+  <li><font face="Arial" size="2">Added secondary click menu pop-up for 
+  screenshot area. [<b>Sword</b>]</font></li>
+  <li><font face="Arial" size="2">Allowed bkground.png to be displayed in 
+  history.dat area under screenshot, font color changed to match GUI font color. 
+  [<b>K&amp;K</b>]</font></li>
+  <li><font face="Arial" size="2">Created new icons for the various tabs in 
+  Default Options / Game Properties dialogue boxes. [<b>John IV</b>]</font></li>
+  <li><font face="Arial" size="2">Updated the ColumnEdit and Properties code to 
+  make them both more extensible. [<b>Nathan Woods/MESS32</b>]</font></li>
+  <li><font face="Arial" size="2">Included index fixes to speed load time in 
+  treeview.c, 
+  particularly with extra \folders *.inis. [<b>Jeff Miller</b>] </font></li>
+  <li><font face="Arial" size="2">Fixed an issue where the startup focus in the 
+  details list would jump to the top of the list before returning to the prior 
+  selection. [<b>Chris Kirmse</b>]</font></li>
+  <li><font face="Arial" size="2">Main distribution now compiled with I686=1 for 
+  Pentium Pro optimization.&nbsp; Doesn't impact high end AMD chips at all but 
+  provides speed increases to lower range PII, P3 machines. [<b>John IV</b>]</font></li>
+  <li><font face="Arial" size="2">Created new *.ini files for the \folders 
+  directory.&nbsp; Replace the old ones with these (except any user-modified of 
+  course). [<b>John IV</b>]</font></li>
+  <li><font face="Arial" size="2">Created a new Mame32 MSI installer package.&nbsp; 
+  This should be easier for beginners. [<b>John IV</b>]</font></li>
+  <li><font face="Arial" size="2">Added the ability to drag and drop games into 
+  the custom *.ini folders. [<b>Chris Kirmse</b>] </font></li>
+  <li><font face="Arial" size="2">Added the ability to secondary click on a game 
+  to add or remove it from an *.ini file in the \folders directory. [<b>Patrick 
+  Jones / Chris Kirmse</b>]</font></li>
+</ul>
+
+<h2><font size="3">v.61</font></h2>
+
+<ul type="square">
+  <li><font size="2" face="Arial">Fixed a nasty crasher where Mame32 would hang if loading 
+a game that required user intervention in Mame[w] like 'The Astyanax', and there 
+was no joystick connected to the system. [<b>Sword</b>]</font></li>
+  <li><font size="2" face="Arial">Fixed a couple of fringe case crashers when Windows is shut down 
+beneath 
+Mame32, i.e. a cabinet setting. [<b>Robert John Sheppard</b>]</font></li>
+  <li><font size="2" face="Arial">Removed -dirty / -nodirty options to match Aaron's core 
+changes. [<b>John IV</b>]</font></li>
+  <li><font size="2" face="Arial">Added dialogue box support for new artwork switches, 
+added -ini support to Options • Directories. [<b>Mike Haaland</b>]</font></li>
+  <li><font size="2" face="Arial">Added dialogue box support for LED disablement, artwork 
+resolution. [<b>Mike Haaland</b>]</font></li>
+  <li><font size="2" face="Arial">Added brightness slider, removed -bpp per Aaron's changes. [<b>Mike Haaland</b>]</font></li>
+  <li><font size="2" face="Arial">Added sound chip and CPU information to the folder views.&nbsp; 
+Added the long requested feature to create user defined folder views, see \folders files for examples. [<b>Sword, 
+BUT, Emuman  / Mike Haaland</b>] </font></li>
+  <li><font size="2" face="Arial">Created Artwork, BIOS, and Custom folder views. [<b>John IV</b>]</font></li>
+  <li><font size="2" face="Arial">Added support for displaying -listsourcefile [source] 
+field to the View • Customize Fields.&nbsp; Handy for sorting to test global 
+driver changes across all its games., or using to report game problems to 
+  MameTesters.com. [<b>Mike Haaland</b>]</font></li>
+  <li><font size="2" face="Arial">Created new Version and Classification folder views. [<b>John IV</b>]</font></li>
+  <li><font size="2" face="Arial">Added support for the new -lightgun switch. [<b>John IV</b>]</font></li>
+  <li><font size="2" face="Arial">Removed 'add to favorites' from context menus and file 
+menu since it is now possible/preferable to have favorites stored in the 
+portable, user-defined, external text file [\folders]. Which also of course 
+would survive a registry key purge. Times played is still accessible as a column 
+in details view. [<b>John IV</b>]</font></li>
+  <li><font size="2" face="Arial">Updated help file with new settings, added baseline 
+Mame[w] documents to help file. [<b>John IV</b>]</font></li>
+  <li><font size="2" face="Arial">Added \titles directory support to allow for title 
+  screenshots viewing. [<b>John IV</b>]</font></li>
+  <li><font face="Arial" size="2">Created new Mame32 icon and About graphic. [<b>John 
+  IV</b>]</font></li>
+</ul>
+
+<h2><font size="3">v.60</font></h2>
+
+<ul type="square">
+  <li><font size="2" face="Arial">Created and added the new Mame32 HTML Help File. [<b>John 
+IV</b>]</font></li>
+  <li><font size="2" face="Arial">Updated context sensitive help support to Mame32, all 
+controls should be mapped to pop-up help. [<b>Mike Haaland</b>]</font></li>
+  <li><font size="2" face="Arial">Added 'Use less CPU if possible' check box in Options • 
+Default Options • Miscellaneous.&nbsp; This toggles the new baseline Mame[w] sleep / -nosleep 
+switch.&nbsp; If toggled on, it will return more time slices to the processor 
+and be more amenable to multi-tasking with other applications.&nbsp; If toggled 
+off, Mame32 will continue to take 100% of the CPU time as it has historically.&nbsp; 
+It should be toggled 'off' for people experiencing severe slowdowns, 
+particularly laptop users. [<b>John IV / Mike Haaland</b>]</font></li>
+  <li><font size="2" face="Arial">Added option to set the directory for hard drive image 
+diff files to match Mame[w] in Options • Directories. Fixed screenshot area 
+decimation when image sized too large for area.&nbsp; Scales properly now and 
+looks great.&nbsp; 
+Fixed flip options. [<b>Sword</b>]</font></li>
+  <li><font size="2" face="Arial">Added option to set the directory for icons in Options • 
+Directories. [<b>John IV</b>]</font></li>
+  <li><font size="2" face="Arial">Added support for new external controller mapping. This 
+adds support for common arcade controllers and provides the ability to create 
+  user defined mappings for home built solutions.&nbsp; See Options • Default Options • Controllers. 
+  Also see the controller mapping document in the Mame Documents help section. [<b>Ron 
+Fries</b>]</font></li>
+</ul>
+
+<h2><font size="3">v.59</font></h2>
+
+<ul type="square">
+  <li><font size="2" face="Arial">Added 'Allow game selection by joystick' check box to 
+Startup Options.&nbsp; Allows navigation and game launch via controller:<br>
+joystick 1 up = up arrow<br>
+joystick 1 down = down arrow<br>
+joystick 1 left = left arrow<br>
+joystick 1 right = right arrow<br>
+joystick 1 button 1 = play game<br>
+joystick 1 button 2 = page up<br>
+joystick 1 button 5 = page down<br>
+joystick 1 button 3 = end<br>
+joystick 1 button 6 = home. [<b>Chris Kirmse</b>]</font></li>
+  <li><font size="2" face="Arial">Fixed a few files to allow a MinGW compile without errors. 
+[<b>Sword</b>]</font></li>
+  <li><font size="2" face="Arial">Added 'Broadcast selected game to all windows' check box in 
+Startup Options, this allows 
+third party applications to be programmatically told what game is being played in Mame32.&nbsp; 
+It can be used to hook into applications like LED reader boards, or instant message clients, etc. [<b>Chris Kirmse</b>]</font></li>
+</ul>
+
+<p>
+<font size="1">
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%Y-%m-%d %I:%M %p %Z" startspan -->2003-07-21 11:57 PM -0700<!--webbot bot="Timestamp" endspan i-checksum="38746" --></font></p>
+
+</body>
+
+</html>

@@ -1,0 +1,374 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Mame32 Properties</title>
+<style>
+<!--
+p
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:10.0pt;
+	font-family:Arial;
+	color:black}
+h1
+	{margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	page-break-after:avoid;
+	font-size:16.0pt;
+	font-family:Arial;
+	color:windowtext;
+	font-weight:bold}
+h2
+	{margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	page-break-after:avoid;
+	font-size:14.0pt;
+	font-family:Arial;
+	font-style:italic}
+ p.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:Arial;
+	margin-left:0in; margin-right:0in; margin-top:0in}
+-->
+</style>
+</head>
+
+<body background="../images/bkground.gif">
+
+<h2>Default Options &amp; Game Properties</h2>
+<p class="MsoNormal">The default options and game properties tabs of Mame32 are 
+used to set the vast majority of game play parameters.&nbsp; The Game Properties 
+dialogue box, accessible from the File • Properties menu item, shares all the 
+tabs of the Default Options dialogue box, accessible from the Options • Default 
+Options menu item.&nbsp; The Game Properties dialogue contains two additional tabs 
+which give information on the game selected, and its current audited state.</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal" style="text-indent: -.25in; margin-left: .75in">
+<span style="font-family: Symbol">
+<img width="11" height="11" src="../images/mame321.gif" alt="*"><span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>General Tab</b> : [only available in Game Properties dialogue] 
+This tab provides information on the game selected, this information includes 
+manufacturer name and date, driver status, original CPU, original sound 
+hardware, original screen resolution and orientation, and number of colors.</p>
+<p class="MsoNormal" style="text-indent: -.25in; margin-left: .75in">
+<span style="font-family: Symbol">
+<img width="11" height="11" src="../images/mame321.gif" alt="*"><span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Audit Tab</b> : [only available in the Game Properties 
+dialogue] This tab performs a ‘mini-audit’ on the game selected, determining its 
+status compared to what Mame32 expects.&nbsp; Status will be reported and missing 
+files with CRC information will appear in the details view.</p>
+<p class="MsoNormal" style="text-indent: -.25in; margin-left: .75in">
+<span style="font-family: Symbol">
+<img width="11" height="11" src="../images/mame321.gif" alt="*"><span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Display Tab</b> : This tab allows the setting of numerous video 
+options.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Run in a window</b> : Mame32 
+will launch the game selected in a window on the desktop, the window can be 
+resized by pausing the emulation and dragging the borders.&nbsp; The resolution of 
+the window can also be set in the Advanced tab.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Start out maximized </b>: 
+Toggling this option on ensures that when windowed mode is used, the maximum 
+amount of space is used.&nbsp; Toggle this option off to play the smallest version of 
+the windowed game.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Enforce aspect ratio </b>: 
+This option is used in conjunction with windowed mode, it forces the aspect 
+ratio to be maintained when the game is paused and the window is dragged and 
+resized.&nbsp; Turn this off to create long, thin game windows, or short fat, etc.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Throttle </b>: This option 
+prevents Mame32 from running games as fast as the host CPU can go.&nbsp; Unless this 
+is toggled on, a modern x86 processor will run Donkey Kong at a thousand times 
+its original speed.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Clean Stretch</b> : These 
+options will stretch the game upwards keeping its original aspect ratio and not 
+convert to 4:3 or 3:4, optionally using the vertical or horizontal axis, 
+resulting in different sizes w/ auto resolutions.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Zoom</b> : Default is usually 
+fine at 2 this slider is used in conjunction with the 'auto' resolution 
+selection and is not used if a set resolution is used.&nbsp; It attempts to find 
+the smallest video mode for a sized game and sizes the effects applied to the 
+image accordingly.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Rotation </b>: This drop down 
+box allows Mame32 to rotate the video output by 90 degrees in either direction.&nbsp; 
+This setting is useful if used in conjunction with a pivoting monitor [the auto 
+options], or 
+playing games with a monitor on its side.&nbsp; Doing so allows vertical orientated 
+games to be played full screen.&nbsp; The additional 'auto clockwise' and 'auto 
+anti-clockwise' settings are particularly useful for rotating LCD monitors, 
+these settings will force vertical games to one 90 degree angle or the other 
+depending on which way the LCD pivots.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Flip screen upside down </b>: 
+This option mirrors the image vertically.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Flip screen left right </b>: 
+This option mirrors the image horizontally.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Effects </b>: This option 
+allows Mame32 to attempt to simulate more closely the look of the original 
+hardware’s monitors, which were much lower resolution devices than modern 
+computer monitors.&nbsp; The scanlines check box can be toggled on only when hardware 
+stretching is disabled.&nbsp; Horizontal scanlines can impose an additional 
+speed penalty in games played, and RGB effects impose an even greater speed hit, 
+upwards of 40%.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Gamma correction </b>: &nbsp;This 
+option controls the global gamma correction in a game and can result in much 
+brighter video output if moved to the higher setting.&nbsp; A high gamma setting is 
+particularly helpful when playing vector based games. Same setting available 
+using the tilde menu [~] in-game.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Brightness correction </b>: This 
+option controls the global brightness in a game at the palette level in Mame32 
+and works with 99% of the games, [does not for those that go directly to RGB].&nbsp; 
+Same setting available using the tilde menu [~] in-game.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Pause Brightness </b>: This 
+option controls the screen brightness when a game is paused.</p>
+<p class="MsoNormal" style="text-indent: -.25in; margin-left: .75in">
+<span style="font-family: Symbol">
+<img width="11" height="11" src="../images/mame321.gif" alt="*"><span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Advanced Tab</b> : This tab allows the setting of numerous 
+video options.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Use DirectDraw</b> : This 
+option controls whether or not Mame32 utilizes the DirectDraw component of 
+DirectX with the video card.&nbsp; Toggling this option off precludes the use of all 
+other check boxes in the area.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Triple buffering </b>: This 
+option controls how Mame32 draws to the screen, if toggled on, it will draw to 
+three buffers and cycle between them.&nbsp; This setting when toggled on can also 
+help alleviate tearing that sometimes occurs in some scrolling games.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Match game refresh rate </b>: 
+This option tells Mame32 to attempt to force the output monitor to match the 
+refresh rate of the selected game’s original video hardware.&nbsp; The majority of 
+games in Mame32 are 60Hz, using this option and triple buffering will produce 
+smooth scrolling in those games.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Sync to monitor refresh </b>: 
+This option tells Mame32 to ignore the original game’s refresh rate and sync it 
+to the output monitor’s current rate.&nbsp; This can cause the game to run too fast 
+if the output monitor is using 85Hz for example..</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Wait for vertical sync </b>: 
+This option tells Mame32 to wait for the refresh period on the output monitor to 
+finish before starting to draw video to the screen.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Stretch using hardware </b>: 
+This option allows Mame32 to utilize the stretching abilities of the video 
+card.&nbsp; Most modern video cards allow this, some do not.&nbsp; If this option is 
+grayed out, the video card does not support it, or it is necessary to switch to 
+16bpp or 32bpp.&nbsp; Mame32 will stretch the 
+original game’s resolution to the nearest 4:3 ratio and output that to the 
+screen. Most video cards perform this stretch and provide a filtering effect 
+which can make the output appear muddy, or blurry.&nbsp; Use one of the graphic 
+effects on the Display tab to counteract this blurriness, particularly the RGB 
+sharp effect.&nbsp; This stretching option uses DirectDraw; for potentially 
+faster display, modern video cards may utilise the Direct3D stretching on the 
+Dircect3D tab.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Switch resolutions to fit </b>
+: This option when used in conjunction with the resolution settings allows 
+Mame32 to resize the game output to the dimensions specified.&nbsp; If not toggled 
+on, Mame32 will draw the game to the current desktop size and settings.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Switch color depths to fit </b>
+: This option when used in conjunction with the resolution settings allows 
+Mame32 to switch to the game’s requested color depth.&nbsp; If not toggled on, Mame32 
+will draw the game to the current desktop color depth.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Full screen brightness </b>: 
+This option allows Mame32 to change its full screen brightness.&nbsp; Some cards 
+alter the brightness/gamma when they go into full screen mode, this allows the 
+counteracting it.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Aspect ratio </b>: This option 
+allows Mame32 to change its stretched to aspect ratio, default value is 4:3.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Resolution </b>: These 
+settings allow Mame32 to use resolutions defined by the systems DirectX video 
+modes, color depths, and refresh rates.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Frame skipping </b>: These 
+settings allow Mame32 to skip frames of animation when playing games, if the 
+host CPU is not fast enough to run the game.</p>
+<p class="MsoNormal" style="text-indent: -.25in; margin-left: .75in">
+<span style="font-family: Symbol">
+<img width="11" height="11" src="../images/mame321.gif" alt="*"><span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>D3D Tab</b> : This tab allows the setting of Direct3D hardware 
+supported 
+video options.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Use Direct3D</b> : This 
+option controls whether or not Mame32 utilizes the Direct3D functions of 
+DirectX.&nbsp; It will override the DirectDraw setting on the Advanced tab, and 
+assumes the use of hardware stretch.&nbsp;  Results will 
+vary on individual hardware configurations, but the D3D effects may be faster 
+than their DirectDraw counterparts on modern video cards.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Texture Management </b>: This 
+option allows the video cards' hardware / driver combo to deal with the display 
+more directly and potentially more intelligently than the Mame code.&nbsp; The 
+default setting is on and is appropriate for most modern video cards.&nbsp; If seeing slowdown in games with the D3D 
+effects and filters on, toggle this option to see if speed increases.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Pre-scale Image</b> : This setting 
+should be used in conjunction with filtering = bilinear or any setting <b>except</b> 
+point filtering.&nbsp; It acts the same way its DirectDraw counterpart 'effect 
+sharp' does, 
+its sharpness level is between pure bilinear filtering and point [no] filtering 
+and can sharpen, slightly, effects used above with non-Point filter selections.&nbsp; 
+The drop down choices allow the selection of the level of sharpness, from the 
+lower blurrier to higher sharpness.&nbsp; The closer to 8 the closer to point 
+filtering.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Rotate Effects</b> : Normally 
+the effects are rotated based on game orientation, toggling this option off will 
+allow horizontal scan lines in vertical games for example.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Filtering</b> : This option allows selecting the filtering method used on the stretched D3D 
+image.&nbsp; Selecting Point filtering will stretch the image and not 
+filter/blur it at all.&nbsp; Bilinear filtering is the default and usually the 
+fastest on most video cards.&nbsp; The other options will affect speed of emulation 
+based on the video card / driver combo used and the maturity of the cards' 
+feature set.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Effect</b> : This drop down 
+contains various 'mask effects' to be used with the Direct3D setting.&nbsp; They 
+each attempt to simulate the display of the game running on an arcade monitor to 
+varying degrees.&nbsp; 
+These settings may be used in conjunction with the filtering options above.&nbsp; 
+If filtering = Point, the screen will be brighter as no blurring will take 
+place.&nbsp; Some suggested effect combos: <b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1.</b> filtering = None + effect = 
+Aperture grille <b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2.</b> filtering = Bilinear + effect 
+= Aperture grille + Pre-scale<b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3.</b> filtering = Bilinear + effect 
+= Dot medium mask<b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.</b> filtering = Bilinear + effect 
+= RGB 4 pixel triad<br>
+Note that some of these effects 
+will do integer stretches on the aspect ratio corrected image as far as possible 
+for the set resolution, this means effects like 'auto', 'aperture grille', 'scan 
+lines'<b> </b>will not stretch to the entire screen.&nbsp; The various RGB/Dot/Mask/None 
+effects will however stretch to the full screen.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Effect Overrides</b> : Scan 
+lines allows manually setting the scan lines intensity and overrides the scan 
+25/50/75 presets in the effects pull down.<b>&nbsp; </b>Feedback simulates the 
+ghosting effect in games showing a variable phosphor trail.&nbsp; Saturate 
+increases the color 'bleed over' factor.</p>
+<p class="MsoNormal" style="text-indent: -.25in; margin-left: .75in">
+<span style="font-family: Symbol">
+<img width="11" height="11" src="../images/mame321.gif" alt="*"><span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Sound Tab </b>: This tab allows for setting the sound options.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Enable sound and sound CPUs
+</b>: This setting toggles sound on or off in games.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Use samples </b>: This setting 
+allows Mame32 to utilize samples for games which do not have their sound 
+hardware emulated, or were using analogue circuitry.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Resample if samplerate doesn’t 
+match </b>: This setting is utilized if the samplerate of the original hardware 
+does not match the samplerate actually used by an integer factor. This is more 
+faithful to the original sound, however, the sound may not be as crisp.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Samplerate </b>: This setting 
+tells Mame32 at what rate to output sound, the higher, the better.&nbsp; Lowering 
+this setting can also result in faster performance on lower end machines.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Volume attenuation </b>: This 
+setting allows Mame32 to set the initial volume level, the default is 0dB.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Audio latency </b>: This 
+slider allows the adjustment of the amount of latency built into the audio 
+streaming.&nbsp; Increasing the slider to the right on faster machines can help 
+alleviate some desync and scratchiness in the sound on some configurations.</p>
+<p class="MsoNormal" style="text-indent: -.25in; margin-left: .75in">
+<span style="font-family: Symbol">
+<img width="11" height="11" src="../images/mame321.gif" alt="*"><span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Controllers Tab </b>: This tab allows for setting the game 
+controller options.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Enable joystick input </b>: 
+This setting tells Mame32 to utilize any currently connected joysticks.&nbsp; Mame32 
+will interrogate the game controllers control panel and use ID#1 and up.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Analog joystick deadzone</b> : 
+This setting controls how Mame32 translates analog input to games that require 
+digital input.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Enable mouse input </b>: This 
+setting tells Mame32 to utilize the mouse in games that require analogue control 
+methods.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Enable lightgun input</b> : 
+This setting tells Mame32 to utilize a lightgun for target/shooting games that 
+require analogue control, like Crossbow, Police Trainer, Rev X, etc.&nbsp; </p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Enable steadykey support </b>: 
+This option tells Mame32 to use a different keyboard handling that makes it 
+easier to register simultaneous key presses for games that require it for 
+special moves [Street Fighter II, etc.].&nbsp; However it can produce more sluggish results in other games.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Default input layout </b>: 
+This drop down menu allows Mame32 to choose between multiple key mappings, 
+including keyboard mapping for various third-party control panels.&nbsp; It will also display user defined 
+controller mappings, if created in the \ctrlr directory.&nbsp; See \docs\ctrlr.txt for more information.</p>
+<p class="MsoNormal" style="text-indent: -.25in; margin-left: .75in">
+<span style="font-family: Symbol">
+<img width="11" height="11" src="../images/mame321.gif" alt="*"><span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Miscellaneous Tab </b>: This tab allows for setting additional 
+options.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Use additional game artwork
+</b>: This setting if toggled on allows Mame32 to utilize the external artwork 
+packages 
+available at <b><a target="_blank" href="http://www.mame.net/downart.html">
+Mame.net</a></b> for display in games like Armor Attack, Discs of Tron, Lunar 
+Lander, Warrior, etc.&nbsp;The artwork packages are placed in the \artwork directory.&nbsp; 
+Each element of the artwork package can be toggled: bezel, overlay, and 
+background.&nbsp; </p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Crop Artwork</b> : Selecting 
+the crop artwork toggle will shrink the scene down to the games original 
+dimensions, cropping any available art pieces.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Artwork resolution</b> : This 
+setting allows selecting normal and higher resolution versions of the artwork, 
+the high setting scales the game graphics to match the higher art resolution, 
+best seen in Night Driver and Space Invaders.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>BIOS</b> : This drop down 
+allows the use of a variety of different supported NeoGeo BIOS files.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Use LEDs as game indicators</b> 
+: This setting if toggled allows Mame32 to utilize the LEDs on the keyboard to 
+match some of the in-game light flashing, seen during braking in Outrun for 
+example, and coin/credit indicators.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>Enable game cheats </b>: This 
+setting if toggled on allows Mame32 to use some cheats that are present in games 
+like Defender and Battlezone to make control easier.&nbsp; It also allows for the use 
+of an external cheat.dat file which can be used to cheat illegally in games in a 
+variety of ways, including infinite lives, level jumping, etc.</p>
+<p class="MsoNormal" style="margin-left:.75in"><b>
+<span style="font-size: 10.0pt; font-family: Arial">Use less CPU time if 
+possible
+</span></b><span style="font-size: 10.0pt; font-family: Arial">: This setting if 
+toggled on allows Mame32 to be more multitasking friendly in that it does not 
+use as much processor time.&nbsp; If this setting is toggled off Mame32 will 
+utilize 100% of the CPU for playing games.&nbsp; Some machines slow down 
+dramatically if this setting is toggled on, particularly laptops.</span></p>
+
+<p class="MsoNormal" style="margin-left:.75in"><b>
+<span style="font-size: 10.0pt; font-family: Arial">Use RDTSC timing system</span></b><span style="font-size: 10.0pt; font-family: Arial"> : This setting if 
+toggled on uses RDTSC over QueryPerformanceCounter for<br>
+timing.&nbsp; Check this desktop systems, and toggle it off for laptops or 
+possibly older K6/7 level machines.</span></p>
+
+<p class="MsoNormal" style="margin-left:.75in"><b>
+<span style="font-size: 10.0pt; font-family: Arial">Error log (for developers)
+</span></b><span style="font-size: 10.0pt; font-family: Arial">: This setting if 
+toggled on produces an error log of illegal memory accesses.</span></p>
+
+<p class="MsoNormal" style="text-indent: -.25in; margin-left: .75in">
+<span style="font-family: Symbol">
+<img width="11" height="11" src="../images/mame321.gif" alt="*"><span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><b>Vector Tab </b>: This tab allows for setting additional 
+options for games that originally utilized a vector monitor instead of a raster 
+monitor. [Asteroids, Battlezone, Armor Attack, etc.]</p>
+<p class="MsoNormal" style="margin-left: .75in"><b>Draw antialiased vectors </b>
+: This setting if toggled on tells Mame32 to draw vector lines with an 
+additional pleasing antialiased look.</p>
+<p class="MsoNormal" style="margin-left: .75in"><b>Draw translucent vectors</b> 
+: This setting if toggled on tells Mame32 to draw vector lines with a slight 
+translucency and bright points at intersections.</p>
+<p class="MsoNormal" style="margin-left: .75in"><b>Beam width</b> : This slider 
+allows Mame32 to set the beam width on the vector lines drawn, increasing it 
+creates wider vectors. </p>
+<p class="MsoNormal" style="margin-left: .75in"><b>Flicker</b> : This slider 
+tells Mame32 to artificially create a flicker effect on the vector lines.</p>
+
+<p class="MsoNormal" style="margin-left: .75in"><b>Intensity</b> : This slider 
+tells Mame32 to increase the brightness/intensity of the vector lines.&nbsp; 
+Higher values attempt to approximate on a raster monitor the distinct bright 
+glow of the original vector hardware.</p>
+
+<p class="MsoNormal" style="margin-left: .75in">&nbsp;</p>
+<p class="MsoNormal" style="margin-left: .75in"><font size="1">
+<!--webbot bot="Timestamp" s-type="EDITED" s-format="%Y-%m-%d %I:%M %p %Z" startspan -->2003-08-09 09:00 AM -0700<!--webbot bot="Timestamp" endspan i-checksum="37698" --></font></p>
+
+</body>
+
+</html>

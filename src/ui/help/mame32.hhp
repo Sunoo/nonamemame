@@ -1,0 +1,23 @@
+[OPTIONS]
+Binary Index=No
+Compatibility=1.1 or later
+Compiled file=mame32.chm
+Contents file=mame32.hhc
+Default Window=Baseline
+Default topic=html\mame32_changes.htm
+Display compile progress=No
+Full text search stop list file=stoplist.stp
+Full-text search=Yes
+Language=0x409 English (United States)
+Title=Mame32 Help
+
+[WINDOWS]
+Baseline="Mame32 Help","mame32.hhc",,"html\mame32_changes.htm",,,,,,0x22520,260,0x300c,[100,100,902,600],,,,,,,0
+
+
+[TEXT POPUPS]
+cntx_help.txt
+reshelp.h
+
+[INFOTYPES]
+

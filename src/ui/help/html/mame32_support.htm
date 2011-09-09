@@ -1,0 +1,865 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 10">
+<meta name=Originator content="Microsoft Word 10">
+<link rel=File-List href="mame32_support_files/filelist.xml">
+<title>Mame32 Support</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>john4</o:Author>
+  <o:Template>Normal</o:Template>
+  <o:LastAuthor>john4</o:LastAuthor>
+  <o:Revision>106</o:Revision>
+  <o:TotalTime>152</o:TotalTime>
+  <o:Created>2002-04-18T05:08:00Z</o:Created>
+  <o:LastSaved>2003-07-28T15:41:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>2744</o:Words>
+  <o:Characters>15643</o:Characters>
+  <o:Lines>130</o:Lines>
+  <o:Paragraphs>36</o:Paragraphs>
+  <o:CharactersWithSpaces>18351</o:CharactersWithSpaces>
+  <o:Version>10.4219</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]-->
+<style>
+<!--
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:Arial;
+	mso-fareast-font-family:"Times New Roman";
+	color:windowtext;}
+h1
+	{margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:1;
+	font-size:16.0pt;
+	font-family:Arial;
+	color:windowtext;
+	font-weight:bold;}
+h2
+	{margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:2;
+	font-size:14.0pt;
+	font-family:Arial;
+	color:windowtext;
+	font-weight:bold;
+	font-style:italic;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:Arial;
+	mso-fareast-font-family:"Times New Roman";
+	color:black;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:1129710728;
+	mso-list-template-ids:-823344360;}
+@list l0:level1
+	{mso-level-tab-stop:.25in;
+	mso-level-number-position:left;
+	margin-left:.25in;
+	text-indent:-.25in;}
+@list l0:level2
+	{mso-level-text:"%1\.%2\.";
+	mso-level-tab-stop:.55in;
+	mso-level-number-position:left;
+	margin-left:.55in;
+	text-indent:-.3in;
+	font-family:Arial;
+	mso-bidi-font-family:"Times New Roman";}
+@list l0:level3
+	{mso-level-text:"%1\.%2\.%3\.";
+	mso-level-tab-stop:.85in;
+	mso-level-number-position:left;
+	margin-left:.85in;
+	text-indent:-.35in;}
+@list l0:level4
+	{mso-level-text:"%1\.%2\.%3\.%4\.";
+	mso-level-tab-stop:1.2in;
+	mso-level-number-position:left;
+	margin-left:1.2in;
+	text-indent:-.45in;}
+@list l0:level5
+	{mso-level-text:"%1\.%2\.%3\.%4\.%5\.";
+	mso-level-tab-stop:1.55in;
+	mso-level-number-position:left;
+	margin-left:1.55in;
+	text-indent:-.55in;}
+@list l0:level6
+	{mso-level-text:"%1\.%2\.%3\.%4\.%5\.%6\.";
+	mso-level-tab-stop:1.9in;
+	mso-level-number-position:left;
+	margin-left:1.9in;
+	text-indent:-.65in;}
+@list l0:level7
+	{mso-level-text:"%1\.%2\.%3\.%4\.%5\.%6\.%7\.";
+	mso-level-tab-stop:2.25in;
+	mso-level-number-position:left;
+	margin-left:2.25in;
+	text-indent:-.75in;}
+@list l0:level8
+	{mso-level-text:"%1\.%2\.%3\.%4\.%5\.%6\.%7\.%8\.";
+	mso-level-tab-stop:2.6in;
+	mso-level-number-position:left;
+	margin-left:2.6in;
+	text-indent:-.85in;}
+@list l0:level9
+	{mso-level-text:"%1\.%2\.%3\.%4\.%5\.%6\.%7\.%8\.%9\.";
+	mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	margin-left:3.0in;
+	text-indent:-1.0in;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="31746"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body bgcolor=white background="../images/bkground.gif" lang=EN-US link=blue
+vlink=blue style='tab-interval:.5in'>
+
+<div class=Section1>
+
+<h1>Mame32 Troubleshooting [&amp; Tips]</h1>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+0in'>Mame32 is a six year old program; it is mature, complex, and robust.&nbsp;
+However, since the Mame project itself is a documentation effort, and
+development is continuous, there will be times when changes to the core program
+effect Mame32.&nbsp; When problems do occur with a specific game in a specific
+version of Mame32, a previous version of Mame32 may be used easily, toggling
+off the Enable version mismatch warning check on the Options • Interface
+Options menu.&nbsp; </p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+0in'>Mame32 is now an integrated GUI front end which passes user input from the
+GUI to the Mame[w] engine.<span style='mso-spacerun:yes'>  </span>Thus, any
+problems that occur in the Mame[w] engine will be inherited by Mame32.&nbsp;
+Prior to <b><a
+href="mailto:mame32qa@hotmail.com?subject=Via%20the%20Mame32%20Help%20File%20/%20Troubleshooting%20Section">reporting
+problems</a> </b><span style='mso-bidi-font-weight:bold'>against Mame32</span>,
+verify that the issue is not a known, core defect in Mame[w].&nbsp; The <b><a
+href="http://www.mametesters.com" target="_blank">Mametesters.com</a></b> site
+is designed to track and report bugs in the baseline Mame[w] version.&nbsp; To
+find if a problem plagues the game in question, do an alt-enter on the game and
+note its driver/source name at the bottom of the general properties tab; then
+search the <span class=SpellE>Mametester’s</span> bug database or search their <a
+href="http://www.mameworld.net/cgi-bin/wwwthreads/wwwthreads.pl?action=list&amp;Board=mameworldmametesting">message
+board</a>.<span style='mso-spacerun:yes'>  </span>The current list of known
+Mame32 specific issues and defect tracking is available at <b><a
+href="http://www.classicgaming.com/mame32qa/bugs.htm" target="_blank">Mame32QA</a></b>.&nbsp;
+</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+0in'>&nbsp;</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.25in;text-indent:-.25in;mso-list:l0 level1 lfo2;tab-stops:list .25in;
+background:white'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><strong><span style='font-family:Arial'>ROMs
+Related Topics</span></strong></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial;color:windowtext'><span style='mso-list:
+Ignore'>1.1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+receiving missing ROM error messages when attempting to run a game, secondary
+click on the game in the list and choose properties, do an audit on that game
+[or use <b>Alt-A</b>].<span style='mso-spacerun:yes'>  </span>The audit will
+determine which files are missing from the ROMset currently being played.<span
+style='mso-spacerun:yes'>  </span>Mame32 will not run a game which fails its
+internal audit.<span style='color:windowtext'><o:p></o:p></span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>1.2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Mame
+is an ongoing documentation project. Sometimes old ROM sets are found to have
+miss-dumped, missing, or damaged ROMs, which need to be replaced.&nbsp; As new
+versions of Mame are released, the Mame developers add support for these new
+iterations of ROMs, supplanting or renaming the old supported versions.<span
+style='mso-spacerun:yes'>  </span>Thus, often, older versions of ROMs which did
+work in older versions of Mame32, will <u>not</u> work with newer versions of
+Mame32 because they are now read as incomplete or wrong.<span
+style='mso-spacerun:yes'>  </span>Mame32 will not play the game in question
+until the updated ROMs are utilized.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>1.3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Mame32
+utilizes the idea of a parent / clone relationship for its games.&nbsp; If
+trying to play a clone or a bootleg of a game, Mame32 will need the ROMs for
+the clone game, <b>and</b> the parent set.&nbsp; Mame32 indicates the parent
+set of a clone at the bottom of the game’s properties tab.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>1.4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Mame32
+utilizes the idea of having single zip files to house the BIOS files for a
+large number of similar games.<span style='mso-spacerun:yes'>  </span>The
+NeoGeo games for example, share four BIOS files in every game.&nbsp; Mame will
+look to neogeo.zip as the BIOS zip, if this file is along with the other NeoGeo
+games, it will use it. Otherwise, Mame32 expects the BIOS files in every NeoGeo
+game. DECO cassette, CVS, PGM, and Playchoice are also BIOS games.&nbsp; An
+error message will occur if the BIOS files are not present and those games are
+run.<span style='mso-spacerun:yes'>  </span>Occasionally, new ROMs will need to
+be added to the BIOS packages themselves, this occurred most recently with the
+‘ng-lo.rom’ in the NeoGeo.zip. Mame32 will not play a game without the file
+with the correct CRC, not just the same name.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>1.5.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Games
+that support .chd [compressed hard drive] images [Max <span style='color:windowtext'>Force,
+Killer Instinct I &amp; II, Area 51, Vicious Circle, and War Gods] have to have
+their ROMs and .chd files in a specific directory structure. The <b
+style='mso-bidi-font-weight:normal'>single</b> large .chd file need to go in a
+directory named for the game one layer beneath the ROMs, e.g. for Area 51,
+mame32\ROMs\area51.zip [for the small zipped ROMs], and
+mame32\ROMs\area51\area51.chd [for the large single freestanding .chd
+file].&nbsp; Additionally, to play successfully, a directory called mame32\diff
+needs to be present [do <b>not</b> put the *.chd file in the \diff directory].
+Also, do <b>not</b> zip the .chd file, it remains freestanding.</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>1.6.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><b>F5
+</b>/ View • Refresh in the GUI. (Do this anytime ROMs are altered, renaming,
+etc.)</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>1.7.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+games are not displaying in the game list, ensure the appropriate folder view
+on the far left is toggled, i.e. 'all games' and it doesn't have filtering on
+it to stop the display of the game being searched for.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>1.8.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Use
+the Options • Reset to default menu choice and check all of the items, restart
+Mame32.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>1.9.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Final
+option, manually delete the Mame32ui.ini and the Mame32.ini file in the \ini
+directory.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.25in;text-indent:-.25in;mso-list:l0 level1 lfo2;tab-stops:list .25in;
+background:white'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><strong><span style='font-family:Arial'>Crash
+Related Topics</span></strong></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Delete
+the .hi, .cfg, or .nv files for the game that's crashing.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Check
+to see that the zip file is valid and that it's not corrupt or read-only.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Verify
+the presence of the \ini directory under Mame32.exe’s location.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+versions of Mame32 prior to .66 have been installed on the system, verify that
+the old registry key has been deleted with regedit.exe.
+HKEY_CURRENT_USER/Software/Freeware/Mame32</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.5.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>The
+game’s entry in the external database, hiscore.dat, may be causing the crash,
+remove the entry by editing hiscore.dat with a text editor.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.6.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+crashing during an audit or an [<b>F5</b>] refresh, it could be a corrupt .zip
+file. &nbsp;Extract it and re-zip. Pkunzip -t *.zip. Note the file that dies
+during the audit and concentrate on that one. Also verify that if zip files are
+not used, that the folder is not empty, or contains partial or damaged ROMs.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.7.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+seeing crashes or weird screen coloration, try disabling running background
+apps [in Win98, use msconfig.exe], Norton Crashguard, PnP programs like Kaaza,
+eDonkey, LimeWire, popup killers, viruscans, MS Office Fast Find, the Microsoft
+Office Bar, Intellimouse, even IE subscription updates, etc. Try moving Mame32
+away from compressed [DriveSpace, DoubleSpace, stacker] drives.&nbsp;
+IntelliMouse and Office Toolbars have been known to cause conflicts. &nbsp;Also
+disable items in the system tray, like the CD player, etc.&nbsp; It may also be
+necessary to download and install the latest version of DirectX from Microsoft
+to prevent some errors.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>In
+some instances games may fail to start if the installed directory path contains
+a large number of characters and spaces, to alleviate this, install Mame32 and
+its support directory structure into a shorter path name, i.e. \games\mame32.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Some
+recent viruses which attach to .exes will cause page faults and access
+violations in Mame32 when it's run.&nbsp; Use an anti-virus check and verify
+Mame32 is not infected.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Odd
+behaviour may be exhibited in NT based systems if attempting to run games while
+security/permissions settings do not allow <span class=GramE>it,</span> or the
+user is not an administrator or member of the administrator’s group.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Some
+anti-virus packages will slow down navigation within the Mame32 directory or
+report spurious messages about Mame32.exe because of its UPX .exe compression
+method.<span style='mso-spacerun:yes'>  </span>These are false positives and
+the anti-virus vendors should update their virus dat signatures.<span
+style='mso-spacerun:yes'>  </span>It may also be possible to exclude the
+mame32.exe from real-time scanning as a workaround.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.5.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>On
+rare occasions malformed or damaged *.dat files [history.dat, mameinfo.dat,
+cheat.dat] can cause Mame32 to error on startup when it tries to read
+them.<span style='mso-spacerun:yes'>  </span>Remove those files individually to
+check for the one causing the crash.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.6.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Use
+the Options • Reset to default menu choice and check all of the items, restart
+Mame32.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>2.7.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Final
+option, manually delete the Mame32ui.ini and the Mame32.ini file in the \ini
+directory.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.25in;text-indent:-.25in;mso-list:l0 level1 lfo2;tab-stops:list .25in;
+background:white'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><strong><span style='font-family:Arial'>Performance
+Related Topics [incl. sound scratchiness and stuttering]</span></strong></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Mame32
+will start to crackle, scratch, or echo if the game running is too taxing for
+the processor [Taito F3, Midway Wolf Unit, CPS2 games require a lot of
+horsepower].&nbsp; This can be visually confirmed by turning on FPS display
+with [<b>F11</b>], and frame skip to auto with [<b>F8</b>].&nbsp; If the FPS
+dips anywhere or frame skipping rises anywhere during the game play, the game
+is maxing out the CPU and sound breakup could occur. The blitter effects
+[partial scanlines, RGB effects] will impose further strain on the CPU, upwards
+of 50%. &nbsp;If upgrading machine components, provide Mame32 with as much
+hardware as possible; a faster CPU makes the most difference, followed by video
+card [for new D3D effects], and RAM.&nbsp; <b><a
+href="http://www.classicgaming.com/mame32qa/settings/settings.htm"
+target="_blank">Suggested Mame32 settings</a></b> are available on the Mame32QA
+site.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+style='color:windowtext'>With the advent of Mame32 .62 there are games
+supported that are not playable at 100% speeds on any commercially available
+PC.<span style='mso-spacerun:yes'>  </span>These will run at half speed or
+lower, they include the Namco System22 3D games like Propcycle and Midway games
+like <span class=SpellE>Cruis’n</span> USA, <span class=SpellE>Cruis’n</span>
+World, and War Gods.<span style='mso-spacerun:yes'>  </span>Eventually PC CPUs
+will advance to the point they can be run, it is estimated a P4 <span
+class=GramE>4Ghz</span> or AMD 3700+ would be able to handle the games.<span
+style='mso-spacerun:yes'>  </span>These games benefit from turning <b>off</b>
+auto-frame skipping.<span style='mso-spacerun:yes'>  </span>Benchmarks of some
+current systems are available at the <b style='mso-bidi-font-weight:normal'><a
+href="http://www.classicgaming.com/mame32qa/bench.htm">Mame32QA Benchmark</a></b>
+page.&nbsp; Because Mame as an emulator strives for perfect emulation, it does
+not take the shortcuts or hacks that other emulators do to make these games run
+faster.</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+style='color:windowtext'>As a general rule, t</span>he higher the resolution of
+the original game, the more CPU power is required to emulate it.&nbsp;
+Performance can be increased on these games by ensuring that Mame32 is not
+using any of the RGB/Scanline effects in Options • Default Game Options •
+Display.&nbsp; Set the effects to 'none' and uncheck scanlines.&nbsp; This will
+allow Mame32 to run these games at the fastest speed. [<span class=GramE>additionally</span>,
+the higher the resolution of the original game, the less likely it is that the
+RGB/Scanline effects will even be seen, so it's recommended to turn them off.]</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Some
+of the largest games supported by Mame32 [NeoGeo mainly] can run into the
+hundreds of megabyte range when they are uncompressed into memory, this
+combined with Mame32 in memory, plus OS overhead can lead to very slow performance
+as Windows swaps the information out to disk if there is not enough physical
+memory.&nbsp; 256M or 512M is recommended for all current games [.58].</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.5.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+style='color:windowtext'>If seeing a severe slowdown in games that previously
+didn't, toggle the Use less CPU time if possible menu item in Options • Default
+Options • Miscellaneous.&nbsp; This happens to laptop users particularly.</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.6.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+style='color:windowtext'>If seeing a severe slowdown in games that previously
+didn't, toggle the Use pre-0.63 timing item in Options • Default Options •
+Miscellaneous.</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.7.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>The
+Midway games from the mid 1990<span style='color:windowtext'>'s like MK2, MK3,
+NBA Hangtime, etc. will sometimes have their sound ‘<span class=SpellE>desync</span>’
+and become scratchy.<span style='mso-spacerun:yes'>  </span>To help alleviate
+this, move the auto latency slider to the right to 2/5 or 3/5 in the Options •
+Default Game Options • Sound tab.</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.8.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Certain
+games in Mame32 perform better on machines that cannot handle them 100% if<span
+style='color:windowtext'> auto-frame skipping is turned <b>off</b>.</span>&nbsp;
+</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.9.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Certain
+games if run with D3D settings will perform better if Triplebuffering is set to
+<b style='mso-bidi-font-weight:normal'>off</b>.<span style='mso-spacerun:yes'> 
+</span>D3D will double buffer if triple is turned off.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.10.</span></span><![endif]>If
+games are running too <b>fast</b>, verify in the Options • Default Game Options
+menu that the throttle option is turned <b>on</b>, that sync to monitor refresh
+is turned <b>off </b>and Wait for Vertical Sync is turned <b>off</b> in the
+Options • Default Game Options • Advanced menu.&nbsp; </p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.11.</span></span><![endif]><span
+style='color:windowtext'>Mame32 video performance can be greatly enhanced by
+ensuring AGP Fast Writes are toggled on in the motherboard BIOS.<span
+style='mso-spacerun:yes'>  </span>The videocard drivers also need to support
+this setting, some recent ATI card drivers do not.</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.12.</span></span><![endif]><span
+style='color:windowtext'>There are some soundcards like early PCI <span
+class=SpellE>Soundblasters</span> 128 that will cause scratchiness if their
+hardware acceleration is turned up too high.&nbsp; Move the slider down various
+steps to troubleshoot in Control Panel • Sound • Advanced Audio.</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>3.13.</span></span><![endif]><span
+style='color:windowtext'>There are some video card/video driver combinations
+that <b>can</b> do hardware stretching, but are slower than running with
+hardware stretch <b>off</b>. If games are too sluggish with the <span
+class=GramE>hw</span> stretch on, toggle it off if possible.&nbsp; Some PCI
+graphic cards have been seen to have this problem.</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.25in;text-indent:-.25in;mso-list:l0 level1 lfo2;tab-stops:list .25in;
+background:white'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><strong><span style='font-family:Arial'>Joysticks
+/ Mice / Gamepad / Lightgun Related Topics</span></strong></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>4.1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Gamepads
+and mouse are disabled by default on first Mame32 launch, enable them by
+toggling their check boxes on in Options • Default Options • Controllers.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>4.2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Mame32
+relies on DirectX’s DirectInput for joystick support, ensure the game pad is
+seen as present and active in the game controller control panel: start menu •
+settings • control panel • game controllers.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>4.3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Verify
+the joystick is seen as ID #1 in the game controllers control panel rather than
+being assigned a higher number.&nbsp; If using multiple gamepads, ensure each
+one has its own ID#.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>4.4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Daisy
+chained gameport Microsoft Sidewinders [original] in Win2k or XP do not work
+very well.&nbsp; Use USB gamepads instead. Single Sidewinders may also cause
+odd behavior like ghost button presses.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.25in;text-indent:-.25in;mso-list:l0 level1 lfo2;tab-stops:list .25in;
+background:white'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><strong><span style='font-family:Arial'>Settings
+Topics</span></strong></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>5.1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>With
+the advent of version 0.66 Mame32 no longer stores its configuration
+information in the Windows registry, it stores it in \mame32ui.ini and
+\ini\mame32.ini.<span style='mso-spacerun:yes'>  </span>To remove vestiges of
+the old versions, run regedit.exe and delete the following key: HKEY_CURRENT_USER\Software\Freeware\MAME32.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>5.2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+having trouble saving keyboard mappings and configuration, verify that the
+*.cfg files are not read-only and that a \mame32\cfg directory is present.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>5.3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+GUI settings and/or audit results aren’t being maintained, verify the existence
+of a writeable mame32ui.ini and that the \ini directory is present and
+writeable [not read only] under the Mame32.exe location.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>5.4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+experiencing odd behavior with Mame32 saving files or not appearing to clear
+its settings, verify that there are not multiple shortcuts pointing to
+different versions, that an .exe is not being used by itself instead of a
+shortcut to the .exe, or a shortcut pointing to an old version of the .exe.<span
+style='mso-spacerun:yes'>  </span>Also verify that there are not multiple
+versions of Mame32 running in memory as the last one out will save the
+settings.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>5.5.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+the in-game [<b>TAB</b>] menu is no longer working or can’t be accessed, it has
+been mapped to another key; delete the default.cfg file in the \mame32\cfg
+directory.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>5.6.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+having trouble mapping keys with the [<b style='mso-bidi-font-weight:normal'>TAB</b>]
+menu, verify the game is not paused while mapping.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>5.7.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>It
+is possible to run multiple versions of Mame32 on the same machine, in the
+event an older version plays a game better than a newer one.&nbsp; In order to
+make them co-exist the best method is to launch each in turn and verify that
+the Enable version mismatch warning option is unchecked in the Options •
+Interface Options menu.&nbsp; This must be toggled off in both versions.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>5.8.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Mame32
+and Mame have a limit on the amount of characters that can be used for the ROM
+paths.<span style='mso-spacerun:yes'>  </span>If directory settings are not
+being maintained, pare down the number and names of the directories being added
+or simply use a single \ROMs directory which Mame32 expects.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>5.9.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Mame32
+now stores its settings in external *.ini files instead of the registry.<span
+style='mso-spacerun:yes'>  </span>If it is necessary to return Mame32 to
+baseline, simply delete the Mame32ui.ini file and the Mame32.ini file in the
+\ini directory.<span style='mso-spacerun:yes'>  </span>The next time Mame32
+runs it will recreate those files with the default settings.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.25in;text-indent:-.25in;mso-list:l0 level1 lfo2;tab-stops:list .25in;
+background:white'><![if !supportLists]><span style='mso-fareast-font-family:
+Arial'><span style='mso-list:Ignore'>6.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><strong><span style='font-family:Arial'>GUI
+Related Topics &amp; Miscellaneous Tips</span></strong></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+style='color:windowtext'>Mame32 will read freestanding icons in the \icons
+directory first, then icons in the icons.zip file.&nbsp; </span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+seeing icon palette corruption in the GUI when returning from a full screen
+game, try increasing the desktop color depth to 24bpp or 32bpp.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+style='color:windowtext'>Sometimes icons in large icon view may appear to be
+missing their white color or have portions transparent, this is the result of
+having white chosen as the windows desktop window setting in Control Panel /
+Display.&nbsp; Change the window setting to slightly off-white or another color
+to return the icons to their appropriate look.</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>The
+GUI text may disappear from the folder view if the GUI font color chosen is
+very close to the Windows system background color scheme or if it is a large
+enough font [or bold] to anti-alias. </p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.5.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+style='color:windowtext'>Mame32 no longer supports *.bmp format and may show a
+blank or empty background if a *.bmp is erroneously renamed and used for
+bkground.png.</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.6.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+style='color:windowtext'>To return to a blank gray background in the GUI,
+delete the bkground.png file in the \mame32\snap directory.</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.7.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>The
+screenshot area was grayed out in Windows XP because of the inclusion of a
+preliminary file in Mame32 version .54 called Mame32 manifest.&nbsp; Remove
+that file to view the screenshot area artwork again.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.8.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Quickly
+navigate through games in the details view by simply typing the first few
+letters in the name of the game, the highlight will jump to that game and
+become more granular as the name is typed out.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.9.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Select
+a random game with [<b>Ctrl-R</b>].</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.10.</span></span><![endif]><span
+style='color:windowtext'>Audit an individual game with [<b>Alt-A</b>].</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.11.</span></span><![endif]>If
+Stretch using hardware is grayed out in Options • Default Options • Advanced,
+verify the desktop is set to 16bpp or 32bpp and not 24bpp.<span
+style='mso-spacerun:yes'>  </span>If it is still grayed out, the video card
+does not support the hardware stretch capabilities Mame32 needs.<span
+style='mso-spacerun:yes'>  </span>Mame32’s Direct3D toggle may be used instead
+depending on the video hardware and driver.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.12.</span></span><![endif]>To
+alleviate screen tearing in some scrolling games, it may be necessary to check
+‘use triple buffering’ and ‘match game refresh rate’, while setting refresh to
+‘auto’.&nbsp; This will set the output monitor’s refresh rate down to 60Hz or
+the closest the monitor can do to the game’s refresh rate.<span
+style='mso-spacerun:yes'>  </span>Some video hardware and driver combos can get
+this effect by only enabling triple buffering.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.13.</span></span><![endif]>Vector
+games like asteroids can look and work better if hardware stretch is
+disabled.&nbsp; Increase the vector intensity to 3, and use a set resolution
+like 1024x768x32 instead of auto.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.14.</span></span><![endif]><span
+style='color:windowtext'>The included custom \folders\*.ini files are set to
+read-only to prevent accidental dragging and dropping of files into them, and
+will produce and error message if that is attempted.&nbsp; If desired, </span>change
+the read-only attribute at the OS level.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.15.</span></span><![endif]>Certain
+items in the GUI may be missing of Mame32 is run on a Win2K/XP box and the user
+is not an admin or member of the admin group.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.55in;text-indent:-.3in;mso-list:l0 level2 lfo2;tab-stops:list .55in'><![if !supportLists]><span
+style='mso-fareast-font-family:Arial'><span style='mso-list:Ignore'>6.16.</span></span><![endif]>If
+when attempting to play a game the monitor displays a message that the signal
+is out of frequency or the monitor goes into sleep mode or there weird
+‘multiple’ images, Mame32 is trying to use an auto video mode that the monitor
+doesn't support.&nbsp; Use a set resolution in the Options • Default Options •
+Display menu, or uncheck the Switch resolution to fit, and uncheck Switch color
+depths to fit.<br style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:3.75pt;margin-left:
+.25in'><span style='font-size:8.0pt'><span style='mso-field-code:" DATE \\\@ \0022M\/d\/yyyy h\:mm\:ss am\/pm\0022 "'><span
+style='mso-no-proof:yes'>7/28/2003 8:19:56 AM</span></span><o:p></o:p></span></p>
+
+</div>
+
+</body>
+
+</html>
