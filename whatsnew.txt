@@ -1,0 +1,16 @@
+0.72.3:
+ - First public release!
+ - Most MisfitMAME and PacMAME drivers added
+ - pacman.c is still unchanged due to the large amount of changes needed
+ - galaxian.c is missing Lucky Today due to unknown errors
+ - galaxian.c is missing Andromeda due to duplicate name
+
+0.72.2:
+ - Started adding MisfitMAME drivers
+
+0.72.1:
+ - Added SName drivers
+ - Added No Nag Patch
+
+0.72.0:
+ - MAME 0.72 source code
