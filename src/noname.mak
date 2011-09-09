@@ -448,7 +448,7 @@ $(OBJ)/sega.a: \
 	$(OBJ)/vidhrdw/segaic24.o \
 	$(OBJ)/drivers/system32.o $(OBJ)/drivers/multi32.o $(OBJ)/vidhrdw/system32.o \
 	$(OBJ)/vidhrdw/segac2.o $(OBJ)/drivers/segac2.o \
-	$(OBJ)/drivers/stv.o \
+	$(OBJ)/drivers/stv.o $(OBJ)/vidhrdw/stvvdp1.o $(OBJ)/vidhrdw/stvvdp2.o \
 
 $(OBJ)/deniam.a: \
 	$(OBJ)/vidhrdw/deniam.o $(OBJ)/drivers/deniam.o \
@@ -607,6 +607,7 @@ $(OBJ)/atari.a: \
 	$(OBJ)/vidhrdw/flyball.o $(OBJ)/drivers/flyball.o \
 	$(OBJ)/vidhrdw/sprint2.o $(OBJ)/drivers/sprint2.o \
 	$(OBJ)/vidhrdw/sprint4.o $(OBJ)/drivers/sprint4.o \
+	$(OBJ)/vidhrdw/sprint8.o $(OBJ)/drivers/sprint8.o \
 	$(OBJ)/vidhrdw/nitedrvr.o $(OBJ)/machine/nitedrvr.o $(OBJ)/drivers/nitedrvr.o \
 	$(OBJ)/machine/dominos.o \
 	$(OBJ)/vidhrdw/triplhnt.o $(OBJ)/drivers/triplhnt.o \
@@ -1068,6 +1069,7 @@ $(OBJ)/other.a: \
 	$(OBJ)/drivers/enigma2.o \
 	$(OBJ)/drivers/ltcasino.o \
 	$(OBJ)/drivers/vamphalf.o \
+	$(OBJ)/drivers/strvmstr.o \
 
 
 COREOBJS += $(OBJ)/driver.o $(OBJ)/cheat.o

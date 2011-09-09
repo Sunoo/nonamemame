@@ -489,15 +489,6 @@ static const char *get_string( const char *section, const char *option, const ch
 	return res;
 }
 
-static void set_game_index( int game_index )
-{
-	game = game_index;
-
-	if( game >= 0 )
-	{
-	}
-}
-
 static void extract_resolution( const char *_resolution )
 {
 	if( stricmp( _resolution, "auto" ) != 0 )

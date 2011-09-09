@@ -10,12 +10,21 @@ ifeq ($(TARGET),)
 TARGET = noname
 endif
 
-# MAME32 front end switch
-ifeq ($(FE),1)
+# Compile version switch
+ifeq ($(OS),mame32)
+MAMEOS = windows
 WINUI = 1
 SUFFIX = 32
 else
-SUFFIX =
+ifeq ($(OS),win)
+MAMEOS = windows
+else
+ifeq ($(OS),dos)
+MAMEOS = msdos
+else
+MAMEOS =
+endif
+endif
 endif
 
 # analog pedal compile option: if defined, use new analog code

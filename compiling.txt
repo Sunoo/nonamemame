@@ -1,0 +1,17 @@
+No Name MAME Compiling Help
+===========================
+
+I made some modifications to the makefile which make building different versions
+easier (especially the MAME32 version).
+
+To compile for Windows:
+	make OS=win
+
+To compile for MS-DOS:
+	make OS=dos
+
+To compile MAME32 version:
+	make OS=mame32
+
+I will probably make further modifications in the future, and when I do, I'll
+document them here.

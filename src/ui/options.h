@@ -211,6 +211,14 @@ typedef struct
 	BOOL   leds;
 	int bios;
 
+	/* Analog+ */
+	BOOL   singlemouse;
+	BOOL   switchmice;
+	BOOL   switchaxes;
+	BOOL   splitmouse;
+	BOOL   resetmouse;
+	BOOL   use_lightgun2a;
+	BOOL   use_lightgun2b;
 } options_type;
 
 // per-game data we store, not to pass to mame, but for our own use.

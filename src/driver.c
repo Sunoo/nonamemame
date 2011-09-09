@@ -142,6 +142,7 @@ const struct GameDriver *test_drivers[] =
 	DRIVER( pengo )		/* 834-0386 (c) 1982 Sega */
 	DRIVER( pengo2 )	/* 834-0386 (c) 1982 Sega */
 	DRIVER( pengo2u )	/* 834-0386 (c) 1982 Sega */
+	DRIVER( pengo3u )	/* 834-0386 (c) 1982 Sega */
 	DRIVER( pengob )	/* bootleg */
 	DRIVER( penta )		/* bootleg */
 	DRIVER( jrpacman )	/* (c) 1983 Midway */
@@ -221,6 +222,8 @@ const struct GameDriver *test_drivers[] =
 	DRIVER( bagmanmc )	/* bootleg */
 	DRIVER( dkongjrm )	/* bootleg */
 	DRIVER( ozon1 )		/* (c) 1983 Proma */
+	DRIVER( ladybugg )	/* bootleg */
+	DRIVER( vpool )		/* bootleg */
 
 	/* Has some similarities with Moon Cresta but Board is very different */
 	DRIVER( rockclim )	/* (c)1981 Taito */
@@ -2767,7 +2770,7 @@ TESTDRIVER( finlarch )
 TESTDRIVER( gaxeduel )
 TESTDRIVER( grdforce )
 TESTDRIVER( groovef )
-TESTDRIVER( hanagumi )
+	DRIVER( hanagumi )
 TESTDRIVER( introdon )
 TESTDRIVER( kiwames )
 TESTDRIVER( maruchan )
@@ -3489,9 +3492,13 @@ TESTDRIVER( xmen6p )	/* GX065 (c) 1992 */
 TESTDRIVER( plygonet )	/* GX305 (c) 1993 */
 
 	/* Konami System GX games */
-	/* 1994.03 Golfing Greats 2 (GX218) */
+
+	/* GX Type 1 */
 TESTDRIVER( racinfrc )	/* GX250 */
 TESTDRIVER( opengolf )	/* ? */
+TESTDRIVER( ggreats2 )	/* GX218 */
+
+	/* GX Type 2 */
 	DRIVER( le2 )		/* GX312 (c) 1994 */
 	DRIVER( le2u )		/* GX312 (c) 1994 */
 	DRIVER( puzldama )	/* GX315 (c) 1994 (Japan) */
@@ -3499,17 +3506,21 @@ TESTDRIVER( opengolf )	/* ? */
 	DRIVER( fantjour )	/* GX321 */
 	DRIVER( dragoonj )	/* GX417 (c) 1995 (Japan) */
 	DRIVER( tbyahhoo )	/* GX424 (c) 1995 (Japan) */
-TESTDRIVER( soccerss )	/* GX427 */
 	DRIVER( tkmmpzdm )	/* GX515 (c) 1995 (Japan) */
 	DRIVER( salmndr2 )	/* GX521 (c) 1996 (Japan) */
 	DRIVER( sexyparo )	/* GX533 (c) 1996 (Japan) */
 	DRIVER( daiskiss )	/* GX535 (c) 1996 (Japan) */
-	/* 1997.11 Rushing Heroes (GX605) */
 	DRIVER( tokkae )	/* GX615 (c) 1996 (Japan) */
-TESTDRIVER( vsnetscr )	/* GX627 */
 TESTDRIVER( winspike )	/* GX705 */
 
+	/* GX Type 3 */
+TESTDRIVER( soccerss )	/* GX427 */
+
+	/* GX Type 4 */
+TESTDRIVER( vsnetscr )	/* GX627 */
 TESTDRIVER( rungun2 )	/* GX505 */
+TESTDRIVER( slamdnk2 )	/* GX505 */
+TESTDRIVER( rushhero )	/* GX605 */
 
 	/* Exidy games */
 	DRIVER( carpolo )	/* (c) 1977 */
@@ -3558,12 +3569,13 @@ TESTDRIVER( rungun2 )	/* GX505 */
 	DRIVER( flyball )	/* 005629			1976/07 [6502] */
 	DRIVER( sprint2 )	/* 005922			1976/11 [6502] */
 	DRIVER( sprint2a )	/* 005922			1976/11 [6502] */
-	DRIVER( sprint4 )	/*					1977/   [6502] */
-	DRIVER( sprint4a )	/*					1977/   [6502] */
+	DRIVER( sprint4 )	/* 008716			1977/12 [6502] */
+	DRIVER( sprint4a )	/* 008716			1977/12 [6502] */
 	DRIVER( nitedrvr )	/* 006321			1976/10 [6502] */
 	DRIVER( dominos )	/* 007305			1977/01 [6502] */
 	DRIVER( triplhnt )	/* 008422-008791	1977/04 [6800] */
-	/* Sprint 8 */		/* ??????			1977/05 [6800] */
+	DRIVER( sprint8 )	/* ??????           1977/05 [6800] */
+	DRIVER( sprint8a )	/* ??????           1977/05 [6800] */
 	DRIVER( dragrace )	/* 008505-008521	1977/06 [6800] */
 	DRIVER( poolshrk )	/* 006281			1977/06 [6800] */
 	DRIVER( starshp1 )	/* 007513-007531	1977/07 [6502] */
@@ -3572,7 +3584,6 @@ TESTDRIVER( rungun2 )	/* GX505 */
 	DRIVER( canyon )	/* 009493-009504	1977/10 [6502] */
 	DRIVER( canbprot )	/* 009493-009504	1977/10 [6502] */
 	DRIVER( destroyr )	/* 030131-030136	1977/10 [6800] */
-	/* Sprint 4 */		/* 008716			1977/12 [6502] */
 	DRIVER( sprint1 )	/* 006443			1978/01 [6502] */
 	DRIVER( ultratnk )	/* 009801			1978/02 [6502] */
 	DRIVER( skyraid )	/* 009709			1978/03 [6502] */
@@ -4548,7 +4559,7 @@ TESTDRIVER( bloodwar )
 	/* SSV System (Seta, Sammy, Visco) games */
 	DRIVER( srmp4 )		/* (c) 1993 Seta */
 	DRIVER( srmp4o )	/* (c) 1993 Seta */
-TESTDRIVER( twineag2 )	/* (c) 1994 Seta */
+	DRIVER( twineag2 )	/* (c) 1994 Seta */
 	DRIVER( srmp7 )		/* (c) 1997 Seta */
 	DRIVER( survarts )	/* (c) 1993 Sammy (American) */
 TESTDRIVER( eaglshot )
@@ -4569,7 +4580,7 @@ TESTDRIVER( eaglshta )
 	DRIVER( vasara2 )	/* (c) 2001 Visco */
 	DRIVER( vasara2a )	/* (c) 2001 Visco */
 
-TESTDRIVER( ultrax )	/* (c) 1995 Banpresto */
+	DRIVER( ultrax )	/* (c) 1995 Banpresto */
 TESTDRIVER( jsk )		/* (c) 1997 Visco */
 
 	/* Atlus games */
@@ -5030,7 +5041,7 @@ TESTDRIVER( hidnctch )	/* Eolith */
 TESTDRIVER( landbrk )	/* Eolith */
 TESTDRIVER( racoon )	/* Eolith */
 TESTDRIVER( xfiles )
-
+	DRIVER( strvmstr )	/* (c) 1986 Enerdyne Technologies Inc */
 
 #endif /* CPSMAME */
 #endif /* NEOMAME */

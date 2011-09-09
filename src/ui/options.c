@@ -295,6 +295,15 @@ static REG_OPTION regGameOpts[] =
 	{ "rdtsc",                  RO_BOOL,    &gOpts.old_timing,        0, 0},
 	{ "leds",                   RO_BOOL,    &gOpts.leds,              0, 0},
 	{ "bios",                   RO_INT,     &gOpts.bios,              0, 0},
+ 
+	// Analog+
+	{ "singlemouse",            RO_BOOL,    &gOpts.singlemouse,       0, 0},
+	{ "switchablemice",         RO_BOOL,    &gOpts.switchmice,        0, 0},
+	{ "switchmiceaxes",         RO_BOOL,    &gOpts.switchaxes,        0, 0},
+	{ "splitmouseaxes",         RO_BOOL,    &gOpts.splitmouse,        0, 0},
+	{ "resetmouseaxes",         RO_BOOL,    &gOpts.resetmouse,        0, 0},
+	{ "lightgun2a",             RO_BOOL,    &gOpts.use_lightgun2a,    0, 0},
+	{ "lightgun2b",             RO_BOOL,    &gOpts.use_lightgun2b,    0, 0},
 
 };
 #define NUM_GAME_OPTIONS (sizeof(regGameOpts) / sizeof(regGameOpts[0]))

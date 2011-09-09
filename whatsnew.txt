@@ -1,3 +1,9 @@
+0.73.07:
+ - Updated to MAME 0.73 source code
+ - Added Analog+ changes to MAME32 version
+ - Starting crediting Anaglog+ creator (sorry u_rebelscum)
+ - Modified makefile for easier compiling
+
 0.72u2.06 "Back to School":
  - Last release before school starts, contains various minor fixes/updates
  - Added DOS version

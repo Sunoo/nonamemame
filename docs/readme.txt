@@ -27,7 +27,9 @@ II. Source Code Sources
    Extra Games Compile Mame Pack for Mame 0.71 - BraiNKilleR
    PatchMAME 0.63.1 - BraiNKilleR, Stephh, Twisty, Haze, MASH, BillK, others
    SirPoonga's hacks - SirPoonga
-   MAME:Analog+ 72.1 - unknown
+   MAME:Analog+ 72.1 (windows) - u_rebelscum
+   MAME:Analog+ 69.1 (dos) - u_rebelscum
+   MAME:Analog+ 71.1 (mame32) - u_rebelscum
 
 
 Appreciation Section
