@@ -122,9 +122,9 @@ static void PasswordEncodeString(void *data,char *str);
     Internal defines
  ***************************************************************************/
 
-#define UI_INI_FILENAME MAME32NAME "ui.ini"
-#define DEFAULT_OPTIONS_INI_FILENAME MAME32NAME ".ini"
-#define DEFAULT_PASSWORD "*MAME32"
+#define UI_INI_FILENAME "nonameui.ini"
+#define DEFAULT_OPTIONS_INI_FILENAME "noname.ini"
+#define DEFAULT_PASSWORD " noname"
 
 /***************************************************************************
     Internal structures
@@ -165,7 +165,7 @@ static REG_OPTION regSettings[] =
 	{ "hide_folders",               RO_ENCODE,  &settings.show_folder_flags,         NULL, FALSE, FolderFlagsEncodeString, FolderFlagsDecodeString },
 
 	{ "show_tabs",                  RO_BOOL,    &settings.show_tabctrl,              "1" },
-	{ "hide_tabs",                  RO_ENCODE,  &settings.show_tab_flags,            "marquee, title, cpanel, history", FALSE, TabFlagsEncodeString, TabFlagsDecodeString },
+	{ "hide_tabs",                  RO_ENCODE,  &settings.show_tab_flags,            "", FALSE, TabFlagsEncodeString, TabFlagsDecodeString },
 	{ "history_tab",				RO_INT,		&settings.history_tab,				 0, 0},
 
 	{ "check_game",                 RO_BOOL,    &settings.game_check,                "1" },

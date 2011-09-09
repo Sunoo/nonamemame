@@ -7,21 +7,21 @@ easier (especially the MAME32 version).
 First, (obviosly) is the make command:  make
 
 Second, select your operating system (default = Windows):
-	Windows:  OS=win
-	Windows XP:  OS=winxp
-	MS-DOS:  OS=dos
-	MAME32 version:  OS=mame32
-	MAME32 version for Windows XP:  OS=mame32xp
+	Windows XP:  OS=xp
+	MAME32 version:  OS=32
+	MAME32 version for Windows XP:  OS=32xp
 
 Third, select your CPU optimization (default = none):
-	Debug:  OPT=debug
-	Athlon:  OPT=athlon
+	Athlon:  OPT=at
 	K6:  OPT=k6
-	Pentium Pro (I686):  OPT=i686
+	Pentium Pro (I686):  OPT=pp
 	Pentium 4: OPT=p4
 
+Fourth, decide if you want debug enabled (default = disabled):
+	Enabled:  DEBUG=1
+
 So, for examble, to compile a MAME32 version for Windows XP optomized for
-a Pentium 4 processor:  make OS=mame32xp OPT=p4
+a Pentium 4 processor:  make OS=32xp OPT=p4
 
 I will probably make further modifications in the future, and when I do, I'll
 document them here.

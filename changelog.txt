@@ -1,12 +1,23 @@
+0.82u2.12:
+ - Updated to MAME 0.82u2 source
+ - Changed default password to "noname"
+ - All games are now unlocked and password disabled by default (LG)
+ - Changed MAME32ui.ini to nonameui.ini
+ - Other misc MAME32 tweaks
+ - Finished Metal Beast support (Nino)
+ - Added Unofficial folder
+ - Fixed CRC in Mr. Pac!
+ - Coin 1 now starts Pong instead of Start 1
+ - Fixed a typo in the Metal Contra driver
+
 0.82u1.11:
  - Updated to MAME 0.82u1 source
- - Replaced MAME32 code with MadeInMame32 0.81 source
+ - Replaced MAME32 code with MadeInMame32 0.81 source (LG)
  - No longer pretending to have a DOS version
  - Added CPU overclock delay (ianpatt)
- - Fixed Metal Beast and Metal Contra to match Metal MAME (Nino)
+ - Fixed Metal Axe and Metal Contra to match Metal MAME (Nino)
  - Added Speed Metal Gyruss support (Nino)
  - Preliminary Metal Beast support (Nino)
-
 
 0.81u5.10:
  - Updated to MAME 0.81u5 source

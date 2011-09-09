@@ -8,59 +8,27 @@ ifeq ($(TARGET),)
 TARGET = noname
 endif
 
-# Processor
-ifeq ($(OPT),debug)
-DEBUG = 1
-else
-ifeq ($(OPT),athlon)
-ATHLON = 1
-else
-ifeq ($(OPT),k6)
-K6 = 1
-else
-ifeq ($(OPT),i686)
-I686 = 1
-else
-ifeq ($(OPT),p4)
-P4 = 1
-endif
-endif
-endif
-endif
-endif
-
 # Operating System
-ifeq ($(OS),winxp)
+ifeq ($(OS),xp)
 MAMEOS = windows
 WINXPANANLOG = 1
 SUFFIX = xp
 else
-ifeq ($(OS),mame32)
+ifeq ($(OS),32)
 MAMEOS = windows
 WINUI = 1
 SUFFIX = 32
 else
-ifeq ($(OS),mame32xp)
+ifeq ($(OS),32xp)
 MAMEOS = windows
 WINUI = 1
 WINXPANANLOG = 1
 SUFFIX = 32xp
-ifeq ($(OS),win)
-MAMEOS = windows
-else
-ifeq ($(OS),dos)
-MAMEOS = msdos
 else
 MAMEOS = windows
 endif
 endif
 endif
-endif
-endif
-
-#ifeq ($(OUTLAW),1)
-#DEF += -DOUTLAW
-#endif
 
 # WinXP compile option: if defined, compile the winXP version
 # default is undefined;  uncomment next line or include in mame commandline to define
@@ -90,15 +58,6 @@ X86_MIPS3_DRC = 1
 # uncomment next line to use cygwin compiler
 # COMPILESYSTEM_CYGWIN	= 1
 
-
-# set this the operating system you're building for
-# MAMEOS = msdos
-# MAMEOS = windows
-ifeq ($(MAMEOS),)
-MAMEOS = windows
-endif
-
-
 # extension for executables
 EXE = .exe
 
@@ -115,40 +74,36 @@ MD = -mkdir
 RM = @rm -f
 #PERL = @perl -w
 
-
-
-ifeq ($(MAMEOS),msdos)
-PREFIX = d
-else
-PREFIX = 
+# Outlaw name switch
+ifneq ($(OUTLAW),)
+MODIFIER = no
 endif
 
+# Debug name switch
 ifdef DEBUG
-NAME = $(PREFIX)$(TARGET)$(SUFFIX)d
-else
-ifdef ATHLON
-NAME = $(PREFIX)$(TARGET)$(SUFFIX)at
+DEBUG = d
+endif
+
+# Processor
+ifeq ($(OPT),at)
 ARCH = -march=athlon
 else
-ifdef K6
-NAME = $(PREFIX)$(TARGET)$(SUFFIX)k6
+ifeq ($(OPT),k6)
 ARCH = -march=k6
 else
-ifdef I686
-NAME = $(PREFIX)$(TARGET)$(SUFFIX)pp
+ifeq ($(OPT),pp)
 ARCH = -march=pentiumpro
 else
-ifdef P4
-NAME = $(PREFIX)$(TARGET)$(SUFFIX)p4
+ifeq ($(OPT),p4)
 ARCH = -march=pentium4
 else
-NAME = $(PREFIX)$(TARGET)$(SUFFIX)
 ARCH = -march=pentium
 endif
 endif
 endif
 endif
-endif
+
+NAME = $(MODIFIER)$(PREFIX)$(TARGET)$(SUFFIX)$(OPT)$(DEBUG)
 
 # build the targets in different object dirs, since mess changes
 # some structures and thus they can't be linked against each other.
@@ -161,6 +116,11 @@ DEFS = -DX86_ASM -DLSB_FIRST -DINLINE="static __inline__" -Dasm=__asm__
 # Analog+ WinXP compile option
 ifdef WINXPANANLOG
 DEFS += -DWINXPANANLOG
+endif
+
+# Outlaw switch
+ifneq ($(OUTLAW),)
+	DEFS += -DOUTLAW
 endif
 
 # MAME32FX needs the followings to work.

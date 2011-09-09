@@ -1796,7 +1796,11 @@ void SetMainTitle(void)
 	char buffer[100];
 
 	sscanf(build_version,"%s",version);
+#ifdef WINXPANANLOG
+	sprintf(buffer,"%sXP %s",MAME32NAME,version);
+#else
 	sprintf(buffer,"%s %s",MAME32NAME,version);
+#endif
 	SetWindowText(hMain,buffer);
 }
 
@@ -2017,7 +2021,7 @@ static BOOL Win32UI_init(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow)
 		// Create a default list with locked games
 		CreateDefaultLockUnlockList();
 
-		MessageBox(GetMainWindow(), "Unlocked file list is either missing or corrupt.\nAll games will be considered as locked." , MAME32NAME, MB_OK | MB_ICONWARNING);
+		MessageBox(GetMainWindow(), "Lock file is either missing or corrupt.\nAll games will be considered unlocked." , MAME32NAME, MB_OK | MB_ICONWARNING);
 	}
 
 	if (oldControl)
@@ -9072,7 +9076,7 @@ static void CreateDefaultLockUnlockList(void)
 	// Create a default list with locked games
 	for ( i=0; i<game_count; i++ )
 	{
-			p[0] = '*';
+			p[0] = ' ';
 			p[1] = '0' + strlen(drivers[i]->name);
 			memcpy(&p[2], drivers[i]->name, strlen(drivers[i]->name));
 			

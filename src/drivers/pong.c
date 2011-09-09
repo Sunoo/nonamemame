@@ -15,7 +15,7 @@ extern void pong_sh_update(void);
 
 INPUT_PORTS_START( pong )
 	PORT_START		/* IN0 buttons */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_START1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_DIPNAME( 0x02, 0x00, "Ending Score" )
 	PORT_DIPSETTING(    0x00, "11" )
 	PORT_DIPSETTING(    0x02, "15" )

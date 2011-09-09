@@ -393,7 +393,7 @@ ADDRESS_MAP_END
 int nextchannel = 2;
 
 static WRITE16_HANDLER( sound_command_w ){
-	if(Machine->gamedrv->name == "metbeast"){
+	if(Machine->gamedrv->name == "metbeast" || "metbeans" || "metbeapt" ){
 /*
  Altered Beast Songs
  144 - BOSS
@@ -405,92 +405,94 @@ static WRITE16_HANDLER( sound_command_w ){
  150 - Intro
  151 - Ending
 */	
+		switch(data){
+			case 0:
+			StopFile(0);
+			if( ACCESSING_LSB ){
+				soundlatch_w( 0,data&0xff );
+				cpu_set_irq_line( 1, 0, HOLD_LINE );
+			}
+			 	return;
+				break;
 
-	switch(data){
-	 case 0:
-		StopFile(0);
-		if( ACCESSING_LSB ){
-		soundlatch_w( 0,data&0xff );
-		cpu_set_irq_line( 1, 0, HOLD_LINE );
+			case 144:
+			PlayFile(0, "songs/metbeast/ab-boss.ogg",1,0,0);
+				return;
+				break;
+
+			case 145:
+			StopFile(-3);
+	 		PlayFile(0, "songs/metbeast/ab-beas.ogg",1,36070,3423000);
+				return;
+				break;
+
+			case 146:
+			StopFile(-3);
+			PlayFile(0, "songs/metbeast/ab-go.ogg",0,0,0);	 
+				return;
+				break;
+
+			case 147:
+			PlayFile(0, "songs/metbeast/ab-pre.ogg",0,0,0);	 
+				return;
+				break;
+
+			case 148:
+			PlayFile(0, "songs/metbeast/ab-st1.ogg",1,987691,5595500);
+				return;
+				break;
+
+			case 149:
+			StopFile(-3);
+			PlayFile(0, "songs/metbeast/ab-ruin.ogg",1,442904,3131800);
+				return;
+				break;
+
+			case 150:
+			StopFile(-3);
+			PlayFile(0, "songs/metbeast/ab-int.ogg",1,532837,1944500);
+				return;
+				break;
+
+			case 151:
+			StopFile(-3);
+			PlayFile(0, "songs/metbeast/ab-end.ogg",0,0,0);
+				return;
+				break;
 		}
-	 return;
-		break;
 
-	 case 144:
-	 PlayFile(0, "songs/metbeast/ab-boss.ogg",1,0,0);
-		return;
-		break;
-
-	 case 145:
-	 StopFile(-3);
-	 PlayFile(0, "songs/metbeast/ab-beas.ogg",1,36070,3423000);
-		return;
-		break;
-
-	 case 146:
-	 StopFile(-3);
-	 PlayFile(0, "songs/metbeast/ab-go.ogg",0,0,0);	 
-		return;
-		break;
-
-	 case 147:
-	 PlayFile(0, "songs/metbeast/ab-pre.ogg",0,0,0);	 
-		return;
-		break;
-
-	 case 148:
-	 PlayFile(0, "songs/metbeast/ab-st1.ogg",1,987691,5595500);
-		return;
-		break;
-
-	 case 149:
-	 StopFile(-3);
-	 PlayFile(0, "songs/metbeast/ab-ruin.ogg",1,442904,3131800);
-		return;
-		break;
-
-	 case 150:
-	 StopFile(-3);
-	 PlayFile(0, "songs/metbeast/ab-int.ogg",1,532837,1944500);
-		return;
-		break;
-
-	 case 151:
-	 StopFile(-3);
-	 PlayFile(0, "songs/metbeast/ab-end.ogg",0,0,0);
-		return;
-		break;
-	}
-
-	/* Voices/FX ... */
-//	if(strcmp(newsoundfx,"yes") == 0){
-	char sfxsnd[100];
-	FILE *f;
-	if(nextchannel > 10){nextchannel = 2;}
-//	sprintf(sfxsnd, "songs/metbeast/ab-%d%s.ogg", data, sndlang);
-	sprintf(sfxsnd, "songs/metbeast/ab-%d.ogg", data);
-	f = fopen(sfxsnd, "r");
-	if(!f){
-	   sprintf(sfxsnd, "songs/metbeast/ab-%d.ogg", data);
-	   f = fopen(sfxsnd, "r");
-	   if(f){
-	   		 fclose(f);
-			 nextchannel++;
-	   		 PlayFile(nextchannel, sfxsnd,0,0,0);
-	   		 return;
-	   }
-	}else{
-	   fclose(f);
-	   nextchannel++;
-	   PlayFile(nextchannel, sfxsnd,0,0,0);
-	   return;
-	}
-//	}
+		/* Voices/FX ... */
+		if(Machine->gamedrv->name == "metbeans" || "metbeapt"){
+			char sfxsnd[100];
+			FILE *f;
+			if(nextchannel > 10){nextchannel = 2;}
+			if(Machine->gamedrv->name == "metbeapt"){
+				sprintf(sfxsnd, "songs/metbeast/ab-%dpt.ogg", data);
+			} else {
+				sprintf(sfxsnd, "songs/metbeast/ab-%d.ogg", data);
+			}
+			f = fopen(sfxsnd, "r");
+			if(!f){
+				sprintf(sfxsnd, "songs/metbeast/ab-%d.ogg", data);
+				f = fopen(sfxsnd, "r");
+				if(f){
+	   				fclose(f);
+					nextchannel++;
+	   				PlayFile(nextchannel, sfxsnd,0,0,0);
+	   				return;
+	   			}
+			} else {
+				fclose(f);
+				nextchannel++;
+				PlayFile(nextchannel, sfxsnd,0,0,0);
+				return;
+			}
+		}
 	
-	if( ACCESSING_LSB ){
-		soundlatch_w( 0,data&0xff );
-		cpu_set_irq_line( 1, 0, HOLD_LINE );
-	}
+		if( ACCESSING_LSB ){
+			soundlatch_w( 0,data&0xff );
+			cpu_set_irq_line( 1, 0, HOLD_LINE );
+		}
 	}
 }
 
@@ -7226,6 +7228,58 @@ ROM_START( metbeast )
 	ROM_LOAD( "opr11673",    0x30000, 0x20000, CRC(400c4a36) SHA1(de4bdfa91734410e0a7f6a16bf8336db172f458a) )
 ROM_END
 
+ROM_START( metbeans )
+	ROM_REGION( 0x040000, REGION_CPU1, 0 ) /* 68000 code */
+	ROM_LOAD16_BYTE( "11705", 0x000000, 0x20000, CRC(57dc5c7a) SHA1(a5cc9b10a00778f5163fc915b956fa5d0d7a37ce) )
+	ROM_LOAD16_BYTE( "11704", 0x000001, 0x20000, CRC(33bbcf07) SHA1(534e5426580dbf72509dceb762b8b99766d3a739) )
+
+	ROM_REGION( 0x60000, REGION_GFX1, ROMREGION_DISPOSE ) /* tiles */
+	ROM_LOAD( "11674", 0x00000, 0x20000, CRC(a57a66d5) SHA1(5103583d48997abad12a0c5fee26431c486ced52) )
+	ROM_LOAD( "11675", 0x20000, 0x20000, CRC(2ef2f144) SHA1(38d22d609db2d9b6067b5d12f6499436de4605cb) )
+	ROM_LOAD( "11676", 0x40000, 0x20000, CRC(0c04acac) SHA1(87fe2a0dd9913f9550e9b4cbc7e7465b61640e07) )
+
+	ROM_REGION( 0x100000, REGION_GFX2, 0 ) /* sprites */
+	ROM_LOAD16_BYTE( "epr11677.b1", 0x00001, 0x20000, CRC(a01425cd) SHA1(72be5ec29e476601f9bf6aaedef9b73cedeb42f0) )
+	ROM_LOAD16_BYTE( "epr11681.b5", 0x00000, 0x20000, CRC(d9e03363) SHA1(995a7c6a8f0c61468b57a3bb407461a2a3ae8adc) )
+	ROM_LOAD16_BYTE( "epr11678.b2", 0x40001, 0x20000, CRC(17a9fc53) SHA1(85a9a605742ae5aab86db37189b9ee4d54c70e56) )
+	ROM_LOAD16_BYTE( "epr11682.b6", 0x40000, 0x20000, CRC(e3f77c5e) SHA1(6b3cb7918ab0c7c97a51cc5ea19ced3374ff3914) )
+	ROM_LOAD16_BYTE( "epr11679.b3", 0x80001, 0x20000, CRC(14dcc245) SHA1(1ca1b6e0f2b7bedad2a8ab70f52da8c54d40d3cf) )
+	ROM_LOAD16_BYTE( "epr11683.b7", 0x80000, 0x20000, CRC(f9a60f06) SHA1(0cffcfdb02733feaa869198b7e668c58b47c321a) )
+	ROM_LOAD16_BYTE( "epr11680.b4", 0xc0001, 0x20000, CRC(f43dcdec) SHA1(2941500cf33afca487f19f2329033d5d17aad826) )
+	ROM_LOAD16_BYTE( "epr11684.b8", 0xc0000, 0x20000, CRC(b20c0edb) SHA1(6c8694d05e3adac37c9015037ab800233371db36) )
+
+	ROM_REGION( 0x50000, REGION_CPU2, 0 ) /* sound CPU */
+	ROM_LOAD( "11671",		 0x00000, 0x08000, CRC(2b71343b) SHA1(8a657f787de2b9d5161ed2c109642a148348af09) )
+	ROM_LOAD( "opr11672",    0x10000, 0x20000, CRC(bbd7f460) SHA1(bbc5c2219cb3a827d84062b19affd9780da2a3cf) )
+	ROM_LOAD( "opr11673",    0x30000, 0x20000, CRC(400c4a36) SHA1(de4bdfa91734410e0a7f6a16bf8336db172f458a) )
+ROM_END
+
+ROM_START( metbeapt )
+	ROM_REGION( 0x040000, REGION_CPU1, 0 ) /* 68000 code */
+	ROM_LOAD16_BYTE( "11705", 0x000000, 0x20000, CRC(57dc5c7a) SHA1(a5cc9b10a00778f5163fc915b956fa5d0d7a37ce) )
+	ROM_LOAD16_BYTE( "11704", 0x000001, 0x20000, CRC(33bbcf07) SHA1(534e5426580dbf72509dceb762b8b99766d3a739) )
+
+	ROM_REGION( 0x60000, REGION_GFX1, ROMREGION_DISPOSE ) /* tiles */
+	ROM_LOAD( "11674", 0x00000, 0x20000, CRC(a57a66d5) SHA1(5103583d48997abad12a0c5fee26431c486ced52) )
+	ROM_LOAD( "11675", 0x20000, 0x20000, CRC(2ef2f144) SHA1(38d22d609db2d9b6067b5d12f6499436de4605cb) )
+	ROM_LOAD( "11676", 0x40000, 0x20000, CRC(0c04acac) SHA1(87fe2a0dd9913f9550e9b4cbc7e7465b61640e07) )
+
+	ROM_REGION( 0x100000, REGION_GFX2, 0 ) /* sprites */
+	ROM_LOAD16_BYTE( "epr11677.b1", 0x00001, 0x20000, CRC(a01425cd) SHA1(72be5ec29e476601f9bf6aaedef9b73cedeb42f0) )
+	ROM_LOAD16_BYTE( "epr11681.b5", 0x00000, 0x20000, CRC(d9e03363) SHA1(995a7c6a8f0c61468b57a3bb407461a2a3ae8adc) )
+	ROM_LOAD16_BYTE( "epr11678.b2", 0x40001, 0x20000, CRC(17a9fc53) SHA1(85a9a605742ae5aab86db37189b9ee4d54c70e56) )
+	ROM_LOAD16_BYTE( "epr11682.b6", 0x40000, 0x20000, CRC(e3f77c5e) SHA1(6b3cb7918ab0c7c97a51cc5ea19ced3374ff3914) )
+	ROM_LOAD16_BYTE( "epr11679.b3", 0x80001, 0x20000, CRC(14dcc245) SHA1(1ca1b6e0f2b7bedad2a8ab70f52da8c54d40d3cf) )
+	ROM_LOAD16_BYTE( "epr11683.b7", 0x80000, 0x20000, CRC(f9a60f06) SHA1(0cffcfdb02733feaa869198b7e668c58b47c321a) )
+	ROM_LOAD16_BYTE( "epr11680.b4", 0xc0001, 0x20000, CRC(f43dcdec) SHA1(2941500cf33afca487f19f2329033d5d17aad826) )
+	ROM_LOAD16_BYTE( "epr11684.b8", 0xc0000, 0x20000, CRC(b20c0edb) SHA1(6c8694d05e3adac37c9015037ab800233371db36) )
+
+	ROM_REGION( 0x50000, REGION_CPU2, 0 ) /* sound CPU */
+	ROM_LOAD( "11671",		 0x00000, 0x08000, CRC(2b71343b) SHA1(8a657f787de2b9d5161ed2c109642a148348af09) )
+	ROM_LOAD( "opr11672",    0x10000, 0x20000, CRC(bbd7f460) SHA1(bbc5c2219cb3a827d84062b19affd9780da2a3cf) )
+	ROM_LOAD( "opr11673",    0x30000, 0x20000, CRC(400c4a36) SHA1(de4bdfa91734410e0a7f6a16bf8336db172f458a) )
+ROM_END
+
 
 
 /* pre-System16 */
@@ -7317,5 +7371,7 @@ GAMEX(1988, wb3a,     wb3,      wb3,      wb3,      wb3,      ROT0,   "Sega / We
 GAME( 1988, wb3bl,    wb3,      wb3bl,    wb3,      wb3bl,    ROT0,   "bootleg", "Wonder Boy III - Monster Lair (bootleg)" )
 GAME( 1989, wrestwar, 0,        wrestwar, wrestwar, wrestwar, ROT270, "Sega",    "Wrestle War" )
 
-GAME( 2004, metalaxe, goldnaxe, goldnaxe, goldnaxe, goldnaxe, ROT0,   "Megadriver",    "Metal Axe" )
-GAME( 2004, metbeast, altbeast, altbeast, altbeast, altbeast, ROT0,   "Megadriver",    "Metal Beast" )
+GAME( 2004, metalaxe, goldnaxe, goldnaxe, goldnaxe, goldnaxe, ROT0,   "MegaDriver",    "Metal Axe" )
+GAME( 2004, metbeast, altbeast, altbeast, altbeast, altbeast, ROT0,   "MegaDriver",    "Metal Beast" )
+GAME( 2004, metbeans, altbeast, altbeast, altbeast, altbeast, ROT0,   "MegaDriver",    "Metal Beast (New Sounds)" )
+GAME( 2004, metbeapt, altbeast, altbeast, altbeast, altbeast, ROT0,   "MegaDriver",    "Metal Beast (Portuguese)" )

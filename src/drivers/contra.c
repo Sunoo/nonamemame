@@ -125,7 +125,7 @@ system(str);
 	
 	case 76: /* Conclusion */
 	logerror("SONG: Conclusion %d\n", data);
-	PlayFile(0, "songs/metlcnta/cnclsion.oggg", 0, 0, 0);
+	PlayFile(0, "songs/metlcnta/cnclsion.ogg", 0, 0, 0);
 	return;
 	break;
 
@@ -558,4 +558,4 @@ GAME( 1987, contraj,  contra, contra, contra, 0, ROT90, "Konami", "Contra (Japan
 GAME( 1987, contrajb, contra, contra, contra, 0, ROT90, "bootleg", "Contra (Japan bootleg)" )
 GAME( 1987, gryzor,   contra, contra, contra, 0, ROT90, "Konami", "Gryzor" )
 
-GAME( 2004, metlcnta, contra, contra, contra, 0, ROT90, "Megadriver", "Metal Contra" )
+GAME( 2004, metlcnta, contra, contra, contra, 0, ROT90, "MegaDriver", "Metal Contra" )
