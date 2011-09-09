@@ -27,9 +27,9 @@
 
 #include "history.h"
 
+extern int load_driver_history(const struct GameDriver *drv, char *buffer, int bufsize);
 extern int load_driver_mameinfo(const struct GameDriver *drv, char *buffer, int bufsize);
 extern int load_driver_drivinfo(const struct GameDriver *drv, char *buffer, int bufsize);
-extern int load_driver_history(const struct GameDriver *drv, char *buffer, int bufsize);
 
 /**************************************************************
  * functions
@@ -43,21 +43,19 @@ char * GetGameHistory(int driver_index)
 	buffer[0] = '\0';
 	dataBuf[0] = '\0';
 
-
-	if (load_driver_mameinfo(drivers[driver_index],buffer,sizeof(buffer)) == 0)
+        if (load_driver_history(drivers[driver_index],buffer,sizeof(buffer)) == 0)
 		strcat(dataBuf, buffer);
 
-	if (load_driver_drivinfo(drivers[driver_index],buffer,sizeof(buffer)) == 0)
+        if (load_driver_mameinfo(drivers[driver_index],buffer,sizeof(buffer)) == 0)
 	{
 		strcat(dataBuf, "\n\n");
 		strcat(dataBuf, buffer);
 	}
 
-	if (load_driver_history(drivers[driver_index],buffer,sizeof(buffer)) == 0)
+        if (load_driver_drivinfo(drivers[driver_index],buffer,sizeof(buffer)) == 0)
 	{
-		strcat(dataBuf, "\n\n\n\nGAME HISTORY\n==============\n");
+        strcat(dataBuf, "\n\n");
 		strcat(dataBuf, buffer);
 	}
-
 	return ConvertToWindowsNewlines(dataBuf);
 }

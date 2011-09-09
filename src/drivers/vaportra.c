@@ -316,7 +316,7 @@ static struct YM2151interface ym2151_interface =
 {
 	1,
 	32220000/9, /* Accurate, audio section crystal is 32.220 MHz */
-	{ YM3012_VOL(45,MIXER_PAN_LEFT,45,MIXER_PAN_RIGHT) },
+	{ YM3012_VOL(60,MIXER_PAN_LEFT,60,MIXER_PAN_RIGHT) },
 	{ sound_irq }
 };
 

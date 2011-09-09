@@ -563,7 +563,7 @@ static struct YM2151interface ym2151_interface =
 {
 	1,
 	32220000/9, /* Accurate, audio section crystal is 32.220 MHz */
-	{ YM3012_VOL(40,MIXER_PAN_LEFT,40,MIXER_PAN_RIGHT) },
+	{ YM3012_VOL(80,MIXER_PAN_LEFT,80,MIXER_PAN_RIGHT) },
 	{ sound_irq },
 	{ sound_bankswitch_w }
 };
@@ -573,7 +573,7 @@ static struct OKIM6295interface okim6295_interface =
 	2,              /* 2 chips */
 	{ 32220000/32/132, 32220000/16/132 },/* Frequency */
 	{ REGION_SOUND1, REGION_SOUND2 },
-	{ 95, 40 } /* Note!  Keep chip 1 (voices) louder than chip 2 */
+	{ 100, 40 } /* Note!  Keep chip 1 (voices) louder than chip 2 */
 };
 
 /**********************************************************************************/

@@ -33,8 +33,9 @@ static const char *mame_default_text[] =
 
 	/* misc stuff */
 	"Return to Main Menu",
-	"Return to Prior Menu",
+	"Return to Previous Menu",
 	"Press Any Key",
+	"Press Select Key",	// Added for usrintrf.c
 	"On",
 	"Off",
 	"NA",
@@ -60,12 +61,17 @@ static const char *mame_default_text[] =
 	"Overclock",
 	"ALL CPUS",
 #ifndef MESS
-	"Mameinfo not available",
-	"Driverinfo not available",
 	"History not available",
 #else
 	"System Info not available",
 #endif
+#ifdef MASH_DATAFILE
+	"Mameinfo not available",
+	"Driverinfo not available",
+#endif /* MASH_DATAFILE */
+#ifdef CMD_LIST
+	"Command List not available",
+#endif /* CMD_LIST */
 
 	/* special characters */
 	"\x11",
@@ -106,27 +112,33 @@ static const char *mame_default_text[] =
 #ifndef MESS
 	"Input (this game)",
 	"Game Information",
-	"Game Mameinfo",
-	"Game Driverinfo",
-	"Game History",
-	"MAME Statistics",
+	"Game Documents",
 	"Reset Game",
 	"Return to Game",
 #else
 	"Input (this machine)",
 	"Machine Information",
-	"Machine Usage & History",
+	"Machine Documents",
 	"Reset Machine",
 	"Return to Machine",
 #endif /* MESS */
-
-	"Cheat",
+	"Game Cheats",
 	"Memory Card",
 	"Mouse Controls",
 	"Mouse Axes",
 	"Analog Joystick Controls",
 
-	/* analog input stuff */
+	/* documents menu */
+	"Game History",
+#ifdef MASH_DATAFILE
+	"Game Mameinfo",
+	"Game Driverinfo",
+#endif /* MASH_DATAFILE */
+#ifdef CMD_LIST
+	"Game Command List",
+#endif /* CMD_LIST */
+
+	/* input */
 	"Key/Joy Speed",
 	"Reverse",
 	"Sensitivity",
@@ -222,6 +234,9 @@ static const char *mame_default_text[] =
 	"All values saved",
 	"One match found - added to list",
 
+	//centering
+	"Center",
+	
 	NULL
 };
 
@@ -241,6 +256,7 @@ static const char **default_text[] =
 static const char **trans_text;
 
 
+#if 0
 int uistring_init (mame_file *langfile)
 {
 	/*
@@ -363,7 +379,37 @@ int uistring_init (mame_file *langfile)
 	/* indicate success */
 	return 0;
 }
+#else
+int uistring_init (void)
+{
+	int i, j, str;
+	int string_count;
 
+	/* count the total amount of strings */
+	string_count = 0;
+	for (i = 0; default_text[i]; i++)
+	{
+		for (j = 0; default_text[i][j]; j++)
+			string_count++;
+	}
+
+	/* allocate the translated text array, and set defaults */
+	trans_text = auto_malloc(sizeof(const char *) * string_count);
+	if (!trans_text)
+		return 1;
+
+	/* copy in references to all of the strings */
+	str = 0;
+	for (i = 0; default_text[i]; i++)
+	{
+		for (j = 0; default_text[i][j]; j++)
+			trans_text[str++] = default_text[i][j];
+	}
+
+	/* indicate success */
+	return 0;
+}
+#endif
 
 
 const char * ui_getstring (int string_num)

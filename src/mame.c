@@ -367,10 +367,14 @@ int run_game(int game)
 static int init_machine(void)
 {
 	/* load the localization file */
+#if 0
 	if (uistring_init(options.language_file) != 0)
+#else
+	if (uistring_init() != 0)
+#endif
 	{
 		logerror("uistring_init failed\n");
-		goto cant_load_language_file;
+		goto cant_init_ui_text;
 	}
 
 	/* initialize the input system */
@@ -465,7 +469,7 @@ cant_allocate_input_ports_default:
 cant_allocate_input_ports:
 	code_close();
 cant_init_input:
-cant_load_language_file:
+cant_init_ui_text:
 	return 1;
 }
 
@@ -571,17 +575,22 @@ void run_machine_core(void)
 				/* load the NVRAM now */
 				if (Machine->drv->nvram_handler)
 				{
+					if (record || playback)
+						(*Machine->drv->nvram_handler)(0,0);
+					else
+					{
 					mame_file *nvram_file = mame_fopen(Machine->gamedrv->name, 0, FILETYPE_NVRAM, 0);
 					(*Machine->drv->nvram_handler)(nvram_file, 0);
 					if (nvram_file)
 						mame_fclose(nvram_file);
+					}
 				}
 
 				/* run the emulation! */
 				cpu_run();
 
 				/* save the NVRAM */
-				if (Machine->drv->nvram_handler)
+				if (Machine->drv->nvram_handler && !record && !playback)
 				{
 					mame_file *nvram_file = mame_fopen(Machine->gamedrv->name, 0, FILETYPE_NVRAM, 1);
 					if (nvram_file != NULL)
@@ -596,6 +605,7 @@ void run_machine_core(void)
 					StopCheat();
 
 				/* save input ports settings */
+				if (!playback)
 				save_input_port_settings();
 			}
 		}
@@ -627,6 +637,7 @@ static void shutdown_machine(void)
 
 	/* close all hard drives */
 	chd_close_all();
+
 
 	/* reset the CPU system */
 	cpu_exit();
@@ -757,7 +768,7 @@ static int vh_open(void)
 	/* resolution we are running at and can pick a different font depending on it. */
 	/* It must be done BEFORE palette_init() because that will also initialize */
 	/* (through osd_allocate_colors()) the uifont colortable. */
-	Machine->uifont = builduifont();
+	uifont_buildfont();
 	if (Machine->uifont == NULL)
 		goto cant_build_uifont;
 
@@ -834,6 +845,7 @@ static void vh_close(void)
 	}
 
 	/* free the font elements */
+	uifont_freefont();
 	if (Machine->uifont)
 	{
 		freegfx(Machine->uifont);
@@ -1118,7 +1130,6 @@ void set_visible_area(int min_x, int max_x, int min_y, int max_y)
 }
 
 
-
 /*-------------------------------------------------
 	set_refresh_rate - adjusts the refresh rate
 	of the video mode dynamically
@@ -1129,10 +1140,10 @@ void set_refresh_rate(float fps)
 	/* bail if already equal */
 	if (Machine->refresh_rate == fps)
 		return;
-
+	
 	/* "dirty" the rate for the next display update */
 	refresh_rate_changed = 1;
-
+	
 	/* set the new values in the Machine struct */
 	Machine->refresh_rate = fps;
 
@@ -1431,8 +1442,8 @@ int mame_highscore_enabled(void)
 		return 0;
 
 	/* disable high score when cheats are used */
-	if (he_did_cheat != 0)
-		return 0;
+//	if (he_did_cheat != 0)
+//		return 0;
 
 	/* disable high score when playing network game */
 	/* (this forces all networked machines to start from the same state!) */
@@ -1689,6 +1700,7 @@ UINT32 mame_chd_write(struct chd_interface_file *file, UINT64 offset, UINT32 cou
 	mame_fseek((mame_file *)file, offset, SEEK_SET);
 	return mame_fwrite((mame_file *)file, buffer, count);
 }
+
 
 
 /*-------------------------------------------------
@@ -1971,10 +1983,10 @@ static int validitychecks(void)
 								struct address_map_t address_map[MAX_ADDRESS_MAP_SIZE];
 								const struct address_map_t *map = address_map;
 								UINT32 flags, val;
-
+								
 								memset(address_map, 0, sizeof(address_map));
 								(*drv.cpu[cpu].construct_map[space][mapnum])(address_map);
-
+								
 								if (IS_AMENTRY_END(map))
 									continue;
 								if (!IS_AMENTRY_EXTENDED(map))

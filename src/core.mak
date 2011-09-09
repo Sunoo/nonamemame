@@ -2,6 +2,7 @@
 # those are added in the target.mak files)
 COREOBJS = $(OBJ)/version.o $(OBJ)/mame.o \
 	$(OBJ)/drawgfx.o $(OBJ)/common.o $(OBJ)/usrintrf.o $(OBJ)/ui_text.o \
+	$(OBJ)/ui_font.o \
 	$(OBJ)/cpuintrf.o $(OBJ)/cpuexec.o $(OBJ)/cpuint.o $(OBJ)/memory.o $(OBJ)/timer.o \
 	$(OBJ)/palette.o $(OBJ)/input.o $(OBJ)/inptport.o $(OBJ)/config.o $(OBJ)/unzip.o \
 	$(OBJ)/audit.o $(OBJ)/info.o $(OBJ)/png.o $(OBJ)/artwork.o \
@@ -29,8 +30,11 @@ COREOBJS = $(OBJ)/version.o $(OBJ)/mame.o \
 	$(OBJ)/profiler.o \
 	$(OBJ)/hash.o $(OBJ)/sha1.o \
 	$(OBJ)/chd.o $(OBJ)/harddisk.o $(OBJ)/md5.o $(OBJ)/machine/idectrl.o \
-	$(OBJ)/sound/wavwrite.o \
-	$(OBJ)/x86drc.o \
-	$(sort $(DBGOBJS))
+	$(OBJ)/sound/wavwrite.o
 
-TOOLS = romcmp$(EXE) chdman$(EXE) xml2info$(EXE)
+ifdef X86_MIPS3_DRC
+COREOBJS += $(OBJ)/x86drc.o
+endif
+
+COREOBJS += $(sort $(DBGOBJS))
+

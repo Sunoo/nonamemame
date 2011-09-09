@@ -2,7 +2,7 @@
 # make SUFFIX=32
 
 # don't create gamelist.txt
-TEXTS = gamelist.txt
+# TEXTS = gamelist.txt
 
 # remove pedantic
 $(OBJ)/ui/%.o: src/ui/%.c

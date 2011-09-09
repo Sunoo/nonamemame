@@ -159,6 +159,12 @@ ifdef WINXPANANLOG
 DEFS += -DWINXPANANLOG
 endif
 
+# MAME32FX needs the followings to work.
+DEFS += -DVOLUME_AUTO_ADJUST \
+	  -DUI_COLOR_DISPLAY \
+	  -DMASH_DATAFILE \
+	  -DCMD_LIST \
+
 CFLAGS = -std=gnu99 -Isrc -Isrc/includes -Isrc/$(MAMEOS) -I$(OBJ)/cpu/m68000 -Isrc/cpu/m68000
 
 ifdef SYMBOLS

@@ -1,4 +1,10 @@
-0.80.06
+0.80u1.07:
+ - Updated to MAME 0.80u1 source
+ - Updated to MAME32 0.80 source
+ - Added all MAME32FX 0.80 changes (may have broken some other functions)
+ - Added a bunch of new folders to MAME32 (CrashTest)
+
+0.80.06:
  - Updated to MAME 0.80 source code
  - Added horizont.ini, vertical.ini, and raster.ini (SirPoonga)
  - Added buttonX.ini, playerX.ini, horizont.ini, and vertical.ini ctrlr files (SirPoonga)

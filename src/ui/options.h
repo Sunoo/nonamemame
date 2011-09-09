@@ -13,6 +13,10 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#ifdef MESS
+#include "ui/optionsms.h"
+#endif
+
 #include "osd_cpu.h"
 #include "input.h" /* for InputSeq definition */
 
@@ -33,6 +37,7 @@ enum
 	COLUMN_PLAYTIME,
 	COLUMN_MAX
 };
+
 
 enum
 {
@@ -109,9 +114,10 @@ typedef struct
 	char ini_name[40]; // ini name
 	int  m_iType;                                 // key type
 	void *m_vpData;                               // key data
+	const char *m_pDefaultValue;                  // default value on startup
+	BOOL m_bOnlyOnGame;                           // use this option only on games
 	void (*encode)(void *data, char *str);        // encode function
 	void (*decode)(const char *str, void *data);  // decode function
-	BOOL m_bOnlyOnGame;                           // use this option only on games
 } REG_OPTION;
 
 typedef struct
@@ -224,6 +230,9 @@ typedef struct
 	char   *ledmode;
 	int bios;
 
+#ifdef MESS
+	struct mess_specific_options mess;
+#endif
 } options_type;
 
 // per-game data we store, not to pass to mame, but for our own use.
@@ -234,9 +243,12 @@ typedef struct
     int rom_audit_results;
     int samples_audit_results;
 
-	BOOL options_loaded; // whether or not we've loaded the game options yet
-	BOOL use_default; // whether or not we should just use default options
+    BOOL options_loaded; // whether or not we've loaded the game options yet
+    BOOL use_default; // whether or not we should just use default options
 
+#ifdef MESS
+    struct mess_specific_game_variables mess;
+#endif
 } game_variables_type;
 
 // List of artwork types to display in the screen shot area
@@ -374,6 +386,10 @@ typedef struct
     char*    mameinfo_filename;
     char*    ctrlrdir;
     char*    folderdir;
+
+#ifdef MESS
+    struct mess_specific_settings mess;
+#endif
 
 } settings_type; /* global settings for the UI only */
 

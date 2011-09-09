@@ -1741,7 +1741,7 @@ void SetMainTitle(void)
 	char buffer[100];
 
 	sscanf(build_version,"%s",version);
-	sprintf(buffer,"%s %s",MAME32NAME,version);
+	sprintf(buffer,"%s %s","No Name MAME32",version);
 	SetWindowText(hMain,buffer);
 }
 
@@ -2611,6 +2611,11 @@ static void OnIdle()
 	{
 		bResetList = FALSE;
 		bFirstTime = FALSE;
+		if (bListReady)
+		{
+			ResetHeaderSortIcon();
+			InvalidateRect(ListView_GetHeader(hwndList), NULL, FALSE);
+		}
 	}
 	if (bDoGameCheck)
 	{
@@ -2628,6 +2633,11 @@ static void OnIdle()
 
 	pDescription = ModifyThe(drivers[driver_index]->description);
 	SendMessage(hStatusBar, SB_SETTEXT, (WPARAM)0, (LPARAM)pDescription);
+	if (bResetList || (GetViewMode() == VIEW_LARGE_ICONS))
+	{
+		ResetWhichGamesInFolders();
+		ResetListView();
+	}
 	idle_work = FALSE;
 	UpdateStatusBar();
 	bFirstTime = TRUE;
@@ -2884,7 +2894,7 @@ static void CopyToolTipText(LPTOOLTIPTEXT lpttt)
 			SendMessage(hStatusBar, SB_GETTEXT, (WPARAM)iButton, (LPARAM)(LPSTR) &String );
 		else
 			//for first pane we get the Status directly, to get the line breaks
-			strcpy(String, GameInfoStatus(GetSelectedPickItem()) );
+			strcpy(String, GameInfoStatusBar(GetSelectedPickItem()) );
 	}
 	else
 		strcpy(String,"Invalid Button Index");
@@ -2997,7 +3007,7 @@ static void UpdateStatusBar()
 		DisableSelection();
 	else
 	{
-		const char* pStatus = GameInfoStatus(i);
+		const char* pStatus = GameInfoStatusBar(i);
 		SendMessage(hStatusBar, SB_SETTEXT, (WPARAM)1, (LPARAM)pStatus);
 	}
 }
@@ -3094,7 +3104,7 @@ static void EnableSelection(int nGame)
 	pText = ModifyThe(drivers[nGame]->description);
 	SendMessage(hStatusBar, SB_SETTEXT, (WPARAM)0, (LPARAM)pText);
 	/* Add this game's status to the status bar */
-	pText = GameInfoStatus(nGame);
+	pText = GameInfoStatusBar(nGame);
 	SendMessage(hStatusBar, SB_SETTEXT, (WPARAM)1, (LPARAM)pText);
 	SendMessage(hStatusBar, SB_SETTEXT, (WPARAM)3, (LPARAM)"");
 
@@ -4292,37 +4302,6 @@ static BOOL MameCommand(HWND hwnd,int id, HWND hwndCtl, UINT codeNotify)
 		SetCurrentTab(id - ID_VIEW_TAB_SCREENSHOT);
 		UpdateScreenShot();
 		TabCtrl_SetCurSel(hTabCtrl, CalculateCurrentTabIndex());
-		break;
-
-	case ID_VIEW_PCBINFO:
-		{
-			int  nGame;
-			char filename[MAX_PATH];
-
-			*filename = 0;
-
-			nGame = GetSelectedPickItem();
-			if (drivers[nGame]->clone_of && !(drivers[nGame]->clone_of->flags & NOT_A_DRIVER))
-				sprintf(filename, "pcb/%s.txt", drivers[nGame]->clone_of->name);
-			else
-				sprintf(filename, "pcb/%s.txt", drivers[nGame]->name);
-
-			DisplayTextFile(hMain, filename);
-		}
-		break;
-
-	case ID_VIEW_SOURCEDRV:
-		{
-			int  nGame;
-			char filename[MAX_PATH];
-
-			*filename = 0;
-
-			nGame = GetSelectedPickItem();
-			sprintf(filename, "%s", drivers[nGame]->source_file);
-
-			DisplayTextFile(hMain, filename);
-		}
 		break;
 
 		// toggle tab's existence

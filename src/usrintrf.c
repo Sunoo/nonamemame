@@ -10,10 +10,12 @@
 #include "info.h"
 #include "vidhrdw/vector.h"
 #include "datafile.h"
+#include <windows.h>
 #include <stdarg.h>
 #include <math.h>
 #include "ui_text.h"
 #include "state.h"
+#include "ui_pal.h"
 
 #ifdef MESS
   #include "mess.h"
@@ -44,7 +46,7 @@ extern int	mcd_number;
 extern int	memcard_status;
 extern int	memcard_number;
 extern int	memcard_manager;
-extern struct GameDriver driver_neogeo;
+extern const struct GameDriver driver_neogeo;
 #endif
 #endif
 #endif
@@ -58,6 +60,39 @@ extern void neogeo_memcard_save(void);
 extern void neogeo_memcard_eject(void);
 extern int neogeo_memcard_create(int);
 /* MARTINEZ.F 990207 Memory Card End */
+
+
+#ifdef CMD_LIST
+static int command_lastselected;
+static char *commandlist_buf = NULL;
+static int command_scroll = 0;
+static int command_load = 1;
+static int command_sc = 0;
+static int command_sel = 1;
+#endif /* CMD_LIST */
+
+
+static int lhw, rhw, uaw, daw, law, raw;
+static int scroll_reset;
+static int displaymessagewindow_under;
+
+#ifdef CMD_LIST
+static int display_scroll_message (struct mame_bitmap *bitmap, int *scroll, int width, int height, char *buf);
+#else /* CMD_LIST */
+static void display_scroll_message (struct mame_bitmap *bitmap, int *scroll, int width, int height, char *buf);
+#endif /* CMD_LIST */
+
+#define ROWMARGIN 2
+#define ROWHEIGHT       (uirotcharheight + ROWMARGIN)
+#define MENUROWHEIGHT   (uirotcharheight + uirotcharheight / 6)
+
+static int wordwrap_text_buffer(char *buffer, int maxwidth);
+static int count_lines_in_buffer (char *buffer);
+
+#ifdef UI_COLOR_DISPLAY
+#define DRAWBOX_MARGIN 2
+#endif /* UI_COLOR_DISPLAY */
+
 
 
 
@@ -371,7 +406,19 @@ void set_ui_visarea(int xmin, int ymin, int xmax, int ymax)
 	Machine->uiymin = uirotbounds.min_y;
 
 	/* rebuild the font */
-	builduifont();
+	uifont_buildfont();
+
+	uirotfont = Machine->uirotfont;
+	if (Machine->ui_orientation & ORIENTATION_SWAP_XY)
+	{
+		uirotcharwidth = uirawcharheight = Machine->uifontwidth;
+		uirotcharheight = uirawcharwidth = Machine->uifontheight;
+	}
+	else
+	{
+		uirotcharwidth = uirawcharwidth = Machine->uifontwidth;
+		uirotcharheight = uirawcharheight = Machine->uifontheight;
+	}
 }
 
 
@@ -393,6 +440,7 @@ static void erase_screen(struct mame_bitmap *bitmap)
 #pragma mark FONTS & TEXT
 #endif
 
+#if 0
 /*-------------------------------------------------
 	builduifont - build the user interface fonts
 -------------------------------------------------*/
@@ -513,6 +561,7 @@ void ui_drawchar(struct mame_bitmap *dest, int ch, int color, int sx, int sy)
 	/* mark dirty */
 	ui_markdirty(&bounds);
 }
+#endif
 
 
 
@@ -522,20 +571,69 @@ void ui_drawchar(struct mame_bitmap *dest, int ch, int color, int sx, int sy)
 
 static void ui_text_ex(struct mame_bitmap *bitmap, const char *buf_begin, const char *buf_end, int x, int y, int color)
 {
-	for ( ; buf_begin != buf_end; ++buf_begin)
-	{
-		ui_drawchar(bitmap, *buf_begin, color, x, y);
-		x += uirotcharwidth;
-	}
+	struct rectangle bounds;
+	int len;
+	char buf[256];
+
+	memset(buf, 0, 256);
+
+	len = (buf_end - buf_begin) + 1;
+	if (*buf_end == ' ')
+		len--;
+
+	memcpy(buf, buf_begin, len);
+
+	bounds.min_x = uirotbounds.min_x + x;
+	bounds.min_y = uirotbounds.min_y + x;
+	bounds.max_x = bounds.min_x;
+	bounds.max_y = bounds.min_y;
+	ui_rot2raw_rect(&bounds);
+
+	uifont_drawfont(bitmap, buf, x, y, color);
 }
 
 
 
 /*-------------------------------------------------
-	ui_text_ex - draw a string to the screen
+	ui_text - draw a string to the screen
 -------------------------------------------------*/
 
+#ifdef UI_COLOR_DISPLAY
 void ui_text(struct mame_bitmap *bitmap, const char *buf, int x, int y)
+{
+	struct rectangle bounds;
+	unsigned char *c = (unsigned char *)buf;
+	int len = 0;
+
+	while (*c)
+	{
+		int increment;
+		unsigned short code;
+
+		increment = uifont_decodechar((unsigned char *)c, &code);
+		len += (code < 256) ? 1 : 2;
+		c += increment;
+	}
+
+	bounds.min_x = uirotbounds.min_x + x;
+	bounds.min_y = uirotbounds.min_y + y;
+	bounds.max_x = bounds.min_x + uirotcharwidth * len;
+	bounds.max_y = bounds.min_y + uirotcharheight;
+	ui_rot2raw_rect(&bounds);
+
+	fillbitmap(bitmap, Machine->uifont->colortable[SYSTEM_COLOR_BACKGROUND], &bounds);
+
+	ui_text_ex(bitmap, buf, buf + strlen(buf), x, y, UI_COLOR_NORMAL);
+}
+
+#else /* UI_COLOR_DISPLAY */
+void ui_text(struct mame_bitmap *bitmap,const char *buf,int x,int y)
+{
+	ui_text_ex(bitmap, buf, buf + strlen(buf), x, y, UI_COLOR_NORMAL);
+}
+#endif /* UI_COLOR_DISPLAY */
+
+void ui_text_nobk(struct mame_bitmap *bitmap, const char *buf, int x, int y)
 {
 	ui_text_ex(bitmap, buf, buf + strlen(buf), x, y, UI_COLOR_NORMAL);
 }
@@ -548,11 +646,21 @@ void ui_text(struct mame_bitmap *bitmap, const char *buf, int x, int y)
 
 void displaytext(struct mame_bitmap *bitmap, const struct DisplayText *dt)
 {
+#if 1
    /* loop until we run out of descriptors */
    for ( ; dt->text; dt++)
    {
       ui_text_ex(bitmap, dt->text, dt->text + strlen(dt->text), dt->x, dt->y, dt->color);
    }
+#else
+	/* loop until we run out of descriptors */
+	for ( ; dt->text; dt++)
+#ifdef UI_COLOR_DISPLAY
+		ui_text_nobk(bitmap, dt->text, dt->x, dt->y);
+#else /* UI_COLOR_DISPLAY */
+		ui_text(bitmap, dt->text, dt->x, dt->y);
+#endif /* UI_COLOR_DISPLAY */
+#endif
 }
 
 
@@ -649,7 +757,7 @@ static void multiline_size(int *dx, int *dy, const char *begin, const char *end,
 
 	/* return the final result scaled by the char size */
 	*dx = cols * uirotcharwidth;
-	*dy = (rows - 1) * 3*uirotcharheight/2 + uirotcharheight;
+	*dy = (rows - 1) * ROWHEIGHT + uirotcharheight;
 }
 
 
@@ -681,7 +789,7 @@ static void ui_multitext_ex(struct mame_bitmap *bitmap, const char *begin, const
 		const char *line_begin = begin;
 		unsigned len = multiline_extract(&begin, end, maxchars);
 		ui_text_ex(bitmap, line_begin, line_begin + len, x, y, color);
-		y += 3*uirotcharheight/2;
+		y += ROWHEIGHT;
 	}
 }
 
@@ -719,6 +827,60 @@ static void ui_multitextbox_ex(struct mame_bitmap *bitmap, const char *begin, co
 void ui_drawbox(struct mame_bitmap *bitmap, int leftx, int topy, int width, int height)
 {
 	struct rectangle bounds, tbounds;
+
+#ifdef UI_COLOR_DISPLAY
+#define DRAWHORIZ(loffs, roffs, y, c) \
+	tbounds.min_x = bounds.min_x + loffs; \
+	tbounds.max_x = bounds.max_x - roffs; \
+	tbounds.min_y = tbounds.max_y = y; \
+	ui_rot2raw_rect(&tbounds); \
+	fillbitmap(bitmap, c, &tbounds)
+
+#define DRAWVERT(toffs, boffs, x, c) \
+	tbounds.min_y = bounds.min_y + toffs; \
+	tbounds.max_y = bounds.max_y - boffs; \
+	tbounds.min_x = tbounds.max_x = x; \
+	ui_rot2raw_rect(&tbounds); \
+	fillbitmap(bitmap, c, &tbounds)
+
+	leftx  -= DRAWBOX_MARGIN;
+	topy   -= DRAWBOX_MARGIN;
+	width  += DRAWBOX_MARGIN * 2;
+	height += DRAWBOX_MARGIN * 2;
+
+	/* make a rect and clip it */
+	bounds.min_x = uirotbounds.min_x + leftx;
+	bounds.min_y = uirotbounds.min_y + topy;
+	bounds.max_x = bounds.min_x + width - 1;
+	bounds.max_y = bounds.min_y + height - 1;
+	sect_rect(&bounds, &uirotbounds);
+
+	/* top edge */
+	DRAWHORIZ(0, 0, bounds.min_y,   Machine->uifont->colortable[SYSTEM_COLOR_FRAMELIGHT]);
+	DRAWHORIZ(1, 1, bounds.min_y+1, Machine->uifont->colortable[SYSTEM_COLOR_FRAMEDARK]);
+
+	/* bottom edge */
+	DRAWHORIZ(1, 1, bounds.max_y-1, Machine->uifont->colortable[SYSTEM_COLOR_FRAMEDARK]);
+	DRAWHORIZ(0, 0, bounds.max_y,   Machine->uifont->colortable[SYSTEM_COLOR_FRAMELIGHT]);
+
+	/* left edge */
+	DRAWVERT(1, 1, bounds.min_x,   Machine->uifont->colortable[SYSTEM_COLOR_FRAMELIGHT]);
+	DRAWVERT(2, 2, bounds.min_x+1, Machine->uifont->colortable[SYSTEM_COLOR_FRAMEDARK]);
+
+	/* right edge */
+	DRAWVERT(2, 2, bounds.max_x-1, Machine->uifont->colortable[SYSTEM_COLOR_FRAMEDARK]);
+	DRAWVERT(1, 1, bounds.max_x,   Machine->uifont->colortable[SYSTEM_COLOR_FRAMELIGHT]);
+
+	/* fill in the middle with black */
+	tbounds = bounds;
+	tbounds.min_x += DRAWBOX_MARGIN;
+	tbounds.min_y += DRAWBOX_MARGIN;
+	tbounds.max_x -= DRAWBOX_MARGIN;
+	tbounds.max_y -= DRAWBOX_MARGIN;
+	ui_rot2raw_rect(&tbounds);
+	fillbitmap(bitmap, Machine->uifont->colortable[SYSTEM_COLOR_BACKGROUND], &tbounds);
+
+#else /* UI_COLOR_DISPLAY */
 	pen_t black, white;
 
 	/* make a rect and clip it */
@@ -764,6 +926,7 @@ void ui_drawbox(struct mame_bitmap *bitmap, int leftx, int topy, int width, int 
 	tbounds.max_y--;
 	ui_rot2raw_rect(&tbounds);
 	fillbitmap(bitmap, black, &tbounds);
+#endif /* UI_COLOR_DISPLAY */
 
 	/* mark things dirty */
 	ui_rot2raw_rect(&bounds);
@@ -780,6 +943,17 @@ static void drawbar(struct mame_bitmap *bitmap, int leftx, int topy, int width, 
 {
 	struct rectangle bounds, tbounds;
 	UINT32 black, white;
+
+	/* make a rect and orient/clip it */
+	bounds.min_x = uirotbounds.min_x + leftx;
+	bounds.min_y = uirotbounds.min_y + topy;
+	bounds.max_x = bounds.min_x + width - 1;
+	bounds.max_y = bounds.min_y + height - 1;
+	sect_rect(&bounds, &uirotbounds);
+
+	/* pick colors from the colortable */
+	black = uirotfont->colortable[0];
+	white = uirotfont->colortable[1];
 
 	/* make a rect and orient/clip it */
 	bounds.min_x = uirotbounds.min_x + leftx;
@@ -845,9 +1019,13 @@ static void drawbar(struct mame_bitmap *bitmap, int leftx, int topy, int width, 
 void ui_displaymenu(struct mame_bitmap *bitmap,const char **items,const char **subitems,char *flag,int selected,int arrowize_subitem)
 {
 	struct DisplayText dt[256];
-	int curr_dt;
+	int curr_dt, curr_y;
+#ifdef UI_COLOR_DISPLAY
+	struct rectangle bounds;
+#else /* UI_COLOR_DISPLAY */
 	const char *lefthilight = ui_getstring (UI_lefthilight);
 	const char *righthilight = ui_getstring (UI_righthilight);
+#endif /* UI_COLOR_DISPLAY */
 	const char *uparrow = ui_getstring (UI_uparrow);
 	const char *downarrow = ui_getstring (UI_downarrow);
 	const char *leftarrow = ui_getstring (UI_leftarrow);
@@ -859,19 +1037,28 @@ void ui_displaymenu(struct mame_bitmap *bitmap,const char **items,const char **s
 
 	i = 0;
 	maxlen = 0;
+#ifdef UI_COLOR_DISPLAY
+	highlen = (uirotwidth - 2 * DRAWBOX_MARGIN) / uirotcharwidth;
+#else /* UI_COLOR_DISPLAY */
 	highlen = uirotwidth / uirotcharwidth;
+#endif /* UI_COLOR_DISPLAY */
 	while (items[i])
 	{
-		len = 3 + strlen(items[i]);
+		len = (raw+law+1) + strlen(items[i]);
 		if (subitems && subitems[i])
-			len += 2 + strlen(subitems[i]);
-		if (len > maxlen && len <= highlen)
+			len += (lhw+rhw) + strlen(subitems[i]);
+		if (len > maxlen)
+		{
+			if (len <= highlen)
 			maxlen = len;
+			else
+				maxlen = highlen;
+		}
 		i++;
 	}
 	count = i;
 
-	visible = uirotheight / (3 * uirotcharheight / 2) - 1;
+	visible = (uirotheight / MENUROWHEIGHT) - 1;
 	topitem = 0;
 	if (visible > count) visible = count;
 	else
@@ -882,10 +1069,10 @@ void ui_displaymenu(struct mame_bitmap *bitmap,const char **items,const char **s
 	}
 
 	leftoffs = (uirotwidth - maxlen * uirotcharwidth) / 2;
-	topoffs = (uirotheight - (3 * visible + 1) * uirotcharheight / 2) / 2;
+	topoffs = (uirotheight - visible * MENUROWHEIGHT) / 2;
 
 	/* black background */
-	ui_drawbox(bitmap,leftoffs,topoffs,maxlen * uirotcharwidth,(3 * visible + 1) * uirotcharheight / 2);
+	ui_drawbox(bitmap,leftoffs,topoffs - ROWMARGIN,maxlen * uirotcharwidth,visible * MENUROWHEIGHT + ROWMARGIN*2);
 
 	selected_long = 0;
 	curr_dt = 0;
@@ -893,20 +1080,22 @@ void ui_displaymenu(struct mame_bitmap *bitmap,const char **items,const char **s
 	{
 		int item = i + topitem;
 
+		curr_y = topoffs + i * MENUROWHEIGHT + (uirotcharheight / 8);
+
 		if (i == 0 && item > 0)
 		{
 			dt[curr_dt].text = uparrow;
 			dt[curr_dt].color = UI_COLOR_NORMAL;
-			dt[curr_dt].x = (uirotwidth - uirotcharwidth * strlen(uparrow)) / 2;
-			dt[curr_dt].y = topoffs + (3*i+1)*uirotcharheight/2;
+			dt[curr_dt].x = (uirotwidth - uirotcharwidth * uaw) / 2;
+			dt[curr_dt].y = curr_y;
 			curr_dt++;
 		}
 		else if (i == visible - 1 && item < count - 1)
 		{
 			dt[curr_dt].text = downarrow;
 			dt[curr_dt].color = UI_COLOR_NORMAL;
-			dt[curr_dt].x = (uirotwidth - uirotcharwidth * strlen(downarrow)) / 2;
-			dt[curr_dt].y = topoffs + (3*i+1)*uirotcharheight/2;
+			dt[curr_dt].x = (uirotwidth - uirotcharwidth * daw) / 2;
+			dt[curr_dt].y = curr_y;
 			curr_dt++;
 		}
 		else
@@ -917,11 +1106,11 @@ void ui_displaymenu(struct mame_bitmap *bitmap,const char **items,const char **s
 				len = strlen(items[item]);
 				dt[curr_dt].text = items[item];
 				dt[curr_dt].color = UI_COLOR_NORMAL;
-				dt[curr_dt].x = leftoffs + 3*uirotcharwidth/2;
-				dt[curr_dt].y = topoffs + (3*i+1)*uirotcharheight/2;
+				dt[curr_dt].x = leftoffs + uirotcharwidth/2 + uirotcharwidth * raw;
+				dt[curr_dt].y = curr_y;
 				curr_dt++;
 				sublen = strlen(subitems[item]);
-				if (sublen > maxlen-5-len)
+				if (sublen > maxlen-(raw+lhw+rhw+2)-len)
 				{
 					dt[curr_dt].text = "...";
 					sublen = strlen(dt[curr_dt].text);
@@ -932,8 +1121,8 @@ void ui_displaymenu(struct mame_bitmap *bitmap,const char **items,const char **s
 				}
 				/* If this item is flagged, draw it in inverse print */
 				dt[curr_dt].color = (flag && flag[item]) ? UI_COLOR_INVERSE : UI_COLOR_NORMAL;
-				dt[curr_dt].x = leftoffs + uirotcharwidth * (maxlen-1-sublen) - uirotcharwidth/2;
-				dt[curr_dt].y = topoffs + (3*i+1)*uirotcharheight/2;
+				dt[curr_dt].x = leftoffs + uirotcharwidth * (maxlen-rhw-sublen) - uirotcharwidth/2;
+				dt[curr_dt].y = curr_y;
 				curr_dt++;
 			}
 			else
@@ -941,13 +1130,16 @@ void ui_displaymenu(struct mame_bitmap *bitmap,const char **items,const char **s
 				dt[curr_dt].text = items[item];
 				dt[curr_dt].color = UI_COLOR_NORMAL;
 				dt[curr_dt].x = (uirotwidth - uirotcharwidth * strlen(items[item])) / 2;
-				dt[curr_dt].y = topoffs + (3*i+1)*uirotcharheight/2;
+				dt[curr_dt].y = curr_y;
 				curr_dt++;
 			}
 		}
 	}
 
 	i = selected - topitem;
+
+	curr_y = topoffs + i * MENUROWHEIGHT + (uirotcharheight / 8);
+
 	if (subitems && subitems[selected] && arrowize_subitem)
 	{
 		if (arrowize_subitem & 1)
@@ -960,37 +1152,49 @@ void ui_displaymenu(struct mame_bitmap *bitmap,const char **items,const char **s
 			dt[curr_dt].color = UI_COLOR_NORMAL;
 
 			sublen = strlen(subitems[selected]);
-			if (sublen > maxlen-5-len)
+			if (sublen > maxlen-(raw+lhw+rhw+2)-len)
 				sublen = strlen("...");
 
-			dt[curr_dt].x = leftoffs + uirotcharwidth * (maxlen-2 - sublen) - uirotcharwidth/2 - 1;
-			dt[curr_dt].y = topoffs + (3*i+1)*uirotcharheight/2;
+			dt[curr_dt].x = leftoffs + uirotcharwidth * (maxlen-(lhw+law)-sublen) - uirotcharwidth/2 - raw;
+			dt[curr_dt].y = curr_y;
 			curr_dt++;
 		}
 		if (arrowize_subitem & 2)
 		{
 			dt[curr_dt].text = rightarrow;
 			dt[curr_dt].color = UI_COLOR_NORMAL;
-			dt[curr_dt].x = leftoffs + uirotcharwidth * (maxlen-1) - uirotcharwidth/2;
-			dt[curr_dt].y = topoffs + (3*i+1)*uirotcharheight/2;
+			dt[curr_dt].x = leftoffs + uirotcharwidth * (maxlen-raw) - uirotcharwidth/2;
+			dt[curr_dt].y = curr_y;
 			curr_dt++;
 		}
 	}
+#ifndef UI_COLOR_DISPLAY
 	else
 	{
 		dt[curr_dt].text = righthilight;
 		dt[curr_dt].color = UI_COLOR_NORMAL;
-		dt[curr_dt].x = leftoffs + uirotcharwidth * (maxlen-1) - uirotcharwidth/2;
-		dt[curr_dt].y = topoffs + (3*i+1)*uirotcharheight/2;
+		dt[curr_dt].x = leftoffs + uirotcharwidth * (maxlen-rhw) - uirotcharwidth/2;
+		dt[curr_dt].y = curr_y;
 		curr_dt++;
 	}
 	dt[curr_dt].text = lefthilight;
 	dt[curr_dt].color = UI_COLOR_NORMAL;
 	dt[curr_dt].x = leftoffs + uirotcharwidth/2;
-	dt[curr_dt].y = topoffs + (3*i+1)*uirotcharheight/2;
+	dt[curr_dt].y = curr_y;
 	curr_dt++;
+#endif /* !UI_COLOR_DISPLAY */
 
 	dt[curr_dt].text = 0;	/* terminate array */
+
+#ifdef UI_COLOR_DISPLAY
+	bounds.min_x = uirotbounds.min_x + leftoffs;
+	bounds.min_y = uirotbounds.min_y + curr_y - 1;
+	bounds.max_x = bounds.min_x + maxlen * uirotcharwidth - 1;
+	bounds.max_y = bounds.min_y + ROWHEIGHT - 1;
+
+	ui_rot2raw_rect(&bounds);
+	fillbitmap(bitmap, Machine->uifont->colortable[CURSOR_COLOR], &bounds);
+#endif /* UI_COLOR_DISPLAY */
 
 	displaytext(bitmap,dt);
 
@@ -1002,86 +1206,116 @@ void ui_displaymenu(struct mame_bitmap *bitmap,const char **items,const char **s
 		int long_y;
 		unsigned long_max;
 
+#ifdef UI_COLOR_DISPLAY
+		long_max = (uirotwidth / uirotcharwidth) - DRAWBOX_MARGIN * 2;
+#else /* UI_COLOR_DISPLAY */
 		long_max = (uirotwidth / uirotcharwidth) - 2;
+#endif /* UI_COLOR_DISPLAY */
 		multilinebox_size(&long_dx,&long_dy,subitems[selected],subitems[selected] + strlen(subitems[selected]), long_max);
 
 		long_x = uirotwidth - long_dx;
-		long_y = topoffs + (i+1) * 3*uirotcharheight/2;
+		long_y = topoffs + (i+1) * MENUROWHEIGHT;
+#ifdef UI_COLOR_DISPLAY
+		long_x -= DRAWBOX_MARGIN;
+#endif /* UI_COLOR_DISPLAY */
 
 		/* if too low display up */
 		if (long_y + long_dy > uirotheight)
-			long_y = topoffs + i * 3*uirotcharheight/2 - long_dy;
+			long_y = topoffs + i * MENUROWHEIGHT - long_dy;
 
 		ui_multitextbox_ex(bitmap,subitems[selected],subitems[selected] + strlen(subitems[selected]), long_max, long_x,long_y,long_dx,long_dy, UI_COLOR_NORMAL);
 	}
 }
 
 
-void ui_displaymessagewindow(struct mame_bitmap *bitmap,const char *text)
+
+int ui_displaymessagewindow(struct mame_bitmap *bitmap,const char *text)
 {
 	struct DisplayText dt[256];
 	int curr_dt;
 	char *c,*c2;
-	int i,len,maxlen,lines;
+	int i,maxlen,lines;
 	char textcopy[2048];
 	int leftoffs,topoffs;
 	int maxcols,maxrows;
 
+#ifdef UI_COLOR_DISPLAY
+	maxcols = ((uirotwidth - 2 * DRAWBOX_MARGIN) / uirotcharwidth) - 1;
+	maxrows = ((uirotheight - 2 * DRAWBOX_MARGIN) / ROWHEIGHT) - 1;
+#else /* UI_COLOR_DISPLAY */
 	maxcols = (uirotwidth / uirotcharwidth) - 1;
-	maxrows = (2 * uirotheight - uirotcharheight) / (3 * uirotcharheight);
+	maxrows = (uirotheight / ROWHEIGHT) - 1;
+#endif /* UI_COLOR_DISPLAY */
 
-	/* copy text, calculate max len, count lines, wrap long lines and crop height to fit */
-	maxlen = 0;
-	lines = 0;
-	c = (char *)text;
-	c2 = textcopy;
-	while (*c)
+	if (maxcols < 0)
+		maxcols = 0;
+	if (maxrows < 0)
+		maxrows = 0;
+
+	strcpy(textcopy, text);
+	maxlen = wordwrap_text_buffer(textcopy, maxcols);
+	lines  = count_lines_in_buffer(textcopy) + 1;
+
+	if (lines > maxrows)
 	{
-		len = 0;
-		while (*c && *c != '\n')
+		static int scroll = 0;
+
+		strcat(textcopy, "\n");
+		if (scroll_reset)
 		{
-			*c2++ = *c++;
-			len++;
-			if (len == maxcols && *c != '\n')
-			{
-				/* attempt word wrap */
-				char *csave = c, *c2save = c2;
-				int lensave = len;
-
-				/* back up to last space or beginning of line */
-				while (*c != ' ' && *c != '\n' && c > text)
-					--c, --c2, --len;
-
-				/* if no space was found, hard wrap instead */
-				if (*c != ' ')
-					c = csave, c2 = c2save, len = lensave;
-				else
-					c++;
-
-				*c2++ = '\n'; /* insert wrap */
-				break;
-			}
+			scroll = 0;
+			scroll_reset = 0;
 		}
 
-		if (*c == '\n')
-			*c2++ = *c++;
+		display_scroll_message(bitmap, &scroll, maxlen, maxrows, textcopy);
 
-		if (len > maxlen) maxlen = len;
+		if ((scroll > 0) && input_ui_pressed_repeat(IPT_UI_UP,4))
+		{
+			if (scroll == 2) scroll = 0;	/* 1 would be the same as 0, but with arrow on top */
+			else scroll--;
+			return -1;
+		}
+		else if (input_ui_pressed_repeat(IPT_UI_DOWN,4))
+			{
+			if (scroll == 0) scroll = 2;	/* 1 would be the same as 0, but with arrow on top */
+			else scroll++;
+			return -1;
+		}
+				else
+		if (input_ui_pressed(IPT_UI_SELECT))
+		{
+			scroll = 0;
+			return 1;
+			}
+		else
+		if (input_ui_pressed(IPT_UI_CANCEL))
+		{
+			scroll = 0;
+			return 2;
+			}
+		else
+		if (input_ui_pressed(IPT_UI_CONFIGURE))
+		{
+			scroll = 0;
+			return 3;
+		}
 
-		lines++;
-		if (lines == maxrows)
-			break;
+		return 0;
 	}
-	*c2 = '\0';
 
 	maxlen += 1;
 
 	leftoffs = (uirotwidth - uirotcharwidth * maxlen) / 2;
 	if (leftoffs < 0) leftoffs = 0;
-	topoffs = (uirotheight - (3 * lines + 1) * uirotcharheight / 2) / 2;
+
+	if (!displaymessagewindow_under)
+		topoffs = (uirotheight - (lines * ROWHEIGHT + ROWMARGIN)) / 2;
+	else
+		topoffs = uirotheight - ((lines + 1) * ROWHEIGHT + ROWMARGIN);
+	if (topoffs < 0) topoffs = 0;
 
 	/* black background */
-	ui_drawbox(bitmap,leftoffs,topoffs,maxlen * uirotcharwidth,(3 * lines + 1) * uirotcharheight / 2);
+	ui_drawbox(bitmap,leftoffs,topoffs,maxlen * uirotcharwidth,lines * ROWHEIGHT + ROWMARGIN);
 
 	curr_dt = 0;
 	c = textcopy;
@@ -1108,7 +1342,7 @@ void ui_displaymessagewindow(struct mame_bitmap *bitmap,const char *text)
 
 		dt[curr_dt].text = c2;
 		dt[curr_dt].color = UI_COLOR_NORMAL;
-		dt[curr_dt].y = topoffs + (3*i+1)*uirotcharheight/2;
+		dt[curr_dt].y = topoffs + i * ROWHEIGHT + ROWMARGIN;
 		curr_dt++;
 
 		i++;
@@ -1117,12 +1351,32 @@ void ui_displaymessagewindow(struct mame_bitmap *bitmap,const char *text)
 	dt[curr_dt].text = 0;	/* terminate array */
 
 	displaytext(bitmap,dt);
+
+	return 0;
+}
+
+
+
+
+int ui_displaymessagewindow_under(struct mame_bitmap *bitmap,const char *text)
+{
+	int result;
+
+	displaymessagewindow_under = 1;
+	result = ui_displaymessagewindow(bitmap, text);
+	displaymessagewindow_under = 0;
+
+	return result;
 }
 
 
 
 static void showcharset(struct mame_bitmap *bitmap)
 {
+#ifdef UI_COLOR_DISPLAY
+#define ui_text	ui_text_nobk
+#endif /* UI_COLOR_DISPLAY */
+
 	int i;
 	char buf[80];
 	int mode,bank,color,firstdrawn;
@@ -1530,6 +1784,9 @@ static void showcharset(struct mame_bitmap *bitmap)
 			!input_ui_pressed(IPT_UI_CANCEL));
 
 	schedule_full_refresh();
+#ifdef UI_COLOR_DISPLAY
+#undef ui_text
+#endif /* UI_COLOR_DISPLAY */
 }
 
 
@@ -1722,7 +1979,7 @@ static int setconfiguration(struct mame_bitmap *bitmap, int selected)
 
 /* This flag is used for record OR sequence of key/joy */
 /* when is !=0 the first sequence is record, otherwise the first free */
-/* it's used byt setdefkeysettings, setdefjoysettings, setkeysettings, setjoysettings */
+/* it's used by setdefkeysettings, setdefjoysettings, setkeysettings, setjoysettings */
 static int record_first_insert = 1;
 
 static char menu_subitem_buffer[500][96];
@@ -1736,9 +1993,13 @@ static int setdefcodesettings(struct mame_bitmap *bitmap,int selected)
 	int i,sel;
 	struct ipd *in;
 	int total;
+	int visible;
 	extern struct ipd inputport_defaults[];
+	static int counter = 0;
+	static int fast = 4;
 
 	sel = selected - 1;
+	visible = (uirotheight / MENUROWHEIGHT) - 3;
 
 
 	if (Machine->input_ports == 0)
@@ -1812,15 +2073,40 @@ static int setdefcodesettings(struct mame_bitmap *bitmap,int selected)
 
 	ui_displaymenu(bitmap,menu_item,menu_subitem,flag,sel,0);
 
-	if (input_ui_pressed_repeat(IPT_UI_DOWN,8))
+	if (input_ui_pressed_repeat(IPT_UI_DOWN,fast))
 	{
 		sel = (sel + 1) % total;
 		record_first_insert = 1;
 	}
 
-	if (input_ui_pressed_repeat(IPT_UI_UP,8))
+	if (input_ui_pressed_repeat(IPT_UI_UP,fast))
 	{
 		sel = (sel + total - 1) % total;
+		record_first_insert = 1;
+	}
+
+	if (seq_pressed(input_port_type_seq(IPT_UI_UP)) | seq_pressed(input_port_type_seq(IPT_UI_DOWN)))
+	{
+		if (++counter == 25)
+		{
+			fast--;
+			if (fast < 2) fast = 2;
+			counter = 0;
+		}
+	}
+	else fast = 8;
+
+	if (input_ui_pressed_repeat(IPT_UI_LEFT,8))
+	{
+		sel -= visible;
+		if (sel < 0) sel = 0;
+		record_first_insert = 1;
+	}
+
+	if (input_ui_pressed_repeat(IPT_UI_RIGHT,8))
+	{
+		sel += visible;
+		if (sel >= total) sel = total - 1;
 		record_first_insert = 1;
 	}
 
@@ -1866,9 +2152,13 @@ static int setcodesettings(struct mame_bitmap *bitmap,int selected)
 	int i,sel;
 	struct InputPort *in;
 	int total;
+	int visible;
+	static int counter = 0;
+	static int fast = 4;
 
 
 	sel = selected - 1;
+	visible = (uirotheight / MENUROWHEIGHT) - 3;
 
 
 	if (Machine->input_ports == 0)
@@ -1946,15 +2236,40 @@ static int setcodesettings(struct mame_bitmap *bitmap,int selected)
 
 	ui_displaymenu(bitmap,menu_item,menu_subitem,flag,sel,0);
 
-	if (input_ui_pressed_repeat(IPT_UI_DOWN,8))
+	if (input_ui_pressed_repeat(IPT_UI_DOWN,fast))
 	{
 		sel = (sel + 1) % total;
 		record_first_insert = 1;
 	}
 
-	if (input_ui_pressed_repeat(IPT_UI_UP,8))
+	if (input_ui_pressed_repeat(IPT_UI_UP,fast))
 	{
 		sel = (sel + total - 1) % total;
+		record_first_insert = 1;
+	}
+
+	if (seq_pressed(input_port_type_seq(IPT_UI_UP)) | seq_pressed(input_port_type_seq(IPT_UI_DOWN)))
+	{
+		if (++counter == 25)
+		{
+			fast--;
+			if (fast < 2) fast = 2;
+			counter = 0;
+		}
+	}
+	else fast = 8;
+
+	if (input_ui_pressed_repeat(IPT_UI_LEFT,8))
+	{
+		sel -= visible;
+		if (sel < 0) sel = 0;
+		record_first_insert = 1;
+	}
+
+	if (input_ui_pressed_repeat(IPT_UI_RIGHT,8))
+	{
+		sel += visible;
+		if (sel >= total) sel = total - 1;
 		record_first_insert = 1;
 	}
 
@@ -2084,9 +2399,9 @@ static int settraksettings(struct mame_bitmap *bitmap,int selected)
 
 	if (total == 0) return 0;
 
-	/* Each analog control has 3 entries - key & joy delta, reverse, sensitivity */
+	/* Each analog control has 4 entries - key & joy delta, reverse, sensitivity, center */
 
-#define ENTRIES 3
+#define ENTRIES 4
 
 	total2 = total * ENTRIES;
 
@@ -2103,11 +2418,13 @@ static int settraksettings(struct mame_bitmap *bitmap,int selected)
 			char setting[30][40];
 			int sensitivity,delta;
 			int reverse;
+			int center;
 
 			strcpy (label[i], input_port_name(entry[i/ENTRIES]));
 			sensitivity = IP_GET_SENSITIVITY(entry[i/ENTRIES]);
 			delta = IP_GET_DELTA(entry[i/ENTRIES]);
 			reverse = (entry[i/ENTRIES]->type & IPF_REVERSE);
+			center = (entry[i/ENTRIES]->type & IPF_CENTER);
 
 			strcat (label[i], " ");
 			switch (i%ENTRIES)
@@ -2128,6 +2445,16 @@ static int settraksettings(struct mame_bitmap *bitmap,int selected)
 				case 2:
 					strcat (label[i], ui_getstring (UI_sensitivity));
 					sprintf(setting[i],"%3d%%",sensitivity);
+					if (i == sel) arrowize = 3;
+					break;
+				case 3:
+					strcat (label[i], ui_getstring (UI_center));
+					if (center)
+						// sprintf(setting[i],ui_getstring (UI_on));
+						strcpy(setting[i],ui_getstring (UI_on));
+					else
+						// sprintf(setting[i],ui_getstring (UI_off));
+						strcpy(setting[i],ui_getstring (UI_off));
 					if (i == sel) arrowize = 3;
 					break;
 			}
@@ -2181,6 +2508,17 @@ static int settraksettings(struct mame_bitmap *bitmap,int selected)
 				if (val < 1) val = 1;
 				IP_SET_SENSITIVITY(entry[sel/ENTRIES],val);
 			}
+			else if ((sel % ENTRIES) == 3)
+			/* center */
+			{
+				int center = entry[sel/ENTRIES]->type & IPF_CENTER;
+				if (center)
+					center=0;
+				else
+					center=IPF_CENTER;
+				entry[sel/ENTRIES]->type &= ~IPF_CENTER;
+				entry[sel/ENTRIES]->type |= center;
+			}
 		}
 	}
 
@@ -2216,6 +2554,17 @@ static int settraksettings(struct mame_bitmap *bitmap,int selected)
 				val ++;
 				if (val > 255) val = 255;
 				IP_SET_SENSITIVITY(entry[sel/ENTRIES],val);
+			}
+			else if ((sel % ENTRIES) == 3)
+			/* center */
+			{
+				int center = entry[sel/ENTRIES]->type & IPF_CENTER;
+				if (center)
+					center=0;
+				else
+					center=IPF_CENTER;
+				entry[sel/ENTRIES]->type &= ~IPF_CENTER;
+				entry[sel/ENTRIES]->type |= center;
 			}
 		}
 	}
@@ -2654,6 +3003,9 @@ static int mame_stats(struct mame_bitmap *bitmap,int selected)
 
 int showcopyright(struct mame_bitmap *bitmap)
 {
+#ifdef UI_COLOR_DISPLAY
+	int back = Machine->uifont->colortable[SYSTEM_COLOR_BACKGROUND];
+#endif /* UI_COLOR_DISPLAY */
 	int done;
 	char buf[1000];
 	char buf2[256];
@@ -2670,8 +3022,14 @@ int showcopyright(struct mame_bitmap *bitmap)
 
 	do
 	{
+#ifdef UI_COLOR_DISPLAY
+		Machine->uifont->colortable[SYSTEM_COLOR_BACKGROUND] = Machine->uifont->colortable[FONT_COLOR_BLANK];
+#endif /* UI_COLOR_DISPLAY */
 		erase_screen(bitmap);
 		ui_drawbox(bitmap,0,0,uirotwidth,uirotheight);
+#ifdef UI_COLOR_DISPLAY
+		Machine->uifont->colortable[SYSTEM_COLOR_BACKGROUND] = back;
+#endif /* UI_COLOR_DISPLAY */
 		ui_displaymessagewindow(bitmap,buf);
 
 		update_video_and_audio();
@@ -2697,16 +3055,20 @@ int showcopyright(struct mame_bitmap *bitmap)
 
 static int displaygameinfo(struct mame_bitmap *bitmap,int selected)
 {
+	int res;
 	int i;
-	char buf[2048];
-	char buf2[32];
+	char buf[4096];
+	char buf2[256];
 	int sel;
 
 
 	sel = selected - 1;
 
 
-	sprintf(buf,"%s\n%s %s\n\n%s:\n",Machine->gamedrv->description,Machine->gamedrv->year,Machine->gamedrv->manufacturer,
+	sprintf(buf,"%s\n%s %s\n\n%s:\n",
+            Machine->gamedrv->description,
+		Machine->gamedrv->year,
+            Machine->gamedrv->manufacturer,
 		ui_getstring (UI_cpu));
 	i = 0;
 	while (i < MAX_CPU && Machine->drv->cpu[i].cpu_type)
@@ -2770,23 +3132,11 @@ static int displaygameinfo(struct mame_bitmap *bitmap,int selected)
 	else
 	{
 		sprintf(&buf[strlen(buf)],"\n%s:\n", ui_getstring (UI_screenres));
-
-		if (Machine->gamedrv->flags & ORIENTATION_SWAP_XY)
-		{
-			sprintf(&buf[strlen(buf)],"%d x %d (V) ",
-				Machine->visible_area.max_y - Machine->visible_area.min_y + 1,
-				Machine->visible_area.max_x - Machine->visible_area.min_x + 1);
-		}
-		else
-		{
-			sprintf(&buf[strlen(buf)],"%d x %d (H) ",
+		sprintf(&buf[strlen(buf)],"%d x %d (%s) %f Hz\n",
 				Machine->visible_area.max_x - Machine->visible_area.min_x + 1,
-				Machine->visible_area.max_y - Machine->visible_area.min_y + 1);
-		}
-
-		sprintf(&buf[strlen(buf)],"%f Hz\n", Machine->refresh_rate);
-		sprintf(&buf[strlen(buf)],"Palettesize: %d\n",Machine->drv->total_colors);
-
+				Machine->visible_area.max_y - Machine->visible_area.min_y + 1,
+				(Machine->gamedrv->flags & ORIENTATION_SWAP_XY) ? "V" : "H",
+				Machine->refresh_rate);
 #if 0
 		{
 			int pixelx,pixely,tmax,tmin,rem;
@@ -2825,20 +3175,40 @@ static int displaygameinfo(struct mame_bitmap *bitmap,int selected)
 
 	if (sel == -1)
 	{
+#ifdef UI_COLOR_DISPLAY
+		int back = Machine->uifont->colortable[SYSTEM_COLOR_BACKGROUND];
+
+		Machine->uifont->colortable[SYSTEM_COLOR_BACKGROUND] = Machine->uifont->colortable[FONT_COLOR_BLANK];
+#endif /* UI_COLOR_DISPLAY */
 		/* startup info, print MAME version and ask for any key */
 
 		sprintf (buf2, "\n\t%s ", ui_getstring (UI_mame));	/* \t means that the line will be centered */
 		strcat(buf, buf2);
 
 		strcat(buf,build_version);
-		sprintf (buf2, "\n\t%s", ui_getstring (UI_anykey));
+		sprintf (buf2, "\n\t%s", ui_getstring (UI_selectkey));
 		strcat(buf,buf2);
 		ui_drawbox(bitmap,0,0,uirotwidth,uirotheight);
-		ui_displaymessagewindow(bitmap,buf);
+
+#ifdef UI_COLOR_DISPLAY
+		Machine->uifont->colortable[SYSTEM_COLOR_BACKGROUND] = back;
+#endif /* UI_COLOR_DISPLAY */
 
 		sel = 0;
-		if (code_read_async() != CODE_NONE)
+
+		res = ui_displaymessagewindow(bitmap,buf);
+
+		if (res >= 0)
+		{
+			if (res == 1 || input_ui_pressed(IPT_UI_SELECT))
 			sel = -1;
+
+			if (res == 2 || input_ui_pressed(IPT_UI_CANCEL))
+			sel = -1;
+
+			if (res == 3 || input_ui_pressed(IPT_UI_CONFIGURE))
+				sel = -2;
+		}
 	}
 	else
 	{
@@ -2850,20 +3220,23 @@ static int displaygameinfo(struct mame_bitmap *bitmap,int selected)
 		strcat(buf," ");
 		strcat(buf,ui_getstring (UI_righthilight));
 
-		ui_displaymessagewindow(bitmap,buf);
-
-		if (input_ui_pressed(IPT_UI_SELECT))
+		res = ui_displaymessagewindow(bitmap,buf);
+		if (res >= 0)
+		{
+			if (res == 1 || input_ui_pressed(IPT_UI_SELECT))
 			sel = -1;
 
-		if (input_ui_pressed(IPT_UI_CANCEL))
+			if (res == 2 || input_ui_pressed(IPT_UI_CANCEL))
 			sel = -1;
 
-		if (input_ui_pressed(IPT_UI_CONFIGURE))
+			if (res == 3 || input_ui_pressed(IPT_UI_CONFIGURE))
 			sel = -2;
+	}
 	}
 
 	if (sel == -1 || sel == -2)
 	{
+		scroll_reset = 1;
 		schedule_full_refresh();
 	}
 
@@ -2874,10 +3247,16 @@ static int displaygameinfo(struct mame_bitmap *bitmap,int selected)
 int showgamewarnings(struct mame_bitmap *bitmap)
 {
 	int i;
-	char buf[2048];
+	char buf[4096];
 
-	if (Machine->gamedrv->flags & GAME_NOT_WORKING)
+	if (Machine->gamedrv->flags &
+			(GAME_NOT_WORKING | GAME_UNEMULATED_PROTECTION | GAME_WRONG_COLORS | GAME_IMPERFECT_COLORS |
+			  GAME_NO_SOUND | GAME_IMPERFECT_SOUND | GAME_IMPERFECT_GRAPHICS | GAME_NO_COCKTAIL))
 	{
+		int res;
+#ifdef UI_COLOR_DISPLAY
+		int back = Machine->uifont->colortable[SYSTEM_COLOR_BACKGROUND];
+#endif /* UI_COLOR_DISPLAY */
 		int done;
 
 		strcpy(buf, ui_getstring (UI_knownproblems));
@@ -2976,22 +3355,35 @@ int showgamewarnings(struct mame_bitmap *bitmap)
 		strcat(buf,ui_getstring (UI_typeok));
 
 		done = 0;
+		res = 0;
 		do
 		{
+#ifdef UI_COLOR_DISPLAY
+			Machine->uifont->colortable[SYSTEM_COLOR_BACKGROUND] = Machine->uifont->colortable[FONT_COLOR_BLANK];
+#endif /* UI_COLOR_DISPLAY */
 			erase_screen(bitmap);
 			ui_drawbox(bitmap,0,0,uirotwidth,uirotheight);
-			ui_displaymessagewindow(bitmap,buf);
-
+#ifdef UI_COLOR_DISPLAY
+			Machine->uifont->colortable[SYSTEM_COLOR_BACKGROUND] = back;
+#endif /* UI_COLOR_DISPLAY */
+			res = ui_displaymessagewindow(bitmap,buf);
 			update_video_and_audio();
-			if (input_ui_pressed(IPT_UI_CANCEL))
+			if (res == 2 || input_ui_pressed(IPT_UI_CANCEL)) // canceled
+			{
 				return 1;
-			if (code_pressed_memory(KEYCODE_O) ||
-					input_ui_pressed(IPT_UI_LEFT))
+			}
+			else if (res >= 0)
+			{
+				if (code_pressed_memory(KEYCODE_O)
+				||  input_ui_pressed(IPT_UI_LEFT))
 				done = 1;
-			if (done == 1 && (code_pressed_memory(KEYCODE_K) ||
-					input_ui_pressed(IPT_UI_RIGHT)))
+				if (done == 1 && (code_pressed_memory(KEYCODE_K)
+				||  input_ui_pressed(IPT_UI_RIGHT)))
 				done = 2;
+			}
 		} while (done < 2);
+
+		scroll_reset = 1;
 	}
 
 	erase_screen(bitmap);
@@ -3018,6 +3410,9 @@ int showgameinfo(struct mame_bitmap *bitmap)
 	}
 	#endif
 
+	/* clear the input memory */
+	while (code_read_async() != CODE_NONE) {};
+
 	erase_screen(bitmap);
 	/* make sure that the screen is really cleared, in case autoframeskip kicked in */
 	update_video_and_audio();
@@ -3031,37 +3426,125 @@ int showgameinfo(struct mame_bitmap *bitmap)
 /* Word-wraps the text in the specified buffer to fit in maxwidth characters per line.
    The contents of the buffer are modified.
    Known limitations: Words longer than maxwidth cause the function to fail. */
-static void wordwrap_text_buffer (char *buffer, int maxwidth)
+static int wordwrap_text_buffer(char *buffer, int maxwidth)
 {
-	int width = 0;
+	char *c, *c2;
+	char textcopy[256 * 1024 + 256];
+	unsigned short code;
+	int i, increment, wrapped;
+	int len, maxlen;
+	char *wrap_c = NULL;
+	char *wrap_c2 = NULL;
+	int wrap_w;
+	int wrap_len = 0;
+	int last_is_space = 0;
 
-	while (*buffer)
-	{
-		if (*buffer == '\n')
+	if (maxwidth <= 0)
 		{
-			buffer++;
-			width = 0;
-			continue;
+		*buffer = '\0';
+		return 0;
 		}
 
-		width++;
+	/* copy text, calculate max len, wrap long lines to fit */
+	len    = 0;
+	maxlen = 0;
+	wrapped = i = 0;
+	c = buffer;
+	c2 = textcopy;
+	memset(textcopy, 0, sizeof textcopy);
 
-		if (width > maxwidth)
+	while (*c)
 		{
-			/* backtrack until a space is found */
-			while (*buffer != ' ')
+		if (wrapped)
 			{
-				buffer--;
-				width--;
+			last_is_space = 0;
+			wrap_w = 0;
 			}
-			if (width < 1) return;	/* word too long */
+		else
+			wrap_w = i;
 
-			/* replace space with a newline */
-			*buffer = '\n';
+		wrapped = 0;
+		increment = uifont_decodechar((unsigned char *)c, &code);
+
+		if (*c == '\n')
+		{
+			*c2++ = *c++;
+			wrapped = 1;
 		}
 		else
-			buffer++;
+		{
+			i = (code < 256) ? 1 : 2;
+			if (i > 1 || wrap_w > 1)
+				wrap_c = NULL;
+
+			if (wrap_c == NULL)
+			{
+				wrap_len = len;
+				wrap_c = c;
+				wrap_c2 = c2;
+			}
+			else if (len > 0 && *c == ' ')
+	{
+				if (!last_is_space)
+		{
+					wrap_c2 = c2;
+					wrap_len = len;
+				}
+				wrap_c = c;
+		}
+
+			last_is_space = (*c == ' ');
+
+			if (len + i > maxwidth)
+		{
+				if (!wrap_len || !wrap_c)
+			{
+					wrap_len = len;
+					wrap_c = c;
+					wrap_c2 = c2;
+			}
+
+				len = wrap_len;
+				c = wrap_c;
+				c2 = wrap_c2;
+
+				while (*c == ' ')
+					c++;
+
+				*c2++ = '\n';
+				wrapped = 1;
+		}
+		else
+			{
+				len += i;
+
+				while (increment)
+				{
+					*c2++ = *c++;
+					increment--;
 	}
+			}
+		}
+
+		if (wrapped)
+		{
+			if (len > maxlen)
+				maxlen = len;
+
+			len = 0;
+			wrap_c = NULL;
+			wrap_w = 0;
+		}
+	}
+
+	if (len > maxlen)
+		maxlen = len;
+
+	*c2 = '\0';
+
+	strcpy(buffer, textcopy);
+
+	return maxlen;
 }
 
 static int count_lines_in_buffer (char *buffer)
@@ -3076,25 +3559,32 @@ static int count_lines_in_buffer (char *buffer)
 }
 
 /* Display lines from buffer, starting with line 'scroll', in a width x height text window */
+#ifdef CMD_LIST
+static int display_scroll_message (struct mame_bitmap *bitmap, int *scroll, int width, int height, char *buf)
+#else /* CMD_LIST */
 static void display_scroll_message (struct mame_bitmap *bitmap, int *scroll, int width, int height, char *buf)
+#endif /* CMD_LIST */
 {
 	struct DisplayText dt[256];
 	int curr_dt = 0;
 	const char *uparrow = ui_getstring (UI_uparrow);
 	const char *downarrow = ui_getstring (UI_downarrow);
-	char textcopy[2048];
+	char textcopy[8192];
 	char *copy;
 	int leftoffs,topoffs;
 	int first = *scroll;
 	int buflines,showlines;
 	int i;
+#ifdef CMD_LIST
+	int ret;
+#endif /* CMD_LIST */
 
 
 	/* draw box */
 	leftoffs = (uirotwidth - uirotcharwidth * (width + 1)) / 2;
 	if (leftoffs < 0) leftoffs = 0;
-	topoffs = (uirotheight - (3 * height + 1) * uirotcharheight / 2) / 2;
-	ui_drawbox(bitmap,leftoffs,topoffs,(width + 1) * uirotcharwidth,(3 * height + 1) * uirotcharheight / 2);
+	topoffs = (uirotheight - (height * ROWHEIGHT + ROWMARGIN)) / 2;
+	ui_drawbox(bitmap,leftoffs,topoffs,(width + 1) * uirotcharwidth,height * ROWHEIGHT + ROWMARGIN);
 
 	buflines = count_lines_in_buffer (buf);
 	if (first > 0)
@@ -3116,7 +3606,7 @@ static void display_scroll_message (struct mame_bitmap *bitmap, int *scroll, int
 		dt[curr_dt].text = uparrow;
 		dt[curr_dt].color = UI_COLOR_NORMAL;
 		dt[curr_dt].x = (uirotwidth - uirotcharwidth * strlen(uparrow)) / 2;
-		dt[curr_dt].y = topoffs + (3*curr_dt+1)*uirotcharheight/2;
+		dt[curr_dt].y = topoffs + curr_dt*ROWHEIGHT + ROWMARGIN;
 		curr_dt++;
 	}
 
@@ -3124,6 +3614,16 @@ static void display_scroll_message (struct mame_bitmap *bitmap, int *scroll, int
 		showlines = height - 1;
 	else
 		showlines = height;
+
+#ifdef CMD_LIST
+	ret = buflines;
+
+	if (first)
+		ret |= SCR_PREV_PAGE;
+
+	if (showlines == (height - 1))
+		ret |= SCR_NEXT_PAGE;
+#endif /* CMD_LIST */
 
 	/* skip to first line */
 	while (first > 0)
@@ -3167,7 +3667,7 @@ static void display_scroll_message (struct mame_bitmap *bitmap, int *scroll, int
 
 		dt[curr_dt].text = copystart;
 		dt[curr_dt].color = UI_COLOR_NORMAL;
-		dt[curr_dt].y = topoffs + (3*curr_dt+1)*uirotcharheight/2;
+		dt[curr_dt].y = topoffs + curr_dt*ROWHEIGHT + ROWMARGIN;
 		curr_dt++;
 	}
 
@@ -3177,18 +3677,33 @@ static void display_scroll_message (struct mame_bitmap *bitmap, int *scroll, int
 		dt[curr_dt].text = downarrow;
 		dt[curr_dt].color = UI_COLOR_NORMAL;
 		dt[curr_dt].x = (uirotwidth - uirotcharwidth * strlen(downarrow)) / 2;
-		dt[curr_dt].y = topoffs + (3*curr_dt+1)*uirotcharheight/2;
+		dt[curr_dt].y = topoffs + curr_dt*ROWHEIGHT + ROWMARGIN;
 		curr_dt++;
 	}
 
 	dt[curr_dt].text = 0;	/* terminate array */
 
 	displaytext(bitmap,dt);
+
+#ifdef CMD_LIST
+	return ret;
+#endif /* CMD_LIST */
 }
 
 
-/* Display text entry for current driver from Mameinfo-, Driverinfo-, History.dat and Statistics. */
+#ifdef MASH_DATAFILE
+enum {
+	DATAFILE_MAMEINFO,
+	DATAFILE_DRIVINFO,
+	DATAFILE_HISTORY
+};
+
+
+/* Display text entry for current driver from history.dat and mameinfo.dat. */
 static int displaydatinfo (struct mame_bitmap *bitmap, int selected, int dattype)
+#else /* MASH_DATAFILE */
+static int displayhistory (struct mame_bitmap *bitmap, int selected)
+#endif /* MASH_DATAFILE */
 {
 	static int scroll = 0;
 	static int counter = 0;
@@ -3202,9 +3717,9 @@ static int displaydatinfo (struct mame_bitmap *bitmap, int selected, int dattype
 
 
 	maxcols = (uirotwidth / uirotcharwidth) - 1;
-	maxrows = (2 * uirotheight - uirotcharheight) / (3 * uirotcharheight);
-	maxcols -= 2;
-	maxrows -= 8;
+	maxrows = (uirotheight / ROWHEIGHT) - 1;
+	maxcols -= 1;
+	maxrows -= 2;
 
 	if (!buf)
 	{
@@ -3213,26 +3728,24 @@ static int displaydatinfo (struct mame_bitmap *bitmap, int selected, int dattype
 
 		if (buf)
 		{
-			/* try to load entry */
-			#ifndef MESS
-
 			/* Disable sound to prevent strange sound*/
 			osd_sound_enable(0);
 
-			if ((dattype == 1 && (load_driver_mameinfo (Machine->gamedrv, buf, 16384) == 0))
-			|| (dattype == 2 && (load_driver_drivinfo (Machine->gamedrv, buf, 16384) == 0))
-			|| (dattype == 3 && (load_driver_history (Machine->gamedrv, buf, bufsize) == 0))
-			|| (dattype == 4 && (load_driver_statistics (buf, 16384) == 0)))
-			#else
+			/* try to load entry */
+#ifdef MASH_DATAFILE
+			if ((dattype == DATAFILE_MAMEINFO   && (load_driver_mameinfo (Machine->gamedrv, buf, bufsize) == 0))
+			||  (dattype == DATAFILE_DRIVINFO   && (load_driver_drivinfo (Machine->gamedrv, buf, bufsize) == 0))
+			||  (dattype == DATAFILE_HISTORY    && (load_driver_history  (Machine->gamedrv, buf, bufsize) == 0)))
+#else /* MASH_DATAFILE */
 			if (load_driver_history (Machine->gamedrv, buf, bufsize) == 0)
-			#endif
+#endif /* MASH_DATAFILE */
 			{
 				scroll = 0;
 				wordwrap_text_buffer (buf, maxcols);
 				strcat(buf,"\n\t");
 				strcat(buf,ui_getstring (UI_lefthilight));
 				strcat(buf," ");
-				strcat(buf,ui_getstring (UI_returntomain));
+				strcat(buf,ui_getstring (UI_returntoprior));
 				strcat(buf," ");
 				strcat(buf,ui_getstring (UI_righthilight));
 				strcat(buf,"\n");
@@ -3243,9 +3756,8 @@ static int displaydatinfo (struct mame_bitmap *bitmap, int selected, int dattype
 				buf = 0;
 			}
 
-			#ifndef MESS
 			osd_sound_enable(1);
-			#endif
+
 		}
 	}
 
@@ -3257,18 +3769,31 @@ static int displaydatinfo (struct mame_bitmap *bitmap, int selected, int dattype
 			char msg[80];
 
 			strcpy(msg,"\t");
-			if (dattype == 1)
+
+			#ifndef MESS
+#ifdef MASH_DATAFILE
+			switch (dattype) {
+			case DATAFILE_MAMEINFO:
 				strcat(msg,ui_getstring(UI_mameinfomissing));
-			if (dattype == 2)
+				break;
+			case DATAFILE_DRIVINFO:
 				strcat(msg,ui_getstring(UI_drivinfomissing));
-			if (dattype == 3)
+				break;
+			case DATAFILE_HISTORY:
 				strcat(msg,ui_getstring(UI_historymissing));
-			if (dattype == 4)
+				break;
+			}
+#else /* MASH_DATAFILE */
+				strcat(msg,ui_getstring(UI_historymissing));
+#endif /* MASH_DATAFILE */
+			#else
 			strcat(msg,ui_getstring(UI_historymissing));
+			#endif
+
 			strcat(msg,"\n\n\t");
 			strcat(msg,ui_getstring (UI_lefthilight));
 			strcat(msg," ");
-			strcat(msg,ui_getstring (UI_returntomain));
+			strcat(msg,ui_getstring (UI_returntoprior));
 			strcat(msg," ");
 			strcat(msg,ui_getstring (UI_righthilight));
 			ui_displaymessagewindow(bitmap,msg);
@@ -3286,9 +3811,20 @@ static int displaydatinfo (struct mame_bitmap *bitmap, int selected, int dattype
 			else scroll++;
 		}
 
+		if (input_ui_pressed_repeat(IPT_UI_PAN_UP, fast))
+		{
+			scroll -= maxrows - 2;
+			if (scroll < 0) scroll = 0;
+		}
+
+		if (input_ui_pressed_repeat(IPT_UI_PAN_DOWN, fast))
+		{
+			scroll += maxrows - 2;
+		}
+
 		if (seq_pressed(input_port_type_seq(IPT_UI_UP)) | seq_pressed(input_port_type_seq(IPT_UI_DOWN)))
 		{
-			if (++counter == 70)
+			if (++counter == 25)
 			{
 				fast--;
 				if (fast < 1) fast = 0;
@@ -3296,17 +3832,6 @@ static int displaydatinfo (struct mame_bitmap *bitmap, int selected, int dattype
 			}
 		}
 		else fast = 4;
-
-		if (input_ui_pressed_repeat(IPT_UI_PAN_UP, 4))
-		{
-			scroll -= maxrows - 2;
-			if (scroll < 0) scroll = 0;
-		}
-
-		if (input_ui_pressed_repeat(IPT_UI_PAN_DOWN, 4))
-		{
-			scroll += maxrows - 2;
-		}
 
 		if (input_ui_pressed(IPT_UI_SELECT))
 			sel = -1;
@@ -3319,7 +3844,7 @@ static int displaydatinfo (struct mame_bitmap *bitmap, int selected, int dattype
 	}
 
 	if (sel == -1 || sel == -2)
-	{
+		{
 		schedule_full_refresh();
 
 		/* force buffer to be recreated */
@@ -3333,6 +3858,306 @@ static int displaydatinfo (struct mame_bitmap *bitmap, int selected, int dattype
 	return sel + 1;
 
 }
+
+
+#ifdef CMD_LIST
+static void flash_all_values_and_buffers(void)
+{
+	setup_selected    = 0;
+	osd_selected      = 0;
+	single_step       = 0;
+
+	scroll_reset      = 1;
+
+	if (commandlist_buf)
+	{
+		free(commandlist_buf);
+		commandlist_buf = NULL;
+		}
+	command_scroll = 0;
+	command_lastselected = 0;
+
+	command_sc = 0;
+	command_sel = 1;
+	command_load = 1;
+}
+
+/* Display text entry for current driver from command.dat. */
+static int displaycommand(struct mame_bitmap *bitmap, int selected, int shortcut)
+{
+	int sel, ret = 0, buflines = 0, visible = 0;
+	static int maxcols = 0, maxrows = 0;
+
+	sel = selected - 1;
+
+	if (!commandlist_buf)
+		{
+		maxcols = (uirotwidth / uirotcharwidth) - 2;
+		maxrows = (uirotheight / ROWHEIGHT) - 2;
+
+		/* allocate a buffer for the text */
+		if ((commandlist_buf = malloc(65536)))
+		{
+			memset(commandlist_buf, 0, 65536);
+
+			/* try to load entry */
+			if (!load_driver_command_ex (Machine->gamedrv, commandlist_buf, 65536, sel))
+			{
+				int height = 1;
+				static int presel = -1;
+				char *c;
+
+				if( presel != sel )
+				{
+					command_scroll = 0;
+					presel = sel;
+				}
+
+				convert_command_move(commandlist_buf);
+
+				strcat(commandlist_buf,"\n\t");
+				strcat(commandlist_buf,ui_getstring(UI_lefthilight));
+				strcat(commandlist_buf," ");
+				strcat(commandlist_buf,ui_getstring(UI_returntoprior));
+				strcat(commandlist_buf," ");
+				strcat(commandlist_buf,ui_getstring(UI_righthilight));
+				strcat(commandlist_buf,"\n");
+
+				c = commandlist_buf;
+
+				while(*c)
+					if (*c++ == '\n') height++;
+
+				if (height <= maxrows)
+					maxrows = height - 1;
+			}
+			else
+			{
+				free(commandlist_buf);
+				commandlist_buf = 0;
+			}
+		}
+	}
+
+	if (commandlist_buf)
+	{
+		ret = display_scroll_message(bitmap, &command_scroll, maxcols, maxrows, commandlist_buf);
+
+		buflines = ret & SCR_PAGE_MASK;
+		visible  = maxrows - ((ret & SCR_PREV_PAGE) != 0) - ((ret & SCR_NEXT_PAGE) != 0);
+	}
+	else
+	{
+		char msg[80];
+
+		strcpy(msg, "\t");
+		strcat(msg, ui_getstring(UI_commandmissing));
+		strcat(msg, "\n\n\t");
+		strcat(msg, ui_getstring(UI_lefthilight));
+		strcat(msg, " ");
+		if (shortcut)
+			strcat(msg, ui_getstring(UI_returntogame));
+		else
+			strcat(msg, ui_getstring(UI_returntoprior));
+		strcat(msg, " ");
+		strcat(msg, ui_getstring(UI_righthilight));
+		ui_displaymessagewindow(bitmap, msg);
+	}
+
+	if ((command_scroll > 0) && input_ui_pressed_repeat(IPT_UI_UP,4))
+	{
+		if (command_scroll == 2) command_scroll = 0;	/* 1 would be the same as 0, but with arrow on top */
+		else command_scroll--;
+	}
+
+	if (input_ui_pressed_repeat(IPT_UI_DOWN,4))
+	{
+		if (command_scroll == 0) command_scroll = 2;	/* 1 would be the same as 0, but with arrow on top */
+		else command_scroll++;
+	}
+
+	if ((ret & SCR_PREV_PAGE) && input_ui_pressed_repeat(IPT_UI_LEFT,4))
+	{
+		if (command_scroll == maxrows - 1)
+			command_scroll = 0;
+		else if (command_scroll - visible < 0)
+			command_scroll = 0;
+		else
+			command_scroll -= visible;
+	}
+
+	if ((ret & SCR_NEXT_PAGE) && input_ui_pressed_repeat(IPT_UI_RIGHT,4))
+	{
+		if (command_scroll >= buflines - visible)
+			command_scroll = buflines - visible;
+		else
+			command_scroll += visible;
+		}
+
+		if (input_ui_pressed(IPT_UI_SELECT))
+			sel = -1;
+
+		if (input_ui_pressed(IPT_UI_CANCEL))
+			sel = -1;
+
+	if (input_ui_pressed(IPT_UI_CONFIGURE) && shortcut == 0)
+			sel = -2;
+
+	if (sel == -1 || sel == -2)
+	{
+		schedule_full_refresh();
+
+		/* force buffer to be recreated */
+		if (commandlist_buf)
+		{
+			free(commandlist_buf);
+			commandlist_buf = 0;
+		}
+		}
+
+	return sel + 1;
+}
+
+
+static int displaycommand_ex(struct mame_bitmap *bitmap, int selected, int shortcut)
+{
+	static const char *menu_item[64];
+	static int total = 0;
+	int sel, visible;
+
+	sel = selected - 1;
+	visible = (uirotheight / ROWHEIGHT) - 3;
+
+	/* If a submenu has been selected, go there */
+	if (command_lastselected)
+	{
+		command_lastselected = displaycommand(bitmap, (sel + 1), shortcut);
+
+		if (command_lastselected == -1)
+		{
+			sel = -2;
+			command_lastselected = 1;
+			schedule_full_refresh();
+	}
+
+	return sel + 1;
+	}
+
+	/* No submenu active, display the main command index menu */
+	if (total == -1)
+	{
+		char msg[80];
+
+		strcpy(msg, "\t");
+		strcat(msg, ui_getstring(UI_commandmissing));
+		strcat(msg, "\n\n\t");
+		strcat(msg, ui_getstring(UI_lefthilight));
+		strcat(msg, " ");
+		if (shortcut)
+			strcat(msg, ui_getstring(UI_returntogame));
+		else
+			strcat(msg, ui_getstring(UI_returntoprior));
+		strcat(msg, " ");
+		strcat(msg, ui_getstring(UI_righthilight));
+		ui_displaymessagewindow(bitmap, msg);
+	}
+	else
+		{
+		if (total == 0 || command_load)
+			{
+			total = command_sub_menu(Machine->gamedrv, menu_item);
+			command_load = 0;
+
+			if (total > 0)
+			{
+				if (shortcut)
+					menu_item[total++] = ui_getstring(UI_returntogame);
+				else
+					menu_item[total++] = ui_getstring(UI_returntoprior);
+				menu_item[total] = 0;
+			}
+			else
+			{
+				char msg[80];
+
+				total = -1;
+				strcpy(msg, "\t");
+				strcat(msg, ui_getstring(UI_commandmissing));
+				strcat(msg, "\n\n\t");
+				strcat(msg, ui_getstring(UI_lefthilight));
+				strcat(msg, " ");
+				if (shortcut)
+					strcat(msg, ui_getstring(UI_returntogame));
+				else
+					strcat(msg, ui_getstring(UI_returntoprior));
+				strcat(msg, " ");
+				strcat(msg, ui_getstring(UI_righthilight));
+				ui_displaymessagewindow(bitmap, msg);
+		}
+	}
+		else
+		{
+			if (shortcut)
+				menu_item[total - 1] = ui_getstring(UI_returntogame);
+			else
+				menu_item[total - 1] = ui_getstring(UI_returntoprior);
+
+			ui_displaymenu(bitmap,menu_item,0,0,sel,0);
+		}
+
+		if (total > 0)
+		{
+			if (input_ui_pressed_repeat(IPT_UI_DOWN,4))
+				sel = (sel + 1) % total;
+
+			if (input_ui_pressed_repeat(IPT_UI_UP,4))
+				sel = (sel + total - 1) % total;
+
+			if (input_ui_pressed_repeat(IPT_UI_LEFT,4))
+			{
+				sel -= visible;
+				if (sel < 0)	sel = 0;
+		}
+
+			if (input_ui_pressed_repeat(IPT_UI_RIGHT,4))
+		{
+				sel += visible;
+				if (sel >= total)	sel = total - 1;
+			}
+		}
+		}
+
+		if (input_ui_pressed(IPT_UI_SELECT))
+	{
+		if (sel == (total - 1) || total == -1) // return to main
+		{
+			command_lastselected = 0;
+			sel = -1;
+		}
+		else
+		{
+			command_lastselected = 1;
+			schedule_full_refresh();
+		}
+	}
+
+	/* Cancel pops us up a menu level */
+		if (input_ui_pressed(IPT_UI_CANCEL))
+			sel = -1;
+
+	/* The UI key takes us all the way back out */
+	if (input_ui_pressed(IPT_UI_CONFIGURE) && shortcut == 0)
+			sel = -2;
+
+	if (sel == -1 || sel == -2)
+	{
+		schedule_full_refresh();
+		total = 0;
+	}
+
+	return sel + 1;
+}
+#endif /* CMD_LIST */
 
 
 #ifndef MESS
@@ -3470,16 +4295,162 @@ int memcard_menu(struct mame_bitmap *bitmap, int selection)
 #endif
 
 
+static int document_menu(struct mame_bitmap *bitmap, int selected)
+{
+	enum {
 #ifndef MESS
-enum { UI_SWITCH = 0,UI_DEFCODE,UI_CODE,UI_ANALOG,UI_CALIBRATE,
-		UI_MOUSECNTL,UI_MOUSEAXESCNTL,
-		UI_STATS,UI_GAMEINFO, UI_MAMEINFO, UI_DRIVINFO, UI_HISTORY, UI_STATISTICS,
-		UI_CHEAT,UI_RESET,UI_MEMCARD,UI_RAPIDFIRE,UI_EXIT };
+#ifdef MASH_DATAFILE
+		UI_MAMEINFO, UI_DRIVINFO,
+#endif /* MASH_DATAFILE */
 #else
-enum { UI_SWITCH = 0,UI_DEFCODE,UI_CODE,UI_ANALOG,UI_CALIBRATE,
-		UI_GAMEINFO, UI_IMAGEINFO,UI_FILEMANAGER,UI_TAPECONTROL,
-		UI_HISTORY,UI_CHEAT,UI_RESET,UI_MEMCARD,UI_RAPIDFIRE,UI_EXIT,
-		UI_CONFIGURATION };
+		UI_IMAGEINFO,
+#endif
+#ifdef CMD_LIST
+		UI_COMMAND,
+#endif /* CMD_LIST */
+		UI_HISTORY, UI_RETURNTOMAIN
+	};
+
+	const char *menuitem[10];
+	int menuaction[10];
+	int menutotal = 0;
+	int sel,res=-1;
+	static int menu_lastselected = 0;
+
+	if (selected == -1)
+		sel = menu_lastselected;
+	else sel = selected - 1;
+
+#ifndef MESS
+	menuitem[menutotal] = ui_getstring (UI_history); menuaction[menutotal++] = UI_HISTORY;
+#ifdef MASH_DATAFILE
+	menuitem[menutotal] = ui_getstring (UI_mameinfo); menuaction[menutotal++] = UI_MAMEINFO;
+	menuitem[menutotal] = ui_getstring (UI_drivinfo); menuaction[menutotal++] = UI_DRIVINFO;
+#endif /* MASH_DATAFILE */
+#ifdef CMD_LIST
+	menuitem[menutotal] = ui_getstring (UI_command); menuaction[menutotal++] = UI_COMMAND;
+#endif /* CMD_LIST */
+#else
+	menuitem[menutotal] = ui_getstring (UI_imageinfo); menuaction[menutotal++] = UI_IMAGEINFO;
+	menuitem[menutotal] = ui_getstring (UI_history); menuaction[menutotal++] = UI_HISTORY;
+#endif
+	menuitem[menutotal] = ui_getstring(UI_returntomain); menuaction[menutotal++] = UI_RETURNTOMAIN;
+	menuitem[menutotal] = 0; /* terminate array */
+
+	if (sel > SEL_MASK)
+	{
+		switch (menuaction[sel & SEL_MASK])
+		{
+			case UI_HISTORY:
+#ifdef MASH_DATAFILE
+				res = displaydatinfo(bitmap, sel >> SEL_BITS, DATAFILE_HISTORY);
+#else /* MASH_DATAFILE */
+				res = displayhistory(bitmap, sel >> SEL_BITS);
+#endif /* MASH_DATAFILE */
+				break;
+#ifndef MESS
+#ifdef MASH_DATAFILE
+			case UI_MAMEINFO:
+				res = displaydatinfo(bitmap, sel >> SEL_BITS, DATAFILE_MAMEINFO);
+				break;
+			case UI_DRIVINFO:
+				res = displaydatinfo(bitmap, sel >> SEL_BITS, DATAFILE_DRIVINFO);
+				break;
+#endif /* MASH_DATAFILE */
+#else
+			case UI_IMAGEINFO:
+				res = displayimageinfo(bitmap, sel >> SEL_BITS);
+				break;
+#endif
+#ifdef CMD_LIST
+			case UI_COMMAND:
+				res = displaycommand_ex(bitmap, sel >> SEL_BITS, 0);
+				break;
+#endif /* CMD_LIST */
+		}
+
+		if (res == -1)
+		{
+			menu_lastselected = sel;
+			sel = -2;
+		}
+		else
+			sel = (sel & SEL_MASK) | (res << SEL_BITS);
+
+		return sel + 1;
+	}
+
+	ui_displaymenu(bitmap,menuitem,0,0,sel,0);
+
+	if (input_ui_pressed_repeat(IPT_UI_DOWN,8))
+		sel = (sel + 1) % menutotal;
+
+	if (input_ui_pressed_repeat(IPT_UI_UP,8))
+		sel = (sel + menutotal - 1) % menutotal;
+
+	if (input_ui_pressed(IPT_UI_SELECT))
+	{
+		switch (menuaction[sel])
+		{
+			#ifndef MESS
+#ifdef MASH_DATAFILE
+			case UI_MAMEINFO:
+			case UI_DRIVINFO:
+#endif /* MASH_DATAFILE */
+			#else
+			case UI_IMAGEINFO:
+			#endif
+			case UI_HISTORY:
+#ifdef CMD_LIST
+			case UI_COMMAND:
+#endif /* CMD_LIST */
+				sel |= 1 << SEL_BITS;
+				schedule_full_refresh();
+				break;
+
+			default:
+				if (sel == menutotal - 1)
+				{
+					menu_lastselected = 0;
+					sel = -1;
+				}
+		}
+	}
+
+	if (input_ui_pressed(IPT_UI_CANCEL))
+	{
+		menu_lastselected = 0;
+		sel = -1;
+	}
+
+	if (input_ui_pressed(IPT_UI_CONFIGURE))
+		sel = -2;
+
+	if (sel == -1 || sel == -2)
+	{
+		schedule_full_refresh();
+	}
+
+	return sel + 1;
+}
+
+
+enum { UI_SWITCH = 0,UI_DEFCODE,UI_CODE,
+		UI_ANALOG,UI_CALIBRATE,
+#ifndef MESS
+		UI_STATS,UI_GAMEINFO,
+#else
+		UI_GAMEINFO,UI_FILEMANAGER,UI_TAPECONTROL,
+#endif
+		UI_GAMEDOCS,UI_CHEAT,
+		UI_MOUSECNTL,UI_MOUSEAXESCNTL,UI_RESET,UI_MEMCARD,
+#ifdef XMAME
+		UI_RAPIDFIRE,
+#endif
+#ifndef MESS
+		UI_EXIT };
+#else
+		UI_EXIT,UI_CONFIGURATION };
 #endif
 
 
@@ -3585,18 +4556,14 @@ static void setup_menu_init(void)
 #ifndef MESS
 	menu_item[menu_total] = ui_getstring (UI_bookkeeping); menu_action[menu_total++] = UI_STATS;
 	menu_item[menu_total] = ui_getstring (UI_gameinfo); menu_action[menu_total++] = UI_GAMEINFO;
-	menu_item[menu_total] = ui_getstring (UI_mameinfo); menu_action[menu_total++] = UI_MAMEINFO;
-	menu_item[menu_total] = ui_getstring (UI_drivinfo); menu_action[menu_total++] = UI_DRIVINFO;
-	menu_item[menu_total] = ui_getstring (UI_history); menu_action[menu_total++] = UI_HISTORY;
-	menu_item[menu_total] = ui_getstring (UI_statistics); menu_action[menu_total++] = UI_STATISTICS;
-#else
-	menu_item[menu_total] = ui_getstring (UI_imageinfo); menu_action[menu_total++] = UI_IMAGEINFO;
+#endif
+#ifdef MESS
 	menu_item[menu_total] = ui_getstring (UI_filemanager); menu_action[menu_total++] = UI_FILEMANAGER;
 #if HAS_WAVE
 	menu_item[menu_total] = ui_getstring (UI_tapecontrol); menu_action[menu_total++] = UI_TAPECONTROL;
 #endif
-	menu_item[menu_total] = ui_getstring (UI_history); menu_action[menu_total++] = UI_HISTORY;
 #endif
+	menu_item[menu_total] = ui_getstring (UI_gamedocuments); menu_action[menu_total++] = UI_GAMEDOCS;
 
 	if (options.cheat)
 	{
@@ -3625,18 +4592,11 @@ static void setup_menu_init(void)
 static int setup_menu(struct mame_bitmap *bitmap, int selected)
 {
 	int sel,res=-1;
-	static int menu_lastselected = -1;
+	static int menu_lastselected = 0;
 
 
 	if (selected == -1)
-	{
 		sel = menu_lastselected;
-		if (menu_lastselected == -1)
-		{
-			sel = menu_total - 6;
-			if (options.cheat) sel--;
-		}
-	}
 	else sel = selected - 1;
 
 	if (sel > SEL_MASK)
@@ -3676,12 +4636,6 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 			case UI_GAMEINFO:
 				res = displaygameinfo(bitmap, sel >> SEL_BITS);
 				break;
-			case UI_MAMEINFO:
-				res = displaydatinfo(bitmap, sel >> SEL_BITS, 1);
-				break;
-			case UI_DRIVINFO:
-				res = displaydatinfo(bitmap, sel >> SEL_BITS, 2);
-				break;
 #endif
 #ifdef MESS
 			case UI_IMAGEINFO:
@@ -3699,11 +4653,8 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 				res = setconfiguration(bitmap, sel >> SEL_BITS);
 				break;
 #endif /* MESS */
-			case UI_HISTORY:
-				res = displaydatinfo(bitmap, sel >> SEL_BITS, 3);
-				break;
-			case UI_STATISTICS:
-				res = displaydatinfo(bitmap, sel >> SEL_BITS, 4);
+			case UI_GAMEDOCS:
+				res = document_menu(bitmap, sel >> SEL_BITS);
 				break;
 			case UI_CHEAT:
 				res = cheat_menu(bitmap, sel >> SEL_BITS);
@@ -3758,17 +4709,13 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 			case UI_MOUSEAXESCNTL:
 			case UI_STATS:
 			case UI_GAMEINFO:
-			case UI_MAMEINFO:
-			case UI_DRIVINFO:
-			#else
+#else
 			case UI_GAMEINFO:
-			case UI_IMAGEINFO:
 			case UI_FILEMANAGER:
 			case UI_TAPECONTROL:
 			case UI_CONFIGURATION:
 #endif /* !MESS */
-			case UI_HISTORY:
-			case UI_STATISTICS:
+			case UI_GAMEDOCS:
 			case UI_CHEAT:
 			case UI_MEMCARD:
 				sel |= 1 << SEL_BITS;
@@ -4452,8 +5399,6 @@ void ui_display_fps(struct mame_bitmap *bitmap)
 	}
 }
 
-
-
 int handle_user_interface(struct mame_bitmap *bitmap)
 {
 #ifdef MESS
@@ -4463,6 +5408,7 @@ int handle_user_interface(struct mame_bitmap *bitmap)
 	/* if the user pressed F12, save the screen to a file */
 	if (input_ui_pressed(IPT_UI_SNAPSHOT))
 		save_screen_snapshot(bitmap);
+
 
 	/* This call is for the cheat, it must be called once a frame */
 	if (options.cheat) DoCheat(bitmap);
@@ -4591,7 +5537,6 @@ int handle_user_interface(struct mame_bitmap *bitmap)
 			if (input_ui_pressed(IPT_UI_SNAPSHOT))
 				save_screen_snapshot(bitmap);
 
-
 			if (input_ui_pressed(IPT_UI_SAVE_STATE))
 				do_loadsave(bitmap, LOADSAVE_SAVE);
 
@@ -4640,6 +5585,29 @@ int handle_user_interface(struct mame_bitmap *bitmap)
 				if (--messagecounter == 0)
 					schedule_full_refresh();
 			}
+
+			/* show FPS display? */
+			if (input_ui_pressed(IPT_UI_SHOW_FPS))
+			{
+				/* if we're temporarily on, turn it off immediately */
+				if (showfpstemp)
+				{
+					showfpstemp = 0;
+					schedule_full_refresh();
+				}
+
+				/* otherwise, just toggle; force a refresh if going off */
+				else
+				{
+					showfps ^= 1;
+					if (!showfps)
+						schedule_full_refresh();
+				}
+			}
+
+			/* add the FPS counter */
+			ui_display_fps(bitmap);
+
 
 			update_video_and_audio();
 			reset_partial_updates();
@@ -4726,6 +5694,7 @@ void init_user_interface(void)
 	/* clear the input memory */
 	while (code_read_async() != CODE_NONE) {};
 
+
 	setup_menu_init();
 	setup_selected = 0;
 
@@ -4735,6 +5704,19 @@ void init_user_interface(void)
 	jukebox_selected = -1;
 
 	single_step = 0;
+	scroll_reset = 1;
+
+	displaymessagewindow_under = 0;
+
+	lhw = strlen(ui_getstring(UI_lefthilight));
+	rhw = strlen(ui_getstring(UI_righthilight));
+	uaw = strlen(ui_getstring(UI_uparrow));
+	daw = strlen(ui_getstring(UI_downarrow));
+	law = strlen(ui_getstring(UI_leftarrow));
+	raw = strlen(ui_getstring(UI_rightarrow));
+#ifdef CMD_LIST
+	flash_all_values_and_buffers();
+#endif /* CMD_LIST */
 }
 
 int onscrd_active(void)
@@ -4756,3 +5738,4 @@ int is_game_paused(void)
 }
 
 #endif
+

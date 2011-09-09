@@ -1,4 +1,4 @@
-This is the complete list of games supported by MAME 0.80.06 (Mar  6 2004).
+This is the complete list of games supported by MAME 0.80.06 (Mar  8 2004).
 Variants of the same game are not included, you can use the -listclones command
 to get a list of the alternate versions of a given game.
 

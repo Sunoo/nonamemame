@@ -37,6 +37,9 @@ extern struct rc_option fileio_opts[];
 extern struct rc_option input_opts[];
 extern struct rc_option sound_opts[];
 extern struct rc_option video_opts[];
+#ifdef UI_COLOR_DISPLAY
+extern struct rc_option palette_opts[];
+#endif /* UI_COLOR_DISPLAY */
 
 #ifdef MESS
 #include "configms.h"
@@ -225,6 +228,10 @@ static struct rc_option opts[] = {
 	{ "crconly", NULL, rc_bool, &options.crc_only, "0", 0, 0, NULL, "use only CRC for all integrity checks" },
 	{ "bios", NULL, rc_string, &options.bios, "default", 0, 14, NULL, "change system bios" },
 	{ "state", NULL, rc_string, &statename, NULL, 0, 0, NULL, "state to load" },
+#ifdef UI_COLOR_DISPLAY
+	/* palette */
+	{ NULL, NULL, rc_link, palette_opts, NULL, 0,	0, NULL, NULL },
+#endif /* UI_COLOR_DISPLAY */
 
 	/* config options */
 	{ "Configuration options", NULL, rc_seperator, NULL, NULL, 0, 0, NULL, NULL },

@@ -20,6 +20,12 @@ struct DisplayText
 #define UI_COLOR_NORMAL 0	/* white on black text */
 #define UI_COLOR_INVERSE 1	/* black on white text */
 
+#ifdef CMD_LIST
+#define SCR_PAGE_MASK  0xffffff
+#define SCR_NEXT_PAGE  0x1000000
+#define SCR_PREV_PAGE  0x10000000
+#endif /* CMD_LIST */
+
 #define SEL_BITS 12		/* main menu selection mask */
 #define SEL_BITS2 4		/* submenu selection masks */
 #define SEL_MASK ((1<<SEL_BITS)-1)
@@ -27,14 +33,14 @@ struct DisplayText
 
 extern UINT8 ui_dirty;
 
-struct GfxElement *builduifont(void);
 void pick_uifont_colors(void);
 void displaytext(struct mame_bitmap *bitmap,const struct DisplayText *dt);
 
 void ui_drawchar(struct mame_bitmap *dest, int ch, int color, int sx, int sy);
 void ui_text(struct mame_bitmap *bitmap,const char *buf,int x,int y);
 void ui_drawbox(struct mame_bitmap *bitmap,int leftx,int topy,int width,int height);
-void ui_displaymessagewindow(struct mame_bitmap *bitmap,const char *text);
+int ui_displaymessagewindow(struct mame_bitmap *bitmap,const char *text);
+int ui_displaymessagewindow_under(struct mame_bitmap *bitmap,const char *text);
 void ui_displaymenu(struct mame_bitmap *bitmap,const char **items,const char **subitems,char *flag,int selected,int arrowize_subitem);
 void ui_display_fps(struct mame_bitmap *bitmap);
 int showcopyright(struct mame_bitmap *bitmap);

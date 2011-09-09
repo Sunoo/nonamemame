@@ -735,117 +735,82 @@ const char *GameInfoStatus(int driver_index)
 	memset(buffer,0,sizeof(char)*1024);
 
 	if (IsAuditResultKnown(audit_result) == FALSE)
-	{
 		strcpy(buffer, "Unknown");
-	}
-	else if (IsAuditResultYes(audit_result))
+
+	if (IsAuditResultYes(audit_result))
 	{
 		if (DriverIsBroken(driver_index))
-		{
 			strcpy(buffer, "Not working");
-			
-			if (drivers[driver_index]->flags & GAME_UNEMULATED_PROTECTION)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Unemulated Protection");
-			}
-			if (drivers[driver_index]->flags & GAME_WRONG_COLORS)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Colors are totally wrong");
-			}
-			if (drivers[driver_index]->flags & GAME_IMPERFECT_COLORS)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Imperfect Colors");
-			}
-			if (drivers[driver_index]->flags & GAME_IMPERFECT_GRAPHICS)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Imperfect Graphics");
-			}
-			if (drivers[driver_index]->flags & GAME_NO_SOUND)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Sound is missing");
-			}
-			if (drivers[driver_index]->flags & GAME_IMPERFECT_SOUND)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Imperfect Sound");
-			}
-			if (drivers[driver_index]->flags & GAME_NO_COCKTAIL)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Screen flip support is missing");
-			}
-		}
 		else
-		{
 			strcpy(buffer, "Working");
-			
-			if (drivers[driver_index]->flags & GAME_UNEMULATED_PROTECTION)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Unemulated Protection");
-			}
-			if (drivers[driver_index]->flags & GAME_WRONG_COLORS)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Colors are totally wrong");
-			}
-			if (drivers[driver_index]->flags & GAME_IMPERFECT_COLORS)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Imperfect Colors");
-			}
-			if (drivers[driver_index]->flags & GAME_IMPERFECT_GRAPHICS)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Imperfect Graphics");
-			}
-			if (drivers[driver_index]->flags & GAME_NO_SOUND)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Sound is missing");
-			}
-			if (drivers[driver_index]->flags & GAME_IMPERFECT_SOUND)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Imperfect Sound");
-			}
-			if (drivers[driver_index]->flags & GAME_NO_COCKTAIL)
-			{
-				if (*buffer != '\0')
-					strcat(buffer, "\r\n");
-				strcat(buffer, "Screen flip support is missing");
-			}
-		}
+
+ 		if (drivers[driver_index]->flags & GAME_UNEMULATED_PROTECTION)
+			strcat(buffer, "\r\nGame protection isn't fully emulated");
+ 		if (drivers[driver_index]->flags & GAME_WRONG_COLORS)
+			strcat(buffer, "\r\nColors are completely wrong");
+		if (drivers[driver_index]->flags & GAME_IMPERFECT_COLORS)
+			strcat(buffer, "\r\nColors aren't 100% accurate");
+		if (drivers[driver_index]->flags & GAME_IMPERFECT_GRAPHICS)
+			strcat(buffer, "\r\nVideo emulation isn't 100% accurate");
+		if (drivers[driver_index]->flags & GAME_NO_SOUND)
+			strcat(buffer, "\r\nGame lacks sound");
+		if (drivers[driver_index]->flags & GAME_IMPERFECT_SOUND)
+			strcat(buffer, "\r\nSound emulation isn't 100% accurate");
+		if (drivers[driver_index]->flags & GAME_NO_COCKTAIL)
+			strcat(buffer, "\r\nScreen flipping is not supported");
 	}
+
+	// audit result is no
 	else
-	{
-		// audit result is no
 #ifdef MESS
 		strcpy(buffer, "BIOS missing");
 #else
 		strcpy(buffer, "ROMs missing");
 #endif
-	}
 
 	return buffer;
+}
+
+/* Build game status bar string */
+const char *GameInfoStatusBar(int driver_index)
+{
+	static char buffer[1024];
+	int audit_result = GetRomAuditResults(driver_index);
+	memset(buffer,0,sizeof(char)*1024);
+
+	if (IsAuditResultKnown(audit_result) == FALSE)
+		return "Unknown";
+
+	if (IsAuditResultYes(audit_result))
+	{
+		if (DriverIsBroken(driver_index))
+			return "Not working";
+		if (drivers[driver_index]->flags & GAME_UNEMULATED_PROTECTION)
+			return "Working with problems";
+		if (drivers[driver_index]->flags & GAME_WRONG_COLORS)
+			return "Working with problems";
+		if (drivers[driver_index]->flags & GAME_IMPERFECT_COLORS)
+			return "Working with problems";
+		if (drivers[driver_index]->flags & GAME_IMPERFECT_GRAPHICS)
+			return "Working with problems";
+		if (drivers[driver_index]->flags & GAME_NO_SOUND)
+			return "Working with problems";
+		if (drivers[driver_index]->flags & GAME_IMPERFECT_SOUND)
+			return "Working with problems";
+		if (drivers[driver_index]->flags & GAME_NO_COCKTAIL)
+			return "Working with problems";
+		else
+			return "Working";
+		return buffer;
+	}
+
+	// audit result is no
+
+#ifdef MESS
+	return "BIOS missing";
+#else
+	return "ROMs missing";
+#endif
 }
 
 /* Build game manufacturer string */
@@ -2168,7 +2133,7 @@ static void BuildDataMap(void)
 	DataMapAdd(IDC_LEDMODE,       DM_INT,  CT_COMBOBOX, &g_nLedmodeIndex,		   DM_STRING, &pGameOpts->ledmode,  0, 0, AssignLedmode);
 	DataMapAdd(IDC_BIOS,          DM_INT,  CT_COMBOBOX, &pGameOpts->bios,          DM_INT, &pGameOpts->bios,        0, 0, 0);
 #ifdef MESS
-	DataMapAdd(IDC_USE_NEW_UI,    DM_BOOL, CT_BUTTON,   &pGameOpts->use_new_ui,    DM_BOOL, &pGameOpts->use_new_ui, 0, 0, 0);
+	DataMapAdd(IDC_USE_NEW_UI,    DM_BOOL, CT_BUTTON,   &pGameOpts->mess.use_new_ui,DM_BOOL, &pGameOpts->mess.use_new_ui, 0, 0, 0);
 #endif
 
 }

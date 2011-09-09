@@ -26,6 +26,7 @@ enum
 	UI_returntomain,
 	UI_returntoprior,
 	UI_anykey,
+	UI_selectkey,	// Added for usrintrf.c
 	UI_on,
 	UI_off,
 	UI_NA,
@@ -50,9 +51,14 @@ enum
 	UI_vectorintensity,
 	UI_overclock,
 	UI_allcpus,
+	UI_historymissing,
+#ifdef MASH_DATAFILE
 	UI_mameinfomissing,
 	UI_drivinfomissing,
-	UI_historymissing,
+#endif /* MASH_DATAFILE */
+#ifdef CMD_LIST
+	UI_commandmissing,
+#endif /* CMD_LIST */
 
 	/* special characters */
 	UI_leftarrow,
@@ -83,10 +89,7 @@ enum
 	UI_bookkeeping,
 	UI_inputspecific,
 	UI_gameinfo,
-	UI_mameinfo,
-	UI_drivinfo,
-	UI_history,
-	UI_statistics,
+	UI_gamedocuments,
 	UI_resetgame,
 	UI_returntogame,
 	UI_cheat,
@@ -95,7 +98,17 @@ enum
 	UI_mouseaxescontrols,
 	UI_analogjoycntls,
 
-	/* analog input stuff */
+	/* documents menu */
+	UI_history,
+#ifdef MASH_DATAFILE
+	UI_mameinfo,
+	UI_drivinfo,
+#endif /* MASH_DATAFILE */
+#ifdef CMD_LIST
+	UI_command,
+#endif /* CMD_LIST */
+
+	/* input stuff */
 	UI_keyjoyspeed,
 	UI_reverse,
 	UI_sensitivity,
@@ -191,6 +204,9 @@ enum
 	UI_search_all_values_saved,
 	UI_search_one_match_found_added,
 
+	//centering
+	UI_center,
+	
 	UI_last_mame_entry
 };
 
@@ -211,7 +227,11 @@ struct lang_struct
 
 extern struct lang_struct lang;
 
+#if 0
 int uistring_init (mame_file *language_file);
+#else
+int uistring_init (void);
+#endif
 
 const char * ui_getstring (int string_num);
 

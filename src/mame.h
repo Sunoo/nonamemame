@@ -15,8 +15,10 @@
 
 #include "fileio.h"
 #include "osdepend.h"
+#include "ui_font.h"
 #include "drawgfx.h"
 #include "palette.h"
+#include "ui_pal.h"
 
 extern char build_version[];
 extern int gbPriorityBitmapIsDirty;
@@ -86,7 +88,7 @@ struct RunningMachine
 	/* current visible area, and a prerotated one adjusted for orientation */
 	struct rectangle 		visible_area;
 	struct rectangle		absolute_visible_area;
-
+	
 	/* current video refresh rate */
 	float					refresh_rate;
 
@@ -130,9 +132,12 @@ struct RunningMachine
 
 	/* font used by the user interface */
 	struct GfxElement *		uifont;
+	struct GfxElement *		uirotfont;
+	struct GfxElement *		uirotfont2;
 
 	/* font parameters */
 	int 					uifontwidth, uifontheight;
+	int                           uifontwidth2,uifontheight2;
 
 	/* user interface visible area */
 	int 					uixmin, uiymin;
@@ -195,6 +200,8 @@ struct GameOptions
 
 	int		mame_debug;		/* 1 to enable debugging */
 	int		cheat;			/* 1 to enable cheating */
+	int		use_lang_list;
+	int		langcode;
 	int 	gui_host;		/* 1 to tweak some UI-related things for better GUI integration */
 	int 	show_matches;
 	int 	skip_disclaimer;	/* 1 to skip the disclaimer screen at startup */
@@ -214,6 +221,9 @@ struct GameOptions
 	int		vector_width;	/* requested width for vector games; 0 means default (640) */
 	int		vector_height;	/* requested height for vector games; 0 means default (480) */
 	int		ui_orientation;	/* orientation of the UI relative to the video */
+#ifdef UI_COLOR_DISPLAY
+	UINT8           uicolortable[MAX_COLORTABLE][3];
+#endif /* UI_COLOR_DISPLAY */
 
 	int		beam;			/* vector beam width */
 	float	vector_flicker;	/* vector beam flicker effect control */
@@ -257,14 +267,14 @@ struct GameOptions
 /* these flags are set in the mame_display struct to indicate that */
 /* a particular piece of state has changed since the last call to */
 /* osd_update_video_and_audio() */
-#define GAME_BITMAP_CHANGED			0x00000001
+#define GAME_BITMAP_CHANGED		0x00000001
 #define GAME_PALETTE_CHANGED		0x00000002
 #define GAME_VISIBLE_AREA_CHANGED	0x00000004
 #define VECTOR_PIXELS_CHANGED		0x00000008
 #define DEBUG_BITMAP_CHANGED		0x00000010
 #define DEBUG_PALETTE_CHANGED		0x00000020
-#define DEBUG_FOCUS_CHANGED			0x00000040
-#define LED_STATE_CHANGED			0x00000080
+#define DEBUG_FOCUS_CHANGED		0x00000040
+#define LED_STATE_CHANGED		0x00000080
 #define GAME_REFRESH_RATE_CHANGED	0x00000100
 
 
@@ -272,27 +282,27 @@ struct GameOptions
 /* video display */
 struct mame_display
 {
-	/* bitfield indicating which states have changed */
-	UINT32					changed_flags;
+      /* bitfield indicating which states have changed */
+      UINT32					changed_flags;
 
-	/* game bitmap and display information */
-	struct mame_bitmap *	game_bitmap;			/* points to game's bitmap */
-	struct rectangle		game_bitmap_update;		/* bounds that need to be updated */
-	const rgb_t *			game_palette;			/* points to game's adjusted palette */
-	UINT32					game_palette_entries;	/* number of palette entries in game's palette */
-	UINT32 *				game_palette_dirty;		/* points to game's dirty palette bitfield */
-	struct rectangle 		game_visible_area;		/* the game's visible area */
-	float					game_refresh_rate;		/* refresh rate */
-	void *					vector_dirty_pixels;	/* points to X,Y pairs of dirty vector pixels */
+      /* game bitmap and display information */
+      struct mame_bitmap *	game_bitmap;			/* points to game's bitmap */
+      struct rectangle		game_bitmap_update;		/* bounds that need to be updated */
+      const rgb_t *			game_palette;			/* points to game's adjusted palette */
+      UINT32					game_palette_entries;	/* number of palette entries in game's palette */
+      UINT32 *				game_palette_dirty;		/* points to game's dirty palette bitfield */
+      struct rectangle 		game_visible_area;		/* the game's visible area */
+      float					game_refresh_rate;		/* refresh rate */
+      void *					vector_dirty_pixels;	/* points to X,Y pairs of dirty vector pixels */
 
-	/* debugger bitmap and display information */
-	struct mame_bitmap *	debug_bitmap;			/* points to debugger's bitmap */
-	const rgb_t *			debug_palette;			/* points to debugger's palette */
-	UINT32					debug_palette_entries;	/* number of palette entries in debugger's palette */
-	UINT8					debug_focus;			/* set to 1 if debugger has focus */
+      /* debugger bitmap and display information */
+      struct mame_bitmap *	debug_bitmap;			/* points to debugger's bitmap */
+      const rgb_t *			debug_palette;			/* points to debugger's palette */
+      UINT32					debug_palette_entries;	/* number of palette entries in debugger's palette */
+      UINT8					debug_focus;			/* set to 1 if debugger has focus */
 
-	/* other misc information */
-	UINT8					led_state;				/* bitfield of current LED states */
+      /* other misc information */
+      UINT8					led_state;				/* bitfield of current LED states */
 };
 
 
