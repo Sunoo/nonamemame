@@ -2685,11 +2685,76 @@ MEMORY_END
 
 READ_HANDLER( downtown_ip_r )
 {
-	int dir1 = readinputport(4);	// analog port
-	int dir2 = readinputport(5);	// analog port
+	/* <jjs> */
+	int dir1;
+	int dir2;
+	static int temp;
+	static unsigned char old_joydir[2];
+	static int counter=0;
+	static int use_2button_rotary[] = {0,0};
+	
+	counter++;
 
-	dir1 = (~ (0x800 >> ((dir1 * 12)/0x100)) ) & 0xfff;
-	dir2 = (~ (0x800 >> ((dir2 * 12)/0x100)) ) & 0xfff;
+	if (counter==16)
+	{
+		if ( (temp = readinputport(6)) || use_2button_rotary[0])
+		{
+			use_2button_rotary[0] = 1;
+			if (temp & 0x1) 
+			{
+				if (old_joydir[0] <= 0)
+						old_joydir[0] = 11;
+				else
+						old_joydir[0]--;
+			}
+			else if (temp & 0x2) 
+			{
+				if (old_joydir[0] >= 11)
+						old_joydir[0] = 0;
+				else
+						old_joydir[0]++;
+			}
+		}
+
+		if ( (temp = readinputport(7)) || use_2button_rotary[1])
+		{
+			use_2button_rotary[1] = 1;
+			if (temp & 0x1) 
+			{
+
+				if (old_joydir[1] <= 0)
+						old_joydir[1] = 11;
+				else
+						old_joydir[1]--;
+			}
+			else if (temp & 0x2) 
+			{        
+				if (old_joydir[1] >= 11)
+						old_joydir[1] = 0;
+				else
+						old_joydir[1]++;
+			}
+		}
+		
+		counter = 0;
+	}
+
+	if (use_2button_rotary[0])
+		dir1 = (~ (0x800 >> old_joydir[0]) ) & 0xfff;
+	else
+	{
+		dir1 = readinputport(4);	// analog port
+		dir1 = (~ (0x800 >> ((dir1 * 12)/0x100)) ) & 0xfff; /* ORIGINAL CODE */
+	}
+	
+	if (use_2button_rotary[1])
+		dir2 = (~ (0x800 >> old_joydir[1]) ) & 0xfff;
+	else
+	{
+		dir2 = readinputport(5);	// analog port
+		dir2 = (~ (0x800 >> ((dir2 * 12)/0x100)) ) & 0xfff; /* ORIGINAL CODE */
+	}
+	/* </jjs> */
 
 	switch (offset)
 	{
@@ -3491,7 +3556,17 @@ INPUT_PORTS_START( downtown )
 	JOY_ROTATION(1, Z, X)
 
 	PORT_START	// IN5 - Rotation Player 2
-	JOY_ROTATION(1, N, M)
+	JOY_ROTATION(2, N, M)
+
+	/* <jjs> */
+	PORT_START	// IN6 - alternate Rotation Player 1
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4, 1)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5, 1)
+
+	PORT_START	// IN7 - alternate Rotation Player 2
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 1)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 1)
+	/* </jjs> */
 INPUT_PORTS_END
 
 

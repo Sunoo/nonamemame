@@ -175,6 +175,8 @@ struct GameOptions
 	int 	gui_host;		/* 1 to tweak some UI-related things for better GUI integration */
 	int 	skip_disclaimer;	/* 1 to skip the disclaimer screen at startup */
 	int 	skip_gameinfo;		/* 1 to skip the game info screen at startup */
+	int 	skip_gamewarnings;	/* 1 to skip the driver warning screen at start up */
+	int 	skip_baddumps;		/* 1 to skip the game bad roms at startup */
 
 	int		samplerate;		/* sound sample playback rate, in Hz */
 	int		use_samples;	/* 1 to enable external .wav samples */
@@ -197,6 +199,7 @@ struct GameOptions
 	int		use_artwork;	/* bitfield indicating which artwork pieces to use */
 	int		artwork_res;	/* 1 for 1x game scaling, 2 for 2x */
 	int		artwork_crop;	/* 1 to crop artwork to the game screen */
+	int		artwork_fb;	/* 1 to crop artwork to the game screen */
 
 	char	savegame;		/* character representing a savegame to load */
 	int     crc_only;       /* specify if only CRC should be used as checksum */

@@ -114,22 +114,84 @@ static WRITE_HANDLER( i8751_reset_w )
 
 static READ_HANDLER( gondo_player_1_r )
 {
+	static unsigned char old_joydir, updatetoggle;
+	static int temp, use_2button_rotary = 0;
+
 	switch (offset) {
 		case 0: /* Rotary low byte */
-			return ~((1 << (readinputport(5) * 12 / 256))&0xff);
+			if ( (temp = readinputport(9)) || use_2button_rotary )  /* first check 2 button rotary input */
+			{
+				use_2button_rotary = 1;
+				updatetoggle = ~updatetoggle;
+				if (updatetoggle==0)
+				{
+					if (temp & 0x1) /*clockwise*/
+					{
+						if (old_joydir >=11)
+							old_joydir = 0;
+						else
+							old_joydir++;
+					}
+					else if (temp &0x2) /*counter-clockwise*/
+					{
+						if (old_joydir <=0)
+							old_joydir = 11;
+						else
+							old_joydir--;
+					}
+				}
+				return ~((1 << (old_joydir)                 )&0xff);
+			}
+			else
+				return ~((1 << (readinputport(5) * 12 / 256))&0xff);
+
 		case 1: /* Joystick = bottom 4 bits, rotary = top 4 */
-			return ((~((1 << (readinputport(5) * 12 / 256))>>4))&0xf0) | (readinputport(0)&0xf);
+			if ( use_2button_rotary )
+				return ((~((1 << (old_joydir)                 )>>4))&0xf0) | (readinputport(0)&0xf);
+			else
+				return ((~((1 << (readinputport(5) * 12 / 256))>>4))&0xf0) | (readinputport(0)&0xf);
 	}
 	return 0xff;
 }
 
 static READ_HANDLER( gondo_player_2_r )
 {
+	static unsigned char old_joydir, updatetoggle;
+	static int temp, use_2button_rotary = 0;
+
 	switch (offset) {
 		case 0: /* Rotary low byte */
-			return ~((1 << (readinputport(6) * 12 / 256))&0xff);
+			if ( (temp = readinputport(10)) || use_2button_rotary )  /* first check 2 button rotary input */
+			{
+				use_2button_rotary = 1;
+				updatetoggle = ~updatetoggle;
+				if (updatetoggle==0)
+				{
+					if (temp & 0x1) /*clockwise*/
+					{
+						if (old_joydir >=11)
+							old_joydir = 0;
+						else
+							old_joydir++;
+					}
+					else if (temp &0x2) /*counter-clockwise*/
+					{
+						if (old_joydir <=0)
+							old_joydir = 11;
+						else
+							old_joydir--;
+					}
+				}
+				return ~((1 << (old_joydir)                 )&0xff);
+			}
+			else
+				return ~((1 << (readinputport(6) * 12 / 256))&0xff);
+
 		case 1: /* Joystick = bottom 4 bits, rotary = top 4 */
-			return ((~((1 << (readinputport(6) * 12 / 256))>>4))&0xf0) | (readinputport(1)&0xf);
+			if ( use_2button_rotary )
+				return ((~((1 << (old_joydir)                 )>>4))&0xf0) | (readinputport(1)&0xf);
+			else
+				return ((~((1 << (readinputport(6) * 12 / 256))>>4))&0xf0) | (readinputport(1)&0xf);
 	}
 	return 0xff;
 }
@@ -172,11 +234,11 @@ static WRITE_HANDLER( srdarwin_i8751_w )
 	if (i8751_value==0x3063) i8751_return=0x9c; /* Protection - Japanese version */
 	if (i8751_value==0x306b) i8751_return=0x94; /* Protection - World version */
 	if ((i8751_value&0xff00)==0x4000) i8751_return=i8751_value; /* Coinage settings */
- 	if (i8751_value==0x5000) i8751_return=((coins / 10) << 4) | (coins % 10); /* Coin request */
- 	if (i8751_value==0x6000) {i8751_value=-1; coins--; } /* Coin clear */
+	if (i8751_value==0x5000) i8751_return=((coins / 10) << 4) | (coins % 10); /* Coin request */
+	if (i8751_value==0x6000) {i8751_value=-1; coins--; } /* Coin clear */
 	/* Nb:  Command 0x4000 for setting coinage options is not supported */
- 	if ((readinputport(4)&1)==1) latch=1;
- 	if ((readinputport(4)&1)!=1 && latch) {coins++; latch=0;}
+	if ((readinputport(4)&1)==1) latch=1;
+	if ((readinputport(4)&1)!=1 && latch) {coins++; latch=0;}
 
 	/* This next value is the index to a series of tables,
 	each table controls the end of level bad guy, wrong values crash the
@@ -243,9 +305,9 @@ static WRITE_HANDLER( gondo_i8751_w )
 	}
 
 	/* Coins are controlled by the i8751 */
- 	if ((readinputport(4)&3)==3) latch=1;
- 	if ((readinputport(4)&1)!=1 && latch) {coin1++; snd=1; latch=0;}
- 	if ((readinputport(4)&2)!=2 && latch) {coin2++; snd=1; latch=0;}
+	if ((readinputport(4)&3)==3) latch=1;
+	if ((readinputport(4)&1)!=1 && latch) {coin1++; snd=1; latch=0;}
+	if ((readinputport(4)&2)!=2 && latch) {coin2++; snd=1; latch=0;}
 
 	/* Work out return values */
 	if (i8751_value==0x0000) {i8751_return=0; coin1=coin2=snd=0;}
@@ -276,9 +338,9 @@ static WRITE_HANDLER( shackled_i8751_w )
 	}
 
 	/* Coins are controlled by the i8751 */
- 	if (/*(readinputport(2)&3)==3*/!latch) {latch=1;coin1=coin2=0;}
- 	if ((readinputport(2)&1)!=1 && latch) {coin1=1; latch=0;}
- 	if ((readinputport(2)&2)!=2 && latch) {coin2=1; latch=0;}
+	if (/*(readinputport(2)&3)==3*/!latch) {latch=1;coin1=coin2=0;}
+	if ((readinputport(2)&1)!=1 && latch) {coin1=1; latch=0;}
+	if ((readinputport(2)&2)!=2 && latch) {coin2=1; latch=0;}
 
 	if (i8751_value==0x0050) i8751_return=0; /* Breywood ID */
 	if (i8751_value==0x0051) i8751_return=0; /* Shackled ID */
@@ -304,8 +366,8 @@ static WRITE_HANDLER( lastmiss_i8751_w )
 	}
 
 	/* Coins are controlled by the i8751 */
- 	if ((readinputport(2)&3)==3 && !latch) latch=1;
- 	if ((readinputport(2)&3)!=3 && latch) {coin++; latch=0;snd=0x400;i8751_return=0x400;return;}
+	if ((readinputport(2)&3)==3 && !latch) latch=1;
+	if ((readinputport(2)&3)!=3 && latch) {coin++; latch=0;snd=0x400;i8751_return=0x400;return;}
 	if (i8751_value==0x007a) i8751_return=0x0185; /* Japan ID code */
 	if (i8751_value==0x007b) i8751_return=0x0184; /* USA ID code */
 	if (i8751_value==0x0001) {coin=snd=0;}//???
@@ -332,8 +394,8 @@ static WRITE_HANDLER( csilver_i8751_w )
 	}
 
 	/* Coins are controlled by the i8751 */
- 	if ((readinputport(2)&3)==3 && !latch) latch=1;
- 	if ((readinputport(2)&3)!=3 && latch) {coin++; latch=0;snd=0x1200; i8751_return=0x1200;return;}
+	if ((readinputport(2)&3)==3 && !latch) latch=1;
+	if ((readinputport(2)&3)!=3 && latch) {coin++; latch=0;snd=0x1200; i8751_return=0x1200;return;}
 
 	if (i8751_value==0x054a) {i8751_return=~(0x4a); coin=0; snd=0;} /* Captain Silver ID */
 	if ((i8751_value>>8)==0x01) i8751_return=0; /* Coinage - Not Supported */
@@ -356,9 +418,9 @@ static WRITE_HANDLER( garyoret_i8751_w )
 	}
 
 	/* Coins are controlled by the i8751 */
- 	if ((readinputport(2)&3)==3) latch=1;
- 	if ((readinputport(2)&1)!=1 && latch) {coin1++; latch=0;}
- 	if ((readinputport(2)&2)!=2 && latch) {coin2++; latch=0;}
+	if ((readinputport(2)&3)==3) latch=1;
+	if ((readinputport(2)&1)!=1 && latch) {coin1++; latch=0;}
+	if ((readinputport(2)&2)!=2 && latch) {coin2++; latch=0;}
 
 	/* Work out return values */
 	if ((i8751_value>>8)==0x00) {i8751_return=0; coin1=coin2=0;}
@@ -372,7 +434,7 @@ static WRITE_HANDLER( garyoret_i8751_w )
 
 static WRITE_HANDLER( dec8_bank_w )
 {
- 	int bankaddress;
+	int bankaddress;
 	unsigned char *RAM = memory_region(REGION_CPU1);
 
 	bankaddress = 0x10000 + (data & 0x0f) * 0x4000;
@@ -382,7 +444,7 @@ static WRITE_HANDLER( dec8_bank_w )
 /* Used by Ghostbusters, Meikyuu Hunter G & Gondomania */
 static WRITE_HANDLER( ghostb_bank_w )
 {
- 	int bankaddress;
+	int bankaddress;
 	unsigned char *RAM = memory_region(REGION_CPU1);
 
 	/* Bit 0: Interrupt enable/disable (I think..)
@@ -416,13 +478,13 @@ WRITE_HANDLER( csilver_control_w )
 
 static WRITE_HANDLER( dec8_sound_w )
 {
- 	soundlatch_w(0,data);
+	soundlatch_w(0,data);
 	cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
 }
 
 static WRITE_HANDLER( oscar_sound_w )
 {
- 	soundlatch_w(0,data);
+	soundlatch_w(0,data);
 	cpu_set_irq_line(2,IRQ_LINE_NMI,PULSE_LINE);
 }
 
@@ -488,34 +550,34 @@ static WRITE_HANDLER( shackled_int_w )
 	switch (offset) {
 		case 0: /* CPU 2 - IRQ acknowledge */
 			cpu_set_irq_line(1,M6809_IRQ_LINE,CLEAR_LINE);
-            return;
-        case 1: /* CPU 1 - IRQ acknowledge */
+			return;
+		case 1: /* CPU 1 - IRQ acknowledge */
 			cpu_set_irq_line(0,M6809_IRQ_LINE,CLEAR_LINE);
-        	return;
-        case 2: /* i8751 - FIRQ acknowledge */
-            return;
-        case 3: /* IRQ 1 */
+			return;
+		case 2: /* i8751 - FIRQ acknowledge */
+			return;
+		case 3: /* IRQ 1 */
 			cpu_set_irq_line(0,M6809_IRQ_LINE,ASSERT_LINE);
 			return;
-        case 4: /* IRQ 2 */
-            cpu_set_irq_line(1,M6809_IRQ_LINE,ASSERT_LINE);
-            return;
+		case 4: /* IRQ 2 */
+			cpu_set_irq_line(1,M6809_IRQ_LINE,ASSERT_LINE);
+			return;
 	}
 #endif
 
 	switch (offset) {
 		case 0: /* CPU 2 - IRQ acknowledge */
-            return;
-        case 1: /* CPU 1 - IRQ acknowledge */
-        	return;
-        case 2: /* i8751 - FIRQ acknowledge */
-            return;
-        case 3: /* IRQ 1 */
+			return;
+		case 1: /* CPU 1 - IRQ acknowledge */
+			return;
+		case 2: /* i8751 - FIRQ acknowledge */
+			return;
+		case 3: /* IRQ 1 */
 			cpu_set_irq_line (0, M6809_IRQ_LINE, HOLD_LINE);
 			return;
-        case 4: /* IRQ 2 */
-            cpu_set_irq_line (1, M6809_IRQ_LINE, HOLD_LINE);
-            return;
+		case 4: /* IRQ 2 */
+			cpu_set_irq_line (1, M6809_IRQ_LINE, HOLD_LINE);
+			return;
 	}
 }
 
@@ -1320,11 +1382,11 @@ INPUT_PORTS_START( gondo )
 	PLAYER1_JOYSTICK
 	/* Top 4 bits are rotary controller */
 
- 	PORT_START	/* Player 2 controls */
+	PORT_START	/* Player 2 controls */
 	PLAYER2_JOYSTICK
 	/* Top 4 bits are rotary controller */
 
- 	PORT_START	/* Player 1 & 2 fire buttons */
+	PORT_START	/* Player 1 & 2 fire buttons */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
@@ -1348,10 +1410,10 @@ INPUT_PORTS_START( gondo )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 
-	PORT_START	/* player 1 12-way rotary control */
+	PORT_START	/* player 1 12-way rotary control - dial type */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE, 25, 10, 0, 0, KEYCODE_Z, KEYCODE_X, 0, 0 )
 
-	PORT_START	/* player 2 12-way rotary control */
+	PORT_START	/* player 2 12-way rotary control - dial type */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, 0, 0 )
 
 	PORT_START	/* Dip switch bank 1 */
@@ -1401,6 +1463,14 @@ INPUT_PORTS_START( gondo )
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	PORT_START	/* player 1 12-way rotary control - 2 button type */	/**JW */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1, 2)	 /*clockwise*/
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1, 2)	 /*counter-clockwise*/
+
+	PORT_START	/* player 2 12-way rotary control - 2 button type */	/**JW */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 2)	 /*clockwise*/
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 2)	 /*counter-clockwise*/
 INPUT_PORTS_END
 
 INPUT_PORTS_START( oscar )
@@ -1411,7 +1481,7 @@ INPUT_PORTS_START( oscar )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
 
- 	PORT_START	/* Player 2 controls */
+	PORT_START	/* Player 2 controls */
 	PLAYER2_JOYSTICK
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
@@ -1484,7 +1554,7 @@ INPUT_PORTS_START( lastmisn )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
- 	PORT_START	/* Player 2 controls */
+	PORT_START	/* Player 2 controls */
 	PLAYER2_JOYSTICK
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
@@ -1558,7 +1628,7 @@ INPUT_PORTS_START( lastmsnj )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
- 	PORT_START	/* Player 2 controls */
+	PORT_START	/* Player 2 controls */
 	PLAYER2_JOYSTICK
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
@@ -1632,7 +1702,7 @@ INPUT_PORTS_START( shackled )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
- 	PORT_START	/* Player 2 controls */
+	PORT_START	/* Player 2 controls */
 	PLAYER2_JOYSTICK
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
@@ -1711,7 +1781,7 @@ INPUT_PORTS_START( csilver )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
- 	PORT_START	/* Player 2 controls */
+	PORT_START	/* Player 2 controls */
 	PLAYER2_JOYSTICK
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
@@ -1785,7 +1855,7 @@ INPUT_PORTS_START( garyoret )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
- 	PORT_START	/* Player 2 controls */
+	PORT_START	/* Player 2 controls */
 	PLAYER2_JOYSTICK
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
@@ -1899,7 +1969,7 @@ static struct GfxLayout sr_sprites =
 	16,16,
 	2048,
 	3,
- 	{ 0x10000*8,0x20000*8,0x00000*8 },
+	{ 0x10000*8,0x20000*8,0x00000*8 },
 	{ 16*8, 1+(16*8), 2+(16*8), 3+(16*8), 4+(16*8), 5+(16*8), 6+(16*8), 7+(16*8),
 		0,1,2,3,4,5,6,7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 ,8*8,9*8,10*8,11*8,12*8,13*8,14*8,15*8 },
@@ -1924,7 +1994,7 @@ static struct GfxLayout tiles =
 	16,16,
 	4096,
 	4,
- 	{ 0x60000*8,0x40000*8,0x20000*8,0x00000*8 },
+	{ 0x60000*8,0x40000*8,0x20000*8,0x00000*8 },
 	{ 16*8, 1+(16*8), 2+(16*8), 3+(16*8), 4+(16*8), 5+(16*8), 6+(16*8), 7+(16*8),
 		0,1,2,3,4,5,6,7 },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 ,8*8,9*8,10*8,11*8,12*8,13*8,14*8,15*8},
@@ -1937,7 +2007,7 @@ static struct GfxLayout tiles_r =
 	16,16,
 	2048,
 	4,
- 	{ 0x20000*8,0x00000*8,0x30000*8,0x10000*8 },
+	{ 0x20000*8,0x00000*8,0x30000*8,0x10000*8 },
 	{ 7,6,5,4,3,2,1,0,
 		7+(16*8), 6+(16*8), 5+(16*8), 4+(16*8), 3+(16*8), 2+(16*8), 1+(16*8), 0+(16*8) },
 	{ 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 ,8*8,9*8,10*8,11*8,12*8,13*8,14*8,15*8},
@@ -1966,9 +2036,9 @@ static struct GfxDecodeInfo srdarwin_gfxdecodeinfo[] =
 	{ REGION_GFX1, 0x00000, &charlayout_16k,128, 4 }, /* Only 1 used so far :/ */
 	{ REGION_GFX2, 0x00000, &sr_sprites,     64, 8 },
 	{ REGION_GFX3, 0x00000, &srdarwin_tiles,  0, 8 },
-  	{ REGION_GFX3, 0x10000, &srdarwin_tiles,  0, 8 },
-    { REGION_GFX3, 0x20000, &srdarwin_tiles,  0, 8 },
-    { REGION_GFX3, 0x30000, &srdarwin_tiles,  0, 8 },
+	{ REGION_GFX3, 0x10000, &srdarwin_tiles,  0, 8 },
+	{ REGION_GFX3, 0x20000, &srdarwin_tiles,  0, 8 },
+	{ REGION_GFX3, 0x30000, &srdarwin_tiles,  0, 8 },
 	{ -1 } /* end of array */
 };
 
@@ -1977,7 +2047,7 @@ static struct GfxDecodeInfo gondo_gfxdecodeinfo[] =
 	{ REGION_GFX1, 0, &chars_3bpp,  0, 16 }, /* Chars */
 	{ REGION_GFX2, 0, &tiles,     256, 32 }, /* Sprites */
 	{ REGION_GFX3, 0, &tiles,     768, 16 }, /* Tiles */
- 	{ -1 } /* end of array */
+	{ -1 } /* end of array */
 };
 
 static struct GfxDecodeInfo oscar_gfxdecodeinfo[] =
@@ -1985,7 +2055,7 @@ static struct GfxDecodeInfo oscar_gfxdecodeinfo[] =
 	{ REGION_GFX1, 0, &oscar_charlayout, 256,  8 }, /* Chars */
 	{ REGION_GFX2, 0, &tiles,              0, 16 }, /* Sprites */
 	{ REGION_GFX3, 0, &tiles,            384,  8 }, /* Tiles */
- 	{ -1 } /* end of array */
+	{ -1 } /* end of array */
 };
 
 static struct GfxDecodeInfo shackled_gfxdecodeinfo[] =
@@ -1993,7 +2063,7 @@ static struct GfxDecodeInfo shackled_gfxdecodeinfo[] =
 	{ REGION_GFX1, 0, &chars_3bpp,   0,  4 },
 	{ REGION_GFX2, 0, &tiles,      256, 16 },
 	{ REGION_GFX3, 0, &tiles,      768, 16 },
- 	{ -1 } /* end of array */
+	{ -1 } /* end of array */
 };
 
 /******************************************************************************/
@@ -2088,8 +2158,8 @@ static INTERRUPT_GEN( oscar_interrupt )
 	if ((readinputport(2) & 0x7) == 0x7) latch=1;
 	if (latch && (readinputport(2) & 0x7) != 0x7) {
 		latch=0;
-    	cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
-    }
+		cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+	}
 }
 
 /******************************************************************************/

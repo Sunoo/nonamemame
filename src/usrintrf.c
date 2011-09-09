@@ -87,12 +87,19 @@ static int single_step;
 
 static int showfps;
 static int showfpstemp;
+int showinput = 1;
 
 static int show_profiler;
 
 UINT8 ui_dirty;
 
-
+/*start MAME:analog+*/
+/* from os/input.c */
+extern int switchmice;	// add menu item to UI: player to mouse mapping
+extern int switchaxes;	// add menu item to UI: assignable mouse axes (more detail than switchmice)
+/* from inptport.c */
+extern int joymouse;	// option to simulate trackball with analog joystick
+/*start MAME:analog+*/
 
 /***************************************************************************
 
@@ -1789,6 +1796,7 @@ static int setdefcodesettings(struct mame_bitmap *bitmap,int selected)
 		return sel + 1;
 	}
 
+	init_analog_seq();
 
 	ui_displaymenu(bitmap,menu_item,menu_subitem,flag,sel,0);
 
@@ -2217,6 +2225,332 @@ static int settraksettings(struct mame_bitmap *bitmap,int selected)
 	}
 
 	return sel + 1;
+#undef ENTRIES
+}
+
+static int setplayermousesettings(struct mame_bitmap *bitmap,int selected)
+{
+#define MAX_LENGTH 40
+	const char *menu_item[MAX_LENGTH];
+	const char *menu_subitem[MAX_LENGTH];
+	int i,sel;
+	struct InputPort *in;
+	int nummice;
+	int total,total2;
+	int arrowize;
+
+	sel = selected - 1;
+
+	if (Machine->input_ports == 0)
+		return 0;
+
+	in = Machine->input_ports;
+
+	/* Count the number of players with analog controls */
+	total = 0;
+	while (in->type != IPT_END)
+	{
+		if (((in->type & 0xff) > IPT_ANALOG_START) && ((in->type & 0xff) < IPT_ANALOG_END)
+				&& !(!options.cheat && (in->type & IPF_CHEAT)))
+		{
+			switch (in->type & IPF_PLAYERMASK)
+			{
+				case IPF_PLAYER1:
+					if (total<1) total = 1;
+					break;
+				case IPF_PLAYER2:
+					if (total<2) total = 2;
+					break;
+				case IPF_PLAYER3:
+					if (total<3) total = 3;
+					break;
+				case IPF_PLAYER4:
+					if (total<4) total = 4;
+					break;
+			}
+		}
+		in++;
+	}
+
+	if (total == 0) return 0;
+
+	/* Count number of mice connected */
+	nummice = osd_numbermice();
+
+	if (nummice == 0) return 0;
+
+	/* Each player's mouse analog control has 1 entry - mouse number */
+	/* see setplayermouseaxissettings() to switch axes too */
+#define ENTRIES 1
+
+	total2 = total * ENTRIES;
+
+	menu_item[total2] = ui_getstring (UI_returntomain);
+	menu_item[total2 + 1] = 0;	/* terminate array */
+	total2++;
+
+	arrowize = 0;
+	for (i = 0;i < total2;i++)
+	{
+		if (i < total2 - 1)
+		{
+			char label[10*ENTRIES][40];
+			char setting[10*ENTRIES][40];
+			int mouse;
+
+			sprintf (label[i], "Player %d",i/ENTRIES);	// should get string from elsewhere
+			mouse = osd_getplayer_mouse(i/ENTRIES);
+
+			strcat (label[i], " ");
+			switch (i%ENTRIES)
+			{
+				case 0:
+					strcat (label[i], ui_getstring (UI_switchmouse));
+					osd_getmousename(setting[i], mouse);
+					if (i == sel) arrowize = 3;
+					break;
+			}
+
+			menu_item[i] = label[i];
+			menu_subitem[i] = setting[i];
+
+//			in++;
+		}
+		else menu_subitem[i] = 0;	/* no subitem */
+	}
+
+	ui_displaymenu(bitmap,menu_item,menu_subitem,0,sel,arrowize);
+
+	if (input_ui_pressed_repeat(IPT_UI_DOWN,8))
+		sel = (sel + 1) % total2;
+
+	if (input_ui_pressed_repeat(IPT_UI_UP,8))
+		sel = (sel + total2 - 1) % total2;
+
+	if (input_ui_pressed_repeat(IPT_UI_LEFT,8))
+	{
+		if ((sel % ENTRIES) == 0)
+		/* set mouse */
+		{
+			int mouse = osd_getplayer_mouse(sel/ENTRIES);
+
+			mouse--;
+			if (mouse < -1) mouse = nummice-1;
+			osd_setplayer_mouse(sel/ENTRIES, mouse);
+		}
+	}
+
+	if (input_ui_pressed_repeat(IPT_UI_RIGHT,8))
+	{
+		if ((sel % ENTRIES) == 0)
+		/* set mouse */
+		{
+			int mouse = osd_getplayer_mouse(sel/ENTRIES);
+
+			mouse++;
+			if (mouse >= nummice) mouse = -1;
+			osd_setplayer_mouse(sel/ENTRIES, mouse);
+		}
+	}
+
+	if (input_ui_pressed(IPT_UI_SELECT))
+	{
+		if (sel == total2 - 1) sel = -1;
+	}
+
+	if (input_ui_pressed(IPT_UI_CANCEL))
+		sel = -1;
+
+	if (input_ui_pressed(IPT_UI_CONFIGURE))
+		sel = -2;
+
+	if (sel == -1 || sel == -2)
+	{
+		schedule_full_refresh();
+	}
+
+	return sel + 1;
+#undef ENTRIES
+}
+
+static int setplayermouseaxessettings(struct mame_bitmap *bitmap,int selected)
+{
+#define MAX_LENGTH 40
+	const char *menu_item[MAX_LENGTH];
+	const char *menu_subitem[MAX_LENGTH];
+	int i,sel;
+	struct InputPort *in;
+	int nummice;
+	int total,total2;
+	int arrowize;
+
+	sel = selected - 1;
+
+	if (Machine->input_ports == 0)
+		return 0;
+
+	in = Machine->input_ports;
+
+	/* Count the number of players with analog controls */
+	total = 0;
+	while (in->type != IPT_END)
+	{
+		if (((in->type & 0xff) > IPT_ANALOG_START) && ((in->type & 0xff) < IPT_ANALOG_END)
+				&& !(!options.cheat && (in->type & IPF_CHEAT)))
+		{
+			switch (in->type & IPF_PLAYERMASK)
+			{
+				case IPF_PLAYER1:
+					if (total<1) total = 1;
+					break;
+				case IPF_PLAYER2:
+					if (total<2) total = 2;
+					break;
+				case IPF_PLAYER3:
+					if (total<3) total = 3;
+					break;
+				case IPF_PLAYER4:
+					if (total<4) total = 4;
+					break;
+			}
+		}
+		in++;
+	}
+
+	if (total == 0) return 0;
+
+	/* Count number of mice connected */
+	nummice = osd_numbermice();
+
+	if (nummice == 0) return 0;
+
+	/* Each player's mouse control has 2 entries - x-axis, y-axis */
+	// will change to add Z axis
+#define ENTRIES 2
+
+	total2 = total * ENTRIES;
+
+	menu_item[total2] = ui_getstring (UI_returntomain);
+	menu_item[total2 + 1] = 0;	/* terminate array */
+	total2++;
+
+	arrowize = 0;
+	for (i = 0;i < total2;i++)
+	{
+		if (i < total2 - 1)
+		{
+			char label[30][MAX_LENGTH];
+			char setting[30][MAX_LENGTH];
+			int mouse, mouseaxis;
+			const char *mouseaxisname;
+			const char *XAXISNAME = ui_getstring( UI_Xaxis ), *YAXISNAME = ui_getstring( UI_Yaxis );
+
+			sprintf (label[i], "Player %d",i/ENTRIES+1);	// should get string from elsewhere
+			mouse = osd_getplayer_mousesplit(i/ENTRIES, i%ENTRIES);
+			mouseaxis = osd_getplayer_mouseaxis(i/ENTRIES, i%ENTRIES);
+			mouseaxisname = mouseaxis ? YAXISNAME : XAXISNAME;
+
+			strcat (label[i], " ");
+			switch (i%ENTRIES)
+			{
+				case 0:
+					strcat (label[i], "X axis ");
+					strcat (label[i], ui_getstring (UI_mouse));
+					osd_getmousename(setting[i], mouse);
+					if (mouse != -1)
+						strcat (setting[i], mouseaxisname);
+					if (i == sel) arrowize = 3;
+					break;
+				case 1:
+					strcat (label[i], "Y axis ");
+					strcat (label[i], ui_getstring (UI_mouse));
+					osd_getmousename(setting[i], mouse);
+					if (mouse != -1)
+						strcat (setting[i], mouseaxisname);
+					if (i == sel) arrowize = 3;
+					break;
+/* Not used, yet
+ *				case 2:
+ *					strcat (label[i], "Z axis ");
+ *					strcat (label[i], ui_getstring (UI_mouse));
+ *					osd_getmousename(setting[i], mouse);
+ *					if (mouse != -1)
+ *						strcat (setting[i], mouseaxisname);
+ *					if (i == sel) arrowize = 3;
+ *					break;	*/
+			}
+
+			menu_item[i] = label[i];
+			menu_subitem[i] = setting[i];
+
+//			in++;
+		}
+		else menu_subitem[i] = 0;	/* no subitem */
+	}
+
+	ui_displaymenu(bitmap,menu_item,menu_subitem,0,sel,arrowize);
+
+	if (input_ui_pressed_repeat(IPT_UI_DOWN,8))
+		sel = (sel + 1) % total2;
+
+	if (input_ui_pressed_repeat(IPT_UI_UP,8))
+		sel = (sel + total2 - 1) % total2;
+
+	if (input_ui_pressed_repeat(IPT_UI_LEFT,8))
+	{
+		int mouse = osd_getplayer_mousesplit(sel/ENTRIES, sel%ENTRIES);
+		int axis = osd_getplayer_mouseaxis(sel/ENTRIES, sel%ENTRIES);
+
+		if (mouse != -1)
+		{
+			axis--;
+			if (axis < 0)
+			{
+				axis = 1;
+				mouse--;
+			}
+		}
+		else mouse = nummice-1;
+		osd_setplayer_mouseaxis(sel/ENTRIES, sel%ENTRIES, mouse, axis);
+	}
+
+	if (input_ui_pressed_repeat(IPT_UI_RIGHT,8))
+	{
+		int mouse = osd_getplayer_mousesplit(sel/ENTRIES, sel%ENTRIES);
+		int axis = osd_getplayer_mouseaxis(sel/ENTRIES, sel%ENTRIES);
+
+		axis++;
+		if (axis > 1)
+		{
+			axis = 0;
+			mouse++;
+		}
+		if (mouse >= nummice)
+		{
+			mouse = -1;
+			axis = 1;
+		}
+		osd_setplayer_mouseaxis(sel/ENTRIES, sel%ENTRIES, mouse, axis);
+	}
+
+	if (input_ui_pressed(IPT_UI_SELECT))
+	{
+		if (sel == total2 - 1) sel = -1;
+	}
+
+	if (input_ui_pressed(IPT_UI_CANCEL))
+		sel = -1;
+
+	if (input_ui_pressed(IPT_UI_CONFIGURE))
+		sel = -2;
+
+	if (sel == -1 || sel == -2)
+	{
+		schedule_full_refresh();
+	}
+
+	return sel + 1;
+#undef ENTRIES
 }
 
 #ifndef MESS
@@ -3078,6 +3412,7 @@ int memcard_menu(struct mame_bitmap *bitmap, int selection)
 
 #ifndef MESS
 enum { UI_SWITCH = 0,UI_DEFCODE,UI_CODE,UI_ANALOG,UI_CALIBRATE,
+		UI_MOUSECNTL,UI_MOUSEAXESCNTL,
 		UI_STATS,UI_GAMEINFO, UI_HISTORY,
 		UI_CHEAT,UI_RESET,UI_MEMCARD,UI_RAPIDFIRE,UI_EXIT };
 #else
@@ -3102,8 +3437,11 @@ static void setup_menu_init(void)
 {
 	menu_total = 0;
 
-	menu_item[menu_total] = ui_getstring (UI_inputgeneral); menu_action[menu_total++] = UI_DEFCODE;
-	menu_item[menu_total] = ui_getstring (UI_inputspecific); menu_action[menu_total++] = UI_CODE;
+	if(showinput)
+	{
+		menu_item[menu_total] = ui_getstring (UI_inputgeneral); menu_action[menu_total++] = UI_DEFCODE;
+		menu_item[menu_total] = ui_getstring (UI_inputspecific); menu_action[menu_total++] = UI_CODE;
+	}
 
 	/* Determine if there are any dip switches */
 	{
@@ -3153,6 +3491,19 @@ static void setup_menu_init(void)
 					&& !(!options.cheat && (in->type & IPF_CHEAT)))
 				num++;
 			in++;
+		}
+
+		/* Determine if there are any mice controls */
+		if (osd_numbermice() && num)
+		{
+			if (switchaxes)
+			{
+				menu_item[menu_total] = ui_getstring (UI_mouseaxescontrols); menu_action[menu_total++] = UI_MOUSEAXESCNTL;
+			}
+			else if (switchmice)
+			{
+				menu_item[menu_total] = ui_getstring (UI_mousecontrols); menu_action[menu_total++] = UI_MOUSECNTL;
+			}
 		}
 
 		if (num != 0)
@@ -3237,6 +3588,12 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 			case UI_ANALOG:
 				res = settraksettings(bitmap, sel >> SEL_BITS);
 				break;
+			case UI_MOUSECNTL:
+				res = setplayermousesettings(bitmap, sel >> SEL_BITS);
+				break;
+			case UI_MOUSEAXESCNTL:
+				res = setplayermouseaxessettings(bitmap, sel >> SEL_BITS);
+				break;
 			case UI_CALIBRATE:
 				res = calibratejoysticks(bitmap, sel >> SEL_BITS);
 				break;
@@ -3288,6 +3645,8 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 		else
 			sel = (sel & SEL_MASK) | (res << SEL_BITS);
 
+		init_analog_seq();
+
 		return sel + 1;
 	}
 
@@ -3313,6 +3672,8 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 			case UI_ANALOG:
 			case UI_CALIBRATE:
 			#ifndef MESS
+			case UI_MOUSECNTL:
+			case UI_MOUSEAXESCNTL:
 			case UI_STATS:
 			case UI_GAMEINFO:
 			#else

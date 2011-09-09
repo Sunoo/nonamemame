@@ -40,13 +40,69 @@ READ16_HANDLER( dec0_controls_r )
 
 READ16_HANDLER( dec0_rotary_r )
 {
+	static unsigned char old_joydir[2], updatetoggle[2];
+	static int temp, use_2button_rotary[]={0,0};
+	
 	switch (offset<<1)
 	{
 		case 0: /* Player 1 rotary */
-			return ~(1 << (readinputport(5) * 12 / 256));
+			temp = readinputport(7); /*Read Player 1 2 button rotary into Temp)*/
+			if (temp || use_2button_rotary[0])
+			{
+				use_2button_rotary[0]=1;
+				
+				updatetoggle[0] =~updatetoggle[0];     /*Invert DO-update holder  since reads happen twice*/
+				if (updatetoggle[0] == 0) 
+				{
+					if (temp & 0x1)		/*Clockwise Button4*/
+					{
+						if (old_joydir[0] >= 11)
+							old_joydir[0] = 0;
+						else
+							old_joydir[0]++;
+					}
+					else if (temp & 0x2)	/*Conter-clockwise Button5 */
+					{
+						if (old_joydir[0] <= 0)
+							old_joydir[0] = 11;
+						else
+							old_joydir[0]--;
+					}
+				}
+				return ~(1 << (old_joydir[0]));
+			}
+			else
+				return ~(1 << (readinputport(5) * 12 / 256));
 
 		case 8: /* Player 2 rotary */
-			return ~(1 << (readinputport(6) * 12 / 256));
+			temp = readinputport(8); /*Read Player 1 2 button rotary into Temp)*/
+			if (temp || use_2button_rotary[1])
+			{
+				use_2button_rotary[1]=1;
+				
+				updatetoggle[1] = ~updatetoggle[1];
+				if (updatetoggle[1] == 0)
+				{
+					if (temp & 0x1)
+					{
+						if (old_joydir[1] >= 11)
+							old_joydir[1] = 0;
+						else
+							old_joydir[1]++;
+					}
+				
+					else if ( temp&0x2 )
+					{
+						if (old_joydir[1] <= 0)
+							old_joydir[1] = 11;
+						else
+							old_joydir[1]--;
+					}
+				}
+				return (~(1<<(old_joydir[1])));
+			}
+			else
+				return ~(1 << (readinputport(6) * 12 / 256));
 
 		default:
 			logerror("Unknown rotary read at 300000 %02x\n",offset);
@@ -59,6 +115,9 @@ READ16_HANDLER( dec0_rotary_r )
 
 READ16_HANDLER( midres_controls_r )
 {
+	static unsigned char old_joydir[2], updatetoggle[2];
+	static int temp, use_2button_rotary[]={0,0};
+	
 	switch (offset<<1)
 	{
 		case 0: /* Player 1 Joystick + start, Player 2 Joystick + start */
@@ -68,10 +127,63 @@ READ16_HANDLER( midres_controls_r )
 			return (readinputport(3) + (readinputport(4) << 8));
 
 		case 4: /* Player 1 rotary */
-			return ~(1 << (readinputport(5) * 12 / 256));
+			temp = readinputport(7); /*Read Player 1 2 button rotary into Temp)*/
+			if (temp || use_2button_rotary[0])
+			{
+				use_2button_rotary[0]=1;
+				
+				updatetoggle[0] =~updatetoggle[0];     /*Invert DO-update holder  since reads happen twice*/
+				if (updatetoggle[0] == 0) 
+				{
+					if (temp & 0x1)		/*Clockwise Button4*/
+					{
+						if (old_joydir[0] >= 11)
+							old_joydir[0] = 0;
+						else
+							old_joydir[0]++;
+					}
+					else if (temp & 0x2)	/*Conter-clockwise Button5 */
+					{
+						if (old_joydir[0] <= 0)
+							old_joydir[0] = 11;
+						else
+							old_joydir[0]--;
+					}
+				}
+				return ~(1 << (old_joydir[0]));
+			}
+			else
+				return ~(1 << (readinputport(5) * 12 / 256));
 
 		case 6: /* Player 2 rotary */
-			return ~(1 << (readinputport(6) * 12 / 256));
+			temp = readinputport(8); /*Read Player 1 2 button rotary into Temp)*/
+			if (temp || use_2button_rotary[1])
+			{
+				use_2button_rotary[1]=1;
+				
+				updatetoggle[1] = ~updatetoggle[1];
+				if (updatetoggle[1] == 0)
+				{
+					if (temp & 0x1)
+					{
+						if (old_joydir[1] >= 11)
+							old_joydir[1] = 0;
+						else
+							old_joydir[1]++;
+					}
+				
+					else if ( temp&0x2 )
+					{
+						if (old_joydir[1] <= 0)
+							old_joydir[1] = 11;
+						else
+							old_joydir[1]--;
+					}
+				}
+				return (~(1<<(old_joydir[1])));
+			}
+			else
+				return ~(1 << (readinputport(6) * 12 / 256));
 
 		case 8: /* Credits, start buttons */
 			return readinputport(2);

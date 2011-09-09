@@ -378,7 +378,7 @@ enum
 
 ***************************************************************************/
 
-void showdisclaimer(void);
+void showlogo(void);
 
 /* helper function that reads samples from disk - this can be used by other */
 /* drivers as well (e.g. a sound chip emulator needing drum samples) */

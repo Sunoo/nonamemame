@@ -446,11 +446,19 @@ INPUT_PORTS_START( hbarrel )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
-	PORT_START	/* player 1 12-way rotary control - converted in controls_r() */
+	PORT_START	/* player 1 12-way rotary control - fake dial type - converted in controls_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE, 25, 10, 0, 0, KEYCODE_Z, KEYCODE_X, 0, 0 )
 
-	PORT_START	/* player 2 12-way rotary control - converted in controls_r() */
+	PORT_START	/* player 2 12-way rotary control - fake dial type - converted in controls_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, 0, 0 )
+	
+	PORT_START	/* player 1 12-way rotary control - fake 2 button type - converted in controls_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1, 3)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1, 3)
+
+	PORT_START	/* player 2 12-way rotary control - fake 2 button type - converted in controls_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 3)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 3)
 INPUT_PORTS_END
 
 INPUT_PORTS_START( baddudes )
@@ -500,6 +508,14 @@ INPUT_PORTS_START( baddudes )
 
 	PORT_START	/* player 2 12-way rotary control - converted in controls_r() */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* unused */
+	
+	PORT_START	/* player 1 12-way rotary control - fake 2 button type - converted in controls_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1, 2)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1, 2)
+
+	PORT_START	/* player 2 12-way rotary control - fake 2 button type - converted in controls_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 2)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 2)
 INPUT_PORTS_END
 
 INPUT_PORTS_START( robocop )
@@ -727,6 +743,14 @@ INPUT_PORTS_START( midres )
 
 	PORT_START	/* player 2 12-way rotary control - converted in controls_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, 0, 0 )
+	
+	PORT_START	/* player 1 12-way rotary control - button type - converted in controls_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1, 2)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1, 2)
+
+	PORT_START	/* player 2 12-way rotary control - button type - converted in controls_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 2)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 2)
 INPUT_PORTS_END
 
 INPUT_PORTS_START( bouldash )

@@ -469,7 +469,7 @@ int frontend_help (const char *gamename)
 	{
 		#ifndef MESS
 		printf("\n");
-		showdisclaimer();
+		showlogo();
 		printf("\nNo Name MAME v%s\n"
 				"        Modified by David Maher (aka TheGatesofBill)\n\n",build_version);
 		printf("Usage:  NONAME gamename [options]\n\n"

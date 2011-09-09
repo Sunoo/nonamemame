@@ -46,15 +46,66 @@ WRITE_HANDLER( jackal_spriteram_w );
 PALETTE_INIT( jackal );
 VIDEO_UPDATE( jackal );
 
+/* <jjs> */
+static int temp;
+static unsigned char old_joydir[2];
+/* </jjs> */
 
+static int use_2button_rotary[] = {0,0};
 
 static READ_HANDLER( rotary_0_r )
 {
+	/* <jjs> */
+	if ( (temp = readinputport(7)) || use_2button_rotary[0])
+	{
+		use_2button_rotary[0] = 1;
+		if (temp & 0x1) /*Forward Button4*/
+		{
+			if (old_joydir[0] <= 0)
+					old_joydir[0] = 7;
+			else
+					old_joydir[0]--;
+		}
+		else if (temp & 0x2) /*Reverse Button5 */
+		{
+			if (old_joydir[0] >= 7)
+					old_joydir[0] = 0;
+			else
+					old_joydir[0]++;
+		} /*JW (jjs: taken from time soldiers driver in alpha68k)*/
+
+		return (1 << old_joydir[0]) ^ 0xff;
+	}
+	/* </jjs> */
+	
 	return (1 << (readinputport(5) * 8 / 256)) ^ 0xff;
 }
 
 static READ_HANDLER( rotary_1_r )
 {
+	/* <jjs> */
+	if ( (temp = readinputport(8)) || use_2button_rotary[1])
+	{
+		use_2button_rotary[1] = 1;
+		if (temp & 0x1) /*Forward Button4*/
+		{
+			if (old_joydir[1] <= 0)
+					old_joydir[1] = 7;
+			else
+					old_joydir[1]--;
+		}
+		else if (temp & 0x2) /*Reverse Button5 */
+		{
+			if (old_joydir[1] >= 7)
+					old_joydir[1] = 0;
+			else
+					old_joydir[1]++;
+		} /*JW (jjs: taken from time soldiers driver in alpha68k)*/
+
+		return (1 << old_joydir[1]) ^ 0xff;
+	}
+	/* </jjs> */
+
 	return (1 << (readinputport(6) * 8 / 256)) ^ 0xff;
 }
 
@@ -314,6 +365,16 @@ INPUT_PORTS_START( topgunbl )
 
 	PORT_START	/* player 2 8-way rotary control - converted in rotary_1_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, 0, 0 )
+
+	/* <jjs> */
+	PORT_START	/* alternate player 1 8-way rotary control - converted in rotary_0_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4, 1)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5, 1)
+
+	PORT_START	/* alternate player 2 8-way rotary control - converted in rotary_1_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 1)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 1)
+	/* </jjs> */
 INPUT_PORTS_END
 
 

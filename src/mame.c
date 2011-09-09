@@ -527,7 +527,7 @@ void run_machine_core(void)
 	if (settingsloaded || options.skip_disclaimer || showcopyright(artwork_get_ui_bitmap()) == 0)
 	{
 		/* show info about incorrect behaviour (wrong colors etc.) */
-		if (showgamewarnings(artwork_get_ui_bitmap()) == 0)
+		if (options.skip_gamewarnings || showgamewarnings(artwork_get_ui_bitmap()) == 0)
 		{
 			/* show info about the game */
 			if (options.skip_gameinfo || showgameinfo(artwork_get_ui_bitmap()) == 0)

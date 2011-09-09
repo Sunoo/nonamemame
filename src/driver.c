@@ -799,6 +799,7 @@ TESTDRIVER( shootgal )
 TESTDRIVER( drakton )
 	DRIVER( strtheat )
 	DRIVER( hunchbkd )	/* (c) 1983 Century */
+	DRIVER( sbdk )		/* (c) 1984 Century */
 	DRIVER( herbiedk )	/* (c) 1984 CVS */
 	DRIVER( herodk )	/* (c) 1984 Seatongrove + Crown license */
 	DRIVER( herodku )	/* (c) 1984 Seatongrove + Crown license */
@@ -2093,6 +2094,7 @@ TESTDRIVER( defndjeu )	/* bootleg */
 	DRIVER( ssf2tb )	/* 11/19/1993 (c) 1993 (World) */
 	DRIVER( ssf2tbj )	/* 10/09/1993 (c) 1993 (Japan) */
 	DRIVER( ecofghtr )	/* 03/12/1993 (c) 1993 (World) */
+	DRIVER( ecofghta )	/* 03/12/1993 (c) 1993 (Asia) */
 	DRIVER( uecology ) 	/* 03/12/1993 (c) 1993 (Japan) */
 	DRIVER( ddtod )		/* 12/04/1994 (c) 1993 (Euro) */
 	DRIVER( ddtodu )	/* 25/01/1994 (c) 1993 (US) */
@@ -2182,7 +2184,8 @@ TESTDRIVER( rckmanj )	/* 22/09/1995 Rockman: The Power Battle (Japan) */
 	DRIVER( sfz2ab )	/* 13/08/1996 (c) 1996 (Brazil) */
 	DRIVER( sfz2aa )	/* 26/08/1996 (c) 1996 (Asia) */
 	DRIVER( xmvsf )		/* 10/09/1996 (c) 1996 (Euro) */
-	DRIVER( xmvsfu )	/* 04/10/1996 (c) 1996 (US) */
+	DRIVER( xmvsfu )	/* 23/10/1996 (c) 1996 (US) */
+	DRIVER( xmvsfur1 )	/* 04/10/1996 (c) 1996 (US) */
 	DRIVER( xmvsfj )	/* 04/10/1996 (c) 1996 (Japan) */
 	DRIVER( xmvsfjr1 )	/* 10/09/1996 (c) 1996 (Japan) */
 	DRIVER( xmvsfjr2 )	/* 09/09/1996 (c) 1996 (Japan) */
@@ -2741,9 +2744,10 @@ TESTDRIVER( slipstrm )	/* Capcom */
 
 	/* Sega Multi System 32 games */
 	DRIVER( orunners )	/* (c) 1992 (US) */
-	DRIVER( harddunk )	/* (c) 1994 (Japan) */
+	DRIVER( harddunk )	/* (c) 1994 (World) */
+	DRIVER( harddunj )	/* (c) 1994 (Japan) */
 TESTDRIVER( titlef )
-	DRIVER( scross )	/* (c) 1992 */
+	DRIVER( scross )	/* (c) 1992 (World) */
 
 	/* Sega ST-V games */
 TESTDRIVER( astrass )
@@ -2849,17 +2853,67 @@ TESTDRIVER( pclubjv5 )
 	/* Genie Hardware (uses Genesis VDP) also has 'Sun Mixing Co' put into tile ram */
 	DRIVER( puckpkmn )	/* (c) 2000 Genie */
 
-	/* Sega MegaTech */
-	DRIVER( mt_beast )
-	DRIVER( mt_astro )
-	DRIVER( mt_gaxe )
-	DRIVER( mt_gng )
-	DRIVER( mt_smgp )
-	DRIVER( mt_wcsoc )
-	DRIVER( mt_sonic )
-	DRIVER( mt_fshrk )
-	DRIVER( mt_gaxe2 )
-	DRIVER( mt_eswat )
+	/* Sega MegaTech, the number shown ia on the label of the instruction rom */
+	DRIVER( mt_beast )	/* 01 */
+	DRIVER( mt_shar2 )	/* 02 */
+	DRIVER( mt_stbld )	/* 03 */
+	DRIVER( mt_ggolf )	/* 04 */
+	DRIVER( mt_gsocr )	/* 05 */
+						/* 06 */
+						/* 07 */
+						/* 08 */
+						/* 09 */
+						/* 10 */
+	DRIVER( mt_tfor2 )	/* 11 */
+						/* 12 */
+	DRIVER( mt_astro )	/* 13 */
+						/* 14 */
+						/* 15 */
+						/* 16 */
+						/* 17 */
+						/* 18 */
+						/* 19 */
+	DRIVER( mt_lastb )	/* 20 */
+	DRIVER( mt_wcsoc )	/* 21 */
+	DRIVER( mt_tetri )	/* 22 */
+	DRIVER( mt_gng )	/* 23 */
+						/* 24 */
+	DRIVER( mt_gaxe )	/* 25 */
+						/* 26 */
+	DRIVER( mt_mystd )	/* 27 */
+						/* 28 */
+	DRIVER( mt_parlg )	/* 29 */
+						/* 30 */
+						/* 31 */
+						/* 32 */
+						/* 33 */
+						/* 34 */
+	DRIVER( mt_tlbba )	/* 35 */
+						/* 36 */
+						/* 37 */
+	DRIVER( mt_eswat )	/* 38 */
+	DRIVER( mt_smgp )	/* 39 */
+	DRIVER( mt_mwalk )	/* 40 */
+						/* 41 */
+						/* 42 */
+						/* 43 */
+						/* 44 */
+						/* 45 */
+						/* 46 */
+						/* 47 */
+						/* 48 */
+	DRIVER( mt_bbros )	/* 49 */
+						/* 50 */
+						/* 51 */
+	DRIVER( mt_sonic )	/* 52 */
+	DRIVER( mt_fshrk )	/* 53 */
+						/* 54 */
+						/* 55 */
+						/* 56 */
+	DRIVER( mt_gaxe2 )	/* 57 */
+						/* 58 */
+						/* 59 */
+	DRIVER( mt_kcham )	/* 60 */
 
 	/* Sega MegaPlay */
 	DRIVER( mp_sonic )
@@ -3313,6 +3367,7 @@ TESTDRIVER( whizquiz )	/* (c) 1985 Zilec-Zenitone */
 	DRIVER( vendetas )	/* GX081 (c) 1991 (Asia) */
 	DRIVER( vendtaso )	/* GX081 (c) 1991 (Asia) */
 	DRIVER( vendettj )	/* GX081 (c) 1991 (Japan) */
+	DRIVER( mogura )	/* GX141 (c) 1991 */
 	DRIVER( wecleman )	/* GX602 (c) 1986 */
 	DRIVER( hotchase )	/* GX763 (c) 1988 */
 	DRIVER( chqflag )	/* GX717 (c) 1988 */
@@ -4436,6 +4491,7 @@ TESTDRIVER( bloodwar )
 
 	/* Seta games */
 	DRIVER( hanaawas )	/* (c) SetaKikaku */
+	DRIVER( speedatk )	/* CB-0 (c) SetaKikaku */
 	DRIVER( srmp2 )		/* UB or UC?? (c) 1987 */
 	DRIVER( srmp3 )		/* ZA-0? (c) 1988 */
 	DRIVER( mjyuugi )	/* (c) 1990 Visco */
@@ -4969,6 +5025,11 @@ TESTDRIVER( portrait )	/* (c) 1983 Olympia */
 	DRIVER( enigma2a )	/* (c) 1984 Zilec Electronics (bootleg?) */
 TESTDRIVER( ltcasino )	/* (c) 1982 Digital Controls Inc */
 TESTDRIVER( ltcasin2 )	/* (c) 1984 Digital Controls Inc */
+TESTDRIVER( vamphalf )	/* DanBi */
+TESTDRIVER( hidnctch )	/* Eolith */
+TESTDRIVER( landbrk )	/* Eolith */
+TESTDRIVER( racoon )	/* Eolith */
+TESTDRIVER( xfiles )
 
 
 #endif /* CPSMAME */

@@ -231,8 +231,10 @@ static READ32_HANDLER( undrfire_input_r )
 	{
 		case 0x00:
 		{
-			return (input_port_0_word_r(0,0) << 16) | input_port_1_word_r(0,0) |
-				  (EEPROM_read_bit() << 7) | frame_counter;
+			return ((input_port_0_word_r(0,0) & (~(input_port_8_word_r(0,0)))) << 16) | input_port_1_word_r(0,0) |
+					(EEPROM_read_bit() << 7) | frame_counter;
+//			return (input_port_0_word_r(0,0) << 16) | input_port_1_word_r(0,0) | 
+//					(EEPROM_read_bit() << 7) | frame_counter;
 		}
 
 		case 0x01:
@@ -311,6 +313,8 @@ static WRITE32_HANDLER( unknown_int_req_w )
 
 static READ32_HANDLER( undrfire_lightgun_r )
 {
+#define RELOADFRAMES 16
+	static int reload_count1 = 0, reload_count2 = 0;
 	int x,y;
 
 	switch (offset)
@@ -322,6 +326,17 @@ static READ32_HANDLER( undrfire_lightgun_r )
 
 		case 0x00:	/* P1 */
 		{
+			if (readinputport(8) & 0x0010)
+			{
+				reload_count1 = RELOADFRAMES;
+				return 0;
+			}
+			if (reload_count1)
+			{
+				reload_count1--;
+				return 0;
+			}
+			
 			x = input_port_3_word_r(0,0) << 6;
 			y = input_port_4_word_r(0,0) << 6;
 
@@ -331,6 +346,17 @@ static READ32_HANDLER( undrfire_lightgun_r )
 
 		case 0x01:	/* P2 */
 		{
+			if (readinputport(8) & 0x0040)
+			{
+				reload_count2 = RELOADFRAMES;
+				return 0;
+			}
+			if (reload_count2)
+			{
+				reload_count2--;
+				return 0;
+			}
+			
 			x = input_port_5_word_r(0,0) << 6;
 			y = input_port_6_word_r(0,0) << 6;
 
@@ -342,6 +368,7 @@ static READ32_HANDLER( undrfire_lightgun_r )
 logerror("CPU #0 PC %06x: warning - read unmapped lightgun offset %06x\n",activecpu_get_pc(),offset);
 
 	return 0x0;
+#undef RELOADFRAMES
 }
 
 
@@ -512,6 +539,12 @@ INPUT_PORTS_START( undrfire )
 	PORT_BITX(    0x01, 0x00, IPT_DIPSWITCH_NAME | IPF_TOGGLE, "Show gun target", KEYCODE_F1, IP_JOY_NONE )
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Yes ) )
+
+//#if 0
+	PORT_START	/* Fake reload button */
+	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1 )
+	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2 )
+//#endif
 INPUT_PORTS_END
 
 

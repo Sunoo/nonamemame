@@ -85,14 +85,14 @@ static int system_bios;
 
 ***************************************************************************/
 
-void showdisclaimer(void)   /* MAURY_BEGIN: dichiarazione */
+void showlogo(void)
 {
 	  printf("N       N  OOOO      N       N  AAAAA   M       M EEEEEE\n"
 		 "N N     N O    O     N N     N A     A  M M   M M E     \n"
 		 "N   N   N O    O     N   N   N AAAAAAA  M   M   M EEE   \n"
 		 "N     N N O    O     N     N N A     A  M       M E     \n"
 		 "N       N  OOOO      N       N A     A  M       M EEEEEE\n");
-}                           /* MAURY_END: dichiarazione */
+}
 
 
 
@@ -1204,7 +1204,7 @@ static int display_rom_load_results(struct rom_load_data *romdata)
 		printf("%s", romdata->errorbuf);
 
 		/* if we're not getting out of here, wait for a keypress */
-		if (!options.gui_host && !bailing)
+		if (!options.gui_host && !bailing && !options.skip_baddumps)
 		{
 			int k;
 

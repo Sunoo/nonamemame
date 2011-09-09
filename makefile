@@ -10,6 +10,17 @@ ifeq ($(TARGET),)
 TARGET = noname
 endif
 
+# analog pedal compile option: if defined, use new analog code
+# uncomment next line to disable, or "ANALOGPEDALON=0" in make commandline
+# ANALOGPEDALON = 0
+ifdef ANALOGPEDALON
+ifeq ($(ANALOGPEDALON),0)
+undef ANALOGPEDALON
+endif
+else
+ANALOGPEDALON = 1
+endif
+
 # uncomment next line to include the debugger
 # DEBUG = 1
 
@@ -33,6 +44,7 @@ X86_MIPS3_DRC = 1
 
 
 # set this the operating system you're building for
+# mame:analog+ for dos is missing some features currently
 # MAMEOS = msdos
 # MAMEOS = windows
 ifeq ($(MAMEOS),)
@@ -56,11 +68,8 @@ RM = @rm -f
 #PERL = @perl -w
 
 
-ifeq ($(MAMEOS),msdos)
-PREFIX = d
-else
-PREFIX =
-endif
+
+
 
 ifdef DEBUG
 NAME = $(PREFIX)$(TARGET)$(SUFFIX)d
@@ -97,14 +106,21 @@ EMULATOR = $(NAME)$(EXE)
 
 DEFS = -DX86_ASM -DLSB_FIRST -DINLINE="static __inline__" -Dasm=__asm__
 
+#ifdef DX_INCPATH
+#DEFS += -I$(DX_INCPATH) -D_MSC_VER=1000
+#endif
+ifdef ANALOGPEDALON
+DEFS += -DANALOGPEDALON
+endif
+
 CFLAGS = -std=gnu99 -Isrc -Isrc/includes -Isrc/$(MAMEOS) -I$(OBJ)/cpu/m68000 -Isrc/cpu/m68000
 
 ifdef SYMBOLS
-CFLAGS += -O0 -Wall -Werror -Wno-unused -g
+CFLAGS += -O0 -Wall -Wno-error -Wno-unused -g
 else
 CFLAGS += -DNDEBUG \
 	$(ARCH) -O3 -fomit-frame-pointer -fstrict-aliasing \
-	-Werror -Wall -Wno-sign-compare -Wunused \
+	-Wno-error -Wall -Wno-sign-compare -Wunused \
 	-Wpointer-arith -Wbad-function-cast -Wcast-align -Waggregate-return \
 	-Wshadow -Wstrict-prototypes -Wundef \
 	-Wformat-security -Wwrite-strings \
@@ -121,7 +137,7 @@ CFLAGS += -DNDEBUG \
 #	-Wmissing-declarations
 endif
 
-CFLAGSPEDANTIC = $(CFLAGS) -pedantic
+CFLAGSPEDANTIC = $(CFLAGS) -Werror -pedantic
 
 ifdef SYMBOLS
 LDFLAGS =

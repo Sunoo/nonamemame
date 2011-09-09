@@ -161,4 +161,21 @@ int input_ui_pressed_repeat(int code, int speed);
 int is_joystick_axis_code(unsigned code);
 int return_os_joycode(InputCode code);
 
+
+/*start MAME:analog+*/
+/***************************************************************************/
+/* analog joystick input code logic functions */
+
+int is_joycode(unsigned code);
+int is_joystick_axis_code(unsigned code);
+int return_os_joycode(InputCode code);
+
+#ifdef ANALOGPEDALON
+/***************************************************************************/
+/* boolean function checking input of the negitive semi axis               */
+/* returns 1 for input from neg semi axis, 0 for pos                       */
+int isNegativeSemiAxis(InputSeq*);
+#endif	/* ANALOGPEDALON */
+/*end MAME:analog+*/
+
 #endif

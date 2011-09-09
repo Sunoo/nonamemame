@@ -55,6 +55,7 @@ static int showusage;
 static int readconfig;
 static int createconfig;
 extern int verbose;
+extern int showinput;
 
 struct rc_struct *rc;
 
@@ -206,6 +207,7 @@ static struct rc_option opts[] = {
 	{ "use_overlays", "overlay", rc_bool, &use_overlays, "1", 0, 0, NULL, "use overlay artwork" },
 	{ "use_bezels", "bezel", rc_bool, &use_bezels, "1", 0, 0, NULL, "use bezel artwork" },
 	{ "artwork_crop", "artcrop", rc_bool, &options.artwork_crop, "0", 0, 0, NULL, "crop artwork to game screen only" },
+	{ "artwork_filledges", "cropfe", rc_bool, &options.artwork_fb, "0", 0, 0, NULL, "use with artcrop, fills edges with art" },
 	{ "artwork_resolution", "artres", rc_int, &options.artwork_res, "0", 0, 0, NULL, "artwork resolution (0 for auto)" },
 	{ "cheat", "c", rc_bool, &options.cheat, "0", 0, 0, NULL, "enable/disable cheat subsystem" },
 	{ "debug", "d", rc_bool, &options.mame_debug, "0", 0, 0, NULL, "enable/disable debugger (only if available)" },
@@ -216,6 +218,8 @@ static struct rc_option opts[] = {
 	{ "oslog", NULL, rc_bool, &erroroslog, "0", 0, 0, NULL, "output error log to debugger" },
 	{ "skip_disclaimer", NULL, rc_bool, &options.skip_disclaimer, "0", 0, 0, NULL, "skip displaying the disclaimer screen" },
 	{ "skip_gameinfo", NULL, rc_bool, &options.skip_gameinfo, "0", 0, 0, NULL, "skip displaying the game info screen" },
+	{ "skip_gamewarnings", NULL, rc_bool, &options.skip_gamewarnings, "0", 0, 0, NULL, "skip displaying driver warning screen" },
+	{ "skip_baddumps", NULL, rc_bool, &options.skip_baddumps, "0", 0, 0, NULL, "skip displaying bad rom messages" },
 	{ "crconly", NULL, rc_bool, &options.crc_only, "0", 0, 0, NULL, "use only CRC for all integrity checks" },
 	{ "bios", NULL, rc_string, &options.bios, "default", 0, 14, NULL, "change system bios" },
 
@@ -226,6 +230,7 @@ static struct rc_option opts[] = {
 	{ "showusage", "su", rc_set_int, &showusage, NULL, 1, 0, NULL, "show this help" },
 	{ "readconfig",	"rc", rc_bool, &readconfig, "1", 0, 0, NULL, "enable/disable loading of configfiles" },
 	{ "verbose", "v", rc_bool, &verbose, "0", 0, 0, NULL, "display additional diagnostic information" },
+	{ "showinputmenu", "sim", rc_bool, &showinput, "1", 0, 0, NULL, "Enable Input(general) and (specific) menus" },
 	{ NULL,	NULL, rc_end, NULL, NULL, 0, 0,	NULL, NULL }
 };
 
@@ -561,9 +566,23 @@ int cli_frontend_init (int argc, char **argv)
 
 	/* if this is a vector game, parse vector.ini first */
 	expand_machine_driver(drivers[game_index]->drv, &drv);
-	if (drv.video_attributes & VIDEO_TYPE_VECTOR)
+	if (drv.video_attributes & VIDEO_TYPE_VECTOR) {
 		if (parse_config ("vector.ini", NULL))
 			exit(1);
+	} else {
+	//if (drv.video_attributes & VIDEO_TYPE_RASTOR)
+		if (parse_config ("rastor.ini", NULL))
+			exit(1);
+	}
+
+	/* if this is a vertical game, parse vertical.ini else horizont.ini */	
+	if (drivers[game_index]->flags & ORIENTATION_SWAP_XY) {		
+		if (parse_config ("vertical.ini", NULL))			
+			exit(1);	
+	} else {		
+		if (parse_config ("horizont.ini", NULL))
+			exit(1);	
+	}
 
 	/* nice hack: load source_file.ini (omit if referenced later any) */
 	{

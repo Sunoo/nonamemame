@@ -47,6 +47,13 @@ WRITE16_HANDLER( pow_video16_w );
 
 static int invert_controls;
 
+/* <jjs> */
+static int temp = 0;
+static unsigned char old_joydir[2];
+/* </jjs> */
+
+static int use_2button_rotary[] = {0,0};
+
 /******************************************************************************/
 
 static READ16_HANDLER( sound_cpu_r )
@@ -95,18 +102,77 @@ static READ16_HANDLER( dip_2_r )
 
 static READ16_HANDLER( rotary_1_r )
 {
-	return (( ~(1 << (readinputport(5) * 12 / 256)) )<<8)&0xff00;
+	/* <jjs> */
+	if ( (temp = readinputport(5)) || use_2button_rotary[0] )
+	{
+		use_2button_rotary[0] = 1;
+		if (temp & 0x1) /*Forward Button4*/
+		{
+			if (old_joydir[0] >= 11)
+					old_joydir[0] = 0;
+			else
+					old_joydir[0]++;
+		}
+		else if (temp & 0x2) /*Reverse Button5 */
+		{
+			if (old_joydir[0] <= 0)
+					old_joydir[0] = 11;
+			else
+					old_joydir[0]--;
+		} /*JW (from time soldiers driver in alpha68k) */
+
+		return (( ~(1 <<old_joydir[0])) <<8)&0xff00;
+	}
+	/* </jjs> */
+
+	return (( ~(1 << (readinputport(5) * 12 / 256)) )<<8)&0xff00;	/* ORIGINAL LINE */
 }
 
 static READ16_HANDLER( rotary_2_r )
 {
-	return (( ~(1 << (readinputport(6) * 12 / 256)) )<<8)&0xff00;
+	/* <jjs> */
+	if ( (temp = readinputport(6)) || use_2button_rotary[1] )
+	{
+		use_2button_rotary[1] = 1;
+		if (temp & 0x1) /*Forward Button4*/
+		{
+			if (old_joydir[1] >= 11)
+					old_joydir[1] = 0;
+			else
+					old_joydir[1]++;
+		}
+		else if (temp & 0x2) /*Reverse Button5 */
+		{
+			if (old_joydir[1] <= 0)
+					old_joydir[1] = 11;
+			else
+					old_joydir[1]--;
+		} /*JW (jjs: taken from time soldiers driver in alpha68k)*/
+
+		return (( ~(1 <<old_joydir[1])) <<8)&0xff00;
+	}
+	/* </jjs> */
+
+	return (( ~(1 << (readinputport(6) * 12 / 256)) )<<8)&0xff00;	/* ORIGINAL LINE */
 }
 
 static READ16_HANDLER( rotary_lsb_r )
 {
-	return ((( ~(1 << (readinputport(6) * 12 / 256))  ) <<4)&0xf000)
-		 + ((( ~(1 << (readinputport(5) * 12 / 256))  )    )&0x0f00);
+	int temp_lsb;
+	
+	/* <jjs> */
+	if (use_2button_rotary[0])
+		temp_lsb =  ( ( ~(1 << ( old_joydir[0] ))              )    ) &0x0f00;
+	else
+		temp_lsb =  ( ( ~(1 << (readinputport(5) * 12 / 256))  )    ) &0x0f00;
+	
+	if (use_2button_rotary[1])
+		temp_lsb += ( ( ~(1 << ( old_joydir[1] ))              ) <<4) &0xf000;
+	else
+		temp_lsb += ( ( ~(1 << (readinputport(6) * 12 / 256))  ) <<4) &0xf000;
+	/* </jjs> */
+
+	return temp_lsb;
 }
 
 static READ16_HANDLER( protcontrols_r )
@@ -456,6 +522,16 @@ INPUT_PORTS_START( searchar )
 
 	PORT_START	/* player 2 12-way rotary control - converted in controls_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, 0, 0 )
+
+	/* <jjs> */
+	PORT_START	/* alternate player 1 12-way rotary control - converted in controls_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4, 1)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5, 1)
+
+	PORT_START	/* alternate player 2 12-way rotary control - converted in controls_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 1)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 1)
+	/* </jjs> */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( streetsm )
@@ -706,6 +782,16 @@ INPUT_PORTS_START( ikari3 )
 
 	PORT_START	/* player 2 12-way rotary control - converted in controls_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, 0, 0 )
+
+	/* <jjs> */
+	PORT_START	/* alternate player 1 12-way rotary control - converted in controls_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4, 1)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5, 1)
+	
+	PORT_START	/* alternate player 2 12-way rotary control - converted in controls_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 1)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 1)
+	/* </jjs> */
 INPUT_PORTS_END
 
 /******************************************************************************/

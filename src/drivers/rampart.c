@@ -147,7 +147,32 @@ static WRITE16_HANDLER( latch_w )
 	}
 }
 
+/* <jake> */
+static READ16_HANDLER( input_ports_2_and_6_word_r )
+{
+    if (Machine->gamedrv->name == "rampart")
+    {
+	return readinputport(2) + (readinputport(6) << 8);
+    }
+    else
+    {
+	return readinputport(2);
+    }
+}
 
+static READ16_HANDLER( input_ports_3_and_7_word_r )
+{
+    if (Machine->gamedrv->name == "rampart") 
+    {
+	return readinputport(3) + (readinputport(7) << 8);
+    }
+    else
+    {
+	return readinputport(3);
+    }
+}
+
+/* </jake> */
 
 /*************************************
  *
@@ -165,8 +190,12 @@ static MEMORY_READ16_START( main_readmem )
 	{ 0x500000, 0x500fff, atarigen_eeprom_r },
 	{ 0x640000, 0x640001, input_port_0_word_r },
 	{ 0x640002, 0x640003, input_port_1_word_r },
-	{ 0x6c0000, 0x6c0001, input_port_2_word_r },
-	{ 0x6c0002, 0x6c0003, input_port_3_word_r },
+	/* <jake> */
+	{ 0x6c0000, 0x6c0001, input_ports_2_and_6_word_r },
+	{ 0x6c0002, 0x6c0003, input_ports_3_and_7_word_r },
+	//{ 0x6c0000, 0x6c0001, input_port_2_word_r },
+	//{ 0x6c0002, 0x6c0003, input_port_3_word_r },
+	/* </jake> */
 	{ 0x6c0004, 0x6c0005, input_port_4_word_r },
 	{ 0x6c0006, 0x6c0007, input_port_5_word_r },
 MEMORY_END
@@ -342,7 +371,6 @@ INPUT_PORTS_START( rampartj )
 	PORT_START
 	PORT_BIT( 0xffff, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
-
 
 
 /*************************************

@@ -1,5 +1,13 @@
+0.72u2.05:
+ - Updated to MAME 0.72u2 source code
+ - Added all of SirPoonga's hacks
+ - Added extended analog support from Analog+
+ - Finished added documentation
+ - Fixed message when opening noname.exe in Windows
+
 0.72u1.04:
  - Updated to MAME 0.072u1 source code
+ - Started adding documentation
 
 0.71u2.04:
  - Added Lucky Today from BraiNKilleR's Extra Games Compile Mame Pack
@@ -22,7 +30,7 @@
  - Started adding MisfitMAME drivers
 
 0.71.01:
- - Added SName drivers
+ - Added SNAME drivers
  - Added No Nag Patch
 
 0.71.00:

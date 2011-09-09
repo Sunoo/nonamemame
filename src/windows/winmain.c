@@ -126,24 +126,20 @@ int main(int argc, char **argv)
 		FILE* fp;
 
   #ifndef MESS
-   #define APPLICATION "M.A.M.E."
-		sprintf(message_text, APPLICATION " v%s - Multiple Arcade Machine Emulator\n"
+   #define APPLICATION "No Name MAME"
+		sprintf(message_text, APPLICATION " v%s\n"
+							  "\tModified by David Maher (aka TheGatesofBill)\n"
+							  "\n"
+							  "Usage:\tNONAME gamename [options]\n"
+							  "\n"
+							  "\tNONAME -list\t\tfor a brief list of supported games\n"
+							  "\tNONAME -listfull\t\tfor a full list of supported games\n"
+							  "\tNONAME -showusage\tfor a brief list of options\n"
+							  "\tNONAME -showconfig\tfor a list of configuration options\n"
+							  "\tNONAME -createconfig\tto create a noname.ini\n"
+							  "\n"
 							  "Copyright (C) 1997-2003 by Nicola Salmoria and the MAME Team\n"
-							  "\n"
-							  APPLICATION " is a console application, you should launch it from a command prompt.\n"
-							  "\n"
-							  "Usage:\tMAME gamename [options]\n"
-							  "\n"
-							  "\tMAME -list\t\tfor a brief list of supported games\n"
-							  "\tMAME -listfull\t\tfor a full list of supported games\n"
-							  "\tMAME -showusage\t\tfor a brief list of options\n"
-							  "\tMAME -showconfig\t\tfor a list of configuration options\n"
-							  "\tMAME -createconfig\tto create a mame.ini\n"
-							  "\n"
-							  "Please consult the documentation for more information.\n"
-							  "\n"
-							  "Would you like to open the documentation now?"
-							  , build_version);
+							  "Would you like to open the documentation now?", build_version);
   #else
    #define APPLICATION "M.E.S.S."
 		sprintf(message_text, APPLICATION " is a console application, you should launch it from a command prompt.\n"

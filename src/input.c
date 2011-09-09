@@ -907,3 +907,48 @@ int return_os_joycode(InputCode code)
 	}
 	return 0;
 }
+
+int is_joycode(unsigned code)
+{
+	if (code == CODE_NOT || code ==	CODE_OR)
+		return 0;
+
+	assert( code < code_mac );
+
+	return (code_map[code].type == CODE_TYPE_JOYSTICK);
+}
+
+/* added function to check the pedals semi axis for positive or negative
+ * dirty:
+ *		assumes only one analog device per seqCode
+ *		assumes uses only one semi-axis set in seqCode
+ *		assumes analog joystick input is listed before any digital joystick input
+ *		assumes up and left are negative and down and right are positive axes
+ *		only y axis works currently (needs to be fixed elsewhere in source) */
+int isNegativeSemiAxis(InputSeq* seqCode)
+{
+	const struct JoystickInfo *joyinfo;
+	int j;
+	
+	for(j=0;j<SEQ_MAX;++j)  	// SEQ_MAX defined in input.h
+	{
+		assert( (*seqCode)[j] < code_mac );
+	
+		if ( is_joystick_axis_code((*seqCode)[j]) )
+		{
+			if ((*seqCode)[j] < __code_max)
+			{
+				joyinfo = internal_code_find_joystick((*seqCode)[j]);
+				if (joyinfo)
+					return osd_isNegativeSemiAxis(joyinfo->code);
+			}
+			else
+			{
+				return osd_isNegativeSemiAxis(code_map[(*seqCode)[j]].oscode);
+			}
+		}
+	}
+	
+	return 0;
+}
+/*end MAME:analog+*/

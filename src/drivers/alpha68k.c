@@ -192,6 +192,8 @@ WRITE16_HANDLER( alpha68k_videoram_w );
 static data16_t *shared_ram;
 //static unsigned char *sound_ram; //AT: not needed
 static int invert_controls;
+static int temp, use_2button_rotary[] = {0,0};
+static unsigned char old_joydir[2], updatetoggle;
 int microcontroller_id, coin_id;
 
 static unsigned trigstate=0, deposits1=0, deposits2=0, credits=0;
@@ -248,6 +250,35 @@ static READ16_HANDLER( control_1_r )
 
 static READ16_HANDLER( control_2_r )
 {
+	temp = readinputport(7);
+	if (temp || use_2button_rotary[0])
+	{
+		use_2button_rotary[0]=1;
+		updatetoggle = ~updatetoggle;
+		if (updatetoggle)
+		{
+			if (temp & 0x1) /*Clockwise Button4*/
+			{
+				if (old_joydir[0] >= 11)
+					old_joydir[0] = 0;
+				else
+					old_joydir[0]++;
+			}
+			else if (temp & 0x2) /*Counter-clockwise Button5 */
+			{
+				if (old_joydir[0] <= 0)
+					old_joydir[0] = 11;
+				else
+					old_joydir[0]--;
+			} /*JW*/
+		}
+		if (invert_controls)
+			return ~(readinputport(3) + ((~(1<<old_joydir[0])) << 8 ));
+
+		return readinputport(3) + /* Low byte of CN1 */
+								((~(1<<old_joydir[0])) << 8);
+	}
+	
 	if (invert_controls)
 		return ~(readinputport(3) + ((~(1 << (readinputport(5) * 12 / 256))) << 8));
 
@@ -262,6 +293,34 @@ static READ16_HANDLER( control_2_V_r )
 
 static READ16_HANDLER( control_3_r )
 {
+	temp = readinputport(8);
+	if (temp || use_2button_rotary[1])
+	{
+		use_2button_rotary[1]=1;
+		updatetoggle = ~updatetoggle;
+		if (updatetoggle)
+		{
+			if (temp & 0x1) /*Clockwise Button4*/
+			{
+				if (old_joydir[1] >= 11)
+					old_joydir[1] = 0;
+				else
+					old_joydir[1]++;
+			}
+			else if (temp & 0x2) /*Counter-clockwise Button5 */
+			{
+				if (old_joydir[1] <= 0)
+					old_joydir[1] = 11;
+				else
+					old_joydir[1]--;
+			} /*JW*/
+		}
+		if (invert_controls)
+			return ~((( ~(1 << old_joydir[1]))<<8)&0xff00);
+
+		return (( ~(1<<old_joydir[1]))<<8)&0xff00;
+	}
+
 	if (invert_controls)
 		return ~((( ~(1 << (readinputport(6) * 12 / 256)) )<<8)&0xff00);
 
@@ -271,12 +330,22 @@ static READ16_HANDLER( control_3_r )
 /* High 4 bits of CN1 & CN2 */
 static READ16_HANDLER( control_4_r )
 {
-	if (invert_controls)
-		return ~(((( ~(1 << (readinputport(6) * 12 / 256))  ) <<4)&0xf000)
-		 + ((( ~(1 << (readinputport(5) * 12 / 256))  )    )&0x0f00));
+	static int tempbits = 0;
 
-	return ((( ~(1 << (readinputport(6) * 12 / 256))  ) <<4)&0xf000)
-		 + ((( ~(1 << (readinputport(5) * 12 / 256))  )    )&0x0f00);
+	if (use_2button_rotary[1])
+		tempbits =  (( ~(1 << (old_joydir[1]              )) ) << 4) & 0xf000;
+	else
+		tempbits =  (( ~(1 << (readinputport(6) * 12 / 256)) ) << 4) & 0xf000;
+
+	if (use_2button_rotary[0])
+		tempbits += (( ~(1 << (old_joydir[0]              )) )     ) & 0x0f00;
+	else
+		tempbits += (( ~(1 << (readinputport(5) * 12 / 256)) )     ) & 0x0f00;
+
+	if (invert_controls) 
+		tempbits = ~tempbits;
+
+	return tempbits;
 }
 
 /******************************************************************************/
@@ -1134,6 +1203,14 @@ INPUT_PORTS_START( timesold )
 
 	PORT_START  /* player 2 12-way rotary control - converted in controls_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 25, 8, 0, 0, KEYCODE_N, KEYCODE_M, 0, 0 )
+
+	PORT_START  /* player 1 12-way rotary control 2 button type - converted in controls_r() */
+	PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1, 1)
+	PORT_BIT_IMPULSE( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1, 1)
+
+	PORT_START  /* player 2 12-way rotary control 2 button type - converted in controls_r() */
+	PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 1)
+	PORT_BIT_IMPULSE( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 1)
 INPUT_PORTS_END
 
 /* Same as 'timesold' but different default settings for the "Language" Dip Switch */
@@ -1183,11 +1260,19 @@ INPUT_PORTS_START( btlfield )
 	PORT_DIPSETTING(    0x00, "6" )
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START  /* player 1 12-way rotary control - converted in controls_r() */
+	PORT_START  /* player 1 12-way rotary control dial type - converted in controls_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE, 25, 8, 0, 0, KEYCODE_Z, KEYCODE_X, 0, 0 )
 
-	PORT_START  /* player 2 12-way rotary control - converted in controls_r() */
+	PORT_START  /* player 2 12-way rotary control dial type - converted in controls_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 25, 8, 0, 0, KEYCODE_N, KEYCODE_M, 0, 0 )
+
+	PORT_START  /* player 1 12-way rotary control 2 button type - converted in controls_r() */
+	PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1, 1)
+	PORT_BIT_IMPULSE( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1, 1)
+
+	PORT_START  /* player 2 12-way rotary control 2 button type - converted in controls_r() */
+	PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 1)
+	PORT_BIT_IMPULSE( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 1)
 INPUT_PORTS_END
 
 INPUT_PORTS_START( skysoldr )
