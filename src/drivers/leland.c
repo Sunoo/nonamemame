@@ -229,6 +229,15 @@ INPUT_PORTS_START( wseries )		/* complete, verified from code */
 	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X | IPF_PLAYER2, 100, 10, 0, 255 )
 	PORT_START
 	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_PLAYER2, 100, 10, 0, 255 )
+
+#if 0
+	/* added hacks for easier play with standard analog joysticks */
+	/* need to add extra data processing functions */
+	PORT_START
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER1, 100, 10, 0, 255 )
+	PORT_START
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 10, 0, 255 )
+#endif
 INPUT_PORTS_END
 
 
@@ -337,13 +346,22 @@ INPUT_PORTS_START( basebal2 )		/* complete, verified from code */
 	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X | IPF_PLAYER2, 100, 10, 0, 255 )
 	PORT_START
 	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_PLAYER2, 100, 10, 0, 255 )
+
+#if 0
+	/* added hacks for easier play with standard analog joysticks */
+	/* need to add extra data processing functions */
+	PORT_START
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER1, 100, 10, 0, 255 )
+	PORT_START
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 10, 0, 255 )
+#endif
 INPUT_PORTS_END
 
 
 INPUT_PORTS_START( redline )		/* complete, verified in code */
 	PORT_START      /* 0xC0 */
 	PORT_BIT( 0x1f, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_ANALOG( 0xe0, 0xe0, IPT_PEDAL | IPF_PLAYER1, 100, 64, 0x00, 0xff )
+	PORT_ANALOG( 0xe0, 0x00, IPT_PEDAL | IPF_PLAYER1, 100, 64, 0x00, 0xff )
 
 	PORT_START      /* 0xC1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SLAVEHALT )
@@ -355,7 +373,7 @@ INPUT_PORTS_START( redline )		/* complete, verified in code */
 
 	PORT_START      /* 0xD0 */
 	PORT_BIT( 0x1f, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_ANALOG( 0xe0, 0xe0, IPT_PEDAL | IPF_PLAYER2, 100, 64, 0x00, 0xff )
+	PORT_ANALOG( 0xe0, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 64, 0x00, 0xff )
 
 	PORT_START      /* 0xD1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_EEPROM_DATA )
@@ -410,6 +428,15 @@ INPUT_PORTS_START( quarterb )		/* complete, verified in code */
 	PORT_START      /* Analog spring stick 4 */
 	PORT_START      /* Analog spring stick 5 */
 	PORT_START      /* Analog spring stick 6 */
+
+#if 0
+	/* added hacks for easier play with standard analog joysticks */
+	/* need to add extra data processing functions */
+	PORT_START
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER1, 100, 10, 0, 255 )
+	PORT_START
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 10, 0, 255 )
+#endif
 INPUT_PORTS_END
 
 
@@ -472,6 +499,15 @@ INPUT_PORTS_START( teamqb )		/* complete, verified in code */
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER3 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER3 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER3 )
+
+#if 0
+	/* added hacks for easier play with standard analog joysticks */
+	/* need to add extra data processing functions */
+	PORT_START
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER1, 100, 10, 0, 255 )
+	PORT_START
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 10, 0, 255 )
+#endif
 INPUT_PORTS_END
 
 
@@ -526,6 +562,15 @@ INPUT_PORTS_START( aafb2p )		/* complete, verified in code */
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
+
+#if 0
+	/* added hacks for easier play with standard analog joysticks */
+	/* need to add extra data processing functions */
+	PORT_START
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER1, 100, 10, 0, 255 )
+	PORT_START
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 10, 0, 255 )
+#endif
 INPUT_PORTS_END
 
 

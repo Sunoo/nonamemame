@@ -220,7 +220,7 @@ int osd_is_joy_pressed(int joycode);
 
 
 /* We support 4 players for each analog control / trackball */
-#define OSD_MAX_JOY_ANALOG	4
+#define OSD_MAX_JOY_ANALOG	4		// why called OSD_MAX_JOY_ANALOG if player limited?
 #define X_AXIS			0
 #define Y_AXIS			1
 #define Z_AXIS			2
@@ -244,6 +244,13 @@ void osd_joystick_calibrate(void);
 void osd_joystick_end_calibration(void);
 
 void osd_lightgun_read(int player, int *deltax, int *deltay);
+void osd_lightgun_read2a(int player, int *deltax, int *deltay);
+void osd_lightgun_read2b(int player, int *deltax, int *deltay);
+#ifdef WINXPANANLOG
+/* <jake> */
+void osd_raw_mouse_lightgun_read(int player, int *deltax, int *deltay);
+/* </jake> */
+#endif /* WINXPANANLOG */
 void osd_trak_read(int player, int *deltax, int *deltay);
 
 /* return values in the range -128 .. 128 (yes, 128, not 127) */
@@ -260,6 +267,36 @@ void osd_analogjoy_read(int player,int analog_axis[MAX_ANALOG_AXES], InputCode a
   Scan the list, and change the keys/joysticks you want.
 */
 void osd_customize_inputport_defaults(struct ipd *defaults);
+
+/*start MAME:analog+*/
+int osd_isNegativeSemiAxis(InputCode code);
+/* u_rebelscum added functions for UI setable analog joystick and mouse control
+		player --> mouse
+		player --> analog joystick
+		player --> mouse axes setting
+		player --> analog joystick axes setting */
+/* trackballs / mice */
+int osd_numbermice(void);						// return # of mice connected
+char *osd_getmousename(char *name, int mouse);	// gets name to be displayed
+int osd_getplayer_mouse(int player);			// returns mouse # of int player
+int osd_setplayer_mouse(int player, int mouse);	// sets player's mouse
+int osd_getplayer_mousesplit(int player, int axis);
+int osd_setplayer_mousesplit(int player, int playeraxis, int mouse);
+int osd_getplayer_mouseaxis(int player, int playeraxis);
+int osd_setplayer_mouseaxis(int player, int playeraxis, int mouse, int axis);
+
+//int osd_getplayer_mouseXaxis(int player);		// yes, player
+//int osd_getplayer_mouseYaxis(int player);
+/* axes setting: will change!! Should I use these??? */
+//int osd_getnummouseaxes(void);			// returns number of mappable axes
+//int osd_setmouseXaxis(int player, int axis);	// assumes the mouse is already set
+//int osd_setmouseYaxis(int player, int axis);	// and both axes are from same mouse
+//int osd_getnumaxes(void)		// returns number of mappable axes
+//void osd_getXaxis(int player, int *mouse, int *axis)	// yes, player
+//void osd_getYaxis(int player, int *mouse, int *axis)
+//int osd_setXaxis(int player, int mouse, int axis)
+//int osd_setYaxis(int player, int mouse, int axis)
+/*end MAME:analog+  */
 
 
 
@@ -365,7 +402,12 @@ void CLIB_DECL osd_die(const char *text,...)
 void CLIB_DECL osd_die(const char *text,...);
 #endif
 
-
+#ifdef WINXPANANLOG
+/* <jake> */
+/* Called immediately before all the input ports are read */
+void osd_new_input_read_cycle(void);
+/* </jake> */
+#endif /* WINXPANANLOG */
 
 #if defined MAME_NET || defined XMAME_NET
 /* network */

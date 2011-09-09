@@ -2714,11 +2714,79 @@ ADDRESS_MAP_END
 
 READ_HANDLER( downtown_ip_r )
 {
-	int dir1 = readinputport(4);	// analog port
-	int dir2 = readinputport(5);	// analog port
+	/* <jjs> */
+	int dir1;
+	int dir2;
+	static int temp;
+	static unsigned char old_joydir[2];
+	static int counter=0;
+	static int use_2button_rotary[] = {0,0};
 
-	dir1 = (~ (0x800 >> ((dir1 * 12)/0x100)) ) & 0xfff;
-	dir2 = (~ (0x800 >> ((dir2 * 12)/0x100)) ) & 0xfff;
+	counter++;
+
+	if (counter==16)
+	{
+		if ( (temp = readinputport(6)) || use_2button_rotary[0])
+		{
+			use_2button_rotary[0] = 1;
+			if (temp & 0x1)
+			{
+				if (old_joydir[0] <= 0)
+					old_joydir[0] = 11;
+				else
+					old_joydir[0]--;
+			}
+			else if (temp & 0x2)
+			{
+				if (old_joydir[0] >= 11)
+					old_joydir[0] = 0;
+				else
+					old_joydir[0]++;
+			}
+		}
+
+		if ( (temp = readinputport(7)) || use_2button_rotary[1])
+		{
+			use_2button_rotary[1] = 1;
+			if (temp & 0x1)
+			{
+				if (old_joydir[1] <= 0)
+					old_joydir[1] = 11;
+				else
+					old_joydir[1]--;
+			}
+			else if (temp & 0x2)
+			{
+				if (old_joydir[1] >= 11)
+					old_joydir[1] = 0;
+				else
+					old_joydir[1]++;
+			}
+		}
+
+		counter = 0;
+	}
+
+	if ( (temp = readinputport(8)) )
+		dir1 = (~ temp ) & 0xfff;
+	else if (use_2button_rotary[0])
+		dir1 = (~ (0x800 >> old_joydir[0]) ) & 0xfff;
+	else
+	{
+		dir1 = readinputport(4);	// analog port
+		dir1 = (~ (0x800 >> ((dir1 * 12)/0x100)) ) & 0xfff; /* ORIGINAL CODE */
+	}
+
+	if ( (temp = readinputport(9)) )
+		dir2 = (~ temp ) & 0xfff;
+	else if (use_2button_rotary[1])
+		dir2 = (~ (0x800 >> old_joydir[1]) ) & 0xfff;
+	else
+	{
+		dir2 = readinputport(5);	// analog port
+		dir2 = (~ (0x800 >> ((dir2 * 12)/0x100)) ) & 0xfff; /* ORIGINAL CODE */
+	}
+	/* </jjs> */
 
 	switch (offset)
 	{
@@ -3550,7 +3618,45 @@ INPUT_PORTS_START( downtown )
 	JOY_ROTATION(1, Z, X)
 
 	PORT_START	// IN5 - Rotation Player 2
-	JOY_ROTATION(1, N, M)
+	JOY_ROTATION(2, N, M)
+
+	/* <jjs> */
+	PORT_START	// IN6 - alternate Rotation Player 1
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4, 1)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5, 1)
+
+	PORT_START	// IN7 - alternate Rotation Player 2
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 1)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 1)
+	/* </jjs> */
+
+	PORT_START	/* player 1 TRUE 12-way rotary control */ /*is this backwards?*/
+	PORT_BIT(0x001, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER3)
+	PORT_BIT(0x002, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER3)
+	PORT_BIT(0x004, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER3)
+	PORT_BIT(0x008, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER3)
+	PORT_BIT(0x010, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER3)
+	PORT_BIT(0x020, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER3)
+	PORT_BIT(0x040, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER3)
+	PORT_BIT(0x080, IP_ACTIVE_HIGH, IPT_BUTTON8 | IPF_PLAYER3)
+	PORT_BIT(0x100, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER3)
+	PORT_BIT(0x200, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER3)
+	PORT_BIT(0x400, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER1)
+	PORT_BIT(0x800, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER1)
+
+	PORT_START	/* player 2 TRUE 12-way rotary control */ /*is this backwards?*/
+	PORT_BIT(0x001, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER4)
+	PORT_BIT(0x002, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER4)
+	PORT_BIT(0x004, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER4)
+	PORT_BIT(0x008, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER4)
+	PORT_BIT(0x010, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER4)
+	PORT_BIT(0x020, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER4)
+	PORT_BIT(0x040, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER4)
+	PORT_BIT(0x080, IP_ACTIVE_HIGH, IPT_BUTTON8 | IPF_PLAYER4)
+	PORT_BIT(0x100, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER4)
+	PORT_BIT(0x200, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER4)
+	PORT_BIT(0x400, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER2)
+	PORT_BIT(0x800, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER2)
 INPUT_PORTS_END
 
 

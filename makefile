@@ -8,12 +8,43 @@ ifeq ($(TARGET),)
 TARGET = noname
 endif
 
-# Compile version switch
+# Processor
+ifeq ($(CPU),debug)
+DEBUG = 1
+else
+ifeq ($(CPU),athlon)
+ATHLON = 1
+else
+ifeq ($(CPU),k6)
+K6 = 1
+else
+ifeq ($(CPU),i686)
+I686 = 1
+else
+ifeq ($(CPU),p4)
+P4 = 1
+endif
+endif
+endif
+endif
+endif
+
+# Operating System
+ifeq ($(OS),winxp)
+MAMEOS = windows
+WINXPANANLOG = 1
+SUFFIX = xp
+else
 ifeq ($(OS),mame32)
 MAMEOS = windows
 WINUI = 1
 SUFFIX = 32
 else
+ifeq ($(OS),mame32xp)
+MAMEOS = windows
+WINUI = 1
+WINXPANANLOG = 1
+SUFFIX = 32xp
 ifeq ($(OS),win)
 MAMEOS = windows
 else
@@ -23,6 +54,15 @@ else
 MAMEOS = windows
 endif
 endif
+endif
+endif
+endif
+
+# WinXP compile option: if defined, compile the winXP version
+# default is undefined;  uncomment next line or include in mame commandline to define
+# WINXPANANLOG = 1
+ifeq ($(WINXPANANLOG),0)
+undef WINXPANANLOG
 endif
 
 # uncomment next line to include the debugger
@@ -54,6 +94,7 @@ ifeq ($(MAMEOS),)
 MAMEOS = windows
 endif
 
+
 # extension for executables
 EXE = .exe
 
@@ -71,10 +112,11 @@ RM = @rm -f
 #PERL = @perl -w
 
 
+
 ifeq ($(MAMEOS),msdos)
 PREFIX = d
 else
-PREFIX =
+PREFIX = 
 endif
 
 ifdef DEBUG
@@ -111,6 +153,11 @@ OBJ = obj/$(NAME)
 EMULATOR = $(NAME)$(EXE)
 
 DEFS = -DX86_ASM -DLSB_FIRST -DINLINE="static __inline__" -Dasm=__asm__
+
+# Analog+ WinXP compile option
+ifdef WINXPANANLOG
+DEFS += -DWINXPANANLOG
+endif
 
 CFLAGS = -std=gnu99 -Isrc -Isrc/includes -Isrc/$(MAMEOS) -I$(OBJ)/cpu/m68000 -Isrc/cpu/m68000
 

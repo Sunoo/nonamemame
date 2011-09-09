@@ -122,7 +122,7 @@
 
 ****************************************************************************/
 
-
+#include <math.h>
 #include "driver.h"
 #include "cpu/t11/t11.h"
 #include "machine/atarigen.h"
@@ -376,15 +376,94 @@ static READ16_HANDLER( adc_r )
 	return readinputport(3 + which_adc) | 0xff00;
 }
 
-
 static READ_HANDLER( leta_r )
 {
     if (pedal_count == -1)   /* 720 */
 	{
+		const int pos_values[]={0x00,0x12,0x24,0x34,0x48,0x5a,0x6c,0x7c };	// 8 dpad directions
+		static int old_position = 0, old_angle = 90;
+		static int num_rotations = 0;
+		int current_angle = 0, current_position = 0;
+		int aj_x, aj_y, aj_delta = 0;
+		int dial_val;
+		int djoy_val;
+		
 		switch (offset & 3)
 		{
-			case 0: return readinputport(7) >> 8;
-			case 1: return readinputport(7) & 0xff;
+			case 0:
+				// return readinputport(7) >> 8; // ORIGINAL LINE
+				// <jake>
+				// dial_val = readinputport(8) & 0xff;
+				// </jake>
+				/* check spinner (original controller) */
+				if ( (dial_val = readinputport(8) & 0xff) )
+				{											// once dial is used, you almost need to restart
+					return dial_val;						// mame to not use dial!!!
+				}
+				if ( (djoy_val = readinputport(15)) )
+				{
+					return (djoy_val == 1) ? 0xff : 0;		// returns 0 if djoy_val <> 1
+				}
+
+				aj_x = (readinputport(13) & 0xff) - 128;
+				aj_y = (readinputport(14) & 0xff) - 128;
+				if ( aj_x || aj_y )
+					current_angle = atan2(aj_x,aj_y) * 360 / (2*M_PI);	// dang radians!
+				else													// 0 degrees is straight up
+					current_angle = old_angle;
+
+				/* original controller had two gaps 10 degrees apart, each 2.5 degrees wide */
+				if ( ((current_angle > -6)&&(current_angle < 6)) && ((current_angle < -2)||(current_angle > 2)) )
+					return 0xff;
+				// else
+				return 0;
+			case 1:
+				/* check original controller (spinner) */
+				if ( (dial_val = readinputport(7) & 0xff) )
+				{											// once dial is used, you almost need to restart
+					return dial_val;						// mame to not use dial!!!
+				}
+				/* if no spinner data, check 8way controller */
+				if ( (djoy_val = readinputport(15)) )
+				{
+					switch (djoy_val)						// not sure if this will "360"
+					{
+						case 0x01: return pos_values[0];
+						case 0x03: return pos_values[1];
+						case 0x02: return pos_values[2];
+						case 0x06: return pos_values[3];
+						case 0x04: return pos_values[4];
+						case 0x0c: return pos_values[5];
+						case 0x08: return pos_values[6];
+						case 0x09: return pos_values[7];
+					}
+				}
+				/* if no spinner or 8way data, check analog joystick */
+				aj_x = (readinputport(13) & 0xff) - 128;
+				aj_y = (readinputport(14) & 0xff) - 128;
+				if ( aj_x || aj_y )
+					current_angle = atan2(aj_x,aj_y) * 360 / (2*M_PI);	// dang radians!
+				else													// 0 degrees is straight up
+					current_angle = old_angle;
+				
+				// need this to figure the "straight up number"
+				// since 144 == once rotation, and input values range from 0 to 256
+				if (current_angle > 90 && old_angle < -90)
+					num_rotations--;
+				else if (current_angle < -90 && old_angle > 90)
+					num_rotations++;
+				
+				aj_delta = current_angle * 144/360;			/* convert from degrees to one game rotation */
+				current_position = ((144 * num_rotations) + aj_delta) & 0xff;
+											/* part before "+" figures the "straight up number" */
+		 									/* part after "+" adds/subs the angle from zero then masks */
+				if (old_position != current_position)
+				{
+					old_position = current_position;
+					old_angle = current_angle;
+				}
+
+				return current_position;
 			case 2: return 0xff;
 			case 3: return 0xff;
 		}
@@ -392,7 +471,6 @@ static READ_HANDLER( leta_r )
 
 	return readinputport(7 + (offset & 3));
 }
-
 
 
 /*************************************
@@ -688,11 +766,14 @@ INPUT_PORTS_START( 720 )
 	PORT_START	/* ADC3 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START	/* LETA0/1 */
-	PORT_ANALOG( 0xffff, 0x0000, IPT_DIAL | IPF_PLAYER1, 30, 10, 0, 0 )
+	PORT_START	/* LETA0 */
+	PORT_ANALOG( 0xff, 0x0000, IPT_DIAL | IPF_PLAYER1, 30, 10, 0, 0 )	// mask was 0xffff, but should be 0xff
 
-	PORT_START	/* filler */
-	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
+	PORT_START	/* LETA1 */
+	/* <Jake> */
+	PORT_ANALOG( 0xff, 0x00, IPT_DIAL_V | IPF_PLAYER4, 1, 0, 0, 0 )		// increase sensitivity if you 
+	/* </Jake> */														// have original controller
+	//PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED ) // Original line
 
 	PORT_START	/* LETA2 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -745,6 +826,22 @@ INPUT_PORTS_START( 720 )
 	PORT_DIPSETTING(    0xc0, "3 to Start, 1 to Continue" )
 	PORT_DIPSETTING(    0x00, "2 to Start, 1 to Continue" )
 	PORT_DIPSETTING(    0x40, "1 to Start, 1 to Continue" )
+	
+	/* fake ports for analog stick control hack */
+	/* listed as player 2 so AD stick and dial inputs aren't mixed */
+	PORT_START
+	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X | IPF_PLAYER2, 100, 10, 0x00, 0xff)
+
+	PORT_START
+	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_PLAYER2 | IPF_REVERSE, 100, 10, 0x00, 0xff)
+	
+	/* fake port for digital stick control hack */
+	/* listed as player 3 so AD stick and 8way stick inputs aren't mixed */
+	PORT_START
+	PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER3 )
+	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER3 )
+	PORT_BIT ( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER3 )
+	PORT_BIT ( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER3 )
 INPUT_PORTS_END
 
 

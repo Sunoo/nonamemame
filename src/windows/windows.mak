@@ -7,6 +7,9 @@ endif
 # the first two targets generate the prefix.h header
 # note this requires that OSOBJS be the first target
 #
+ifdef WINXPANANLOG
+# <jake> I added raw_mouse.o to this list
+endif
 OSOBJS = $(OBJ)/windows/winmain.o $(OBJ)/windows/fileio.o $(OBJ)/windows/config.o \
 	 $(OBJ)/windows/ticker.o $(OBJ)/windows/fronthlp.o $(OBJ)/windows/video.o \
 	 $(OBJ)/windows/input.o $(OBJ)/windows/sound.o $(OBJ)/windows/blit.o \
@@ -14,6 +17,9 @@ OSOBJS = $(OBJ)/windows/winmain.o $(OBJ)/windows/fileio.o $(OBJ)/windows/config.
 	 $(OBJ)/windows/window.o $(OBJ)/windows/wind3d.o $(OBJ)/windows/wind3dfx.o \
 	 $(OBJ)/windows/winddraw.o \
 	 $(OBJ)/windows/asmblit.o $(OBJ)/windows/asmtile.o
+ifdef WINXPANANLOG
+OSOBJS += $(OBJ)/windows/raw_mouse.o
+endif
 
 # uncomment this line to enable guard pages on all memory allocations
 #OSOBJS += $(OBJ)/windows/winalloc.o

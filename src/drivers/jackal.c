@@ -47,6 +47,36 @@ static int irq_enable;
 
 static READ_HANDLER( topgunbl_rotary_r )
 {
+/*start MAME:analog+*/
+	static int use_2button_rotary[] = {0,0};
+	/* <jjs> */
+	static int temp;
+
+	if ( (temp = readinputport(7 + offset)) || use_2button_rotary[offset])
+	{
+		static unsigned char old_joydir[2];
+
+		use_2button_rotary[offset] = 1;
+		if (temp & 0x1) /*Forward Button4*/
+		{
+			if (old_joydir[offset] <= 0)
+					old_joydir[offset] = 7;
+			else
+					old_joydir[offset]--;
+		}
+		else if (temp & 0x2) /*Reverse Button5 */
+		{
+			if (old_joydir[offset] >= 7)
+					old_joydir[offset] = 0;
+			else
+					old_joydir[offset]++;
+		} /*JW (jjs: taken from time soldiers driver in alpha68k)*/
+
+		return (1 << old_joydir[offset]) ^ 0xff;
+	}
+	/* </jjs> */
+/*end MAME:analog+  */
+
 	return (1 << (readinputport(5 + offset) * 8 / 256)) ^ 0xff;
 }
 
@@ -279,6 +309,16 @@ INPUT_PORTS_START( topgunbl )
 
 	PORT_START	/* player 2 8-way rotary control - converted in topgunbl_rotary_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, IP_JOY_NONE, IP_JOY_NONE )
+
+	/* <jjs> */
+	PORT_START	/* alternate player 1 8-way rotary control - converted in rotary_0_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4, 1)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5, 1)
+
+	PORT_START	/* alternate player 2 8-way rotary control - converted in rotary_1_r() */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 1)
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 1)
+	/* </jjs> */
 INPUT_PORTS_END
 
 

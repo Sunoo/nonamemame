@@ -170,29 +170,75 @@ static WRITE16_HANDLER( spyhunt2_control_w )
 
 static READ16_HANDLER( archrivl_port_1_r )
 {
-	int joystick = readinputport(3);
-	int result = 0;
-
 	/* each axis of the 49-way joystick is mapped like this:*/
-	/*      0 8      = neutral                              */
-	/*      1        = slightly left/up                     */
-	/*      2 3      = middle left/up                       */
-	/*      4 5 6 7  = full left/up                         */
-	/*      C        = slightly right/down                  */
-	/*      A E      = middle right/down                    */
-	/*      9 B D F  = full right/down                      */
+	/*    01xx  (4 5 6 7)  = full left/up                         */
+	/*    001x  (2 3)      = middle left/up                       */
+	/*    0001  (1)        = slightly left/up                     */
+	/*    x000  (0 8)      = neutral                              */
+	/*    1100  (C)        = slightly right/down                  */
+	/*    1x10  (A E)      = middle right/down                    */
+	/*    1xx1  (9 B D F)  = full right/down                      */
 
-	if (joystick & 0x0001) result |= 0x0040;
-	else if (joystick & 0x0002) result |= 0x0090;
+	int joy_x, joy_y;
+	int bits_x, bits_y;
+	static int dstickmem = 0;
+	static int truestickmem = 0;
+	int dstick = readinputport(3);
+	int result = readinputport(1);
 
-	if (joystick & 0x0004) result |= 0x0004;
-	else if (joystick & 0x0008) result |= 0x0009;
+	/* the first if handles a true 49-way joystick for an axis               */
+	/* the second if handles a just centered 49-way joystick                 */
+	/* the next pair of ifs (3rd & 4th) handle digital (8-way) input         */
+	/* the fifth if handles a just centered digital input for that axis      */
+	/* the final else handles input from analog devices                      */
+	/* this setup gives precidence to 49-way input, then 8-way, then analog  */
+	if (result & 0x00f0)	        { truestickmem = (truestickmem & ~0x00f0) | (result & 0x00f0); }
+	else if (truestickmem & 0x00f0) { truestickmem &= ~0x00f0; }
+	else if (dstick & 0x0001)       { result |= 0x0040; dstickmem |= 0x0001; }
+	else if (dstick & 0x0002)       { result |= 0x0090; dstickmem |= 0x0002; }
+	else if (dstickmem & 0x0003)    { result |= (0x0f << 4); dstickmem &= ~0x0003; }
+	else
+	{
+		joy_y = readinputport(5) >> 4;	/* 0 = down 3 = center 6 = up */
+		bits_y = (0x70 >> (7 - joy_y)) & 0x0f;
+		result |= (~bits_y &0x0f) << 4;
+	}
 
-	if (joystick & 0x0010) result |= 0x4000;
-	else if (joystick & 0x0020) result |= 0x9000;
+	if (result & 0x000f)	        { truestickmem = (truestickmem & ~0x000f) | (result & 0x000f); }
+	else if (truestickmem & 0x000f) { truestickmem &= ~0x000f; }
+	else if (dstick & 0x0004)       { result |= 0x0004; dstickmem |= 0x0004; }
+	else if (dstick & 0x0008)       { result |= 0x0009; dstickmem |= 0x0008; }
+	else if (dstickmem & 0x000C)    { result |= 0x0f; dstickmem &= ~0x000C; }
+	else
+	{
+		joy_x = readinputport(4) >> 4;	/* 0 = left 3 = center 6 = right */
+		bits_x = (0x70 >> (7 - joy_x)) & 0x0f;
+		result |= ~bits_x & 0x0f;
+	}
 
-	if (joystick & 0x0040) result |= 0x0400;
-	else if (joystick & 0x0080) result |= 0x0900;
+	if (result & 0xf000)	        { truestickmem = (truestickmem & ~0xf000) | (result & 0xf000); }
+	else if (truestickmem & 0xf000) { truestickmem &= ~0xf000; }
+	else if (dstick & 0x0010)       { result |= 0x4000; dstickmem |= 0x0010; }
+	else if (dstick & 0x0020)       { result |= 0x9000; dstickmem |= 0x0020; }
+	else if (dstickmem & 0x0030)    { result |= (0x0f << 12); dstickmem &= ~0x0030; }
+	else
+	{
+		joy_y = readinputport(7) >> 4;	/* 0 = down 3 = center 6 = up */
+		bits_y = (0x70 >> (7 - joy_y)) & 0x0f;
+		result |= (~bits_y &0x0f) << 12;
+	}
+
+	if (result & 0x0f00)	        { truestickmem = (truestickmem & ~0x0f00) | (result & 0x0f00); }
+	else if (truestickmem & 0x0f00) { truestickmem &= ~0x0f00; }
+	else if (dstick & 0x0040)       { result |= 0x0400; dstickmem |= 0x0040; }
+	else if (dstick & 0x0080)       { result |= 0x0900; dstickmem |= 0x0080; }
+	else if (dstickmem & 0x00C0)    { result |= (0x0f << 8); dstickmem &= ~0x00C0; }
+	else
+	{
+		joy_x = readinputport(6) >> 4;	/* 0 = left 3 = center 6 = right */
+		bits_x = (0x70 >> (7 - joy_x)) & 0x0f;
+		result |= (~bits_x & 0x0f) << 8;
+	}
 
 	return result;
 }
@@ -253,16 +299,38 @@ static READ16_HANDLER( pigskin_protection_r )
 
 static READ16_HANDLER( pigskin_port_1_r )
 {
-	int joystick = readinputport(3);
+	int joy_x, joy_y;
+	int bits_x, bits_y;
+	static int dstickmem = 0;
+	static int truestickmem = 0;
+	int dstick = readinputport(3);
 	int result = readinputport(1);
 
 	/* see archrivl_port_1_r for 49-way joystick description */
 
-	if (joystick & 0x0001) result |= 0x4000;
-	else if (joystick & 0x0002) result |= 0x9000;
+	if (result & 0xf000)	        { truestickmem = (truestickmem & ~0xf000) | (result & 0xf000); }
+	else if (truestickmem & 0xf000) { truestickmem &= ~0xf000; }
+	else if (dstick & 0x0001)       { result |= 0x4000;  dstickmem |= 0x0001; }
+	else if (dstick & 0x0002)       { result |= 0x9000;  dstickmem |= 0x0002; }
+	else if (dstickmem & 0x0003)    { result |= (0x0f << 12); dstickmem &= ~0x0003; }
+	else
+	{
+		joy_x = readinputport(4) >> 4;	/* 0 = down 3 = center 6 = up */
+		bits_x = (0x70 >> (7 - joy_x)) & 0x0f;
+		result |= (~bits_x & 0x0f) << 12;
+	}
 
-	if (joystick & 0x0004) result |= 0x0400;
-	else if (joystick & 0x0008) result |= 0x0900;
+	if (result & 0x0f00)	        { truestickmem = (truestickmem & ~0x0f00) | (result & 0x0f00); }
+	else if (truestickmem & 0x0f00) { truestickmem &= ~0x0f00; }
+	else if (dstick & 0x0004)       { result |= 0x0400; dstickmem |= 0x0004; }
+	else if (dstick & 0x0008)       { result |= 0x0900; dstickmem |= 0x0008; }
+	else if (dstickmem & 0x000C)    { result |= (0x0f << 8); dstickmem &= ~0x000C; }
+	else
+	{
+		joy_y = readinputport(5) >> 4;	/* 0 = down 3 = center 6 = up */
+		bits_y = (0x70 >> (7 - joy_y)) & 0x0f;
+		result |= (~bits_y & 0x0f) << 8;
+	}
 
 	return result;
 }
@@ -270,16 +338,39 @@ static READ16_HANDLER( pigskin_port_1_r )
 
 static READ16_HANDLER( pigskin_port_2_r )
 {
-	int joystick = readinputport(3);
+	int joy_x, joy_y;
+	int bits_x, bits_y;
+	static int dstickmem = 0;
+	static int truestickmem = 0;
+	int dstick = readinputport(3);
 	int result = readinputport(2);
 
 	/* see archrivl_port_1_r for 49-way joystick description */
 
-	if (joystick & 0x0010) result |= 0x4000;
-	else if (joystick & 0x0020) result |= 0x9000;
+	if (result & 0xf000)	        { truestickmem |= (result & 0xf000); }
+	else if (truestickmem & 0xf000) { truestickmem &= ~0xf000; }
+	else if (dstick & 0x0010)       { result |= 0x4000; dstickmem |= 0x0010; }
+	else if (dstick & 0x0020)       { result |= 0x9000; dstickmem |= 0x0020; }
+	else if (dstickmem & 0x0030)    { result |= (0x0f << 12); dstickmem &= ~0x0030; }
+	else
+	{
+		joy_x = readinputport(6) >> 4;	/* 0 = down 3 = center 6 = up */
+		bits_x = (0x70 >> (7 - joy_x)) & 0x0f;
+		result |= (~bits_x & 0x0f) << 12;
+	}
 
-	if (joystick & 0x0040) result |= 0x0400;
-	else if (joystick & 0x0080) result |= 0x0900;
+
+	if (result & 0x0f00)	        { truestickmem |= (result & 0x0f00); }
+	else if (truestickmem & 0x0f00) { truestickmem &= ~0x0f00; }
+	else if (dstick & 0x0040)       { result |= 0x0400; dstickmem |= 0x0040; }
+	else if (dstick & 0x0080)       { result |= 0x0900; dstickmem |= 0x0080; }
+	else if (dstickmem & 0x00C0)    { result |= (0x0f << 8); dstickmem &= ~0x00C0; }
+	else
+	{
+		joy_y = readinputport(7) >> 4;	/* 0 = down 3 = center 6 = up */
+		bits_y = (0x70 >> (7 - joy_y)) & 0x0f;
+		result |= (~bits_y & 0x0f) << 8;
+	}
 
 	return result;
 }
@@ -697,8 +788,26 @@ INPUT_PORTS_START( archrivl )
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
 
-	PORT_START
-	PORT_BIT( 0xffff, IP_ACTIVE_HIGH, IPT_UNUSED )	/* player 1/2 joysticks go here */
+	PORT_START	/* original 49-way player 1/2 joysticks go here */
+/*Analog+ start */
+	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER3 )  /* P1 left-right (A1) opto 1 (joy pin 2?) */
+	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER3 )  /* P1 left-right (B1) opto 2 (joy pin 3?) */
+	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER3 )  /* P1 left-right (C1) opto 3 (joy pin 4?) */
+	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER3 )  /* P1 left-right direction bit (joy pin 5?) */
+	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER3 )  /* P1  up-down   (A1) opto 4 (joy pin 6?) */
+	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER3 )  /* P1  up-down   (B1) opto 5 (joy pin 7?) */
+	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER3 )  /* P1  up-down   (C1) opto 6 (joy pin 8?) */
+	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_BUTTON8 | IPF_PLAYER3 )  /* P1  up-down   direction bit (joy pin 9?) */
+	PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER4 )  /* P2 left-right (A1) opto 1 (joy pin 2?) */
+	PORT_BIT( 0x0200, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER4 )  /* P2 left-right (B1) opto 2 (joy pin 3?) */
+	PORT_BIT( 0x0400, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER4 )  /* P2 left-right (C1) opto 3 (joy pin 4?) */
+	PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER4 )  /* P2 left-right direction bit (joy pin 5?) */
+	PORT_BIT( 0x1000, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER4 )  /* P2  up-down   (A1) opto 4 (joy pin 6?) */
+	PORT_BIT( 0x2000, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER4 )  /* P2  up-down   (B1) opto 5 (joy pin 7?) */
+	PORT_BIT( 0x4000, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER4 )  /* P2  up-down   (C1) opto 6 (joy pin 8?) */
+	PORT_BIT( 0x8000, IP_ACTIVE_HIGH, IPT_BUTTON8 | IPF_PLAYER4 )  /* P2  up-down   direction bit (joy pin 9?) */
+//	PORT_BIT( 0xffff, IP_ACTIVE_HIGH, IPT_UNUSED )	/* original mame code */
+/*Analog+ end*/
 
 	PORT_START
 	PORT_DIPNAME( 0x0003, 0x0003, "Game Time" )
@@ -726,7 +835,7 @@ INPUT_PORTS_START( archrivl )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
-	PORT_START	/* 49-way joystick simulator */
+	PORT_START	/* 49-way joystick simulator, for keyboard (& d-pads), converted by archrivl_port_1_r() */
 	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_8WAY | IPF_PLAYER1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_PLAYER1 )
 	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_PLAYER1 )
@@ -735,6 +844,22 @@ INPUT_PORTS_START( archrivl )
 	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_PLAYER2 )
 	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_PLAYER2 )
 	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
+
+	PORT_START	/* 49-way simulator, for analog joysticks, converted by archrivl_port_1_r() */
+	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_X | IPF_REVERSE | IPF_CENTER, 100, 100, 0x00, 0x6f, \
+	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_1_LEFT, JOYCODE_1_RIGHT )
+
+	PORT_START	/* 49-way simulator, for analog joysticks, converted by archrivl_port_1_r() */
+	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_Y | IPF_REVERSE | IPF_CENTER, 100, 100, 0x00, 0x6f, \
+	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_1_UP, JOYCODE_1_DOWN )
+
+	PORT_START	/* 49-way simulator, for analog joysticks, converted by archrivl_port_1_r() */
+	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_X | IPF_REVERSE | IPF_CENTER | IPF_PLAYER2, 100, 100, 0x00, 0x6f, \
+	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_2_LEFT, JOYCODE_2_RIGHT )
+
+	PORT_START	/* 49-way simulator, for analog joysticks, converted by archrivl_port_1_r() */
+	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_Y | IPF_REVERSE | IPF_CENTER | IPF_PLAYER2, 100, 100, 0x00, 0x6f, \
+	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_2_UP, JOYCODE_2_DOWN )
 INPUT_PORTS_END
 
 
@@ -763,7 +888,17 @@ INPUT_PORTS_START( pigskin )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_UNUSED )	/* player 1 joystick goes here */
+/*Analog+ start */	/* original 49 way player 1 joystick goes here */
+	PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER3 )  /* left-right (A1) opto 1 (joy pin 2?) */
+	PORT_BIT( 0x0200, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER3 )  /* left-right (B1) opto 2 (joy pin 3?) */
+	PORT_BIT( 0x0400, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER3 )  /* left-right (C1) opto 3 (joy pin 4?) */
+	PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER3 )  /* left-right direction bit (joy pin 5?) */
+	PORT_BIT( 0x1000, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER3 )  /*  up-down   (A1) opto 4 (joy pin 6?) */
+	PORT_BIT( 0x2000, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER3 )  /*  up-down   (B1) opto 5 (joy pin 7?) */
+	PORT_BIT( 0x4000, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER3 )  /*  up-down   (C1) opto 6 (joy pin 8?) */
+	PORT_BIT( 0x8000, IP_ACTIVE_HIGH, IPT_BUTTON8 | IPF_PLAYER3 )  /*  up-down   direction bit (joy pin 9?) */
+//	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_UNUSED )	/* original mame code */
+/*Analog+ end*/
 
 	PORT_START
 	PORT_DIPNAME( 0x0003, 0x0003, "Game Time" )
@@ -788,9 +923,19 @@ INPUT_PORTS_START( pigskin )
 	PORT_DIPNAME( 0x0080, 0x0080, "Joystick" )
 	PORT_DIPSETTING(      0x0080, "Standard" )
 	PORT_DIPSETTING(      0x0000, "Rotated" )
-	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_UNUSED )	/* player 2 joystick goes here */
+/*Analog+ start */	/* real 49 way player 2 joystick goes here */
+	PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER4 )  /* left-right (A1) opto 1 (joy pin 2?) */
+	PORT_BIT( 0x0200, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER4 )  /* left-right (B1) opto 2 (joy pin 3?) */
+	PORT_BIT( 0x0400, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER4 )  /* left-right (C1) opto 3 (joy pin 4?) */
+	PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER4 )  /* left-right direction bit (joy pin 5?) */
+	PORT_BIT( 0x1000, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER4 )  /*  up-down   (A1) opto 4 (joy pin 6?) */
+	PORT_BIT( 0x2000, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER4 )  /*  up-down   (B1) opto 5 (joy pin 7?) */
+	PORT_BIT( 0x4000, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER4 )  /*  up-down   (C1) opto 6 (joy pin 8?) */
+	PORT_BIT( 0x8000, IP_ACTIVE_HIGH, IPT_BUTTON8 | IPF_PLAYER4 )  /*  up-down   direction bit (joy pin 9?) */
+//	PORT_BIT( 0xff00, IP_ACTIVE_HIGH, IPT_UNUSED )	/* original mame code */
+/*Analog+ end*/
 
-	PORT_START	/* 49-way joystick simulator */
+	PORT_START	/* 49-way joystick simulator, for keyboard (& d-pads) */
 	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_PLAYER1 )
 	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_8WAY | IPF_PLAYER1 )
@@ -799,6 +944,22 @@ INPUT_PORTS_START( pigskin )
 	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_PLAYER2 )
 	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_8WAY | IPF_PLAYER2 )
 	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_PLAYER2 )
+
+	PORT_START	/* 49-way simulator, for analog joysticks, converted by pigskin_port_1_r() */
+	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_X | IPF_CENTER, 100, 100, 0x00, 0x6f, \
+	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_1_LEFT, JOYCODE_1_RIGHT )
+
+	PORT_START	/* 49-way simulator, for analog joysticks, converted by pigskin_port_1_r() */
+	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_Y | IPF_REVERSE | IPF_CENTER, 100, 100, 0x00, 0x6f, \
+	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_1_UP, JOYCODE_1_DOWN )
+
+	PORT_START	/* 49-way simulator, for analog joysticks, converted by pigskin_port_2_r() */
+	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_X | IPF_CENTER | IPF_PLAYER2, 100, 100, 0x00, 0x6f, \
+	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_2_LEFT, JOYCODE_2_RIGHT )
+
+	PORT_START	/* 49-way simulator, for analog joysticks, converted by pigskin_port_2_r() */
+	PORT_ANALOGX( 0xff, 0x38, IPT_AD_STICK_Y | IPF_REVERSE | IPF_CENTER | IPF_PLAYER2, 100, 100, 0x00, 0x6f, \
+	              IP_KEY_NONE, IP_KEY_NONE, JOYCODE_2_UP, JOYCODE_2_DOWN )
 INPUT_PORTS_END
 
 

@@ -928,23 +928,43 @@ static WRITE32_HANDLER( adc0834_w )
 
 static READ32_HANDLER( le2_gun_H_r )
 {
-	int p1x = readinputport(9)*287/0xff+22;
-	int p2x = readinputport(11)*287/0xff+22;
+	int p1x;
+	int p2x;
+	
+	if ( (p1x=readinputport(15)&0x04) )			/* if (player 1 button 4 (reload) is not pressed) */
+	{
+		p1x = readinputport(9)*287/0xff+22;
+	}
+	
+	if ( (p2x=readinputport(16)&0x04) )			/* if (player 2 button 4 (reload) is not pressed) */
+	{
+		p2x = readinputport(11)*287/0xff+22;
+	}
 
 	return (p1x<<16)|p2x;
 }
 
 static READ32_HANDLER( le2_gun_V_r )
 {
-	int p1y = readinputport(10)*223/0xff+1;
-	int p2y = readinputport(12)*223/0xff+1;
+	int p1y;
+	int p2y;
+	
+	if ( (p1y = readinputport(15)&0x04) ) {		/* if (player 1 button 4 (reload) is not pressed) */
+		p1y = readinputport(10)*223/0xff+1;
+	}
+	
+	if ( (p2y = readinputport(16)&0x04) ) {		/* if (player 2 button 4 (reload) is not pressed) */
+		p2y = readinputport(12)*223/0xff+1;
+	}
 
 	return (p1y<<16)|p2y;
 }
 
+/* reload hack -- thanks fosters! */
 static READ32_HANDLER( service_r )
 {
-	int res = (readinputport(1)<<24) | (readinputport(8)<<8);
+	int res = (( ( (readinputport(15)|(~0x04) ) & readinputport(1) )<<24) | \
+	   		   ( ( (readinputport(16)|(~0x04) ) & readinputport(8) )<< 8));
 
 	if (init_eeprom_count)
 	{
@@ -1958,16 +1978,16 @@ INPUT_PORTS_START( le2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START /* mask default type                     sens delta min max */
-	PORT_ANALOG( 0xff, 0x00, IPT_LIGHTGUN_X | IPF_PLAYER1, 35, 15, 0, 0xff )
+	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER1, 35, 15, 0, 0xff )
 
 	PORT_START
-	PORT_ANALOG( 0xff, 0x00, IPT_LIGHTGUN_Y | IPF_PLAYER1, 35, 15, 0, 0xff )
+	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER1, 35, 15, 0, 0xff )
 
 	PORT_START
-	PORT_ANALOG( 0xff, 0x00, IPT_LIGHTGUN_X | IPF_PLAYER2, 35, 15, 0, 0xff )
+	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER2, 35, 15, 0, 0xff )
 
 	PORT_START
-	PORT_ANALOG( 0xff, 0x00, IPT_LIGHTGUN_Y | IPF_PLAYER2, 35, 15, 0, 0xff )
+	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER2, 35, 15, 0, 0xff )
 
 	PORT_START
 	PORT_DIPNAME( 0x03, 0x02, "Background Detail" )
@@ -1980,6 +2000,12 @@ INPUT_PORTS_START( le2 )
 	PORT_DIPSETTING(    0x00, "Low" )
 	PORT_DIPSETTING(    0x01, "Med" )
 	PORT_DIPSETTING(    0x02, "High" )
+	
+	PORT_START /* reload hack -- thanks fosters! */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 )
+	
+	PORT_START
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
 INPUT_PORTS_END
 
 INPUT_PORTS_START( gokuparo )

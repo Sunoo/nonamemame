@@ -362,6 +362,10 @@ static const char *get_path_for_filetype(int filetype, int pathindex, DWORD *cou
 			break;
 #endif
 
+		case FILETYPE_CONFIG_ANALOGPLUS:
+			list = &pathlist[FILETYPE_CONFIG];
+			break;
+
 		default:
 			list = &pathlist[filetype];
 			break;

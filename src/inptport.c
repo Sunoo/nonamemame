@@ -43,6 +43,14 @@ extern unsigned int coins[COIN_COUNTERS];
 extern unsigned int lastcoin[COIN_COUNTERS];
 extern unsigned int coinlockedout[COIN_COUNTERS];
 
+/*start MAME:analog+*/
+extern int switchmice, switchaxes;			// from OS/input.c
+extern int splitmouse, resetmouse;			// from OS/input.c
+//extern int analog_pedal;					// from OS/input.c
+
+static int joymouse;  // option to simulate trackball with analog joystick
+/*end MAME:analog+  */
+
 static unsigned short input_port_value[MAX_INPUT_PORTS];
 static unsigned short input_vblank[MAX_INPUT_PORTS];
 
@@ -960,6 +968,39 @@ struct ik input_keywords[] =
 	{ "MOUSECODE_1_BUTTON1", 	IKT_STD,		JOYCODE_MOUSE_1_BUTTON1 },
 	{ "MOUSECODE_1_BUTTON2", 	IKT_STD,		JOYCODE_MOUSE_1_BUTTON2 },
 	{ "MOUSECODE_1_BUTTON3", 	IKT_STD,		JOYCODE_MOUSE_1_BUTTON3 },
+	{ "MOUSECODE_1_BUTTON4", 	IKT_STD,		JOYCODE_MOUSE_1_BUTTON4 },
+	{ "MOUSECODE_2_BUTTON1", 	IKT_STD,		JOYCODE_MOUSE_2_BUTTON1 },
+	{ "MOUSECODE_2_BUTTON2", 	IKT_STD,		JOYCODE_MOUSE_2_BUTTON2 },
+	{ "MOUSECODE_2_BUTTON3", 	IKT_STD,		JOYCODE_MOUSE_2_BUTTON3 },
+	{ "MOUSECODE_2_BUTTON4", 	IKT_STD,		JOYCODE_MOUSE_2_BUTTON4 },
+	{ "MOUSECODE_3_BUTTON1", 	IKT_STD,		JOYCODE_MOUSE_3_BUTTON1 },
+	{ "MOUSECODE_3_BUTTON2", 	IKT_STD,		JOYCODE_MOUSE_3_BUTTON2 },
+	{ "MOUSECODE_3_BUTTON3", 	IKT_STD,		JOYCODE_MOUSE_3_BUTTON3 },
+	{ "MOUSECODE_3_BUTTON4", 	IKT_STD,		JOYCODE_MOUSE_3_BUTTON4 },
+	{ "MOUSECODE_4_BUTTON1", 	IKT_STD,		JOYCODE_MOUSE_4_BUTTON1 },
+	{ "MOUSECODE_4_BUTTON2", 	IKT_STD,		JOYCODE_MOUSE_4_BUTTON2 },
+	{ "MOUSECODE_4_BUTTON3", 	IKT_STD,		JOYCODE_MOUSE_4_BUTTON3 },
+	{ "MOUSECODE_4_BUTTON4", 	IKT_STD,		JOYCODE_MOUSE_4_BUTTON4 },
+	{ "MOUSECODE_5_BUTTON1", 	IKT_STD,		JOYCODE_MOUSE_5_BUTTON1 },
+	{ "MOUSECODE_5_BUTTON2", 	IKT_STD,		JOYCODE_MOUSE_5_BUTTON2 },
+	{ "MOUSECODE_5_BUTTON3", 	IKT_STD,		JOYCODE_MOUSE_5_BUTTON3 },
+	{ "MOUSECODE_5_BUTTON4", 	IKT_STD,		JOYCODE_MOUSE_5_BUTTON4 },
+	{ "MOUSECODE_6_BUTTON1", 	IKT_STD,		JOYCODE_MOUSE_6_BUTTON1 },
+	{ "MOUSECODE_6_BUTTON2", 	IKT_STD,		JOYCODE_MOUSE_6_BUTTON2 },
+	{ "MOUSECODE_6_BUTTON3", 	IKT_STD,		JOYCODE_MOUSE_6_BUTTON3 },
+	{ "MOUSECODE_6_BUTTON4", 	IKT_STD,		JOYCODE_MOUSE_6_BUTTON4 },
+	{ "MOUSECODE_7_BUTTON1", 	IKT_STD,		JOYCODE_MOUSE_7_BUTTON1 },
+	{ "MOUSECODE_7_BUTTON2", 	IKT_STD,		JOYCODE_MOUSE_7_BUTTON2 },
+	{ "MOUSECODE_7_BUTTON3", 	IKT_STD,		JOYCODE_MOUSE_7_BUTTON3 },
+	{ "MOUSECODE_7_BUTTON4", 	IKT_STD,		JOYCODE_MOUSE_7_BUTTON4 },
+	{ "MOUSECODE_8_BUTTON1", 	IKT_STD,		JOYCODE_MOUSE_8_BUTTON1 },
+	{ "MOUSECODE_8_BUTTON2", 	IKT_STD,		JOYCODE_MOUSE_8_BUTTON2 },
+	{ "MOUSECODE_8_BUTTON3", 	IKT_STD,		JOYCODE_MOUSE_8_BUTTON3 },
+	{ "MOUSECODE_8_BUTTON4", 	IKT_STD,		JOYCODE_MOUSE_8_BUTTON4 },
+	{ "MOUSECODE_SYS_BUTTON1", 	IKT_STD,		JOYCODE_MOUSE_SYS_BUTTON1 },
+	{ "MOUSECODE_SYS_BUTTON2", 	IKT_STD,		JOYCODE_MOUSE_SYS_BUTTON2 },
+	{ "MOUSECODE_SYS_BUTTON3", 	IKT_STD,		JOYCODE_MOUSE_SYS_BUTTON3 },
+	{ "MOUSECODE_SYS_BUTTON4", 	IKT_STD,		JOYCODE_MOUSE_SYS_BUTTON4 },
 
 	{ "KEYCODE_NONE",			IKT_STD,		CODE_NONE },
 	{ "CODE_NONE",			  	IKT_STD,		CODE_NONE },
@@ -2078,7 +2119,9 @@ void update_analog_port(int port)
 
 	player = IP_GET_PLAYER(in);
 
-	delta = mouse_delta_axis[player][axis];
+/*start MAME:analog+*/
+	delta = mouse_delta_axis[player][axis] + (analog_current_axis[player][axis] >> 3);
+/*end MAME:analog+*/
 
 	if (seq_pressed(decseq)) delta -= keydelta;
 
@@ -2153,7 +2196,7 @@ void update_analog_port(int port)
 		{
 			delta=0;
 
-			/* for pedals, need to change to possitive number */
+			/* for pedals, need to change to positive number */
 			/* and, if needed, reverse pedal input */
 			if (type == IPT_PEDAL || type == IPT_PEDAL2)
 			{
@@ -2228,6 +2271,13 @@ void update_analog_port(int port)
 		}
 	}
 
+/*start MAME:analog+*/
+	if (joymouse)
+	{
+		//special handling for using a joystick as a mouse
+	}
+/*end MAME:analog+  */
+
 	input_analog_current_value[port] = current;
 }
 
@@ -2273,7 +2323,9 @@ profiler_mark(PROFILER_END);
 }
 
 #define MAX_JOYSTICKS 3
-#define MAX_PLAYERS 8
+/*start MAME:analog+*/
+//#define MAX_PLAYERS 8	/* defined in inptport.h */
+/*end MAME:analog+  */
 static int mJoyCurrent[MAX_JOYSTICKS*MAX_PLAYERS];
 static int mJoyPrevious[MAX_JOYSTICKS*MAX_PLAYERS];
 static int mJoy4Way[MAX_JOYSTICKS*MAX_PLAYERS];
@@ -2675,6 +2727,13 @@ profiler_mark(PROFILER_INPUT);
 		}
 	}
 
+#ifdef WINXPANANLOG
+	/* <jake> */
+	// Give the input osd_reads a chance to initialize themselves at the start of a cycle
+	osd_new_input_read_cycle();
+	/* <jake> */
+
+#endif /* WINXPANANLOG */
 	/* update the analog devices */
 	for (i = 0;i < OSD_MAX_JOY_ANALOG;i++)
 	{

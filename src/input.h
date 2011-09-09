@@ -97,14 +97,16 @@ enum
 	JOYCODE_MOUSE_1_BUTTON4,JOYCODE_MOUSE_1_BUTTON5,JOYCODE_MOUSE_1_BUTTON6, /* Placed here so old cfg files won't break */
 	JOYCODE_MOUSE_2_BUTTON4,JOYCODE_MOUSE_2_BUTTON5,JOYCODE_MOUSE_2_BUTTON6,
 	JOYCODE_MOUSE_3_BUTTON4,JOYCODE_MOUSE_3_BUTTON5,JOYCODE_MOUSE_3_BUTTON6,
-	JOYCODE_MOUSE_4_BUTTON4,JOYCODE_MOUSE_4_BUTTON5,JOYCODE_MOUSE_4_BUTTON6, 
+	JOYCODE_MOUSE_4_BUTTON4,JOYCODE_MOUSE_4_BUTTON5,JOYCODE_MOUSE_4_BUTTON6,
 	JOYCODE_MOUSE_5_BUTTON4,JOYCODE_MOUSE_5_BUTTON5,JOYCODE_MOUSE_5_BUTTON6,
 	JOYCODE_MOUSE_6_BUTTON4,JOYCODE_MOUSE_6_BUTTON5,JOYCODE_MOUSE_6_BUTTON6,
 	JOYCODE_MOUSE_7_BUTTON4,JOYCODE_MOUSE_7_BUTTON5,JOYCODE_MOUSE_7_BUTTON6,
-	JOYCODE_MOUSE_8_BUTTON4,JOYCODE_MOUSE_8_BUTTON5,JOYCODE_MOUSE_8_BUTTON6, 
+	JOYCODE_MOUSE_8_BUTTON4,JOYCODE_MOUSE_8_BUTTON5,JOYCODE_MOUSE_8_BUTTON6,
+	JOYCODE_MOUSE_SYS_BUTTON1,JOYCODE_MOUSE_SYS_BUTTON2,
+	JOYCODE_MOUSE_SYS_BUTTON3,JOYCODE_MOUSE_SYS_BUTTON4,
 
 #define __code_joy_first JOYCODE_1_LEFT
-#define __code_joy_last JOYCODE_MOUSE_8_BUTTON6
+#define __code_joy_last JOYCODE_MOUSE_SYS_BUTTON4
 
 	__code_max, /* Temination of standard code */
 
@@ -112,7 +114,7 @@ enum
 	CODE_NONE = 0x8000, /* no code, also marker of sequence end */
 	CODE_OTHER, /* OS code not mapped to any other code */
 	CODE_DEFAULT, /* special for input port definitions */
-        CODE_PREVIOUS, /* special for input port definitions */
+	CODE_PREVIOUS, /* special for input port definitions */
 	CODE_NOT, /* operators for sequences */
 	CODE_OR /* operators for sequences */
 };
@@ -193,5 +195,20 @@ int input_ui_pressed_repeat(int code, int speed);
 
 int is_joystick_axis_code(unsigned code);
 int return_os_joycode(InputCode code);
+
+
+/*start MAME:analog+*/
+/***************************************************************************/
+/* analog joystick input code logic functions */
+
+int is_joycode(unsigned code);
+int is_joystick_axis_code(unsigned code);
+int return_os_joycode(InputCode code);
+
+/***************************************************************************/
+/* boolean function checking input of the negitive semi axis               */
+/* returns 1 for input from neg semi axis, 0 for pos                       */
+int isNegativeSemiAxis(InputSeq*);
+/*end MAME:analog+*/
 
 #endif

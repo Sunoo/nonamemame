@@ -6,6 +6,11 @@
 
 // standard windows headers
 #define WIN32_LEAN_AND_MEAN
+#ifdef WINXPANANLOG
+#ifndef WINUI
+#define _WIN32_WINNT 0x501
+#endif /* WINUI */
+#endif /* WINXPANANLOG */
 #include <windows.h>
 #include <conio.h>
 #include <winioctl.h>
@@ -19,7 +24,14 @@
 #include "window.h"
 #include "rc.h"
 #include "input.h"
+#ifdef WINXPANANLOG
+/* <jake> */
+#include "raw_mouse.h"
+/* </jake> */
+#endif /* WINXPANANLOG */
 
+//#include <stdlib.h>
+//int snprintf (char *str, size_t count, const char *fmt, ...);	// from snprintf.c
 
 
 //============================================================
@@ -37,8 +49,10 @@ extern int win_window_mode;
 //============================================================
 
 #define MAX_KEYBOARDS		1
-#define MAX_MICE			8
-#define MAX_JOYSTICKS		8
+/*start MAME:analog+*/
+#define MAX_MICE			MAX_PLAYERS + 1	// The extra one is the "system mouse"
+#define MAX_JOYSTICKS		MAX_PLAYERS		// now that MAX_PLAYERS is 8
+/*end MAME:analog+  */
 
 #define MAX_KEYS			256
 
@@ -106,6 +120,31 @@ static struct ipd 			*ipddef_ptr = NULL;
 static int					num_osd_ik = 0;
 static int					size_osd_ik = 0;
 
+/*start MAME:analog+*/
+//int							analog_pedal;
+static int					singlemouse;
+int							switchmice;
+int							switchaxes;
+int							splitmouse;
+int							resetmouse;
+#ifdef WINXPANANLOG
+/* <jake> */
+static int use_rawmouse_winxp;
+static int acquire_raw_mouse;
+/* </jake> */
+#endif /* WINXPANANLOG */
+
+// two different multi-lightgun options
+static int					use_lightgun2a;
+static int					use_lightgun2b;
+
+// debug, should be moved back to function after debugging finished
+static int initlightgun2[MAX_PLAYERS]= {2,2,2,2,2,2,2,2};
+static int maxdeltax[MAX_PLAYERS]={1,1,1,1,1,1,1,1}, maxdeltay[MAX_PLAYERS]={1,1,1,1,1,1,1,1};
+//static int minmx[4], minmy[4], maxmx[4], maxmy[4];
+static int lg_center_x[MAX_PLAYERS], lg_center_y[MAX_PLAYERS];
+/*end MAME:analog+  */
+
 // keyboard states
 static int					keyboard_count;
 static LPDIRECTINPUTDEVICE	keyboard_device[MAX_KEYBOARDS];
@@ -136,6 +175,41 @@ static DIDEVCAPS			joystick_caps[MAX_JOYSTICKS];
 static DIJOYSTATE			joystick_state[MAX_JOYSTICKS];
 static DIPROPRANGE			joystick_range[MAX_JOYSTICKS][MAX_AXES];
 
+
+/*start MAME:analog+*/
+static int					joystick_setrange[MAX_JOYSTICKS][MAX_AXES];  // boolean if range was set
+
+// mappable mouse axes stuff
+static int num_axis_per_mouse[MAX_MICE];
+
+struct Mouse_Axes
+{
+	int xmouse;
+	int xaxis;
+	int ymouse;
+	int yaxis;
+};
+
+// analog tables for the mice
+static struct Mouse_Axes os_player_mouse_axes[MAX_PLAYERS];
+
+// set with following const, edit them as needed
+// TODO: do this in the UI
+const int mouse_map_default[MAX_PLAYERS] = {0,1,2,3,4,5,6,7};	// default mame mapping
+const int mouse_map_split[MAX_PLAYERS]	= {1,1,2,2,3,3,4,4};	// split mice default mapping
+const int mouse_map_usbs[MAX_PLAYERS]	= {1,2,3,4,5,6,7,0};	// if usb is present, map it to p1 and "system mouse" to p4
+const int mouse_map_8usbs[MAX_PLAYERS]	= {1,2,3,4,5,6,7,8};	// 4 usb present, map only to them and no "system mouse"
+/*end MAME:analog+  */
+
+#ifdef WINXPANANLOG
+/* <jake> */
+// Storage for values to be read at the beginning of the input read cycle - the "+1" is to include the sys mouse
+static ULONG raw_mouse_delta_x[MAX_PLAYERS + 1] = {0,0,0,0,0,0,0,0,0};
+static ULONG raw_mouse_delta_y[MAX_PLAYERS + 1] = {0,0,0,0,0,0,0,0,0};
+static ULONG raw_mouse_delta_z[MAX_PLAYERS + 1] = {0,0,0,0,0,0,0,0,0};
+/* </jake> */
+
+#endif /* WINXPANANLOG */
 // led states
 static int original_leds;
 static HANDLE hKbdDev;
@@ -159,12 +233,28 @@ struct rc_option input_opts[] =
 	{ "joystick", "joy", rc_bool, &use_joystick, "0", 0, 0, NULL, "enable joystick input" },
 	{ "lightgun", "gun", rc_bool, &use_lightgun, "0", 0, 0, NULL, "enable lightgun input" },
 	{ "dual_lightgun", "dual", rc_bool, &use_lightgun_dual, "0", 0, 0, NULL, "enable dual lightgun input" },
-	{ "offscreen_reload", "reload", rc_bool, &use_lightgun_reload, "0", 0, 0, NULL, "offscreen shots reload" },				
+	{ "offscreen_reload", "reload", rc_bool, &use_lightgun_reload, "0", 0, 0, NULL, "offscreen shots reload" },
 	{ "steadykey", "steady", rc_bool, &steadykey, "0", 0, 0, NULL, "enable steadykey support" },
 	{ "keyboard_leds", "leds", rc_bool, &use_keyboard_leds, "1", 0, 0, NULL, "enable keyboard LED emulation" },
 	{ "led_mode", NULL, rc_string, &ledmode, "ps/2", 0, 0, decode_ledmode, "LED mode (ps/2|usb)" },
 	{ "a2d_deadzone", "a2d", rc_float, &a2d_deadzone, "0.3", 0.0, 1.0, NULL, "minimal analog value for digital input" },
 	{ "ctrlr", NULL, rc_string, &ctrlrtype, 0, 0, 0, NULL, "preconfigure for specified controller" },
+/*start MAME:analog+*/
+	{ "Analog+ options", NULL, rc_seperator, NULL, NULL, 0, 0, NULL, NULL },
+//	{ "analogpedal", "anapedal", rc_bool, &analog_pedal, "1", 0, 0, NULL, "enable analog pedal" },
+	{ "singlemouse", "onemouse", rc_bool, &singlemouse, "0", 0, 0, NULL, "allow only one mouse device" },
+	{ "switchablemice", "switchmice", rc_bool, &switchmice, "0", 0, 0, NULL, "enable switching mouse -> player" },
+	{ "switchmiceaxes", "switchaxes", rc_bool, &switchaxes, "0", 0, 0, NULL, "enable assigning mouse axis -> player axis" },
+	{ "splitmouseaxes", "splitmouse", rc_bool, &splitmouse, "0", 0, 0, NULL, "automatically map one mouse axis per player from commandline/ini" },
+	{ "resetmouseaxes", "resetmouse", rc_bool, &resetmouse, "0", 0, 0, NULL, "reset analog+ mouse settings for this game" },
+	{ "lightgun2a", "gun2a", rc_bool, &use_lightgun2a, "0", 0, 0, NULL, "use 2 USB mouse lightguns with relative mode" },
+	{ "lightgun2b", "gun2b", rc_bool, &use_lightgun2b, "0", 0, 0, NULL, "use 2 USB mouse lightguns with absolute mode" },
+#ifdef WINXPANANLOG
+	/* <jake> */
+	{ "multimouse_winxp", "multimousexp", rc_bool, &use_rawmouse_winxp, "0", 0, 0, NULL, "use multiple mice (WinXP only) with rawmouse, -mouse required" },
+	/* </jake> */
+#endif /* WINXPANANLOG */
+/*end MAME:analog+  */
 	{ NULL,	NULL, rc_end, NULL, NULL, 0, 0,	NULL, NULL }
 };
 
@@ -208,6 +298,10 @@ static void updatekeyboard(void);
 static void init_keylist(void);
 static void init_joylist(void);
 
+/*start MAME:analog+*/
+//static void init_analogjoy_arrays(void);
+static void init_mouse_arrays(const int playermousedefault[]);
+/*end MAME:analog+  */
 
 
 //============================================================
@@ -453,10 +547,90 @@ static int joy_trans_table[][2] =
 	{ JOYCODE(7, JOYTYPE_BUTTON, 4),	JOYCODE_8_BUTTON5 },
 	{ JOYCODE(7, JOYTYPE_BUTTON, 5),	JOYCODE_8_BUTTON6 },
 
-	{ JOYCODE(0, JOYTYPE_MOUSEBUTTON, 0), 	JOYCODE_MOUSE_1_BUTTON1 },
-	{ JOYCODE(0, JOYTYPE_MOUSEBUTTON, 1), 	JOYCODE_MOUSE_1_BUTTON2 },
-	{ JOYCODE(0, JOYTYPE_MOUSEBUTTON, 2), 	JOYCODE_MOUSE_1_BUTTON3 },
-	{ JOYCODE(0, JOYTYPE_MOUSEBUTTON, 3), 	JOYCODE_MOUSE_1_BUTTON4 },
+	{ JOYCODE(0, JOYTYPE_MOUSEBUTTON, 0), 	JOYCODE_MOUSE_SYS_BUTTON1 },
+	{ JOYCODE(0, JOYTYPE_MOUSEBUTTON, 1), 	JOYCODE_MOUSE_SYS_BUTTON2 },
+	{ JOYCODE(0, JOYTYPE_MOUSEBUTTON, 2), 	JOYCODE_MOUSE_SYS_BUTTON3 },
+	{ JOYCODE(0, JOYTYPE_MOUSEBUTTON, 3), 	JOYCODE_MOUSE_SYS_BUTTON4 },
+
+	{ JOYCODE(0, JOYTYPE_BUTTON, 6),	JOYCODE_1_BUTTON7 },
+	{ JOYCODE(0, JOYTYPE_BUTTON, 7),	JOYCODE_1_BUTTON8 },
+	{ JOYCODE(0, JOYTYPE_BUTTON, 8),	JOYCODE_1_BUTTON9 },
+	{ JOYCODE(0, JOYTYPE_BUTTON, 9),	JOYCODE_1_BUTTON10 },
+
+	{ JOYCODE(1, JOYTYPE_BUTTON, 6),	JOYCODE_2_BUTTON7 },
+	{ JOYCODE(1, JOYTYPE_BUTTON, 7),	JOYCODE_2_BUTTON8 },
+	{ JOYCODE(1, JOYTYPE_BUTTON, 8),	JOYCODE_2_BUTTON9 },
+	{ JOYCODE(1, JOYTYPE_BUTTON, 9),	JOYCODE_2_BUTTON10 },
+
+	{ JOYCODE(2, JOYTYPE_BUTTON, 6),	JOYCODE_3_BUTTON7 },
+	{ JOYCODE(2, JOYTYPE_BUTTON, 7),	JOYCODE_3_BUTTON8 },
+	{ JOYCODE(2, JOYTYPE_BUTTON, 8),	JOYCODE_3_BUTTON9 },
+	{ JOYCODE(2, JOYTYPE_BUTTON, 9),	JOYCODE_3_BUTTON10 },
+
+	{ JOYCODE(3, JOYTYPE_BUTTON, 6),	JOYCODE_4_BUTTON7 },
+	{ JOYCODE(3, JOYTYPE_BUTTON, 7),	JOYCODE_4_BUTTON8 },
+	{ JOYCODE(3, JOYTYPE_BUTTON, 8),	JOYCODE_4_BUTTON9 },
+	{ JOYCODE(3, JOYTYPE_BUTTON, 9),	JOYCODE_4_BUTTON10 },
+
+	{ JOYCODE(4, JOYTYPE_BUTTON, 6),	JOYCODE_5_BUTTON7 },
+	{ JOYCODE(4, JOYTYPE_BUTTON, 7),	JOYCODE_5_BUTTON8 },
+	{ JOYCODE(4, JOYTYPE_BUTTON, 8),	JOYCODE_5_BUTTON9 },
+	{ JOYCODE(4, JOYTYPE_BUTTON, 9),	JOYCODE_5_BUTTON10 },
+
+	{ JOYCODE(5, JOYTYPE_BUTTON, 6),	JOYCODE_6_BUTTON7 },
+	{ JOYCODE(5, JOYTYPE_BUTTON, 7),	JOYCODE_6_BUTTON8 },
+	{ JOYCODE(5, JOYTYPE_BUTTON, 8),	JOYCODE_6_BUTTON9 },
+	{ JOYCODE(5, JOYTYPE_BUTTON, 9),	JOYCODE_6_BUTTON10 },
+
+	{ JOYCODE(6, JOYTYPE_BUTTON, 6),	JOYCODE_7_BUTTON7 },
+	{ JOYCODE(6, JOYTYPE_BUTTON, 7),	JOYCODE_7_BUTTON8 },
+	{ JOYCODE(6, JOYTYPE_BUTTON, 8),	JOYCODE_7_BUTTON9 },
+	{ JOYCODE(6, JOYTYPE_BUTTON, 9),	JOYCODE_7_BUTTON10 },
+
+	{ JOYCODE(7, JOYTYPE_BUTTON, 6),	JOYCODE_8_BUTTON7 },
+	{ JOYCODE(7, JOYTYPE_BUTTON, 7),	JOYCODE_8_BUTTON8 },
+	{ JOYCODE(7, JOYTYPE_BUTTON, 8),	JOYCODE_8_BUTTON9 },
+	{ JOYCODE(7, JOYTYPE_BUTTON, 9),	JOYCODE_8_BUTTON10 },
+
+	{ JOYCODE(1, JOYTYPE_MOUSEBUTTON, 0), 	JOYCODE_MOUSE_1_BUTTON1 },
+	{ JOYCODE(1, JOYTYPE_MOUSEBUTTON, 1), 	JOYCODE_MOUSE_1_BUTTON2 },
+	{ JOYCODE(1, JOYTYPE_MOUSEBUTTON, 2), 	JOYCODE_MOUSE_1_BUTTON3 },
+	{ JOYCODE(1, JOYTYPE_MOUSEBUTTON, 3), 	JOYCODE_MOUSE_1_BUTTON4 },
+
+	{ JOYCODE(2, JOYTYPE_MOUSEBUTTON, 0), 	JOYCODE_MOUSE_2_BUTTON1 },
+	{ JOYCODE(2, JOYTYPE_MOUSEBUTTON, 1), 	JOYCODE_MOUSE_2_BUTTON2 },
+	{ JOYCODE(2, JOYTYPE_MOUSEBUTTON, 2), 	JOYCODE_MOUSE_2_BUTTON3 },
+	{ JOYCODE(2, JOYTYPE_MOUSEBUTTON, 3), 	JOYCODE_MOUSE_2_BUTTON4 },
+
+	{ JOYCODE(3, JOYTYPE_MOUSEBUTTON, 0), 	JOYCODE_MOUSE_3_BUTTON1 },
+	{ JOYCODE(3, JOYTYPE_MOUSEBUTTON, 1), 	JOYCODE_MOUSE_3_BUTTON2 },
+	{ JOYCODE(3, JOYTYPE_MOUSEBUTTON, 2), 	JOYCODE_MOUSE_3_BUTTON3 },
+	{ JOYCODE(3, JOYTYPE_MOUSEBUTTON, 3), 	JOYCODE_MOUSE_3_BUTTON4 },
+
+	{ JOYCODE(4, JOYTYPE_MOUSEBUTTON, 0), 	JOYCODE_MOUSE_4_BUTTON1 },
+	{ JOYCODE(4, JOYTYPE_MOUSEBUTTON, 1), 	JOYCODE_MOUSE_4_BUTTON2 },
+	{ JOYCODE(4, JOYTYPE_MOUSEBUTTON, 2), 	JOYCODE_MOUSE_4_BUTTON3 },
+	{ JOYCODE(4, JOYTYPE_MOUSEBUTTON, 3), 	JOYCODE_MOUSE_4_BUTTON4 },
+
+	{ JOYCODE(5, JOYTYPE_MOUSEBUTTON, 0), 	JOYCODE_MOUSE_5_BUTTON1 },
+	{ JOYCODE(5, JOYTYPE_MOUSEBUTTON, 1), 	JOYCODE_MOUSE_5_BUTTON2 },
+	{ JOYCODE(5, JOYTYPE_MOUSEBUTTON, 2), 	JOYCODE_MOUSE_5_BUTTON3 },
+	{ JOYCODE(5, JOYTYPE_MOUSEBUTTON, 3), 	JOYCODE_MOUSE_5_BUTTON4 },
+
+	{ JOYCODE(6, JOYTYPE_MOUSEBUTTON, 0), 	JOYCODE_MOUSE_6_BUTTON1 },
+	{ JOYCODE(6, JOYTYPE_MOUSEBUTTON, 1), 	JOYCODE_MOUSE_6_BUTTON2 },
+	{ JOYCODE(6, JOYTYPE_MOUSEBUTTON, 2), 	JOYCODE_MOUSE_6_BUTTON3 },
+	{ JOYCODE(6, JOYTYPE_MOUSEBUTTON, 3), 	JOYCODE_MOUSE_6_BUTTON4 },
+
+	{ JOYCODE(7, JOYTYPE_MOUSEBUTTON, 0), 	JOYCODE_MOUSE_7_BUTTON1 },
+	{ JOYCODE(7, JOYTYPE_MOUSEBUTTON, 1), 	JOYCODE_MOUSE_7_BUTTON2 },
+	{ JOYCODE(7, JOYTYPE_MOUSEBUTTON, 2), 	JOYCODE_MOUSE_7_BUTTON3 },
+	{ JOYCODE(7, JOYTYPE_MOUSEBUTTON, 3), 	JOYCODE_MOUSE_7_BUTTON4 },
+
+	{ JOYCODE(8, JOYTYPE_MOUSEBUTTON, 0), 	JOYCODE_MOUSE_8_BUTTON1 },
+	{ JOYCODE(8, JOYTYPE_MOUSEBUTTON, 1), 	JOYCODE_MOUSE_8_BUTTON2 },
+	{ JOYCODE(8, JOYTYPE_MOUSEBUTTON, 2), 	JOYCODE_MOUSE_8_BUTTON3 },
+	{ JOYCODE(8, JOYTYPE_MOUSEBUTTON, 3), 	JOYCODE_MOUSE_8_BUTTON4 },
 };
 
 
@@ -530,6 +704,9 @@ static BOOL CALLBACK enum_mouse_callback(LPCDIDEVICEINSTANCE instance, LPVOID re
 	if (mouse_count >= MAX_MICE)
 		goto out_of_mice;
 
+	// init for this mouse
+	num_axis_per_mouse[mouse_count] = 0;
+
 	// attempt to create a device
 	result = IDirectInput_CreateDevice(dinput, &instance->guidInstance, &mouse_device[mouse_count], NULL);
 	if (result != DI_OK)
@@ -546,12 +723,28 @@ static BOOL CALLBACK enum_mouse_callback(LPCDIDEVICEINSTANCE instance, LPVOID re
 	if (result != DI_OK)
 		goto cant_get_caps;
 
-	// set relative mode
+	// get number of axes used by the mouse
+	num_axis_per_mouse[mouse_count] = mouse_caps[mouse_count].dwAxes;
+
+	// set relative or absolute mode
+	// note: does not have effect in winMe!!!
+	// hacked it into pause function, where it does take effect
 	value.diph.dwSize = sizeof(DIPROPDWORD);
 	value.diph.dwHeaderSize = sizeof(value.diph);
 	value.diph.dwObj = 0;
 	value.diph.dwHow = DIPH_DEVICE;
-	value.dwData = DIPROPAXISMODE_REL;
+	if (use_lightgun || use_lightgun2b)
+	{
+		if (verbose)
+			printf("mouse/lightgun absolute mode\n");
+		value.dwData = DIPROPAXISMODE_ABS;
+	}
+	else
+	{
+		if (verbose)
+			printf("mouse/lightgun relative mode\n");
+		value.dwData = DIPROPAXISMODE_REL;
+	}
 	result = IDirectInputDevice_SetProperty(mouse_device[mouse_count], DIPROP_AXISMODE, &value.diph);
 	if (result != DI_OK)
 		goto cant_set_axis_mode;
@@ -562,7 +755,9 @@ static BOOL CALLBACK enum_mouse_callback(LPCDIDEVICEINSTANCE instance, LPVOID re
 		goto cant_set_format;
 
 	// set the cooperative level
-	if (use_lightgun)
+/*start MAME:analog+*/
+	if ( use_lightgun && !(use_lightgun2a) && !(use_lightgun2b) )
+/*end MAME:analog+  */
 		result = IDirectInputDevice_SetCooperativeLevel(mouse_device[mouse_count], win_video_window,
 					DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
 	else
@@ -573,10 +768,15 @@ static BOOL CALLBACK enum_mouse_callback(LPCDIDEVICEINSTANCE instance, LPVOID re
 		goto cant_set_coop_level;
 
 	// increment the count
-	if (use_lightgun)
+	if (use_lightgun||use_lightgun2a||use_lightgun2b)
 		lightgun_count++;
 	mouse_count++;
-	return DIENUM_CONTINUE;
+/*start MAME:analog+*/
+	if (singlemouse)		// Assuming the first mouse enum'ed always is the sysmouse:
+		return DIENUM_STOP;	// why continue looking for more mice if you only want one?
+	else
+/*end MAME:analog+  */
+		return DIENUM_CONTINUE;
 
 cant_set_coop_level:
 cant_set_format:
@@ -602,7 +802,7 @@ static BOOL CALLBACK enum_joystick_callback(LPCDIDEVICEINSTANCE instance, LPVOID
 	HRESULT result = DI_OK;
 	DWORD flags;
 
-	// if we're not out of mice, log this one
+	// if we're not out of joysticks, log this one
 	if (joystick_count >= MAX_JOYSTICKS)
 		goto out_of_joysticks;
 
@@ -664,7 +864,26 @@ out_of_joysticks:
 	return DIENUM_CONTINUE;
 }
 
+#ifdef WINXPANANLOG
+/* <jake> */
+//============================================================
+//	process_raw_mouse_wm_input()
+//============================================================
+void process_rawmouse_wm_input(LPARAM lparam, int center_cursor_pos_x, int center_cursor_pos_y)
+{
+	// called when WM_INPUT message received in window.c
+	//   to in order to stay informed of the current mouse status
+#endif /* WINXPANANLOG */
 
+#ifdef WINXPANANLOG
+	if (use_rawmouse_winxp) add_to_raw_mouse_x_and_y((HRAWINPUT)lparam);
+
+	// Hide the cursor smack in the center of the screen (hides the mouse in windowed mode)
+	if (acquire_raw_mouse) SetCursorPos(center_cursor_pos_x, center_cursor_pos_y);
+
+}
+/* </jake> */
+#endif /* WINXPANANLOG */
 
 //============================================================
 //	win_init_input
@@ -684,6 +903,7 @@ int win_init_input(void)
 		if (result != DI_OK)
 			goto cant_create_dinput;
 	}
+
 	if (verbose)
 		fprintf(stderr, "Using DirectInput %d\n", dinput_version >> 8);
 
@@ -698,9 +918,39 @@ int win_init_input(void)
 	mouse_count = 0;
 	lightgun_dual_player_state[0]=lightgun_dual_player_state[1]=0;
 	lightgun_dual_player_state[2]=lightgun_dual_player_state[3]=0;
+#ifdef WINXPANANLOG
+
+	/* <jake> */
+	if (use_rawmouse_winxp) {
+		if (!init_raw_mouse(1, 0, !singlemouse))  // only include individual mice when singlemouse is "off"
+			goto cant_init_mouse;  // sysmouse yes, rdpmouse no, individualmice no
+
+		mouse_count = raw_mouse_count;
+		if (use_lightgun) lightgun_count = mouse_count;
+	}
+	else { // Use directinput for the mice
+	/* </jake> */
+
+#endif /* WINXPANANLOG */
 	result = IDirectInput_EnumDevices(dinput, DIDEVTYPE_MOUSE, enum_mouse_callback, 0, DIEDFL_ATTACHEDONLY);
 	if (result != DI_OK)
 		goto cant_init_mouse;
+#ifdef WINXPANANLOG
+	/* <jake> */
+	}
+	/* </jake> */
+
+#endif /* WINXPANANLOG */
+/*start MAME:analog+*/
+	if (splitmouse)
+		init_mouse_arrays(mouse_map_split);		// handle split mice
+	else if (mouse_count >= 9)
+		init_mouse_arrays(mouse_map_8usbs);		// handle 8 usb mice
+	else if (mouse_count >= 2)
+		init_mouse_arrays(mouse_map_usbs);		// handle 1-3 usb mice
+	else
+		init_mouse_arrays(mouse_map_default);	// else do the normal mapping
+/*end MAME:analog+  */
 
 	// initialize joystick devices
 	joystick_count = 0;
@@ -716,7 +966,13 @@ int win_init_input(void)
 
 	// print the results
 	if (verbose)
+/*start MAME:analog+*/
+	{
+		if (singlemouse)
+			fprintf(stderr, "Single Mouse option set\n");
 		fprintf(stderr, "Keyboards=%d  Mice=%d  Joysticks=%d Lightguns=%d\n", keyboard_count, mouse_count, joystick_count, lightgun_count);
+	}
+/*end MAME:analog+  */
 	return 0;
 
 cant_init_joystick:
@@ -738,17 +994,74 @@ void win_shutdown_input(void)
 {
 	int i;
 
+/* lightgun2a/b debug */
+	DIPROPDWORD value;
+	HRESULT result = DI_OK;
+
+	if (verbose)
+	{
+		if (use_lightgun2a || use_lightgun2b)
+		{
+			if (use_lightgun2a)
+			{
+				fprintf (stdout, "final values for -lightgun2a (relative directX)\n");
+				for (i = 0; i < MAX_PLAYERS; i++)
+					fprintf (stdout, "Player %d max delta x,y ( %d , %d )\n", i, maxdeltax[i], maxdeltay[i]);
+			}
+			else if (use_lightgun2b)
+			{
+				fprintf (stdout, "final values for -lightgun2b (absolute directX)\n");
+				for (i = 0; i < MAX_PLAYERS; i++)
+					fprintf (stdout, "Player %d center x,y ( %d , %d )\n", i, lg_center_x[i], lg_center_y[i]);
+			}
+			for (i = 0; i<mouse_count; i++)
+			{
+				// get relative or absolute mode
+				value.diph.dwSize = sizeof(DIPROPDWORD);
+				value.diph.dwHeaderSize = sizeof(value.diph);
+				value.diph.dwObj = 0;
+				value.diph.dwHow = DIPH_DEVICE;
+				result = IDirectInputDevice_GetProperty(mouse_device[i], DIPROP_AXISMODE, &value.diph);
+				if (result == DI_OK)
+				{
+					fprintf(stdout, "Player %d mouse type %s\n", i, (value.dwData == DIPROPAXISMODE_REL) ? "Relative" : "Absolute");
+	//				if (value.dwData == DIPROPAXISMODE_REL)
+	//					fprintf(stdout, "Player %d mouse type Relative\n", i);
+	//				else if (value.dwData == DIPROPAXISMODE_ABS)
+	//					fprintf(stdout, "Player %d mouse type Absolute\n", i);
+	//				else
+	//					fprintf(stdout, "player %i mouse unknown rel/abs type", i);
+				}
+			}
+		}
+	}
+/* end lightgun2a/b debug output */
 
 	// release all our keyboards
-	for (i = 0; i < keyboard_count; i++) {
+	for (i = 0; i < keyboard_count; i++)
+	{
 		IDirectInputDevice_Release(keyboard_device[i]);
 		if (keyboard_device2[i])
 			IDirectInputDevice_Release(keyboard_device2[i]);
 		keyboard_device2[i]=0;
 	}
 
+	for (i = 0; i < joystick_count; i++)
+	{
+	}
+
 	// release all our joysticks
-	for (i = 0; i < joystick_count; i++) {
+	for (i = 0; i < joystick_count; i++)
+	{
+		// restore all joysticks original range before releasing
+		for (int j=0; j < MAX_AXES; j++)
+		{
+			joystick_range[i][j].diph.dwSize = sizeof(DIPROPRANGE);
+			joystick_range[i][j].diph.dwHeaderSize = sizeof(joystick_range[i][j].diph);
+			joystick_range[i][j].diph.dwObj = offsetof(DIJOYSTATE, lX) + j * sizeof(LONG);
+			joystick_range[i][j].diph.dwHow = DIPH_BYOFFSET;
+			result = IDirectInputDevice_SetProperty(joystick_device[i], DIPROP_RANGE, &joystick_range[i][j].diph);
+		}
 		IDirectInputDevice_Release(joystick_device[i]);
 		if (joystick_device2[i])
 			IDirectInputDevice_Release(joystick_device2[i]);
@@ -756,13 +1069,31 @@ void win_shutdown_input(void)
 	}
 
 	// release all our mice
-	for (i = 0; i < mouse_count; i++) {
+
+#ifdef WINXPANANLOG
+  	/* <jake> */
+	if (use_rawmouse_winxp)
+	{
+		destroy_raw_mouse();
+	}
+	else
+	{
+	/* </jake> */
+#endif /* WINXPANANLOG */
+
+	for (i = 0; i < mouse_count; i++)
+	{
 		IDirectInputDevice_Release(mouse_device[i]);
 		if (mouse_device2[i])
 			IDirectInputDevice_Release(mouse_device2[i]);
 		mouse_device2[i]=0;
 	}
 
+#ifdef WINXPANANLOG
+	/* <jake> */
+	}
+	/* </jake> */
+#endif /* WINXPANANLOG */
 	// release DirectInput
 	if (dinput)
 		IDirectInput_Release(dinput);
@@ -786,9 +1117,25 @@ void win_pause_input(int paused)
 		for (i = 0; i < keyboard_count; i++)
 			IDirectInputDevice_Unacquire(keyboard_device[i]);
 
+#ifdef WINXPANANLOG
+		/* <jake> */
+		if (!use_rawmouse_winxp) {
+		/* </jake> */
+
+#endif /* WINXPANANLOG */
 		// unacquire all our mice
 		for (i = 0; i < mouse_count; i++)
 			IDirectInputDevice_Unacquire(mouse_device[i]);
+#ifdef WINXPANANLOG
+
+		/* <jake> */
+		}
+		else {
+		  acquire_raw_mouse = 0;
+		}
+		/* </jake> */
+
+#endif /* WINXPANANLOG */
 	}
 
 	// otherwise, reacquire all devices
@@ -798,10 +1145,53 @@ void win_pause_input(int paused)
 		for (i = 0; i < keyboard_count; i++)
 			IDirectInputDevice_Acquire(keyboard_device[i]);
 
+#ifdef WINXPANANLOG
+		/* <jake> */
+		if (!use_rawmouse_winxp) {
+ 	        /* </jake> */
+
+#endif /* WINXPANANLOG */
 		// acquire all our mice if active
 		if (mouse_active && !win_has_menu())
-			for (i = 0; i < mouse_count && (use_mouse||use_lightgun); i++)
+		{
+/*start MAME:analog+*/
+			for (i = 0; i < mouse_count && (use_mouse||use_lightgun||use_lightgun2a||use_lightgun2b); i++)
+			{
+				if (use_lightgun2b)		// set abs mode not working in enum location
+				{						// placement here is a hack, but seems to work
+					DIPROPDWORD value;
+
+					IDirectInputDevice_Unacquire(mouse_device[i]);
+
+					// set absolute mode
+					value.diph.dwSize = sizeof(DIPROPDWORD);
+					value.diph.dwHeaderSize = sizeof(value.diph);
+					value.diph.dwObj = 0;
+					value.diph.dwHow = DIPH_DEVICE;
+					value.dwData = DIPROPAXISMODE_ABS;
+
+					IDirectInputDevice_SetProperty(mouse_device[i], DIPROP_AXISMODE, &value.diph);
+				}
+/*end MAME:analog+  */
 				IDirectInputDevice_Acquire(mouse_device[i]);
+			}
+
+/*start MAME:analog+*/
+// according to MS dX SDK help, need to init directX lightguns after every pause
+			for (i = 0; i<MAX_PLAYERS && (use_lightgun2a||use_lightgun2b);i++)
+				if (!initlightgun2[i]) initlightgun2[i] = 1;
+/*end MAME:analog+  */
+		}
+#ifdef WINXPANANLOG
+
+		/* <jake> */
+		}
+		else {
+		        if (mouse_active && !win_has_menu()) acquire_raw_mouse = 1;
+		}
+		/* </jake> */
+
+#endif /* WINXPANANLOG */
 	}
 
 	// set the paused state
@@ -897,9 +1287,15 @@ void win_poll_input(void)
 		}
 	}
 
+#ifdef WINXPANANLOG
+	/* <jake> */  // For rawmouse, this processing is handled with WM_INPUT from window.c
+	if (!use_rawmouse_winxp) {
+	/* </jake> */
+
+#endif /* WINXPANANLOG */
 	// poll all our mice if active
-	if (mouse_active && !win_has_menu())
-		for (i = 0; i < mouse_count && (use_mouse||use_lightgun); i++)
+	if (mouse_active && !win_has_menu() && (use_mouse||use_lightgun||use_lightgun2a||use_lightgun2b))
+		for (i = 0; i < mouse_count; i++)
 		{
 			// first poll the device
 			if (mouse_device2[i])
@@ -916,6 +1312,11 @@ void win_poll_input(void)
 					result = IDirectInputDevice_GetDeviceState(mouse_device[i], sizeof(mouse_state[i]), &mouse_state[i]);
 			}
 		}
+#ifdef WINXPANANLOG
+	/* <jake> */
+	}
+	/* </jake> */
+#endif /* WINXPANANLOG */
 }
 
 
@@ -926,7 +1327,7 @@ void win_poll_input(void)
 
 int win_is_mouse_captured(void)
 {
-	return (!input_paused && mouse_active && mouse_count > 0 && use_mouse && !win_has_menu());
+	return (!input_paused && mouse_active && (mouse_count > 0) && (use_mouse||use_lightgun||use_lightgun2a||use_lightgun2b) && !win_has_menu());
 }
 
 
@@ -1034,7 +1435,7 @@ int osd_readkey_unicode(int flush)
 
 
 //============================================================
-//	init_joylist
+//	init_keylist
 //============================================================
 
 static void init_keylist(void)
@@ -1229,9 +1630,27 @@ static void init_joylist(void)
 	int joycount = 0;
 
 	// first of all, map mouse buttons
+//	for (mouse = 0; (mouse < mouse_count) && (use_mouse || use_lightgun||use_lightgun2a||use_lightgun2b); mouse++)
 	for (mouse = 0; mouse < mouse_count; mouse++)
 		for (button = 0; button < 4; button++)
 		{
+#ifdef WINXPANANLOG
+
+			/* <jake> */
+			if(use_rawmouse_winxp) {
+				if (mouse_count > 1) {
+					wsprintf(tempname, "Mouse %d %s", mouse, get_raw_mouse_button_name(mouse, button));
+				}
+				else
+					sprintf(tempname, "Mouse Button %i", button);
+
+					if (mouse != 0) // Avoid using the sysmouse buttons for every user
+						add_joylist_entry(tempname, JOYCODE(mouse, JOYTYPE_MOUSEBUTTON, button), &joycount);
+			}
+			else { // using directx
+			/* </jake> */
+
+#endif /* WINXPANANLOG */
 			DIDEVICEOBJECTINSTANCE instance = { 0 };
 			HRESULT result;
 
@@ -1242,21 +1661,33 @@ static void init_joylist(void)
 			{
 				// add mouse number to the name
 				if (mouse_count > 1)
-					sprintf(tempname, "Mouse %d %s", mouse + 1, instance.tszName);
+					if (mouse == 0)
+						sprintf(tempname, "SysMouse %s", instance.tszName);
+					else
+						sprintf(tempname, "Mouse %d %s", mouse, instance.tszName);
 				else
 					sprintf(tempname, "Mouse %s", instance.tszName);
 				add_joylist_entry(tempname, JOYCODE(mouse, JOYTYPE_MOUSEBUTTON, button), &joycount);
 			}
+#ifdef WINXPANANLOG
+
+			/* <jake> */
+			}
+			/* </jake> */
+
+#endif /* WINXPANANLOG */
 		}
 
 	// now map joysticks
-	for (stick = 0; stick < joystick_count; stick++)
+//	for (stick = 0; (stick < joystick_count) && use_joystick; stick++)	// loop over all joystick deviceses
+	for (stick = 0; stick < joystick_count; stick++)	// loop over all joystick devices
 	{
 		// loop over all axes
 		for (axis = 0; axis < MAX_AXES; axis++)
 		{
 			DIDEVICEOBJECTINSTANCE instance = { 0 };
 			HRESULT result;
+			DIPROPRANGE temprange;
 
 			// attempt to get the object info
 			instance.dwSize = STRUCTSIZE(DIDEVICEOBJECTINSTANCE);
@@ -1277,6 +1708,25 @@ static void init_joylist(void)
 				joystick_range[stick][axis].diph.dwObj = offsetof(DIJOYSTATE, lX) + axis * sizeof(LONG);
 				joystick_range[stick][axis].diph.dwHow = DIPH_BYOFFSET;
 				result = IDirectInputDevice_GetProperty(joystick_device[stick], DIPROP_RANGE, &joystick_range[stick][axis].diph);
+
+/*start MAME:analog+*/
+				// try to set range to -128 to 128
+				temprange.diph.dwSize       = sizeof(DIPROPRANGE);
+				temprange.diph.dwHeaderSize = sizeof(temprange.diph);
+				temprange.diph.dwObj        = offsetof(DIJOYSTATE, lX) + axis * sizeof(LONG);
+				temprange.diph.dwHow        = DIPH_BYOFFSET;
+				temprange.lMin              = -128;
+				temprange.lMax              = +128;
+				result = IDirectInputDevice_SetProperty(joystick_device[stick], DIPROP_RANGE, &temprange.diph);
+				joystick_setrange[stick][axis] = (result == DI_OK);
+				if (verbose)
+				{
+					if (joystick_setrange[stick][axis])
+						fprintf(stderr, "stick%d, axis%d: set\n", stick, axis) ;
+					else
+						fprintf(stderr, "stick%d, axis%d: could not set\n", stick, axis) ;
+				}
+/*end MAME:analog+  */
 			}
 		}
 
@@ -1325,6 +1775,11 @@ static void init_joylist(void)
 				add_joylist_entry(tempname, JOYCODE(stick, JOYTYPE_POV_RIGHT, pov), &joycount);
 			}
 		}
+
+/*start MAME:analog+*/
+		/* init analog_post_player to default */
+//		init_analogjoy_arrays();
+/*end MAME:analog+  */
 	}
 
 	// terminate array
@@ -1342,7 +1797,34 @@ const struct JoystickInfo *osd_get_joy_list(void)
 	return joylist;
 }
 
+#ifdef WINXPANANLOG
+/* <jake> */
+//============================================================
+//	osd_new_input_read_cycle
+//============================================================
+#endif /* WINXPANANLOG */
 
+#ifdef WINXPANANLOG
+void osd_new_input_read_cycle(void)
+{
+	// Do any processing needed at the beginning of an input read cycle
+	int i;
+
+	// refresh the local copy of raw mouse x and y deltas
+	// When the get_raw_mouse_n_delta() is called, the
+	//    the mouse delta is reset to 0.  Therefore I need to
+	//    cache the values at the beginning in case multiple
+	//    players wish to share a single raw_mouse input.
+	if (use_rawmouse_winxp) {
+		for (i = 0; i < MAX_PLAYERS; i++) {
+			raw_mouse_delta_x[i] = get_raw_mouse_x_delta(i);
+			raw_mouse_delta_y[i] = get_raw_mouse_y_delta(i);
+			raw_mouse_delta_z[i] = get_raw_mouse_z_delta(i);
+		}
+	}
+}
+/* </jake> */
+#endif /* WINXPANANLOG */
 
 //============================================================
 //	osd_is_joy_pressed
@@ -1359,6 +1841,8 @@ int osd_is_joy_pressed(int joycode)
 	switch (joytype)
 	{
 		case JOYTYPE_MOUSEBUTTON:
+/*Analog+: back out official mame's core reload so the game driver reload works*/
+#if 0
 			/* ActLabs lightgun - remap button 2 (shot off-screen) as button 1 */
 			if (use_lightgun_dual && joyindex<4) {
 				if (use_lightgun_reload && joynum==0) {
@@ -1373,7 +1857,7 @@ int osd_is_joy_pressed(int joycode)
 				}
 				return lightgun_dual_player_state[joyindex];
 			}
-						
+
 			if (use_lightgun) {
 				if (use_lightgun_reload && joynum==0) {
 					if (joyindex==0 && (mouse_state[0].rgbButtons[1]&0x80))
@@ -1382,6 +1866,17 @@ int osd_is_joy_pressed(int joycode)
 						return 0;
 				}
 			}
+#endif
+/*end Analog+: back out*/
+#ifdef WINXPANANLOG
+		  /* <jake> */
+		  if (use_rawmouse_winxp) {
+				return is_raw_mouse_button_pressed(joynum, joyindex);
+		  }
+		  else
+		  /* </jake> */
+#endif /* WINXPANANLOG */
+
 			return mouse_state[joynum].rgbButtons[joyindex] >> 7;
 
 		case JOYTYPE_BUTTON:
@@ -1390,10 +1885,20 @@ int osd_is_joy_pressed(int joycode)
 		case JOYTYPE_AXIS_POS:
 		case JOYTYPE_AXIS_NEG:
 		{
+			LONG top, bottom, middle;
 			LONG val = ((LONG *)&joystick_state[joynum].lX)[joyindex];
-			LONG top = joystick_range[joynum][joyindex].lMax;
-			LONG bottom = joystick_range[joynum][joyindex].lMin;
-			LONG middle = (top + bottom) / 2;
+			if (joystick_setrange[joynum][joyindex])
+			{
+				top = 128;
+				bottom = -128;
+				middle = 0;
+			}
+			else
+			{
+				top = joystick_range[joynum][joyindex].lMax;
+				bottom = joystick_range[joynum][joyindex].lMin;
+				middle = (top + bottom) / 2;
+			}
 
 			// watch for movement greater "a2d_deadzone" along either axis
 			// FIXME in the two-axis joystick case, we need to find out
@@ -1450,7 +1955,7 @@ void osd_analogjoy_read(int player, int analog_axis[], InputCode analogjoy_input
 
 	for (i=0; i<MAX_ANALOG_AXES; i++)
 	{
-		int joyindex, joytype, joynum;
+		int joyindex, joynum;
 
 		analog_axis[i] = 0;
 
@@ -1458,16 +1963,24 @@ void osd_analogjoy_read(int player, int analog_axis[], InputCode analogjoy_input
 			continue;
 
 		joyindex = JOYINDEX( analogjoy_input[i] );
-		joytype = JOYTYPE( analogjoy_input[i] );
 		joynum = JOYNUM( analogjoy_input[i] );
 
-		top = joystick_range[joynum][joyindex].lMax;
-		bottom = joystick_range[joynum][joyindex].lMin;
-		middle = (top + bottom) / 2;
-		analog_axis[i] = (((LONG *)&joystick_state[joynum].lX)[joyindex] - middle) * 257 / (top - bottom);
-		if (analog_axis[i] < -128) analog_axis[i] = -128;
-		if (analog_axis[i] >  128) analog_axis[i] =  128;
-		if (joytype == JOYTYPE_AXIS_POS)
+		if (joystick_setrange[joynum][joyindex])
+		{
+			analog_axis[i] = ((LONG *)&joystick_state[joynum].lX)[joyindex];
+			if (analog_axis[i] < -128) { analog_axis[i] = -128; fprintf(stderr, "RangeSet but too low\n"); }
+			if (analog_axis[i] >  128) { analog_axis[i] =  128; fprintf(stderr, "RangeSet but too high\n"); }
+		}
+		else
+		{
+			top = joystick_range[joynum][joyindex].lMax;
+			bottom = joystick_range[joynum][joyindex].lMin;
+			middle = (top + bottom) / 2;
+			analog_axis[i] = (((LONG *)&joystick_state[joynum].lX)[joyindex] - middle) * 257 / (top - bottom);
+			if (analog_axis[i] < -128) analog_axis[i] = -128;
+			if (analog_axis[i] >  128) analog_axis[i] =  128;
+		}
+		if (!osd_isNegativeSemiAxis(analogjoy_input[i]))
 			analog_axis[i] = -analog_axis[i];
 	}
 }
@@ -1514,6 +2027,21 @@ void input_mouse_button_up(int button)
 void osd_lightgun_read(int player,int *deltax,int *deltay)
 {
 	POINT point;
+
+#ifdef WINXPANANLOG
+	/* <jake> */
+	if (use_rawmouse_winxp) {
+		osd_raw_mouse_lightgun_read(player,deltax,deltay);
+		return;
+	}
+	/* </jake> */
+
+#endif /* WINXPANANLOG */
+	if (use_lightgun2b)
+	{
+		osd_lightgun_read2b(player,deltax,deltay);
+		return;
+	}
 
 	// if the mouse isn't yet active, make it so
 	if (!mouse_active && (use_mouse||use_lightgun) && !win_has_menu())
@@ -1606,22 +2134,380 @@ void osd_lightgun_read(int player,int *deltax,int *deltay)
 	if (*deltay > 128) *deltay = 128;
 }
 
+
+//============================================================
+//	osd_lightgun_read2a
+//============================================================
+
+	// This is an alpha test for using directX relative mouse values
+	// mame core should treat deltax & deltay values like
+	// a normal mouse delta values
+	// Compare to osd_trackball_read() function
+
+void osd_lightgun_read2a(int player,int *deltax,int *deltay)
+{
+//	static int maxdeltax[]={1,1,1,1}, maxdeltay[]={1,1,1,1};  //currently global for debug
+//	static int sxpre=0, sypre=0;
+	int sx=0, sy=0;							// temp raw mouse vaules
+	int mousex,mousey;
+	int axisx, axisy;
+
+	*deltax = 0;
+	*deltay = 0;
+
+	if (!use_lightgun2a )
+		return ;
+
+	// if the mouse isn't yet active, make it so
+	if (!mouse_active)
+	{
+		mouse_active = 1;
+		win_pause_input(0);
+	}
+
+	// init values to get center
+	if (initlightgun2[player])
+	{								// resetting maxdelta
+		maxdeltax[player] = 1;
+		maxdeltay[player] = 1;
+
+		if (verbose)						// debugging output
+		{
+			fprintf (stdout, "p%d init delta (%d,%d)\n", player, maxdeltax[player], maxdeltay[player]);
+			if (player == 3) fprintf (stdout, "\n");
+		}
+
+		initlightgun2[player]--;
+	}
+
+	// for switchable mice and switch mouse axis
+	mousex = os_player_mouse_axes[player].xmouse;
+	mousey = os_player_mouse_axes[player].ymouse;
+	axisx = os_player_mouse_axes[player].xaxis;
+	axisy = os_player_mouse_axes[player].yaxis;
+
+	// get the latest lightgun/mouse info if mouse exists
+	if ((mousex >= 0) && (mousex < mouse_count))
+	{
+		switch (axisx)
+		{
+			case X_AXIS: sx = mouse_state[mousex].lX;	break;
+			case Y_AXIS: sx = mouse_state[mousex].lY;	break;
+			case Z_AXIS: sx = mouse_state[mousex].lZ;	break;
+
+			default:	sx = 0;	break;	/* never should happen, but JIC */
+		}
+	}
+	if ((mousey >= 0) && (mousey < mouse_count))
+	{
+		switch (axisy)
+		{
+			case X_AXIS: sy = mouse_state[mousex].lX;	break;
+			case Y_AXIS: sy = mouse_state[mousex].lY;	break;
+			case Z_AXIS: sy = mouse_state[mousex].lZ;	break;
+
+			default:	sy = 0;	break;	/* never should happen, but JIC */
+		}
+	}
+
+	// need max delta to scale correctly
+	if (abs(sx)>maxdeltax[player])
+	{
+		maxdeltax[player] = abs(sx);
+	}
+	if (abs(sy)>maxdeltay[player])
+	{
+		maxdeltay[player] = abs(sy);
+	}
+
+	// Map reletive pixel values for mame
+	// I think it should be -256 to 256, corner to corner. I need to check up on this
+//	*deltax=sx*256/maxdeltax[player];
+//	*deltay=sy*256/maxdeltay[player];
+	*deltax=sx*512/0x7fff;				// max delta ~32000 (0x7fff), so testing constant number
+	*deltay=sy*512/0x7fff;
+}
+
+//============================================================
+//	osd_lightgun_read2b
+//============================================================
+
+	// This is an alpha test for using directX absolute mouse values
+	// mame core should treat deltax & deltay values like
+	// a lightgun's delta values
+	// Compare to osd_lightgun_read() function
+
+void osd_lightgun_read2b(int player,int *deltax,int *deltay)
+{
+//	static int initlightgun2[]= {1,1,1,1};  // global for debugging
+//	static int lg_center_x[4], lg_center_y[4];	// global for debug
+	static int minmx[MAX_PLAYERS], minmy[MAX_PLAYERS];		//remove this after debugging
+	static int maxmx[MAX_PLAYERS], maxmy[MAX_PLAYERS];		//remove this after debugging
+	static int presx[MAX_PLAYERS], presy[MAX_PLAYERS];		// saving last value to skip repeating math
+	const int rangemx=0xFFFF, rangemy=0xFFFF;	// total range (x,y), works on my winME
+	int p=0;							// debug boolean
+	int sx=0, sy=0, changed=0;			// temp raw mouse vaules, and if different from last time boolean
+	int mousex,mousey;					// mouse # that controls this game axis
+	int axisx, axisy;					// mouse axis # that controls this game axis
+
+	if (!use_lightgun2b)
+		return ;			// don't really need this ATM, but leaving it in for error protection
+
+	// if the mouse isn't yet active, make it so
+	if (!mouse_active)
+	{
+		mouse_active = 1;
+		win_pause_input(0);
+	}
+
+	// for switchable mice and switch mouse axis
+	mousex = os_player_mouse_axes[player].xmouse;
+	mousey = os_player_mouse_axes[player].ymouse;
+	axisx = os_player_mouse_axes[player].xaxis;
+	axisy = os_player_mouse_axes[player].yaxis;
+
+	// get the latest lightgun/mouse info if mouse exists
+	if ((mousex >= 0) && (mousex < mouse_count))
+	{
+		switch (axisx)
+		{
+			case X_AXIS: sx = mouse_state[mousex].lX;	break;
+			case Y_AXIS: sx = mouse_state[mousex].lY;	break;
+			case Z_AXIS: sx = mouse_state[mousex].lZ;	break;
+
+			default:	sx = 0;	break;	/* never should happen, but JIC */
+		}
+	}
+	if ((mousey >= 0) && (mousey < mouse_count))
+	{
+		switch (axisy)
+		{
+			case X_AXIS: sy = mouse_state[mousex].lX;	break;
+			case Y_AXIS: sy = mouse_state[mousex].lY;	break;
+			case Z_AXIS: sy = mouse_state[mousex].lZ;	break;
+
+			default:	sy = 0;	break;	/* never should happen, but JIC */
+		}
+	}
+
+	// init values to get center
+	if (initlightgun2[player])
+	{																// get default center values, I hope
+		lg_center_x[player] = (mousex == 0) ? sx : rangemx/2;		// system mouse has unknown center
+		lg_center_y[player] = (mousey == 0) ? sy : rangemy/2;		// USB mice in winMe center = 0x7FFF
+
+		if (verbose)						// debugging output
+		{
+			fprintf (stdout, "p%d init center (%d,%d)\n", player, lg_center_x[player], lg_center_y[player]);
+			if (player == 3) fprintf (stdout, "\n");
+		}
+
+		presx[player] = sx+1; presy[player] = sy+1;
+		minmx[player]=maxmx[player]=sx;
+		minmy[player]=maxmy[player]=sy;
+		initlightgun2[player]--;
+	}
+
+// debug: store old value so only fprintfs when changed
+//	doesn't seem to be working ?
+	if ( (sx == presx[player]) && (sy == presy[player]) )
+		return ;
+
+	presx[player] = sx; presy[player] = sy;
+	*deltax = 0;
+	*deltay = 0;
+
+	if (minmx[player] > sx) minmx[player] = sx;			//storing min & max for debugging
+	else if (maxmx[player] < sx) maxmx[player] = sx;
+	if (minmy[player] > sy) minmy[player] = sy;
+	else if (maxmy[player] < sy) maxmy[player] = sy;
+
+	changed = 1;		// old code.  leaving in because may need later
+
+	// Map absolute pixel values into -128 -> 128 range
+	// I hope that's what I'm doing
+	sx = sx - ( lg_center_x[player] - (rangemx / 2) );
+	sy = sy - ( lg_center_y[player] - (rangemy / 2) );
+
+// this should be combined with last two lines on sy & sx, but separated for debugging for now
+	*deltax=((sx*257)/rangemx) - 128;
+	*deltay=((sy*257)/rangemy) - 128;
+
+	if (*deltax > 128) *deltax=128;
+	if (*deltax < -128) *deltay=-128;
+	if (*deltay > 128) *deltay=128;
+	if (*deltay < -128) *deltay=-128;
+
+	if (verbose && (p || (changed && (player == 0))))	// debug output
+	{
+		fprintf (stdout, "p%d center (%d,%d)\t min, max x (%d - %d)  y (%d - %d)\t", player, \
+						lg_center_x[player], lg_center_y[player], \
+						minmx[player], maxmx[player],minmy[player], maxmy[player]);
+		fprintf (stdout, "p%d range (%d,%d)\ns# (%d,%d)\t", player, rangemx, rangemy, sx, sy);
+		fprintf (stdout, "p%d delta (%d,%d)\n\n", player, *deltax, *deltay);
+	}
+}
+#ifdef WINXPANANLOG
+
+/* <jake> */
+//============================================================
+//	osd_raw_mouse_lightgun_read
+//============================================================
+
+void osd_raw_mouse_lightgun_read(int player,int *deltax,int *deltay) {
+
+	int mousex,mousey;
+	int axisx, axisy;
+
+	// if the mouse isn't yet active, make it so
+	if (!mouse_active && (use_mouse||use_lightgun) && !win_has_menu())
+	{
+		mouse_active = 1;
+		win_pause_input(0);
+	}
+
+	// if out of range, skip it
+	if (!use_lightgun || !win_physical_width || !win_physical_height || player >= lightgun_count)
+	{
+		*deltax = *deltay = 0;
+		return;
+	}
+
+	// for switchable mice and switch mouse axis
+	mousex = os_player_mouse_axes[player].xmouse;
+	mousey = os_player_mouse_axes[player].ymouse;
+	axisx = os_player_mouse_axes[player].xaxis;
+	axisy = os_player_mouse_axes[player].yaxis;
+
+	// get the latest lightgun/mouse info if mouse exists
+	if ((mousex >= 0) && (mousex < mouse_count))
+	{
+		switch (axisx)
+		{
+			case X_AXIS: *deltax = raw_mouse_delta_x[mousex];	break;
+			case Y_AXIS: *deltax = raw_mouse_delta_y[mousex];	break;
+			case Z_AXIS: *deltax = raw_mouse_delta_z[mousex];	break;
+
+			default:	*deltax = 0;	break;	/* never should happen, but JIC */
+		}
+		*deltax = (*deltax/256) - 128;
+	}
+	if ((mousey >= 0) && (mousey < mouse_count)) {
+		switch (axisy)
+		{
+			case X_AXIS: *deltay = raw_mouse_delta_x[mousey];	break;
+			case Y_AXIS: *deltay = raw_mouse_delta_y[mousey];	break;
+			case Z_AXIS: *deltay = raw_mouse_delta_z[mousey];	break;
+
+			default:	*deltay = 0;	break;	/* never should happen, but JIC */
+		}
+		*deltay = (*deltay/256) - 128;
+	}
+
+	if (*deltax < -128) *deltax = -128;
+	if (*deltax > 128) *deltax = 128;
+	if (*deltay < -128) *deltay = -128;
+	if (*deltay > 128) *deltay = 128;
+}
+/* </jake> */
+
+#endif /* WINXPANANLOG */
+/*end Mame:Analog+*/
+
 //============================================================
 //	osd_trak_read
 //============================================================
 
 void osd_trak_read(int player, int *deltax, int *deltay)
 {
+/*start MAME:analog+*/
+	int mousex,mousey;
+	int axisx, axisy;
+
+	if (use_lightgun2a)
+	{
+		osd_lightgun_read2a(player,deltax,deltay);
+		return;
+	}
+/*end MAME:analog+  */
+
+	*deltax = 0;
+	*deltay = 0;
+
+	if (!use_mouse)
+		return ;
+
 	// if the mouse isn't yet active, make it so
-	if (!mouse_active && use_mouse && !win_has_menu())
+	if (!mouse_active && !win_has_menu())
 	{
 		mouse_active = 1;
 		win_pause_input(0);
 	}
 
-	// return the latest mouse info
-	*deltax = mouse_state[player].lX;
-	*deltay = mouse_state[player].lY;
+/*start MAME:analog+*/
+	mousex = os_player_mouse_axes[player].xmouse;
+	mousey = os_player_mouse_axes[player].ymouse;
+	axisx = os_player_mouse_axes[player].xaxis;
+	axisy = os_player_mouse_axes[player].yaxis;
+
+	// return the latest mouse info if mouse exists
+	if ((mousex >= 0) && (mousex < mouse_count))
+	{
+#ifdef WINXPANANLOG
+
+	/* <jake> */
+		if (use_rawmouse_winxp) {
+		        switch (axisx)
+		        {
+			        case X_AXIS: *deltax = raw_mouse_delta_x[mousex];	break;
+			        case Y_AXIS: *deltax = raw_mouse_delta_y[mousex];	break;
+			        case Z_AXIS: *deltax = raw_mouse_delta_z[mousex];	break;
+
+			        default:	*deltax = 0;	break;	/* never should happen, but JIC */
+		        }
+		}
+		else  // using direct x
+	/* </jake> */
+
+#endif /* WINXPANANLOG */
+		switch (axisx)
+		{
+			case X_AXIS: *deltax = mouse_state[mousex].lX;	break;
+			case Y_AXIS: *deltax = mouse_state[mousex].lY;	break;
+			case Z_AXIS: *deltax = mouse_state[mousex].lZ;	break;
+
+			default:	*deltax = 0;	break;	/* never should happen, but JIC */
+		}
+	}
+	if ((mousey >= 0) && (mousey < mouse_count))
+	{
+#ifdef WINXPANANLOG
+
+	/* <jake> */
+		if (use_rawmouse_winxp) {
+		        switch (axisy)
+		        {
+			        case X_AXIS: *deltay = raw_mouse_delta_x[mousey];	break;
+			        case Y_AXIS: *deltay = raw_mouse_delta_y[mousey];	break;
+			        case Z_AXIS: *deltay = raw_mouse_delta_z[mousey];	break;
+
+			        default:	*deltay = 0;	break;	/* never should happen, but JIC */
+		        }
+		}
+		else
+	/* </jake> */
+
+#endif /* WINXPANANLOG */
+		switch (axisy)
+		{
+			case X_AXIS: *deltay = mouse_state[mousex].lX;	break;
+			case Y_AXIS: *deltay = mouse_state[mousex].lY;	break;
+			case Z_AXIS: *deltay = mouse_state[mousex].lZ;	break;
+
+			default:	*deltay = 0;	break;	/* never should happen, but JIC */
+		}
+	}
+/*end MAME:analog+  */
 }
 
 
@@ -2016,6 +2902,7 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 
 				case IPT_AD_STICK_X:
 				case IPT_AD_STICK_Y:
+				case IPT_AD_STICK_Z:
 					if (!adstick)
 					{
 						if ((ad_stick_ini != NULL) && (*ad_stick_ini != 0))
@@ -2035,6 +2922,7 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 					break;
 
 				case IPT_PEDAL:
+				case IPT_PEDAL2:
 					if (!pedal)
 					{
 						if ((pedal_ini != NULL) && (*pedal_ini != 0))
@@ -2056,11 +2944,16 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 
 		fprintf(stderr, "Mouse support %sabled\n",use_mouse ? "en" : "dis");
 		fprintf(stderr, "Joystick support %sabled\n",use_joystick ? "en" : "dis");
-		fprintf(stderr, "Keyboards=%d  Mice=%d  Joysticks=%d\n",
+		fprintf(stderr, "Keyboards=%d  Mice=%d  Joysticks=%d Lightguns=%d(%d,%d)\n",
 			keyboard_count,
 			use_mouse ? mouse_count : 0,
-			use_joystick ? joystick_count : 0);
+			use_joystick ? joystick_count : 0,
+			use_lightgun ? lightgun_count : 0,
+			use_lightgun2a ? lightgun_count : 0,
+			use_lightgun2b ? lightgun_count : 0);
 	}
+
+	init_analog_seq();
 }
 
 
@@ -2296,3 +3189,198 @@ void stop_led(void)
 
 	return;
 }
+
+
+/*start MAME:analog+*/
+// init's os_player_mouse_axes
+static void init_mouse_arrays(const int playermousedefault[])
+{
+	int i;
+
+	for (i = 0; i < MAX_PLAYERS; i++)
+	{
+		os_player_mouse_axes[i].xmouse = playermousedefault[i];
+		os_player_mouse_axes[i].ymouse = playermousedefault[i];
+		if (splitmouse)
+		{
+			os_player_mouse_axes[i].xaxis = i % 2;
+			os_player_mouse_axes[i].yaxis = i % 2;	// Y axis should not be used, but mapped same axis as X
+		}
+		else
+		{
+			os_player_mouse_axes[i].xaxis = X_AXIS;
+			os_player_mouse_axes[i].yaxis = Y_AXIS;
+		}
+	}
+}
+
+
+/* osd UI input functions */
+/* trackballs / mice */
+int osd_numbermice(void)	// return # of mice connected
+{
+	if (!use_mouse && !use_lightgun && !use_lightgun2a && !use_lightgun2b)
+		return 0;			// if all mouse type inputs are disabled, return zero
+	return mouse_count;		// mouse[0] is sysmouse
+}
+
+char *osd_getmousename(char *name, int mouse)	// gets name to be displayed
+{												// note mouse, !player's mouse
+	if ((mouse < mouse_count) && (mouse > 0))
+		sprintf(name, "mouse %d", mouse);
+	else if (mouse == 0)
+		sprintf(name, "sysmouse");
+	else
+		sprintf(name, "no mouse");
+
+	return name;
+}
+
+int osd_getplayer_mouse(int player)				// returns mouse # of player
+{
+	return os_player_mouse_axes[player].xmouse;
+}
+
+int osd_setplayer_mouse(int player, int mouse)	// sets player's mouse
+{
+	if (mouse >= mouse_count)
+		return 1;								// returns 1 if error
+
+	os_player_mouse_axes[player].xmouse = mouse;
+	os_player_mouse_axes[player].ymouse = mouse;
+	return 0;
+}
+
+/* returns mouse # used for player and game axis */
+int osd_getplayer_mousesplit(int player, int axis)
+{
+	if (axis == 0)
+		return os_player_mouse_axes[player].xmouse;
+	else
+		return os_player_mouse_axes[player].ymouse;
+}
+
+int osd_setplayer_mousesplit(int player, int playeraxis, int mouse)
+{												// sets player's mouse
+	if (mouse >= mouse_count)
+		return 1;								// returns 1 if error
+
+	if (playeraxis == 0)
+		os_player_mouse_axes[player].xmouse = mouse;
+	else
+		os_player_mouse_axes[player].ymouse = mouse;
+	return 0;
+}
+
+/* mouse axes settings */
+int osd_getnummouseaxes(void)			// returns number of mappable axes
+{
+	return 2;							// defaults to 2 right now
+}
+
+
+int osd_getplayer_mouseaxis(int player, int gameaxis)
+{
+	if (gameaxis == 0)
+		return os_player_mouse_axes[player].xaxis;
+	else
+		return os_player_mouse_axes[player].yaxis;
+}
+
+int osd_setplayer_mouseaxis(int player, int playeraxis, int mouse, int axis)
+{
+	switch (playeraxis)	/* switch in case add z-axis */
+	{
+		case 0:
+			os_player_mouse_axes[player].xmouse = mouse;
+			os_player_mouse_axes[player].xaxis  = axis;
+			break;
+		case 1:
+			os_player_mouse_axes[player].ymouse = mouse;
+			os_player_mouse_axes[player].yaxis  = axis;
+			break;
+		default:
+			/* error */
+			break;
+	}
+	return 0;
+}
+
+#if 0 //notused?
+int osd_getplayermouseXaxis(int player)
+{
+	return osd_getplayer_mouseaxis(player, 0);
+}
+int osd_getplayermouseYaxis(int player)
+{
+	return osd_getplayer_mouseaxis(player, 1);
+}
+#endif
+
+
+int osd_isNegativeSemiAxis(InputCode code)
+{
+	return ( JOYTYPE( code ) == JOYTYPE_AXIS_NEG );
+//	return (is_joycode(code) && JOYTYPE(code) == JOYTYPE_AXIS_NEG);
+}
+
+char* osd_getjoyaxisname(char *name, int joynum, int axis)
+#define MAX_LENGTH 40
+{
+	if ((joynum < joystick_count) && (joynum >= 0))
+	{
+		DIDEVICEOBJECTINSTANCE instance = { 0 };
+		HRESULT result;
+
+		// attempt to get the object info
+		instance.dwSize = STRUCTSIZE(DIDEVICEOBJECTINSTANCE);
+		result = IDirectInputDevice_GetObjectInfo(joystick_device[joynum], &instance, offsetof(DIJOYSTATE, lX) + axis * sizeof(LONG), DIPH_BYOFFSET);
+
+		if (result == DI_OK)
+			snprintf(name, 10, "%s ", instance.tszName);
+//			strncpy(name, instance.tszName, 10);
+		else
+			sprintf(name, " ");
+	}
+	else
+	{
+		sprintf(name, " ");
+	}
+	return name;
+}
+
+char *osd_getjoyname(char *name, int joynum)	// gets name to be displayed
+{
+	if ((joynum < joystick_count) && (joynum >= 0))
+	{
+		DIDEVICEINSTANCE instance = { 0 };
+		HRESULT result;
+
+		// attempt to get the object info
+		instance.dwSize = STRUCTSIZE(DIDEVICEINSTANCE);
+		result = IDirectInputDevice_GetDeviceInfo(joystick_device[joynum], &instance);
+
+		if (FAILED(result))
+			sprintf(name, "Joystick %d", joynum+1);
+		else
+			snprintf(name, 28, "%s ", instance.tszProductName);
+//			strncpy(name, instance.tszInstanceName, 25);
+	}
+	else
+	{
+		sprintf(name, "No joystick");
+	}
+	return name;
+}
+
+#if 0
+int ui_inputtoanalogsettings()
+{
+}
+
+int ui_analogtoinputsettings()
+{
+}
+#endif
+/*end MAME:analog+  */
+

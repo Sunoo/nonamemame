@@ -6,6 +6,11 @@
 
 // standard windows headers
 #define WIN32_LEAN_AND_MEAN
+#ifdef WINXPANANLOG
+#ifndef WINUI
+#define _WIN32_WINNT 0x501
+#endif /* WINUI */
+#endif /* WINXPANANLOG */
 #include <windows.h>
 #include <windowsx.h>
 
@@ -760,6 +765,12 @@ static void draw_video_contents(HDC dc, struct mame_bitmap *bitmap, const struct
 static LRESULT CALLBACK video_window_proc(HWND wnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
 	extern void win_timer_enable(int enabled);
+#ifdef WINXPANANLOG
+	/* <jake> */
+	extern void process_rawmouse_wm_input(LPARAM, int, int);            // from input.h
+	RECT		window_rect;
+	/* </jake> */
+#endif /* WINXPANANLOG */
 
 	// handle a few messages
 	switch (message)
@@ -798,6 +809,19 @@ static LRESULT CALLBACK video_window_proc(HWND wnd, UINT message, WPARAM wparam,
 			EndPaint(wnd, &pstruct);
 			break;
 		}
+#ifdef WINXPANANLOG
+
+		/* <jake> */
+		// Gather the raw input data
+	    case WM_INPUT:
+		{
+			GetWindowRect ( wnd, &window_rect);
+
+		    process_rawmouse_wm_input(lparam, (window_rect.right + window_rect.left)/2, (window_rect.top + window_rect.bottom)/2);
+			break;
+		}
+		/* </jake> */
+#endif /* WINXPANANLOG */
 
 		// get min/max info: set the minimum window size
 		case WM_GETMINMAXINFO:

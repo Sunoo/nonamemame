@@ -147,7 +147,32 @@ static WRITE16_HANDLER( latch_w )
 	}
 }
 
+/* <jake> */
+static READ16_HANDLER( input_ports_2_and_6_word_r )
+{
+    if (Machine->gamedrv->name == "rampart")
+    {
+	return readinputport(2) + (readinputport(6) << 8);
+    }
+    else
+    {
+	return readinputport(2);
+    }
+}
 
+static READ16_HANDLER( input_ports_3_and_7_word_r )
+{
+    if (Machine->gamedrv->name == "rampart")
+    {
+	return readinputport(3) + (readinputport(7) << 8);
+    }
+    else
+    {
+	return readinputport(3);
+    }
+}
+
+/* </jake> */
 
 /*************************************
  *
@@ -165,8 +190,12 @@ static ADDRESS_MAP_START( main_readmem, ADDRESS_SPACE_PROGRAM, 16 )
 	AM_RANGE(0x500000, 0x500fff) AM_READ(atarigen_eeprom_r)
 	AM_RANGE(0x640000, 0x640001) AM_READ(input_port_0_word_r)
 	AM_RANGE(0x640002, 0x640003) AM_READ(input_port_1_word_r)
-	AM_RANGE(0x6c0000, 0x6c0001) AM_READ(input_port_2_word_r)
-	AM_RANGE(0x6c0002, 0x6c0003) AM_READ(input_port_3_word_r)
+	/* <jake> */
+	AM_RANGE(0x6c0000, 0x6c0001) AM_READ(input_ports_2_and_6_word_r)
+	AM_RANGE(0x6c0002, 0x6c0003) AM_READ(input_ports_3_and_7_word_r)
+	//AM_RANGE(0x6c0000, 0x6c0001) AM_READ(input_port_2_word_r)
+	//AM_RANGE(0x6c0002, 0x6c0003) AM_READ(input_port_3_word_r)
+	/* </jake> */
 	AM_RANGE(0x6c0004, 0x6c0005) AM_READ(input_port_4_word_r)
 	AM_RANGE(0x6c0006, 0x6c0007) AM_READ(input_port_5_word_r)
 ADDRESS_MAP_END
@@ -239,6 +268,17 @@ INPUT_PORTS_START( rampart )
 	PORT_START
     PORT_ANALOG( 0x00ff, 0, IPT_TRACKBALL_X | IPF_REVERSE | IPF_PLAYER1, 100, 30, 0, 0 )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+
+/* <jake> */
+	// Fake input ports for player 3's trackball
+	PORT_START
+	PORT_ANALOG( 0x00ff, 0, IPT_TRACKBALL_Y | IPF_REVERSE | IPF_PLAYER3, 100, 30, 0, 0 )
+	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+
+	PORT_START
+	PORT_ANALOG( 0x00ff, 0, IPT_TRACKBALL_X | IPF_REVERSE | IPF_PLAYER3, 100, 30, 0, 0 )
+	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
+/* </jake> */
 INPUT_PORTS_END
 
 

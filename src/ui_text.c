@@ -122,11 +122,27 @@ static const char *mame_default_text[] =
 
 	"Cheat",
 	"Memory Card",
+	"Mouse Controls",
+	"Mouse Axes",
+	"Analog Joystick Controls",
 
-	/* input */
+	/* analog input stuff */
 	"Key/Joy Speed",
 	"Reverse",
 	"Sensitivity",
+
+	/* analog+ input stuff */
+	"Mouse control",
+	"Mouse",
+	"AnalogJoy",
+	"x-axis",
+	"y-axis",
+	"z-axis",
+#if 0
+	"rX-axis",
+	"rY-axis",
+	"rZ-axis",
+#endif
 
 	/* stats */
 	"Tickets dispensed",

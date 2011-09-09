@@ -114,22 +114,96 @@ static WRITE_HANDLER( i8751_reset_w )
 
 static READ_HANDLER( gondo_player_1_r )
 {
+	static unsigned char old_joydir, updatetoggle;
+	static int temp, use_2button_rotary = 0;
+
 	switch (offset) {
 		case 0: /* Rotary low byte */
-			return ~((1 << (readinputport(5) * 12 / 256))&0xff);
+			/* input from original buttons overides all other rotary inputs */
+			if ( (temp = readinputport(11)) )
+				return ~(temp&0xff);
+
+			if ( (temp = readinputport(9)) || use_2button_rotary )  /* first check 2 button rotary input */
+			{
+				use_2button_rotary = 1;
+				updatetoggle = ~updatetoggle;
+				if (updatetoggle==0)
+				{
+					if (temp & 0x1) /*clockwise*/
+					{
+						if (old_joydir >=11)
+							old_joydir = 0;
+						else
+							old_joydir++;
+					}
+					else if (temp &0x2) /*counter-clockwise*/
+					{
+						if (old_joydir <=0)
+							old_joydir = 11;
+						else
+							old_joydir--;
+					}
+				}
+				return ~((1 << (old_joydir)                 )&0xff);
+			}
+			else
+				return ~((1 << (readinputport(5) * 12 / 256))&0xff);
+
 		case 1: /* Joystick = bottom 4 bits, rotary = top 4 */
-			return ((~((1 << (readinputport(5) * 12 / 256))>>4))&0xf0) | (readinputport(0)&0xf);
+			if ( (temp = readinputport(11)) )
+				return ((~( temp                               >>4))&0xf0) | (readinputport(0)&0xf);
+			else if ( use_2button_rotary )
+				return ((~((1 << (old_joydir)                 )>>4))&0xf0) | (readinputport(0)&0xf);
+			else
+				return ((~((1 << (readinputport(5) * 12 / 256))>>4))&0xf0) | (readinputport(0)&0xf);
 	}
 	return 0xff;
 }
 
 static READ_HANDLER( gondo_player_2_r )
 {
+	static unsigned char old_joydir, updatetoggle;
+	static int temp, use_2button_rotary = 0;
+
 	switch (offset) {
 		case 0: /* Rotary low byte */
-			return ~((1 << (readinputport(6) * 12 / 256))&0xff);
+			/* input from original buttons overides all other rotary inputs */
+			if ( (temp = readinputport(12)) )
+				return ~(temp&0xff);
+
+			if ( (temp = readinputport(10)) || use_2button_rotary )  /* first check 2 button rotary input */
+			{
+				use_2button_rotary = 1;
+				updatetoggle = ~updatetoggle;
+				if (updatetoggle==0)
+				{
+					if (temp & 0x1) /*clockwise*/
+					{
+						if (old_joydir >=11)
+							old_joydir = 0;
+						else
+							old_joydir++;
+					}
+					else if (temp &0x2) /*counter-clockwise*/
+					{
+						if (old_joydir <=0)
+							old_joydir = 11;
+						else
+							old_joydir--;
+					}
+				}
+				return ~((1 << (old_joydir)                 )&0xff);
+			}
+			else
+				return ~((1 << (readinputport(6) * 12 / 256))&0xff);
+
 		case 1: /* Joystick = bottom 4 bits, rotary = top 4 */
-			return ((~((1 << (readinputport(6) * 12 / 256))>>4))&0xf0) | (readinputport(1)&0xf);
+			if ( (temp = readinputport(12)) )
+				return ((~( temp                               >>4))&0xf0) | (readinputport(1)&0xf);
+			else if ( use_2button_rotary )
+				return ((~((1 << (old_joydir)                 )>>4))&0xf0) | (readinputport(1)&0xf);
+			else
+				return ((~((1 << (readinputport(6) * 12 / 256))>>4))&0xf0) | (readinputport(1)&0xf);
 	}
 	return 0xff;
 }
@@ -488,34 +562,34 @@ static WRITE_HANDLER( shackled_int_w )
 	switch (offset) {
 		case 0: /* CPU 2 - IRQ acknowledge */
 			cpu_set_irq_line(1,M6809_IRQ_LINE,CLEAR_LINE);
-            return;
-        case 1: /* CPU 1 - IRQ acknowledge */
+			return;
+		case 1: /* CPU 1 - IRQ acknowledge */
 			cpu_set_irq_line(0,M6809_IRQ_LINE,CLEAR_LINE);
-        	return;
-        case 2: /* i8751 - FIRQ acknowledge */
-            return;
-        case 3: /* IRQ 1 */
+			return;
+		case 2: /* i8751 - FIRQ acknowledge */
+			return;
+		case 3: /* IRQ 1 */
 			cpu_set_irq_line(0,M6809_IRQ_LINE,ASSERT_LINE);
 			return;
-        case 4: /* IRQ 2 */
-            cpu_set_irq_line(1,M6809_IRQ_LINE,ASSERT_LINE);
-            return;
+		case 4: /* IRQ 2 */
+			cpu_set_irq_line(1,M6809_IRQ_LINE,ASSERT_LINE);
+			return;
 	}
 #endif
 
 	switch (offset) {
 		case 0: /* CPU 2 - IRQ acknowledge */
-            return;
-        case 1: /* CPU 1 - IRQ acknowledge */
-        	return;
-        case 2: /* i8751 - FIRQ acknowledge */
-            return;
-        case 3: /* IRQ 1 */
+			return;
+		case 1: /* CPU 1 - IRQ acknowledge */
+			return;
+		case 2: /* i8751 - FIRQ acknowledge */
+			return;
+		case 3: /* IRQ 1 */
 			cpu_set_irq_line (0, M6809_IRQ_LINE, HOLD_LINE);
 			return;
-        case 4: /* IRQ 2 */
-            cpu_set_irq_line (1, M6809_IRQ_LINE, HOLD_LINE);
-            return;
+		case 4: /* IRQ 2 */
+			cpu_set_irq_line (1, M6809_IRQ_LINE, HOLD_LINE);
+			return;
 	}
 }
 
@@ -1348,10 +1422,10 @@ INPUT_PORTS_START( gondo )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 
-	PORT_START	/* player 1 12-way rotary control */
+	PORT_START	/* player 1 12-way rotary control - dial type */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE, 25, 10, 0, 0, KEYCODE_Z, KEYCODE_X, IP_JOY_NONE, IP_JOY_NONE )
 
-	PORT_START	/* player 2 12-way rotary control */
+	PORT_START	/* player 2 12-way rotary control - dial type */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, IP_JOY_NONE, IP_JOY_NONE )
 
 	PORT_START	/* Dip switch bank 1 */
@@ -1401,6 +1475,42 @@ INPUT_PORTS_START( gondo )
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	PORT_START	/* player 1 12-way rotary control - 2 button type */	/**JW */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1, 2)	 /*clockwise*/
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1, 2)	 /*counter-clockwise*/
+
+	PORT_START	/* player 2 12-way rotary control - 2 button type */	/**JW */
+	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 2)	 /*clockwise*/
+	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 2)	 /*counter-clockwise*/
+
+	PORT_START	/* player 1 TRUE 12-way rotary control */
+	PORT_BIT(0x001, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER3)
+	PORT_BIT(0x002, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER3)
+	PORT_BIT(0x004, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER3)
+	PORT_BIT(0x008, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER3)
+	PORT_BIT(0x010, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER3)
+	PORT_BIT(0x020, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER3)
+	PORT_BIT(0x040, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER3)
+	PORT_BIT(0x080, IP_ACTIVE_HIGH, IPT_BUTTON8 | IPF_PLAYER3)
+	PORT_BIT(0x100, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER3)
+	PORT_BIT(0x200, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER3)
+	PORT_BIT(0x400, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER1)
+	PORT_BIT(0x800, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER1)
+
+	PORT_START	/* player 2 TRUE 12-way rotary control */
+	PORT_BIT(0x001, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER4)
+	PORT_BIT(0x002, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER4)
+	PORT_BIT(0x004, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER4)
+	PORT_BIT(0x008, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER4)
+	PORT_BIT(0x010, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER4)
+	PORT_BIT(0x020, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER4)
+	PORT_BIT(0x040, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER4)
+	PORT_BIT(0x080, IP_ACTIVE_HIGH, IPT_BUTTON8 | IPF_PLAYER4)
+	PORT_BIT(0x100, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER4)
+	PORT_BIT(0x200, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER4)
+	PORT_BIT(0x400, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER2)
+	PORT_BIT(0x800, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER2)
 INPUT_PORTS_END
 
 INPUT_PORTS_START( oscar )

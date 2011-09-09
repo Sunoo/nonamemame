@@ -192,6 +192,10 @@ mame_file *mame_fopen(const char *gamename, const char *filename, int filetype, 
 		case FILETYPE_CONFIG:
 			return generic_fopen(filetype, NULL, gamename, 0, openforwrite ? FILEFLAG_OPENWRITE : FILEFLAG_OPENREAD);
 
+		/* Analog+ config files */
+		case FILETYPE_CONFIG_ANALOGPLUS:
+			return generic_fopen(filetype, NULL, gamename, 0, openforwrite ? FILEFLAG_OPENWRITE : FILEFLAG_OPENREAD);
+
 		/* input logs */
 		case FILETYPE_INPUTLOG:
 			return generic_fopen(filetype, NULL, gamename, 0, openforwrite ? FILEFLAG_OPENWRITE : FILEFLAG_OPENREAD);
@@ -821,6 +825,10 @@ static const char *get_extension_for_filetype(int filetype)
 
 		case FILETYPE_CONFIG:		/* config files */
 			extension = "cfg";
+			break;
+
+		case FILETYPE_CONFIG_ANALOGPLUS:	/* Analog+ config files */
+			extension = "ana";
 			break;
 
 		case FILETYPE_INPUTLOG:		/* input logs */

@@ -267,6 +267,7 @@ static unsigned char *shared_ram, *io_ram, *shared_ram2;
 static const SNK_INPUT_PORT_TYPE *snk_io; /* input port configuration */
 
 static int hard_flags;
+static int guerilla_fix=0;
 
 /*********************************************************************/
 
@@ -287,9 +288,44 @@ static int snk_sound_register;
 
 static int snk_rot8( int which ){
 	const int dial_8[8]   = { 0xf0,0x30,0x10,0x50,0x40,0xc0,0x80,0xa0 };
-	int value = readinputport(which+1);
-	int joypos16 = value>>4;
-	return (value&0xf) | dial_8[joypos16>>1];
+	int value_dial = readinputport(which+1);		// dial fake input
+	int value_2button = readinputport( which+6 );	// 2 button fake input
+	int joypos16, joydir;
+	static int old_joydir[2];
+	static int use_2button_rotary[] = {0,0};
+	static int count = 1;
+
+	if ( ((joydir = (value_2button>>4)) ^ 3) || use_2button_rotary[which] )	// 2button input overrides dial input
+	{
+		use_2button_rotary[which] = 1;
+
+		if (!--count)
+		{
+			count = 2;
+
+			if (joydir == 1)
+			{
+				if (old_joydir[which]==7)
+					old_joydir[which]=0;
+				else
+					old_joydir[which]++;
+			}
+			else if (joydir == 2)
+			{
+				if (old_joydir[which]==0)
+					old_joydir[which]=7;
+				else
+					old_joydir[which]--;
+			}
+		}
+
+		return (value_dial&0x0f) | dial_8[old_joydir[which]];
+	}
+
+	/* else */
+
+	joypos16 = value_dial>>4;
+	return (value_dial&0x0f) | dial_8[joypos16>>1];
 }
 
 static int snk_rot12( int which ){
@@ -297,34 +333,86 @@ static int snk_rot12( int which ){
 	This routine converts a 4 bit (16 directional) analog input to the 12
 	directional input that many SNK games require.
 */
-	const int dial_12[13] = {
+	const int dial_12[12] = {
+	0xb0,0xa0,0x90,0x80,0x70,0x60,
+	0x50,0x40,0x30,0x20,0x10,0x00
+	};
+
+	const int dial_12gwar[13] = {
 	0xb0,0xa0,0x90,0x80,0x70,0x60,
 	0xf0,
-	/* 0xf0 isn't a valid direction, but avoids the "joystick error"
-	protection
+	/* 0xf0 isn't a valid direction, but avoids the "joystick error" protection
 	** in Guerilla War which happens when direction changes directly from
 	** 0x50<->0x60 8 times.
 	*/
 	0x50,0x40,0x30,0x20,0x10,0x00
 	};
-	int value = readinputport(which+1);
-	int joydir = value>>4;
+	int value_dial = readinputport( which+1 );		// dial fake input & 8-way joystick
+	int value_2button = readinputport( which+6 );	// 2 button fake input
+	int value_12true = readinputport( which+8 );	// 12 switch original input
+	int joydir;
+	int size;
 	static int old_joydir[2];
 	static int dial_select[2];
+	static int use_2button_rotary[] = {0,0};
 
-	int delta = (joydir - old_joydir[which])&0xf;
-	old_joydir[which] = joydir;
+/* input from original buttons overides all other rotary inputs */
+	if ( (joydir = value_12true) & 0xf0)
+		return (value_dial & 0x0f) | ((joydir - 0x10) & 0xf0);
 
-	if( delta<=7 && delta>=1 ){
-		if( dial_select[which]==12 ) dial_select[which] = 0;
-		else dial_select[which]++;
+	if (guerilla_fix)
+		size = 12;
+	else
+		size = 11;
+
+	if ( ((joydir = (value_2button>>4)) ^ 3) || use_2button_rotary[which] )	// 2button input overrides dial input
+	{
+		use_2button_rotary[which] = 1;
+		if (joydir == 1)
+		{
+			if (dial_select[which]==size)
+				dial_select[which]=0;
+			else
+				dial_select[which]++;
+		}
+		else if (joydir == 2)
+		{
+			if (dial_select[which]==0)
+				dial_select[which]=size;
+			else
+				dial_select[which]--;
+		}
+
+//		if (guerilla_fix)
+//			return (value_dial&0x0f) | dial_12gwar[old_joydir[which]];
+//		return (value_dial&0x0f) | dial_12[old_joydir[which]];
 	}
-	else if( delta > 8 ){
-		if( dial_select[which]==0 ) dial_select[which] = 12;
-		else dial_select[which]--;
+	else
+	{
+		int delta;
+		joydir = value_dial>>4;
+		delta = (joydir - old_joydir[which])&0x0f;
+		old_joydir[which] = joydir;
+
+		if ( delta<=7 && delta>=1 )
+		{
+			if ( dial_select[which]==size )
+				dial_select[which] = 0;
+			else
+				dial_select[which]++;
+		}
+		else if ( delta > 8 )
+		{
+			if ( dial_select[which]==0 )
+				dial_select[which] = size;
+			else
+				dial_select[which]--;
+		}
 	}
 
-	return (value&0xf) | dial_12[dial_select[which]];
+	if (guerilla_fix)
+		return (value_dial&0x0f) | dial_12gwar[dial_select[which]];
+	return (value_dial&0x0f) | dial_12[dial_select[which]];
 }
 
 static int snk_input_port_r( int which ){
@@ -2646,6 +2734,41 @@ ROM_END
 	PORT_DIPSETTING(    0x80, DEF_STR( 1C_4C ) ) \
 	PORT_DIPSETTING(    0xc0, DEF_STR( 1C_6C ) )
 
+#define SNK_FAKE_ROTARY_INPUTS \
+	PORT_START	/* player 1 12-way rotary control - FAKE 2 button type */ \
+	PORT_BIT_IMPULSE(0x10, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1, 1) \
+	PORT_BIT_IMPULSE(0x20, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER1, 1) \
+	PORT_START	/* player 2 12-way rotary control - FAKE 2 button type */ \
+	PORT_BIT_IMPULSE(0x10, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2, 1) \
+	PORT_BIT_IMPULSE(0x20, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER2, 1) \
+	PORT_START	/* player 1 TRUE 12-way rotary control */ \
+	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER3) \
+	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER3) \
+	PORT_BIT(0x30, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER3) \
+	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER3) \
+	PORT_BIT(0x50, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER3) \
+	PORT_BIT(0x60, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER3) \
+	PORT_BIT(0x70, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER3) \
+	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_BUTTON8 | IPF_PLAYER3) \
+	PORT_BIT(0x90, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER3) \
+	PORT_BIT(0xa0, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER3) \
+	PORT_BIT(0xb0, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER1) \
+	PORT_BIT(0xc0, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER1) \
+	PORT_START	/* player 2 TRUE 12-way rotary control */ \
+	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER4) \
+	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER4) \
+	PORT_BIT(0x30, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER4) \
+	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER4) \
+	PORT_BIT(0x50, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER4) \
+	PORT_BIT(0x60, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER4) \
+	PORT_BIT(0x70, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER4) \
+	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_BUTTON8 | IPF_PLAYER4) \
+	PORT_BIT(0x90, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER4) \
+	PORT_BIT(0xa0, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER4) \
+	PORT_BIT(0xb0, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER2) \
+	PORT_BIT(0xc0, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER2)
+
+
 INPUT_PORTS_START( ikari )
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* sound CPU status */
@@ -2676,6 +2799,7 @@ INPUT_PORTS_START( ikari )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Lives ) )
 	PORT_DIPSETTING(    0x08, "3" )
 	PORT_DIPSETTING(    0x00, "5" )
+
 	SNK_COINAGE
 
 	PORT_START /* DSW 2 */
@@ -2700,6 +2824,8 @@ INPUT_PORTS_START( ikari )
 	PORT_DIPNAME( 0x80, 0x00, "Allow Continue" )
 	PORT_DIPSETTING(    0x80, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
+
+	SNK_FAKE_ROTARY_INPUTS
 INPUT_PORTS_END
 
 INPUT_PORTS_START( ikarijp )
@@ -2756,6 +2882,8 @@ INPUT_PORTS_START( ikarijp )
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	SNK_FAKE_ROTARY_INPUTS
 INPUT_PORTS_END
 
 
@@ -2813,6 +2941,8 @@ INPUT_PORTS_START( victroad )
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
+
+	SNK_FAKE_ROTARY_INPUTS
 INPUT_PORTS_END
 
 
@@ -2928,6 +3058,8 @@ INPUT_PORTS_START( gwar )
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	SNK_FAKE_ROTARY_INPUTS
 INPUT_PORTS_END
 
 INPUT_PORTS_START( athena )
@@ -3083,6 +3215,8 @@ INPUT_PORTS_START( tnk3 )
 	PORT_DIPNAME( 0x80, 0x00, "Allow Continue" )
 	PORT_DIPSETTING(    0x80, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
+
+	SNK_FAKE_ROTARY_INPUTS
 INPUT_PORTS_END
 
 INPUT_PORTS_START( bermudat )
@@ -3138,6 +3272,8 @@ INPUT_PORTS_START( bermudat )
 	PORT_DIPSETTING(    0x80, "Normal with continue" )
 	PORT_DIPSETTING(    0x40, "Time attack 3 minutes" )
 	PORT_DIPSETTING(    0x00, "Time attack 5 minutes" )
+
+	SNK_FAKE_ROTARY_INPUTS
 INPUT_PORTS_END
 
 INPUT_PORTS_START( bermudaa )
@@ -3197,6 +3333,8 @@ INPUT_PORTS_START( bermudaa )
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unused ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	SNK_FAKE_ROTARY_INPUTS
 INPUT_PORTS_END
 
 /* Same as Bermudaa, but has different Bonus Life */
@@ -3254,6 +3392,8 @@ INPUT_PORTS_START( worldwar )
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unused ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	SNK_FAKE_ROTARY_INPUTS
 INPUT_PORTS_END
 
 INPUT_PORTS_START( psychos )
@@ -3975,6 +4115,7 @@ static DRIVER_INIT( gwar ){
 	hard_flags = 0;
 	snk_bg_tilemap_baseaddr = 0xd800;
 	snk_gamegroup = 2;
+	guerilla_fix = 1;
 }
 
 static DRIVER_INIT( gwara ){
@@ -3983,6 +4124,7 @@ static DRIVER_INIT( gwara ){
 	hard_flags = 0;
 	snk_bg_tilemap_baseaddr = 0xd800;
 	snk_gamegroup = 4;
+	guerilla_fix = 1;
 }
 
 static DRIVER_INIT( chopper ){

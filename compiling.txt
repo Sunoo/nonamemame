@@ -4,14 +4,24 @@ No Name MAME Compiling Help
 I made some modifications to the makefile which make building different versions
 easier (especially the MAME32 version).
 
-To compile for Windows:
-	make OS=win
+First, (obviosly) is the make command:  make
 
-To compile for MS-DOS:
-	make OS=dos
+Second, select your operating system (default = Windows):
+	Windows:  OS=win
+	Windows XP:  OS=winxp
+	MS-DOS:  OS=dos
+	MAME32 version:  OS=mame32
+	MAME32 version for Windows XP:  OS=mame32xp
 
-To compile MAME32 version:
-	make OS=mame32
+Third, select your CPU optimization (default = none):
+	Debug:  CPU=debug
+	Athlon:  CPU=athlon
+	K6:  CPU=k6
+	Pentium Pro (I686):  CPU=i686
+	Pentium 4: CPU=p4
+
+So, for examble, to compile a MAME32 version for Windows XP optomized for
+a Pentium 4 processor:  make OS=mame32xp CPU=p4
 
 I will probably make further modifications in the future, and when I do, I'll
 document them here.

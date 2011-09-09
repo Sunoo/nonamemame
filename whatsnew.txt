@@ -1,3 +1,8 @@
+0.79u4.04:
+ - Added MameAnalog+ 79.1 changes
+ - Made the makefile a bit friendlier
+ - Now including ctrlr files from MAME and MameAnalog+
+
 0.79u4.03:
  - Added MAMEinfo 0.79u4 changes
  - Fixed view source option

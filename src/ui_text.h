@@ -91,11 +91,27 @@ enum
 	UI_returntogame,
 	UI_cheat,
 	UI_memorycard,
+	UI_mousecontrols,
+	UI_mouseaxescontrols,
+	UI_analogjoycntls,
 
-	/* input stuff */
+	/* analog input stuff */
 	UI_keyjoyspeed,
 	UI_reverse,
 	UI_sensitivity,
+
+	/* analog+ input stuff */
+	UI_switchmouse,
+	UI_mouse,
+	UI_ajoy,
+	UI_Xaxis,
+	UI_Yaxis,
+	UI_Zaxis,
+#if 0
+	UI_rXaxis,
+	UI_rYaxis,
+	UI_rZaxis,
+#endif
 
 	/* stats */
 	UI_tickets,
