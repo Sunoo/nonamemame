@@ -1,3 +1,11 @@
+0.81.09:
+ - Updated to MAME 0.81 source
+ - Removed Unavailable folder from MAME32
+ - Fixed an accidental inclusion, or 18
+ - Fixed romcmp, chdman, and xml2info
+ - Fixed skip_baddumps
+ - Added ssf.txt to help with the -ssf command (SA Dev)
+
 0.80u1.08:
  - Added Horiz Pac, the Alpacas, the Pac Snoops, and the rest of Jerry's stuff
  - Hopefully fixed the DOS version

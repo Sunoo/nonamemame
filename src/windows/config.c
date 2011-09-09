@@ -224,7 +224,7 @@ static struct rc_option opts[] = {
 	{ "skip_disclaimer", NULL, rc_bool, &options.skip_disclaimer, "0", 0, 0, NULL, "skip displaying the disclaimer screen" },
 	{ "skip_gameinfo", NULL, rc_bool, &options.skip_gameinfo, "0", 0, 0, NULL, "skip displaying the " GAMENOUN " info screen" },
 	{ "skip_gamewarnings", NULL, rc_bool, &options.skip_gamewarnings, "0", 0, 0, NULL, "skip displaying driver warning screen" },
-	{ "skip_gameinfo", NULL, rc_bool, &options.skip_gameinfo, "0", 0, 0, NULL, "skip displaying the game info screen" },
+	{ "skip_baddumps", NULL, rc_bool, &options.skip_baddumps, "0", 0, 0, NULL, "skip displaying bad dump errors" },
 	{ "crconly", NULL, rc_bool, &options.crc_only, "0", 0, 0, NULL, "use only CRC for all integrity checks" },
 	{ "bios", NULL, rc_string, &options.bios, "default", 0, 14, NULL, "change system bios" },
 	{ "state", NULL, rc_string, &statename, NULL, 0, 0, NULL, "state to load" },
@@ -665,7 +665,7 @@ int cli_frontend_init (int argc, char **argv)
 
 	if( statename )
 	{
-		options.savegame = *( statename );
+		options.savegame = statename;
 	}
 
 	/* need a decent default for debug width/height */

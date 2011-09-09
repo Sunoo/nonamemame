@@ -58,6 +58,10 @@ endif
 endif
 endif
 
+#ifeq ($(OUTLAW),1)
+#DEF += -DOUTLAW
+#endif
+
 # WinXP compile option: if defined, compile the winXP version
 # default is undefined;  uncomment next line or include in mame commandline to define
 # WINXPANANLOG = 1
@@ -259,7 +263,7 @@ romcmp$(EXE): $(OBJ)/romcmp.o $(OBJ)/unzip.o
 	@echo Linking $@...
 	$(LD) $(LDFLAGS) $^ -lz -o $@
 
-chdman$(EXE): $(OBJ)/chdman.o $(OBJ)/chd.o $(OBJ)/md5.o $(OBJ)/sha1.o $(OBJ)/version.o
+chdman$(EXE): $(OBJ)/chdman.o $(OBJ)/chd.o $(OBJ)/chdcd.o $(OBJ)/md5.o $(OBJ)/sha1.o $(OBJ)/version.o
 	@echo Linking $@...
 	$(LD) $(LDFLAGS) $^ -lz -o $@
 

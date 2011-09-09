@@ -236,7 +236,7 @@ struct GameOptions
 	int		artwork_crop;	/* 1 to crop artwork to the game screen */
 	int		artwork_fb;		/* 1 to crop artwork to the game screen */
 
-	char	savegame;		/* character representing a savegame to load */
+	const char * savegame;	/* string representing a savegame to load; if one length then interpreted as a character */
 	int     crc_only;       /* specify if only CRC should be used as checksum */
 	char *	bios;			/* specify system bios (if used), 0 is default */
 

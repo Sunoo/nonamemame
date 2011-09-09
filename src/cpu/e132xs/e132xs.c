@@ -35,6 +35,13 @@
 
  CHANGELOG:
 
+ MooglyGuy 29/03/2004
+    - Changed MOVI to use unsigned values instead of signed, correcting
+      an ugly glitch when loading 32-bit immediates.
+ Pierpaolo Prazzoli
+	- Same fix in get_const
+
+
  MooglyGuy - 02/27/04
     - Fixed delayed branching
     - const_val for CALL should always have bit 0 clear
@@ -314,7 +321,7 @@ enum
 	E132XS_ISR,
 	E132XS_FCR,
 	E132XS_MCR,
-	E132XS_G28, 
+	E132XS_G28,
 	E132XS_G29,
 	E132XS_G30,
 	E132XS_G31,
@@ -676,7 +683,7 @@ void e132xs_set_entry_point(int which)
 
 INT32 immediate_value(void)
 {
-	INT16 imm1, imm2;
+	UINT16 imm1, imm2;
 	INT32 ret;
 
 	switch( N_VALUE )
@@ -696,12 +703,12 @@ INT32 immediate_value(void)
 
 		case 18:
 			PC += 2;
-			ret = (UINT32) READ_OP(PC);
+			ret = READ_OP(PC);
 			return ret;
 
 		case 19:
 			PC += 2;
-			ret = 0xffff0000 | ((INT32) READ_OP(PC));
+			ret = (INT32) (0xffff0000 | READ_OP(PC));
 			return ret;
 
 		case 20:
@@ -747,14 +754,14 @@ INT32 immediate_value(void)
 INT32 get_const(void)
 {
 	INT32 const_val;
-	INT16 imm1;
+	UINT16 imm1;
 
 	PC += 2;
 	imm1 = READ_OP(PC);
 
 	if( E_BIT(imm1) )
 	{
-		INT16 imm2;
+		UINT16 imm2;
 
 		PC += 2;
 		imm2 = READ_OP(PC);
@@ -2393,7 +2400,7 @@ void e132xs_sardi(void)
 		int i;
 		for( i = 0; i < N_VALUE; i++ )
 		{
-			val |= (0x8000000000000000ULL >> i);
+			val |= (U64(0x8000000000000000) >> i);
 		}
 	}
 
@@ -2432,7 +2439,7 @@ void e132xs_sard(void)
 			int i;
 			for( i = 0; i < n; i++ )
 			{
-				val |= (0x8000000000000000ULL >> i);
+				val |= (U64(0x8000000000000000) >> i);
 			}
 		}
 

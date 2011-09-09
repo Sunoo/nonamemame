@@ -30,6 +30,7 @@ COREOBJS = $(OBJ)/version.o $(OBJ)/mame.o \
 	$(OBJ)/profiler.o \
 	$(OBJ)/hash.o $(OBJ)/sha1.o \
 	$(OBJ)/chd.o $(OBJ)/harddisk.o $(OBJ)/md5.o $(OBJ)/machine/idectrl.o \
+	$(OBJ)/cdrom.o \
 	$(OBJ)/sound/wavwrite.o
 
 ifdef X86_MIPS3_DRC
@@ -38,3 +39,4 @@ endif
 
 COREOBJS += $(sort $(DBGOBJS))
 
+TOOLS = romcmp$(EXE) chdman$(EXE) xml2info$(EXE)
