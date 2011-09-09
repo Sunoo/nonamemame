@@ -1,3 +1,8 @@
+0.76u1.10:
+ - Updated to MAME 0.76u1 source code
+ - Changed vliner from TESTDRIVER to DRIVER to correspond with the removal of the TESTDRIVER system
+ - Now using folders from MAME32 0.76
+
 0.75u1.10:
  - Updated to MAME 0.75u1 source code
  - Fixed more CRC errors (thanks again to Vladimir Rajovic)

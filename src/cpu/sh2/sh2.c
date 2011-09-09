@@ -27,6 +27,9 @@
 
 /*****************************************************************************
 	Changes
+	20031015 O. Galibert
+	- dma fixes, thanks to sthief
+
 	20031013 O. Galibert, A. Giles
 	- timer fixes
 	- multi-cpu simplifications
@@ -2311,7 +2314,7 @@ void sh2_reset(void *param)
 	sh2.dma_timer[1] = tsaved1;
 	sh2.m = m;
 	memset(sh2.m, 0, 0x200);
-	
+
 	if(conf)
 		sh2.is_slave = conf->is_slave;
 	else
@@ -2498,7 +2501,7 @@ static void sh2_recalc_irq(void)
 static void sh2_timer_callback(int cpunum)
 {
 	UINT16 frc;
-	
+
 	cpuintrf_push_context(cpunum);
 	sh2_timer_resync();
 
@@ -2548,14 +2551,11 @@ static void sh2_dmac_check(int dma)
 			incd = (sh2.m[0x63+4*dma] >> 14) & 3;
 			incs = (sh2.m[0x63+4*dma] >> 12) & 3;
 			size = (sh2.m[0x63+4*dma] >> 10) & 3;
-			size = size == 3 ? 16 : 1<<size;
 			if(incd == 3 || incs == 3)
 			{
 				logerror("SH2: DMA: bad increment values (%d, %d, %d, %04x)\n", incd, incs, size, sh2.m[0x63+4*dma]);
 				return;
 			}
-			incd = incd == 0 ? (size == 16 ? 16 : 0) : incd == 1 ? +size : -size;
-			incs = incs == 0 ? (size == 16 ? 16 : 0) : incs == 1 ? +size : -size;
 			src   = sh2.m[0x60+4*dma];
 			dst   = sh2.m[0x61+4*dma];
 			count = sh2.m[0x62+4*dma];
@@ -2572,45 +2572,67 @@ static void sh2_dmac_check(int dma)
 
 			switch(size)
 			{
-			case 1:
-				while(count--)
+			case 0:
+				for(;count > 0; count --)
 				{
+					if(incs == 2)
+						src --;
+					if(incd == 2)
+						dst --;
 					cpu_writemem32bedw(dst, cpu_readmem32bedw(src));
-					src += incs;
-					dst += incd;
+					if(incs == 1)
+						src ++;
+					if(incd == 1)
+						dst ++;
+				}
+				break;
+			case 1:
+				src &= ~1;
+				dst &= ~1;
+				for(;count > 0; count --)
+				{
+					if(incs == 2)
+						src -= 2;
+					if(incd == 2)
+						dst -= 2;
+					cpu_writemem32bedw_word(dst, cpu_readmem32bedw_word(src));
+					if(incs == 1)
+						src += 2;
+					if(incd == 1)
+						dst += 2;
 				}
 				break;
 			case 2:
-				src &= ~1;
-				dst &= ~1;
-				while(count--)
-				{
-					cpu_writemem32bedw_word(dst, cpu_readmem32bedw_word(src));
-					src += incs;
-					dst += incd;
-				}
-				break;
-			case 4:
 				src &= ~3;
 				dst &= ~3;
-				while(count--)
+				for(;count > 0; count --)
 				{
+					if(incs == 2)
+						src -= 4;
+					if(incd == 2)
+						dst -= 4;
 					cpu_writemem32bedw_dword(dst, cpu_readmem32bedw_dword(src));
-					src += incs;
-					dst += incd;
+					if(incs == 1)
+						src += 4;
+					if(incd == 1)
+						dst += 4;
 				}
 				break;
-			case 16:
+			case 3:
 				src &= ~3;
 				dst &= ~3;
-				while(count--)
+				count &= ~3;
+				for(;count > 0; count -= 4)
 				{
+					if(incd == 2)
+						dst -= 16;
 					cpu_writemem32bedw_dword(dst, cpu_readmem32bedw_dword(src));
 					cpu_writemem32bedw_dword(dst+4, cpu_readmem32bedw_dword(src+4));
 					cpu_writemem32bedw_dword(dst+8, cpu_readmem32bedw_dword(src+8));
 					cpu_writemem32bedw_dword(dst+12, cpu_readmem32bedw_dword(src+12));
-					src += incs;
-					dst += incd;
+					src += 16;
+					if(incd == 1)
+						dst += 16;
 				}
 				break;
 			}
@@ -2955,7 +2977,7 @@ void sh2_set_irq_line(int irqline, int state)
 			LOG(("SH-2 #%d cleared nmi\n", cpu_getactivecpu()));
 		else
         {
-			LOG(("SH-2 #%d assert nmi\n", cpu_getactivecpu(), irqline));
+			LOG(("SH-2 #%d assert nmi\n", cpu_getactivecpu()));
 			sh2_exception("sh2_set_irq_line/nmi", 16);
         }
 	}
