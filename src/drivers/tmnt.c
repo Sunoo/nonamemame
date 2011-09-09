@@ -25,15 +25,41 @@ TODO:
   053936 tilemap that shouldn't be seen are visible. Maybe the tilemap ROM is
   banked, or there are controls to clip the visible region (registers 0x06 and
   0x07 of the 053936) or both.
-- detatwin: sprites are left on screen during attract mode
-- a garbage sprite is STILL sticking on screen from time to time in ssriders.
-- sprite colors / zoomed placement in tmnt2 (protection)
-- I don't think I'm handling the palette dim control in tmnt2/ssriders correctly.
-  TMNT2 stays dimmed most of the time.
 - is IPT_VBLANK really vblank or something else? Investigate.
-- sprite lag, quite evident in lgtnfght and mia but also in the others. Also
-  see the left corner of the wall in punkshot DownTown level
 - some slowdowns in lgtnfght when there are many sprites on screen - vblank issue?
+
+Updates:
+
+- detatwin: sprites are left on screen during attract mode(fixed)
+  Sprite buffer should be cleared at vblank start. On the GX OBJDMA
+  automatically occurs 32.0-42.7us after clearing but on older boards
+  using the K053245, DMA must be triggered manually. The game uses a
+  trick to disable sprites by simply not triggering OBJDMA.
+- a garbage sprite is STILL sticking on screen in ssriders.(fixed)
+- sprite colors / zoomed placement in tmnt2(improved MCU sim)
+- I don't think I'm handling the palette dim control in tmnt2/ssriders
+  correctly. TMNT2 stays dimmed most of the time.(fixed)
+- sprite lag, quite evident in lgtnfght and mia but also in the others.
+  Also see the left corner of the wall in punkshot DownTown level(should be better)
+- ssriders: Billy no longer goes berserk at stage 4's boss.
+
+* uncertain bugs:
+- Detana!! Twin Bee's remaining sprite lag does not appear to be
+  emulation related. While these common one-pixel lags are very obvious
+  on VGA-class displays they're virtually invisible on TV and older
+  15kHz arcade monitors.
+- TMNT2: "BIG APPLE, 3 AM" is not played in the first loop. I believe
+  it's a design decision because it'll cut into the last intro dialogue.
+  The game looks up sound codes of these prologue lines from two different
+  tables. One for the first loop and the other for any loop thereafter.
+  The SNES port plays it everytime probably because it has no intro speech.
+  If the real board turns out otherwise I have no idea how to fix it except
+  patching the first table.
+- TMNT: In the sewer level when purple foot soldiers jump out of the water
+  they turn white for a short moment. The color index is copied straight
+  form ROM and nothing unusual is found in that part the code. There is no
+  known protection in this game so this bug may need reconfirmation.
+(081003AT)
 
 ***************************************************************************/
 
@@ -43,7 +69,7 @@ TODO:
 #include "machine/eeprom.h"
 #include "cpu/m68000/m68000.h"
 #include "cpu/z80/z80.h"
-
+#include "math.h"
 
 WRITE16_HANDLER( tmnt_paletteram_word_w );
 WRITE16_HANDLER( tmnt_0a0000_w );
@@ -56,6 +82,7 @@ WRITE16_HANDLER( ssriders_1c0300_w );
 WRITE16_HANDLER( prmrsocr_122000_w );
 WRITE16_HANDLER( tmnt_priority_w );
 READ16_HANDLER( glfgreat_ball_r );
+VIDEO_START( sunsetbl );
 VIDEO_START( cuebrckj );
 VIDEO_START( mia );
 VIDEO_START( tmnt );
@@ -72,6 +99,8 @@ VIDEO_UPDATE( lgtnfght );
 VIDEO_UPDATE( glfgreat );
 VIDEO_UPDATE( tmnt2 );
 VIDEO_UPDATE( thndrx2 );
+VIDEO_EOF( detatwin );
+
 static int tmnt_soundlatch;
 static int cbj_snd_irqlatch, cbj_nvram_bank;
 static data16_t cbj_nvram[0x400*0x20];	// 32k paged in a 1k window
@@ -125,15 +154,13 @@ static READ16_HANDLER( K053245_scattered_word_r )
 	}
 }
 
-static WRITE16_HANDLER( K053245_scattered_word_w )
+static WRITE16_HANDLER( K053245_scattered_word_w ) //*
 {
-	if (offset & 0x0031)
-		COMBINE_DATA(spriteram16 + offset);
-	else
+	COMBINE_DATA(spriteram16 + offset);
+
+	if (!(offset & 0x0031))
 	{
 		offset = ((offset & 0x000e) >> 1) | ((offset & 0x1fc0) >> 3);
-//if ((offset&0xf) == 0)
-//	logerror("%04x: write %02x to spriteram %04x\n",activecpu_get_pc(),data,offset);
 		K053245_word_w(offset,data,mem_mask);
 	}
 }
@@ -322,12 +349,12 @@ static int tmnt_decode_sample(const struct MachineSound *msound)
 	for (i = 0;i < 0x40000;i++)
 	{
 		int val = source[2*i] + source[2*i+1] * 256;
-		int exp = val >> 13;
+		int expo = val >> 13;
 
 	  	val = (val >> 3) & (0x3ff);	/* 10 bit, Max Amplitude 0x400 */
 		val -= 0x200;					/* Centralize value	*/
 
-		val <<= (exp-3);
+		val <<= (expo-3);
 
 		dest[i] = val;
 	}
@@ -409,7 +436,7 @@ static READ16_HANDLER( ssriders_protection_r )
 			data = -cpu_readmem24bew_word(0x105818);
 			data = ((data / 8 - 4) & 0x1f) * 0x40;
 			data += ((cpu_readmem24bew_word(0x105cb0) +
-						256*K052109_r(0x1a01) + K052109_r(0x1a00)) / 8 + 12) & 0x3f;
+						256*K052109_r(0x1a01) + K052109_r(0x1a00) - 4) / 8 + 12) & 0x3f; //*
 			return data;
 
 		default:
@@ -524,6 +551,25 @@ static READ16_HANDLER( ssriders_eeprom_r )
 	{
 		init_eeprom_count--;
 		res &= 0x7f;
+	}
+	toggle ^= 0x04;
+	return res ^ toggle;
+}
+
+static READ16_HANDLER( ssridersbl_eeprom_r )
+{
+	int res;
+	static int toggle;
+
+	/* bit 0 is EEPROM data */
+	/* bit 1 is EEPROM ready */
+	/* bit 2 is VBLANK (???) */
+	/* bit 3 is service button */
+	res = EEPROM_read_bit() | input_port_3_word_r(0,0);
+	if (init_eeprom_count)
+	{
+		init_eeprom_count--;
+		res &= 0xf7;
 	}
 	toggle ^= 0x04;
 	return res ^ toggle;
@@ -955,11 +1001,11 @@ static MEMORY_WRITE16_START( prmrsocr_writemem )
 MEMORY_END
 
 
-static MEMORY_READ16_START( tmnt2_readmem )
-	{ 0x000000, 0x0fffff, MRA16_ROM },
+static MEMORY_READ16_START( tmnt2_readmem ) //*
+	{ 0x000000, 0x07ffff, MRA16_ROM },
 	{ 0x104000, 0x107fff, MRA16_RAM },	/* main RAM */
 	{ 0x140000, 0x140fff, MRA16_RAM },
-	{ 0x180000, 0x183fff, K053245_scattered_word_r },
+	{ 0x180000, 0x183fff, MRA16_RAM },	// K053245_scattered_word_r
 	{ 0x1c0000, 0x1c0001, input_port_0_word_r },
 	{ 0x1c0002, 0x1c0003, input_port_1_word_r },
 	{ 0x1c0004, 0x1c0005, input_port_4_word_r },
@@ -967,7 +1013,7 @@ static MEMORY_READ16_START( tmnt2_readmem )
 	{ 0x1c0100, 0x1c0101, input_port_2_word_r },
 	{ 0x1c0102, 0x1c0103, ssriders_eeprom_r },
 	{ 0x1c0400, 0x1c0401, watchdog_reset16_r },
-	{ 0x1c0500, 0x1c057f, MRA16_RAM },	/* TMNT2 only (1J) unknown */
+	{ 0x1c0500, 0x1c057f, MRA16_RAM },	/* TMNT2 only (1J) unknown, mostly MCU blit offsets */
 //	{ 0x1c0800, 0x1c0801, ssriders_protection_r },	/* protection device */
 	{ 0x5a0000, 0x5a001f, K053244_word_noA1_r },
 	{ 0x5c0600, 0x5c0603, tmnt2_sound_r },	/* K053260 */
@@ -975,7 +1021,149 @@ static MEMORY_READ16_START( tmnt2_readmem )
 MEMORY_END
 
 static data16_t *tmnt2_1c0800,*sunset_104000;
+static data16_t *tmnt2_rom;
 
+#if 1 //*
+INLINE UINT32 tmnt2_get_word(UINT32 addr)
+{
+	if (addr <= 0x07ffff/2) return(tmnt2_rom[addr]); else
+	if (addr >= 0x104000/2 && addr <= 0x107fff/2) return(sunset_104000[addr-0x104000/2]); else
+	if (addr >= 0x180000/2 && addr <= 0x183fff/2) return(spriteram16[addr-0x180000/2]);
+	return(0);
+}
+
+static void tmnt2_put_word(UINT32 addr, UINT16 data)
+{
+	UINT32 offs;
+	if (addr >= 0x180000/2 && addr <= 0x183fff/2)
+	{
+		spriteram16[addr-0x180000/2] = data;
+		offs = addr-0x180000/2;
+		if (!(offs & 0x0031))
+		{
+			offs = ((offs & 0x000e) >> 1) | ((offs & 0x1fc0) >> 3);
+			K053245_word_w(offs, data, 0);
+		}
+	}
+	else if (addr >= 0x104000/2 && addr <= 0x107fff/2) sunset_104000[addr-0x104000/2] = data;
+}
+
+WRITE16_HANDLER( tmnt2_1c0800_w )
+{
+	UINT32 src_addr, dst_addr, mod_addr, attr1, code, attr2, cbase, cmod, color;
+	int xoffs, yoffs, xmod, ymod, zmod, xzoom, yzoom, i;
+	UINT16 *mcu;
+	UINT16 src[4], mod[24];
+	UINT8 keepaspect, xlock, ylock, zlock;
+
+	COMBINE_DATA(tmnt2_1c0800 + offset);
+
+	if (offset != 0x18/2 || !ACCESSING_MSB) return;
+
+	mcu = tmnt2_1c0800;
+	if ((mcu[8] & 0xff00) != 0x8200) return;
+
+	src_addr = (mcu[0] | (mcu[1]&0xff)<<16) >> 1;
+	dst_addr = (mcu[2] | (mcu[3]&0xff)<<16) >> 1;
+	mod_addr = (mcu[4] | (mcu[5]&0xff)<<16) >> 1;
+	zlock    = (mcu[8] & 0xff) == 0x0001;
+
+	for (i=0; i< 4; i++) src[i] = tmnt2_get_word(src_addr + i);
+	for (i=0; i<24; i++) mod[i] = tmnt2_get_word(mod_addr + i);
+
+	code = src[0];			// code
+
+	i= src[1];
+	attr1 = i>>2 & 0x3f00;	// flip y, flip x and sprite size
+	attr2 = i & 0x380;		// mirror y, mirror x, shadow
+	cbase = i & 0x01f;		// base color
+	cmod  = mod[0x2a/2]>>8;
+	color = (cbase != 0x0f && cmod <= 0x1f && !zlock) ? cmod : cbase;
+
+	xoffs = (INT16)src[2];	// local x
+	yoffs = (INT16)src[3];	// local y
+
+	i = mod[0];
+	attr2 |= i & 0x0060;	// priority
+	keepaspect = (i & 0x0014) == 0x0014;
+	if (i & 0x8000) { attr1 |= 0x8000; }	// active
+	if (keepaspect)	{ attr1 |= 0x4000; }	// keep aspect
+//	if (i & 0x????) { attr1 ^= 0x2000; yoffs = -yoffs; }	// flip y (not used?)
+	if (i & 0x4000) { attr1 ^= 0x1000; xoffs = -xoffs; }	// flip x
+
+	xmod = (INT16)mod[6];	// global x
+	ymod = (INT16)mod[7];	// global y
+	zmod = (INT16)mod[8];	// global z
+	xzoom = mod[0x1c/2];
+	yzoom = (keepaspect) ? xzoom : mod[0x1e/2];
+
+	ylock = xlock = (i & 0x0020 && (!xzoom || xzoom == 0x100));
+
+	/*
+		Scale factor is non-linear. The zoom vales are looked-up from
+		two to three nested tables and passed through a series of math
+		operations. The MCU is suspected to have its own tables for
+		translating zoom values to final scale factors or it knows where
+		to fetch them in ROM. There is no access to its internal code so
+		the scale curve is only approximated.
+
+		The most accurate method is to trace how MCU zoom is transformed
+		from ROM data, reverse the maths, plug the result into the sprite
+		zoom code and derive the scale factor from there; but zooming
+		would still suffer from precision loss in K053245_sprites_draw()
+		and drawgfx() producing gaps in logical sprite groups.
+
+		A few sample points on the real curve:
+
+		 Zoom | Scale factor
+		------+--------------
+		 0    | 0.0
+		 0x2c | 0x40/0x8d
+		 0x2f | 0x40/0x80
+		 0x4f | 1.0
+		 0x60 | 0x40/0x2f
+		 0x7b | 0x40/0x14
+	*/
+	if (!xlock)
+	{
+		i = xzoom - 0x4f00;
+		if (i > 0)
+		{
+			i >>= 8;
+			xoffs += (int)(pow(i, /*1.898461*/1.891292) * xoffs / 599.250121);
+		}
+		else if (i < 0)
+		{
+			i = (i>>3) + (i>>4) + (i>>5) + (i>>6) + xzoom;
+			xoffs = (i > 0) ? (xoffs * i / 0x4f00) : 0;
+		}
+	}
+	if (!ylock)
+	{
+		i = yzoom - 0x4f00;
+		if (i > 0)
+		{
+			i >>= 8;
+			yoffs += (int)(pow(i, /*1.898461*/1.891292) * yoffs / 599.250121);
+		}
+		else if (i < 0)
+		{
+			i = (i>>3) + (i>>4) + (i>>5) + (i>>6) + yzoom;
+			yoffs = (i > 0) ? (yoffs * i / 0x4f00) : 0;
+		}
+
+	}
+	if (!zlock) yoffs += zmod;
+	xoffs += xmod;
+	yoffs += ymod;
+
+	tmnt2_put_word(dst_addr +  0, attr1);
+	tmnt2_put_word(dst_addr +  2, code);
+	tmnt2_put_word(dst_addr +  4, (UINT32)yoffs);
+	tmnt2_put_word(dst_addr +  6, (UINT32)xoffs);
+	tmnt2_put_word(dst_addr + 12, attr2 | color);
+}
+#else // for reference; do not remove
 WRITE16_HANDLER( tmnt2_1c0800_w )
 {
     COMBINE_DATA( tmnt2_1c0800 + offset);
@@ -1061,16 +1249,17 @@ logerror("copy command %04x sprite %08x data %08x: %04x%04x %04x%04x  modifiers 
 //        }
     }
 }
+#endif
 
-static MEMORY_WRITE16_START( tmnt2_writemem )
-	{ 0x000000, 0x0fffff, MWA16_ROM },
+static MEMORY_WRITE16_START( tmnt2_writemem ) //*
+	{ 0x000000, 0x07ffff, MWA16_ROM, &tmnt2_rom },
 	{ 0x104000, 0x107fff, MWA16_RAM, &sunset_104000 },	/* main RAM */
 	{ 0x140000, 0x140fff, paletteram16_xBBBBBGGGGGRRRRR_word_w, &paletteram16 },
 	{ 0x180000, 0x183fff, K053245_scattered_word_w, &spriteram16 },
 	{ 0x1c0200, 0x1c0201, ssriders_eeprom_w },	/* EEPROM and gfx control */
 	{ 0x1c0300, 0x1c0301, ssriders_1c0300_w },
 	{ 0x1c0400, 0x1c0401, watchdog_reset16_w },
-	{ 0x1c0500, 0x1c057f, MWA16_RAM },	/* unknown: TMNT2 only (1J) */
+	{ 0x1c0500, 0x1c057f, MWA16_RAM },	/* unknown: TMNT2 only (1J), mostly MCU blit offsets */
 	{ 0x1c0800, 0x1c081f, tmnt2_1c0800_w, &tmnt2_1c0800 },	/* protection device */
 	{ 0x5a0000, 0x5a001f, K053244_word_noA1_w },
 	{ 0x5c0600, 0x5c0601, K053260_0_lsb_w },
@@ -1116,6 +1305,41 @@ static MEMORY_WRITE16_START( ssriders_writemem )
 	{ 0x600000, 0x603fff, K052109_word_w },
 MEMORY_END
 
+static MEMORY_READ16_START( ssridersbl_readmem )
+	{ 0x000000, 0x0bffff, MRA16_ROM },
+	{ 0x104000, 0x107fff, MRA16_RAM },	/* main RAM */
+	{ 0x14c000, 0x14cfff, MRA16_RAM },
+	{ 0x180000, 0x183fff, K053245_scattered_word_r },
+	{ 0x184000, 0x18ffff, MRA16_RAM },
+	{ 0x5a0000, 0x5a001f, K053244_word_noA1_r },
+	{ 0x600000, 0x603fff, K052109_word_r },
+	{ 0xc00000, 0xc00001, input_port_0_word_r },
+	{ 0xc00002, 0xc00003, input_port_1_word_r },
+	{ 0xc00004, 0xc00005, input_port_4_word_r },
+	{ 0xc00006, 0xc00007, input_port_5_word_r },
+	{ 0xc00404, 0xc00405, input_port_2_word_r },
+	{ 0xc00406, 0xc00407, ssridersbl_eeprom_r },
+	{ 0xc00600, 0xc00601, OKIM6295_status_0_lsb_r },
+	{ 0x75d288, 0x75d289, MRA16_NOP },	// read repeatedly in some test menus (PC=181f2)
+MEMORY_END
+
+static MEMORY_WRITE16_START( ssridersbl_writemem )
+	{ 0x000000, 0x0bffff, MWA16_ROM },
+	{ 0x104000, 0x107fff, MWA16_RAM },	/* main RAM */
+	{ 0x14c000, 0x14cfff, paletteram16_xBBBBBGGGGGRRRRR_word_w, &paletteram16 },
+	{ 0x14e700, 0x14e71f, K053251_lsb_w },
+	{ 0x180000, 0x183fff, K053245_scattered_word_w, &spriteram16 },
+	{ 0x184000, 0x18ffff, MWA16_RAM },
+	{ 0x1c0300, 0x1c0301, ssriders_1c0300_w },
+	{ 0x1c0400, 0x1c0401, MWA16_NOP },
+	{ 0x5a0000, 0x5a001f, K053244_word_noA1_w },
+	{ 0x600000, 0x603fff, K052109_word_w },
+	{ 0x604020, 0x60402f, MWA16_NOP },	/* written every frame */
+	{ 0x604200, 0x604201, MWA16_NOP },	/* watchdog */
+	{ 0x6119e2, 0x6119e3, MWA16_NOP },	/* written a lot in some test menus (PC=18204) */
+	{ 0xc00200, 0xc00201, ssriders_eeprom_w },	/* EEPROM and gfx control */
+	{ 0xc00600, 0xc00601, OKIM6295_data_0_lsb_w },
+MEMORY_END
 
 static MEMORY_READ16_START( thndrx2_readmem )
 	{ 0x000000, 0x03ffff, MRA16_ROM },
@@ -2048,6 +2272,40 @@ INPUT_PORTS_START( ssrid4ps )
 	KONAMI_PLAYERS_INPUT_LSB( IPF_PLAYER4, IPT_UNKNOWN, IPT_START4 )
 INPUT_PORTS_END
 
+/* Version for the bootleg, which has the service switch a little different */
+INPUT_PORTS_START( ssridbl )
+	PORT_START	/* IN0 */
+	KONAMI_PLAYERS_INPUT_LSB( IPF_PLAYER1, IPT_UNKNOWN, IPT_START1 )
+
+	PORT_START	/* IN1 */
+	KONAMI_PLAYERS_INPUT_LSB( IPF_PLAYER2, IPT_UNKNOWN, IPT_START2 )
+
+	PORT_START	/* COIN */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN4 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE2 )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE3 )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE4 )
+
+	PORT_START	/* EEPROM and service */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* EEPROM data */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SPECIAL )	/* EEPROM status? - always 1 */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BITX(0x08, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x60, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* unused? */
+	PORT_BITX(0x80, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+
+	PORT_START	/* IN2 */
+	KONAMI_PLAYERS_INPUT_LSB( IPF_PLAYER3, IPT_UNKNOWN, IPT_START3 )
+
+	PORT_START	/* IN3 */
+	KONAMI_PLAYERS_INPUT_LSB( IPF_PLAYER4, IPT_UNKNOWN, IPT_START4 )
+INPUT_PORTS_END
+
 INPUT_PORTS_START( qgakumon )
 	PORT_START	/* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )	// Joystick control : Left
@@ -2231,6 +2489,13 @@ static struct K053260_interface glfgreat_k053260_interface =
 //	{ sound_nmi_callback },
 };
 
+static struct OKIM6295interface okim6295_interface =
+{
+	1,			/* 1 chip */
+	{ 8000 },
+	{ REGION_SOUND1 },
+	{ 100 }
+};
 
 static MACHINE_DRIVER_START( cuebrckj )
 
@@ -2240,10 +2505,10 @@ static MACHINE_DRIVER_START( cuebrckj )
 	MDRV_CPU_VBLANK_INT(cbj_interrupt,10)
 
 	MDRV_FRAMES_PER_SECOND(60)
-	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)
 
 	/* video hardware */
-	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS)
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS | VIDEO_UPDATE_AFTER_VBLANK)
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(14*8, (64-14)*8-1, 2*8, 30*8-1 )
 	MDRV_PALETTE_LENGTH(1024)
@@ -2268,10 +2533,10 @@ static MACHINE_DRIVER_START( mia )
 	MDRV_CPU_MEMORY(mia_s_readmem,mia_s_writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
-	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)
 
 	/* video hardware */
-	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS)
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS | VIDEO_UPDATE_AFTER_VBLANK)
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(14*8, (64-14)*8-1, 2*8, 30*8-1 )
 	MDRV_PALETTE_LENGTH(1024)
@@ -2297,10 +2562,10 @@ static MACHINE_DRIVER_START( tmnt )
 	MDRV_CPU_MEMORY(tmnt_s_readmem,tmnt_s_writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
-	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)
 
 	/* video hardware */
-	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS)
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS | VIDEO_UPDATE_AFTER_VBLANK)
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(13*8, (64-13)*8-1, 2*8, 30*8-1 )
 	MDRV_PALETTE_LENGTH(1024)
@@ -2330,10 +2595,10 @@ static MACHINE_DRIVER_START( punkshot )
 	MDRV_CPU_MEMORY(punkshot_s_readmem,punkshot_s_writemem)
 								/* NMIs are generated by the 053260 */
 	MDRV_FRAMES_PER_SECOND(60)
-	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)
 
 	/* video hardware */
-	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS)
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS | VIDEO_UPDATE_AFTER_VBLANK)
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(14*8, (64-14)*8-1, 2*8, 30*8-1 )
 	MDRV_PALETTE_LENGTH(2048)
@@ -2359,10 +2624,10 @@ static MACHINE_DRIVER_START( lgtnfght )
 	MDRV_CPU_MEMORY(lgtnfght_s_readmem,lgtnfght_s_writemem)
 
 	MDRV_FRAMES_PER_SECOND(60)
-	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)
 
 	/* video hardware */
-	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS)
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS | VIDEO_UPDATE_AFTER_VBLANK)
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(14*8, (64-14)*8-1, 2*8, 30*8-1 )
 	MDRV_PALETTE_LENGTH(2048)
@@ -2389,18 +2654,19 @@ static MACHINE_DRIVER_START( detatwin )
 	MDRV_CPU_MEMORY(ssriders_s_readmem,ssriders_s_writemem)
 								/* NMIs are generated by the 053260 */
 	MDRV_FRAMES_PER_SECOND(60)
-	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)
 
 	MDRV_NVRAM_HANDLER(eeprom)
 
 	/* video hardware */
-	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS)
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS | VIDEO_UPDATE_AFTER_VBLANK)
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(14*8, (64-14)*8-1, 2*8, 30*8-1 )
 	MDRV_PALETTE_LENGTH(2048)
 
 	MDRV_VIDEO_START(detatwin)
 	MDRV_VIDEO_UPDATE(lgtnfght)
+	MDRV_VIDEO_EOF( detatwin ) //*
 
 	/* sound hardware */
 	MDRV_SOUND_ATTRIBUTES(SOUND_SUPPORTS_STEREO)
@@ -2440,10 +2706,10 @@ static MACHINE_DRIVER_START( glfgreat )
 	MDRV_CPU_MEMORY(glfgreat_s_readmem,glfgreat_s_writemem)
 								/* NMIs are generated by the 053260 */
 	MDRV_FRAMES_PER_SECOND(60)
-	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)
 
 	/* video hardware */
-	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS)
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS | VIDEO_UPDATE_AFTER_VBLANK)
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(14*8, (64-14)*8-1, 2*8, 30*8-1 )
 	MDRV_GFXDECODE(glfgreat_gfxdecodeinfo)
@@ -2485,12 +2751,12 @@ static MACHINE_DRIVER_START( prmrsocr )
 	MDRV_CPU_MEMORY(prmrsocr_s_readmem,prmrsocr_s_writemem)
 								/* NMIs are generated by the 054539 */
 	MDRV_FRAMES_PER_SECOND(60)
-	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)
 
 	MDRV_NVRAM_HANDLER(thndrx2)
 
 	/* video hardware */
-	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS)
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS | VIDEO_UPDATE_AFTER_VBLANK)
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(14*8, (64-14)*8-1, 2*8, 30*8-1 )
 	MDRV_GFXDECODE(glfgreat_gfxdecodeinfo)
@@ -2505,7 +2771,7 @@ static MACHINE_DRIVER_START( prmrsocr )
 MACHINE_DRIVER_END
 
 
-static MACHINE_DRIVER_START( tmnt2 )
+static MACHINE_DRIVER_START( tmnt2 ) //*
 
 	/* basic machine hardware */
 	MDRV_CPU_ADD(M68000, 16000000)	/* 16 MHz */
@@ -2521,14 +2787,14 @@ static MACHINE_DRIVER_START( tmnt2 )
 	MDRV_CPU_MEMORY(ssriders_s_readmem,ssriders_s_writemem)
 								/* NMIs are generated by the 053260 */
 	MDRV_FRAMES_PER_SECOND(60)
-	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)
 
 	MDRV_NVRAM_HANDLER(eeprom)
 
 	/* video hardware */
-	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS)
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS | VIDEO_UPDATE_AFTER_VBLANK)
 	MDRV_SCREEN_SIZE(64*8, 32*8)
-	MDRV_VISIBLE_AREA(13*8, (64-13)*8-1, 2*8, 30*8-1 )
+	MDRV_VISIBLE_AREA(14*8, (64-14)*8-1, 2*8, 30*8-1 )
 	MDRV_PALETTE_LENGTH(2048)
 
 	MDRV_VIDEO_START(lgtnfght)
@@ -2558,7 +2824,7 @@ static MACHINE_DRIVER_START( ssriders )
 	MDRV_NVRAM_HANDLER(eeprom)
 
 	/* video hardware */
-	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS)
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS | VIDEO_UPDATE_AFTER_VBLANK)
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(14*8, (64-14)*8-1, 2*8, 30*8-1 )
 	MDRV_PALETTE_LENGTH(2048)
@@ -2573,6 +2839,32 @@ static MACHINE_DRIVER_START( ssriders )
 MACHINE_DRIVER_END
 
 
+static MACHINE_DRIVER_START( ssridersbl )
+
+	/* basic machine hardware */
+	MDRV_CPU_ADD(M68000, 16000000)	/* 16 MHz */
+	MDRV_CPU_MEMORY(ssridersbl_readmem,ssridersbl_writemem)
+	MDRV_CPU_VBLANK_INT(irq4_line_hold,1)
+
+	MDRV_FRAMES_PER_SECOND(60)
+	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)
+
+	MDRV_NVRAM_HANDLER(eeprom)
+
+	/* video hardware */
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS | VIDEO_UPDATE_AFTER_VBLANK)
+	MDRV_SCREEN_SIZE(64*8, 32*8)
+	MDRV_VISIBLE_AREA(14*8, (64-14)*8-1, 2*8, 30*8-1 )
+	MDRV_PALETTE_LENGTH(2048)
+
+	MDRV_VIDEO_START(sunsetbl)
+	MDRV_VIDEO_UPDATE(tmnt2)
+
+	/* sound hardware */
+	MDRV_SOUND_ATTRIBUTES(SOUND_SUPPORTS_STEREO)
+	MDRV_SOUND_ADD(OKIM6295, okim6295_interface)
+MACHINE_DRIVER_END
+
 static MACHINE_DRIVER_START( thndrx2 )
 
 	/* basic machine hardware */
@@ -2585,12 +2877,12 @@ static MACHINE_DRIVER_START( thndrx2 )
 	MDRV_CPU_MEMORY(thndrx2_s_readmem,thndrx2_s_writemem)
 								/* NMIs are generated by the 053260 */
 	MDRV_FRAMES_PER_SECOND(60)
-	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)
 
 	MDRV_NVRAM_HANDLER(thndrx2)
 
 	/* video hardware */
-	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS)
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_HAS_SHADOWS | VIDEO_HAS_HIGHLIGHTS | VIDEO_UPDATE_AFTER_VBLANK)
 	MDRV_SCREEN_SIZE(64*8, 32*8)
 	MDRV_VISIBLE_AREA(14*8, (64-14)*8-1, 2*8, 30*8-1 )
 	MDRV_PALETTE_LENGTH(2048)
@@ -2614,10 +2906,6 @@ MACHINE_DRIVER_END
 
 ROM_START( cuebrckj )
 	ROM_REGION( 0x40000, REGION_CPU1, 0 )	/* 2*128k and 2*64k for 68000 code */
-	ROM_LOAD16_BYTE( "903d25.g12",   0x00000, 0x10000, CRC(8d575663) SHA1(0e308e04936efa80351bf808ac304d3fcc82f19a) )
-	ROM_LOAD16_BYTE( "903d24.f12",   0x00001, 0x10000, CRC(2973625d) SHA1(e2496704390930761204624d4bf6b0b68d3133ab) )
-
-	ROM_REGION( 0x40000, REGION_USER1, 0 )	/* 2*128k and 2*64k for 68000 code */
 	ROM_LOAD16_BYTE( "903d25.g12",   0x00000, 0x10000, CRC(8d575663) SHA1(0e308e04936efa80351bf808ac304d3fcc82f19a) )
 	ROM_LOAD16_BYTE( "903d24.f12",   0x00001, 0x10000, CRC(2973625d) SHA1(e2496704390930761204624d4bf6b0b68d3133ab) )
 
@@ -3402,6 +3690,27 @@ ROM_START( ssrdrjbd )
 	ROM_LOAD( "sr_1d.rom",    0x0000, 0x100000, CRC(59810df9) SHA1(a0affc6330bdbfab1447dc0cf13c20ff708c2c71) )
 ROM_END
 
+ROM_START( sunsetbl )
+	ROM_REGION( 0x100000, REGION_CPU1, 0 )
+	ROM_LOAD16_WORD_SWAP( "sunsetb.03",   0x000000, 0x080000, CRC(37ffe90b) SHA1(3f8542243f2a0c0718056672a906b70af5894a86) )
+	ROM_LOAD16_WORD_SWAP( "sunsetb.04",   0x080000, 0x080000, CRC(8ff647b7) SHA1(75144ce928fc4e7d24d9dd50a93e11ea41903bc4) )
+
+	ROM_REGION( 0x100000, REGION_GFX1, 0 )	/* graphics (addressable by the main CPU) */
+	// should be sunsetb.09 and .10 from the bootleg, but .09 is a bad dump and .10 matches the parent's sr_12k, so we just use the parent's roms
+	ROM_LOAD( "sr_16k.rom",   0x000000, 0x080000, CRC(e2bdc619) SHA1(04449deb267b0beacfa33640b593eb16194aa0d9) )	/* tiles */
+	ROM_LOAD( "sr_12k.rom",   0x080000, 0x080000, CRC(2d8ca8b0) SHA1(7c882f79c2402cf75979c681071007d76e4db9ae) )
+
+	ROM_REGION( 0x200000, REGION_GFX2, 0 )	/* graphics (addressable by the main CPU) */
+	ROM_LOAD( "sunsetb.05",   0x000000, 0x080000, CRC(8a0ff31a) SHA1(fee21d787d1cddd04713e10b1622f3fa231ebc4e) )
+	ROM_LOAD( "sunsetb.06",   0x080000, 0x080000, CRC(fdf2c887) SHA1(a165c7e6495d870324f59262ad4175a039e199a5) )
+	ROM_LOAD( "sunsetb.07",   0x100000, 0x080000, CRC(a545b1ed) SHA1(249f1f1a992f05c0dc23bd52785a355a402a0d10) )
+	ROM_LOAD( "sunsetb.08",   0x180000, 0x080000, CRC(f867cd38) SHA1(633703474010364dc47176965daa873d548da074) )
+
+	ROM_REGION( 0x100000, REGION_SOUND1, 0 )	/* samples */
+	ROM_LOAD( "sunsetb.01",   0x000000, 0x080000, CRC(1a8b5ca2) SHA1(4101686c7bf3243273a52fca046b252fc3c78721) )
+	ROM_LOAD( "sunsetb.02",   0x080000, 0x080000, CRC(5d485523) SHA1(478119cb6273d870ca04a66e9b964ca0424f6fbd) )
+ROM_END
+
 ROM_START( thndrx2 )
 	ROM_REGION( 0x40000, REGION_CPU1, 0 )
 	ROM_LOAD16_BYTE( "073-k02.11c", 0x000000, 0x20000, CRC(0c8b2d3f) SHA1(44ca5d96d8f85ae2760df4e1c339916e0a76143f) )
@@ -3722,7 +4031,7 @@ static DRIVER_INIT( cuebrckj )
 	shuffle(memory_region(REGION_GFX2),memory_region_length(REGION_GFX2));
 }
 
-GAMEX( 1989, cuebrckj, cuebrick, cuebrckj, mia,      cuebrckj, ROT0,  "Konami", "Cue Brick (Japan version D)", GAME_IMPERFECT_GRAPHICS )
+GAME( 1989, cuebrckj, cuebrick, cuebrckj, mia,      cuebrckj, ROT0,  "Konami", "Cue Brick (Japan version D)" )
 
 GAME( 1989, mia,      0,        mia,      mia,      mia,      ROT0,  "Konami", "Missing in Action (version T)" )
 GAME( 1989, mia2,     mia,      mia,      mia,      mia,      ROT0,  "Konami", "Missing in Action (version S)" )
@@ -3762,6 +4071,7 @@ GAMEX(1991, ssrdruac, ssriders, ssriders, ssridr4p, gfx,      ROT0,  "Konami", "
 GAMEX(1991, ssrdrubc, ssriders, ssriders, ssriders, gfx,      ROT0,  "Konami", "Sunset Riders (US 2 Players ver. UBC)", GAME_IMPERFECT_GRAPHICS )
 GAMEX(1991, ssrdrabd, ssriders, ssriders, ssriders, gfx,      ROT0,  "Konami", "Sunset Riders (Asia 2 Players ver. ABD)", GAME_IMPERFECT_GRAPHICS )
 GAMEX(1991, ssrdrjbd, ssriders, ssriders, ssriders, gfx,      ROT0,  "Konami", "Sunset Riders (Japan 2 Players ver. JBD)", GAME_IMPERFECT_GRAPHICS )
+GAMEX(1991, sunsetbl, ssriders, ssridersbl, ssridbl, gfx,     ROT0,  "Konami", "Sunset Riders (bootleg 4 Players ver. ADD)", GAME_NOT_WORKING | GAME_IMPERFECT_GRAPHICS )
 
 GAME( 1991, thndrx2,  0,        thndrx2,  thndrx2,  gfx,      ROT0,  "Konami", "Thunder Cross II (Japan)" )
 GAME( 1991, thndrx2a, thndrx2,  thndrx2,  thndrx2,  gfx,      ROT0,  "Konami", "Thunder Cross II (Asia)" )

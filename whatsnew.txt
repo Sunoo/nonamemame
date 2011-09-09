@@ -1,3 +1,6 @@
+0.72u1.04:
+ - Updated to MAME 0.072u1 source code
+
 0.71u2.04:
  - Added Lucky Today from BraiNKilleR's Extra Games Compile Mame Pack
  - Added Andromeda (rename to andromeh.zip)
@@ -5,7 +8,7 @@
  - pacman.c is missing "zola" and "fast" games
 
 0.71u2.03:
- - Updated to MAME 0.71u2.3 source code
+ - Updated to MAME 0.71u2 source code
  - Removed No Nag Patch due to MAME's Derivative Works clause
 
 0.71.03:

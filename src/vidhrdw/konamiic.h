@@ -122,6 +122,7 @@ READ16_HANDLER( K053244_word_r );
 WRITE16_HANDLER( K053244_word_w );
 void K053244_bankselect(int bank);	/* used by TMNT2, Asterix and Premier Soccer for ROM testing */
 void K053245_sprites_draw(struct mame_bitmap *bitmap,const struct rectangle *cliprect);
+void K053245_clear_buffer(void);
 
 #define K055673_LAYOUT_GX  0
 #define K055673_LAYOUT_RNG 1
@@ -157,7 +158,7 @@ void K053247_sprites_draw(struct mame_bitmap *bitmap,const struct rectangle *cli
 int K053247_read_register(int regnum);
 void K053247_set_SpriteOffset(int offsx, int offsy);
 void K053247_wraparound_enable(int status);
-void K053247_set_z_rejection(int zcode);
+void K05324x_set_z_rejection(int zcode); // common to K053245/6/7
 void K053247_export_config(data16_t **ram, struct GfxElement **gfx, void **callback, int *dx, int *dy);
 
 READ_HANDLER( K053246_r );
@@ -275,6 +276,7 @@ WRITE16_HANDLER( K056832_b_word_w );
 void K056832_mark_plane_dirty(int num);
 void K056832_MarkAllTilemapsDirty(void);
 void K056832_tilemap_draw(struct mame_bitmap *bitmap, const struct rectangle *cliprect, int num, int flags, UINT32 priority);
+void K056832_tilemap_draw_dj(struct mame_bitmap *bitmap, const struct rectangle *cliprect, int layer, int flags, UINT32 priority);
 void K056832_set_LayerAssociation(int status);
 int  K056832_get_LayerAssociation(void);
 void K056832_set_LayerOffset(int layer, int offsx, int offsy);
@@ -296,6 +298,7 @@ WRITE32_HANDLER( K056832_b_long_w );
 #define K056832_BPP_5	1
 #define K056832_BPP_6	2
 #define K056832_BPP_8	3
+#define K056832_BPP_4dj	4
 
 void K055555_vh_start(void); // "PCU2"
 void K055555_write_reg(data8_t regnum, data8_t regdat);
@@ -437,3 +440,5 @@ READ16_HANDLER( K054338_word_r );		// CLTC
 READ32_HANDLER( K056832_long_r );		// VACSET
 READ32_HANDLER( K053247_reg_long_r );	// OBJSET2
 READ32_HANDLER( K055555_long_r );		// PCU2
+
+READ16_HANDLER( K053244_reg_word_r );	// OBJSET0

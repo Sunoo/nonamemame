@@ -1,0 +1,218 @@
+History
+-------
+
+0.62.1 - November 20th, 2002
+
+- Everything from MAME 0.62 and previous PatchMAME releases
+  (older/removed games, M*A*S*H*'s fixes - various .dat support, etc.).
+  See the list at the end of this file for latest supported romsets
+- Super Derby driver from Haze.
+- Latest inputs/dip switches fixes from Stephh (lasso.c)
+- Latest fixes from Shiriru to CPS-2, Cave, and Seta drivers. 
+- Support for phosphorescent decay in vector games (Windows build only)
+- Misfit hacks have been removed, no time to maintain and choose them...
+
+--
+
+0.61.1 - August 8th, 2002
+
+- Everything from previous releases (older/removed games, MASH's 
+  fixes, etc.)
+- Fixed an artwork problem.
+- Neo-Geo: Bang Bead (original encrypted ROMs) and Neo No Panepon 
+  (beta). 2 KOF2001 sets are now supported (original & bootleg)
+- I have now included some of PacMAME or MisfitMAME hacked sets.
+  If you're using these versions, please tell me what are the 
+  interesting hacks, which I could include in the next release. No, I 
+  have no plans to include ALL of them. Some are useless or crappy.
+
+--
+
+0.60.5 - May 15th, 2002
+
+NOTE:
+Name of the executable is now (by default) "pmame.exe" and the .ini is "pmame.ini".
+
+- Updated Taito F3 drivers again
+- Changed cpu0 default overclock value in some Neo-Geo games, for them being smoother:
+  Set aof3, gowcaizr, mslug, mslug2, mslugx, mslug3,zedblade to 200%; s1945p to 300%.
+- Updated KOF 2001 m1 and p1 CRC to match latest dumps.
+- Added clones:
+	
+  * elim4p  : Eliminator (4 Players, Prototype)
+  
+  * esprade : ESP Ra.De. (World Ver 1998 4/22)
+  * espradej: ESP Ra.De. (Japan Ver 1998 4/21)
+  
+  * gingania: Ginga NinkyouDen (set 2)     (MASH)
+  * bking   : Birdie King (Japan version)  (MASH)
+  * froggrs : Frogger (Scramble hardware)  (MASH)
+
+- Fixed Exterminator driver with proper rotary controls
+  (Derrick Renaud)
+
+- Stephh's latest fixes:
+  Input and Dip Switches in
+  * daitorid - dharma - karatour
+  * lastfero - lastfort - poitto
+  * pururun - puzzli - skyalert
+  * toride2g
+  * mspacpls - pacplus
+  * vanvan - vanvank
+
+  "Speedup" handling in
+  * mspacpls - pacplus
+
+TIPS & TRICKS:
+When playing game #9 (Namco SIL) with the "multipac" driver:
+- Press <1>: PacMan is invincible
+- Press <2>: PacMan is in a hurry ;-)
+
+--
+
+0.60.4 - May 10th, 2002
+
+- Support for the new V2 dump of Savage Reign (Neo-Geo)
+- Added 2 "Phoenix" clones: 'falcon' et'pleiads2'
+- Added a hacked version of Astro Blaster (more fuel & laser time)
+- Added "Super ABC Pacman" and "Multi-Pac" (24-in-1) hack by Clay Cowgill
+  (5 sets: multipac,multi14,multi13,multi11,multi10)
+  (from MisfitMAME and PacMAME)
+- Updated Taito F3 driver: zooming fixes & alpha blending !
+  (thanks Norix)
+
+--
+
+0.60.3 - May 8th, 2002
+
+Some fixes are from X-Mame sources:
+
+- Updated the SNK driver to fix sound for games that couldn't use Y8950 together with YM326/YM3812
+- Fixed the leg of the tiger in namcos86
+- Fixed a stereo output bug in sound/2612intf.c; fixed a sample looptiming bug in sound/k007232.c.
+- Fixed the Mortal Kombat 3 level select screen
+- Updated the V60 core to handle unaligned memory accesses, which should fix some SSV games
+- Updated 8080bw to fix the dip switches for Ozma Wars and its clones
+- Modified sound/ay8910.c to fix sound in some M62 games
+- Updated drivers/wecleman.c to make the car in wecleman controllable.
+- Added Stephh's latest fixes: lastmisn,lastmsnj,lastmsno: DIP switches.
+  alpine, alpinea, elevatob, elevator,jungleh, junglek, junglhbr, 
+  junglkj2,piratpet,tinstar, waterski: Inputs and DIP switches.
+  funkyjet, sotsugyo: Dip Switches, improved protection check to 
+  support "Coinage" Dip Switches, fixed bad GFX in 'sotsugyo'
+
+--
+0.60.2 - May 6th, 2002
+
+- Support for Pong and ZuPaPa! (I forgot to include them in 0.60.1, 
+  sorry)
+- Support for a new 'dump' of KOF 2001. This fixes console mode and 
+  missing sounds, ie.
+- Added a hacked version of 'Puzzle Bobble (Neo-Geo) ('pbobbldx')
+- Added a (Japanese?) hacked version of 'Knights of the 
+  Round'( 'knightsh')
+- Added a new revision of 'Oriental Legends' (Rev. 126)
+- Artwork support for 'Space Invaders' and 'Space Invaders Deluxe' 
+  (MASH)
+- Fixed 'shaolins' and 'kicker' from crashing. Thanks [Haze]
+- Some more correct entries for 'gamelist055ora' (from Mametesters 
+  boards)
+
+--
+0.60.1 - May 3th, 2002
+
+- Up-to-date with the MAME 0.60 version
+- All added games from 0.59.4 are here. Added support for 'knightb', a Kiki KaiKai clone.
+- Stephh's fixes: acrobatm, asterix, astrxeaa, astrxeac, 
+  minigolf,minigol2, captaven, captavne, captavnj, captavnu, moo, 
+  mooua, vanvan, vanvank, and some BillK's patches.
+- MASH's fixes for System16 games and various stuff
+- Suppport for a new redump of 'gtmr2" (Mille Miglia 2)
+- Fixes for 'gamelist055or' from the Mametesters boards.
+
+Supported romsets (Updated to 0.62.1)
+-----------------
+
+Various
+-------
+Pong						pong
+Monaco GP					monaco
+Street Fighter Alpha (Publicity CPS Changer)	sfach
+Street Fighter Zero  (Japan CPS Changer)	sfzch
+
+
+Gambling Games
+--------------
+GoldStar					goldstar
+GoldStar (Blue version)				goldtsbl
+Champion Skill Ability				csk227it
+Champion Skill Ability (alt)			csk234it
+Pontoon						pontoon
+
+Pac-Man hacks
+-------------
+MultiPac 1.5 by Clay Cowgill			multipac
+MultiPac 1.4 by Clay Cowgill			multi14
+MultiPac 1.3 by Clay Cowgill			multi13
+MultiPac 1.1 by Clay Cowgill			multi11
+MultiPac 1.0 by Clay Cowgill			multi10
+Pac-Man Super ANC (c) Two-Bit score		superabc
+
+Clones
+------
+
+Arkanoid (old)					arknoiuo
+Captain Avenger (old)				captavno
+Eliminator ( 4 players, prototype)		elim4p
+Lunar Lander (Test board - not a game)		llandert
+Frogger (Scramble hardware) 			froggrs
+Ginga NinkyouDen (set 2) 			gingania
+Main Event (The) (2 players)			mainev2p
+Maniac Square (prototype ?)			maniacsq
+Magic Sword (old version)			mswordr1
+Falcon (Phoenix clone)				falcon
+Pleiads (bootleg)				pleiads2
+Police Trainer (old set)			policeto
+Xevious (alternate set)				xeviousb
+Knight Boy (KiKiKaiKai clone)			knightb
+Astro Blaster (hack) - Clay Cowgill		astrobh
+Cadillacs & Dinosaurs (Hack)			dinoh
+Knights Of The Round (hack)			knightsh
+
+Neo-Geo
+-------
+Digger Man					diggerma
+Neo Non Panepon (beta)				neonopon
+Neo-Pong v1.1					neopong
+Puzzle Bobble (level hack)			pbobbldx
+
+Not officially included
+-----------------------
+ZuPaPa !					zupapa
+King of Fighters 2001 (The) 			kof2001
+Metal Slug 4					mslug4
+
+Neo-Geo (decrypted C)
+---------------------
+Strikers 1945 Plus				s1945pd
+Musashi Ganryuuki				ganryud
+Prehistoric Isle 2				preisl2d
+King of Fighters 2000 (The)			kof2knd
+ZuPaPa!						zupapad
+Nightmare in the Dark				nitdd
+Sengoku 3					sengok3d
+Metal Slug 3					mslug3nd
+King of Fighters 2001 (The) (bootleg)		kof2001b
+Metal Slug 4					mslug4d
+
+
+
+--
+As my sources are completely unofficial, please don't hassle others than me for compiling them !
+If you have (found) a fix/patch or whatever which could be included in the next version, please send me a mail...
+
+________________________
+Mevi
+patchmame@emu-france.com
+
+

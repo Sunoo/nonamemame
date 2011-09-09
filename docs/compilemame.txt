@@ -1,0 +1,47 @@
+BraiNKilleR (Http://kickme.to/brainkiller)
+Extra Games Compile Mame Pack for Mame 0.71
+
+-Introduction
+
+First of all I amd not a C programmer (not even close) but 
+when M.A.S.H. stopped releasing his compile Mame pack
+i decided to continue his work for my self fixing some 
+stuff here and there at first becouse i didn't want to 
+loose these *removed* from the official Mame Gems.
+
+-Contents
+
+This pack includes drivers for the Following games:
+
+Pong
+Monaco GP /monaco
+Lucky Today /luctoday
+Golden Star /goldstar,goldstbl
+Champion Skill /csk227it,csk234it
+Super Derby /sderby
+Pontoon /pontoon
+DiggerMan /diggerma
+NeoPong /neopong
+Neo no Panepon /neonopon
+
+If new Drivers are available i will add them to the pack.
+
+-Installation
+
+Just use install.bat to copy the files at your Mame source Folder,
+next change the source files (the files with the leading - ) where 
+needeed and Compile as usual.
+
+-Credits
+
+The best emulator available today and His dev team MAME Http://www.mame.net
+MASH for his excellent work and his great Mameinfo.dat http://www.mameworld.net/mameinfo
+Mametesters at http://www.mametesters.com
+and to everyone who contributes to this great project.
+-----------------------------------------------------------------------------------------
+This pack is targeted to experience mame users who know how to compile Mame
+If you want to learn how to You can find nice and easy instructions at
+http://www.mameworld.net/compile32 or http://www.mame.net/compilewin.html
+-----------------------------------------------------------------------------------------
+BraiNKilleR 2003
+

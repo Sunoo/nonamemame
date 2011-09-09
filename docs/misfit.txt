@@ -1,0 +1,531 @@
+**12/01/02**
+Wip Build...Finally got everything moved to the new core. Newest twisty hacks addedas always.
+Bunch of new additions since the last officail release. Thanks to everone who helped bug the test builds.
+This build has the Street Fighter 2 hacks enabled NOTE: these are not working!! maybe some one will be inspired to work on the cps1 driver to help get these working. A Galaxian multi-game is also enabled though not completed..This is being worked on by Peter Storey. Other addition include Super Derby,Piranha2 Revenge!(sequel to Pet Shop Freakout),a bunch of Xevious 2002 Hacks and a few that I forgot. Thanks again to everyone that helped out on this. 
+New Game Total 407.
+New additions since last official release:
+
+andromed  "Andromeda"
+astropd2  "Astropede II (Centipede Hack)"
+battlesh  "Battles 2002"
+dinoh     "Cadillacs Kyouryuu-Shinseiki (Japan)"
+fourplay  "Four Play"
+froggrs   "Frogger (Scramble hardware)"
+galagost  "Galaga Ghost"
+knightsh  "Knights of the Round (hack)"
+kfjohnny  "Kung-Fu Johnny"
+mrpac     "Mr. Pac!"
+neonopnd  "Neo No Panepon"
+piranha2  "Piranha 2 Revenge!"
+hwofa     "Sangokushi II (Asia)(Hack)"
+kouryu    "Street Fighter 2 Kouryuv2"
+sf2m1     "Street Fighter 2-M1"
+sf2m2     "Street Fighter 2-M2"
+sf2m3     "Street Fighter 2-M3"
+sf2m4     "Street Fighter 2-M4"
+sf2m5     "Street Fighter 2-M5"
+sf2m6     "Street Fighter 2-M6"
+sf2m7     "Street Fighter 2-M7"
+sderby    "Super Derby"
+sxvioush  "Super Xevious 2002"
+xviousah  "Xevious 2002 (Atari set 1)"
+xevioush  "Xevious 2002 (Namco)"
+
+June 24, 2002
+
+Added another DaveC hack with my last few free moments.
+"Bump n Jump Reverse Mod" Instead of a car jumping water, your a boat jumping land, and the other cars are now other boats. New game total 347.
+
+
+June 22, 2002
+
+Moon Ranger added at the request of BombJack of Mame DK; it was taken out in 37b12....Who am I to say no :)
+
+June 18, 2002
+
+Tapper (Simpsons Hack) Added
+
+** 03/08/02**
+Better Late Then Never
+21 games added new games total 343
+Thanks to all who submitted drivers
+Thanks again to Peter Storey for the fully working 4in1 driver
+All 4 builds now working
+
+** 01/25/02 **
+5 games added new game total 322
+Lucky Today added thanks to Peter Storey
+Misfit32 build is also available sorry I can't get the misfitfull32 working at the moment.
+
+** 01/04/02** Happy New Year!!
+9 games added and moved onto the .57 core.new game total 317
+Thanks again to Rodimus for proving that a can't proof read my own work :).
+Again watch using roms managers they like to destroy your sets
+
+
+** 12/16/01 ** added a few that were laying around
+
+** 11/29/01 **..and "JUSTICE" for all....
+NOTES..."BLUE JUSTICE" HACKS NEED TO BE RENAMED TO CONFORM TO THE 8.3 FILE NAME SYSTEM.
+use the games list at the bottom of the page for naming.
+
+
+
+Misfit mame is an unofficial version of mame (based on mame 0.62) that plays 404 games not included in mame.It does not play anyother games but the ones listed at the bottom of the page.
+
+Do not bug the mame team about this build! Question should go to:
+ tinkerz@hotmail.com
+
+Thanks to:
+
+Rodimus---Sname files went to good use(thanks for your help with this)
+MASH---pong and monaco patches
+Tourniquet---Kingdom grand prix (sorry kept neill corlett's rom patched)
+Jeff Coleburn---mame-ex2
+XzeriX---multi&ABC pacman
+PacMame---pacman hacks
+
+Note:
+
+This project was attempted without any previous programing experience. It may not be pretty but it works.the only way to learn is to roll your own :). All older driver files(updated by trial and error).
+
+Enjoy,
+
+Tinker
+
+
+
+Game Listing Report:
+--------------------
+
+ROM       Clone of  Name
+--------  --------  ---------------------------------------------------
+4in1                4 Fun in 1
+abortman            Abortman
+andromed  galaxian  Andromeda
+akgcdx    arkanoid  Arkanoid Deluxe (Game Corporation)
+aktaytdx  arkanoid  Arkanoid Deluxe (Japan, Tayto)
+astrob2h  astrob    Astro Blaster (ver 2 Hack)
+astroped  centiped  Astropede (Centipede Hack)
+astropd2  centiped  Astropede II (Centipede Hack)
+baby2     puckman   Baby Pacman 2 (Alt)
+baby3     puckman   Baby Pacman 3 (Alt)
+battlesh  xevious   Battles 2002
+akblc2dx  arkanoid  Block Deluxe (Game Corporation)
+brakman   puckman   Brakman
+bbhackv1            Bubble Bobble (Level Hack)
+bb2bmh              Bubble Bobble (Memories Hack)
+bucaneer  puckman   Bucaneer
+bnjr      brubber   Bump 'n' Jump Reverse Mod
+stictime  btime     Burger Time (Mr Sticky)
+vecbtime  btime     Burgertime (Vector sim)
+dinoh     dino      Cadillacs Kyouryuu-Shinseiki (Japan)
+caterpil  puckman   Caterpillar
+cemescry  centiped  Cemescary (Centipede Hack)
+cenmario  mario     Censored Mario Bros.
+centidux  centiped  Centipede Dux (Centipede Hack)
+csk234it  csk227it  Champion Skill (Ability, Poker & Symbols)
+csk227it            Champion Skill (with Ability)
+comdelux  commando  Commando Deluxe
+comdlux1  commando  Commando Deluxe Again
+cookiem   mspacman  Cookie-Mon!
+crackhea            Crackhead
+crashh    mspacman  Crash
+crazypac  puckman   Crazy Pac
+pacstrm   puckman   Desert Storm Pac-Man
+diggermn            Digger Man
+dizzy     puckman   Dizzy Ghost - A Reversal of Roles
+kong2600  dkong     Donkey Kong (2600 graphics)
+eltonpac  puckman   Elton Pac
+europac   puckman   Euro Pac
+fourplay            Four Play
+froggrs   frogger   Frogger (Scramble hardware)
+galaga99  galaga    Galaga '99
+galagost  galaga    Galaga Ghost
+galagax   1942      Galaga X (1942 hack)
+galgaxin  galaga    Galagalaxian
+galaped   galaga    Galapede (Fast Shoot)
+buglaxn   galaxian  Galaxian (Bug sprites)
+galaxkyo  galaxian  Galaxian (Kyoko)
+galinvad  galaxian  Galaxian (Space Invaders sprites)
+vectrgal  galaxian  Galaxian (Vector Sim)
+gaunt2s             Gauntlet II Speed Hack
+gaylaxn   galaxian  Gaylaxian
+geminit   gemini    Gemini Wing Hack
+gmunch    puckman   Ghost Muncher (bootleg on Galaxian hardware)
+gmunch2   puckman   Ghost Muncher Set 2 (bootleg on Galaxian hardware)
+goldstar            Golden Star
+goldstbl  goldstar  Golden Star (Blue version)
+handiman            Handi-Man in Cyberworld
+chthang   puckman   Hangly Man (Cheat)
+fasthang  puckman   Hangly Man (Fast)
+hm1000    puckman   Hangly Man 1000
+hm2000    puckman   Hangly Man 2000
+hmba5000  puckman   Hangly Man Babies 5000
+hmba7000  puckman   Hangly Man Babies 7000
+hmbabymz  puckman   Hangly Man BabiesMaze
+hmbluep   puckman   Hangly Man Blue Plus
+hmgrenp   puckman   Hangly Man Green Plus
+hmplus    puckman   Hangly Man Plus
+hanglyb   puckman   Hangly-Man (Hearts)
+hanglyad  puckman   Hangly-Man (set 1) After Dark
+hanglyx   puckman   Hangly-ManX (set 1)
+hangly2x  puckman   Hangly-ManX (set 2)
+housepty            House Party
+jacman    puckman   Jacman
+fastjr              Jr. Pac-Man (Fast)
+jr1000              Jr. Pac-Man 1000
+jr2000              Jr. Pac-Man 2000
+jr2001              Jr. Pac-Man 2001
+jr2001p             Jr. Pac-Man 2001 Plus
+jr2002              Jr. Pac-Man 2002
+jr2002p             Jr. Pac-Man 2002 Plus
+jr2003              Jr. Pac-Man 2003
+jr2003p             Jr. Pac-Man 2003 Plus
+jr2004              Jr. Pac-Man 2004
+jr2004p             Jr. Pac-Man 2004 Plus
+jr2005              Jr. Pac-Man 2005
+jr2005p             Jr. Pac-Man 2005 Plus
+jr3000p             Jr. Pac-Man 3000 Plus
+jr4000p             Jr. Pac-Man 4000 Plus
+jr5000p             Jr. Pac-Man 5000 Plus
+jr6000              Jr. Pac-Man 6000
+jr7000              Jr. Pac-Man 7000
+jr7000p             Jr. Pac-Man 7000 Plus
+jr8000              Jr. Pac-Man 8000
+jr8000p             Jr. Pac-Man 8000 Plus
+jr9000p             Jr. Pac-Man 9000 Plus
+jrpacad             Jr. Pac-Man After Dark
+jrdeluxe            Jr. Pac-Man Deluxe
+jrhearts            Jr. Pac-Man Hearts
+jrpacjr             Jr. Pac-Man Junior
+jrpacjrp            Jr. Pac-Man Junior Plus
+jrpacp              Jr. Pac-Man Plus
+jrvectr             Jr. Pac-Man Vector
+killiped  centiped  Killipede (Centipede Hack)
+kingdmgp  shippumd  Kingdom Grand Prix (World)
+knightsh  knights   Knights of the Round (hack)
+kfjohnny  kicker    Kung-Fu Johnny
+lottofun            Lotto Fun
+luctoday            Lucky Today
+mariopac            Mario in Pac-Land
+pacmar    puckman   Mario Pacman
+marpy               Marpy
+mazeman   puckman   Maze Man
+pacmini   puckman   Mini Pac-Man
+pacmini2  puckman   Mini Pac-Man 2
+monaco              Monaco GP
+mranger   mpatrol   Moon Ranger
+mrdigdo   mrdo      Mr. Do! (Dig Dug sprites)
+newdigdo  mrdo      Mr. Do! (Dig Dug sprites, new version)
+mrpac     mrdo      Mr. Pac!
+mrpacman  mspacman  Mr. Pac-Man - Another Kind of Role Reversal
+stickydo  mrdo      Mr. Sticky Do!
+msbaby    mspacman  Ms. Baby Pacman
+msbaby1   mspacman  Ms. Baby Pacman (Alt)
+msdstorm  mspacman  Ms. Desert Storm
+faststrm  mspacman  Ms. Desert Storm (Fast)
+mselton   mspacman  Ms. Elton
+msf1pac   mspacman  Ms. F1 Pac-Man
+mshangly  mspacman  Ms. Hangly Man
+heartbn2  mspacman  Ms. Heart Burn
+fasthear  mspacman  Ms. Heart Burn (Fast)
+heartbrn  mspacman  Ms. Heart Burn (TwoBit Score)
+msindy    mspacman  Ms. Indy
+msrumble  mspacman  Ms. Pac Rumble
+msminia   mspacman  Ms. Pac-Attack Mini
+chtmspa   mspacman  Ms. Pac-Man (Cheat)
+mspachi   mspacman  Ms. Pacman (Dwidel's Hiscore Kit)
+fastmspa  mspacman  Ms. Pac-Man (Fast)
+mspacj    mspacman  Ms. Pac-Man (Jamma? Bootleg)
+zolamaze  mspacman  Ms. Pacman (Zola Mazes)
+ms1000    mspacman  Ms. Pacman 1000
+ms2000    mspacman  Ms. Pacman 2000
+ms2600    mspacman  Ms. Pacman 2600
+ms3000    mspacman  Ms. Pacman 3000
+ms4000p   mspacman  Ms. Pacman 4000 Plus
+ms5000    mspacman  Ms. Pacman 5000
+ms5000p   mspacman  Ms. Pacman 5000 Plus
+mspac6m   mspacman  Ms. Pac-Man 6M (Six Maze)
+mspacad   mspacman  Ms. Pac-Man After Dark
+mspc6mad  mspacman  Ms. Pacman After Dark (6 Mazes)
+mssilad   mspacman  Ms. Pac-Man After Dark (Sil)
+msdroid   mspacman  Ms. Pacman Android
+fstmsatk  mspacman  Ms. Pac-Man Attack (Fast)
+msberzk   mspacman  Ms. Pac-Man Berzerk
+mscrzyma  mspacman  Ms. Pacman Crazy Mazes
+mscrzymp  mspacman  Ms. Pacman Crazy Mazes Plus
+mspacdel  mspacman  Ms. Pacman Deluxe
+msextra   mspacman  Ms. Pacman Extra
+msextrap  mspacman  Ms. Pacman Extra Plus
+msgrkb    mspacman  Ms. Pacman Greek
+msgrkatk  mspacman  Ms. Pacman Greek Bootleg
+mshearts  mspacman  Ms. Pac-Man Hearts
+mspacii             Ms. Pacman II
+mspamsba  mspacman  Ms. Pacman Ms. Babies
+msmspac   mspacman  Ms. Pacman Ms. Pac
+msmulti   mspacman  Ms. Pacman Multi
+msnes6m   mspacman  Ms. Pacman NES
+mspacnes  mspacman  Ms. Pac-Man NES
+msnes62   mspacman  Ms. Pacman NES (Set 2)
+msnes63   mspacman  Ms. Pacman NES (Set 3)
+msplus    mspacman  Ms. Pacman Plus
+chtmsatk  mspacman  Ms. Pac-Man Plus (Cheat)
+fastplus  mspacman  Ms. Pac-Man Plus (Fast)
+pacatk    mspacman  Ms. Pac-Man Plus (Fruit)
+mspacatb  mspacman  Ms. Pac-Man Plus (Set B)
+mspacat2  mspacman  Ms. Pac-Man Plus / Attack
+msatk2ad  mspacman  Ms. Pac-Man Plus / Attack After Dark
+msatkad   mspacman  Ms. Pac-Man Plus After Dark
+mspatkx   mspacman  Ms. Pac-Man PlusX
+mspacren  mspacman  Ms. Pacman Renaissance
+msnes6m2  mspacman  Ms. Pacman SNES (New Mazes)
+msnes6m3  mspacman  Ms. Pacman SNES (Regular / Tall
+msnes6m4  mspacman  Ms. Pacman SNES (Regular)
+msnes4a   mspacman  Ms. Pacman SNES (Tall Alternate)
+msstrmaz  mspacman  Ms. Pacman Strange Mazes
+mspacx    mspacman  Ms. Pac-ManX
+msmini    mspacman  Ms. Pac-Mini
+mspacrip  mspacman  Ms. Pac-Mortem
+mspacp    mspacman  Ms. Plus
+msultra   mspacman  Ms. Ultra Pacman
+msyakman  mspacman  Ms. Yak Man
+multi10   multi15   Multipac (v1.0)
+multi11   multi15   Multipac (v1.1)
+multi13   multi15   Multipac (v1.3)
+multi14   multi15   Multipac (v1.4)
+multi15             Multipac (v1.5)
+neonopnd            Neo No Panepon
+neonopon            Neo No Panepon (beta)
+neopong             Neo-Pong! (v1.1)
+neopong1            Neo-Pong! Ver 1.0
+newpuck2  pacman    New Puck-2
+newpuc2   puckman   New Puckman 2 (Set 1)
+nwpuc2b   puckman   New Puckman 2 (Set 2)
+puckmanx  puckman   New Puck-XX
+offender  scramble  Offender
+pac2600   puckman   Pac 2600
+pm1000    puckman   Pac Man 1000
+pm2000    puckman   Pac Man 2000
+pm3000    puckman   Pac Man 3000
+pm4000p             Pac Man 4000 Plus
+pm5000p             Pac Man 5000 Plus
+pm6000              Pac Man 6000
+pm7000              Pac Man 7000
+pm7000p             Pac Man 7000 Plus
+pmba2000  puckman   Pac Man Babies 2000
+pmba3000  puckman   Pac Man Babies 3000
+pmba4000            Pac Man Babies 4000
+pmba6000  puckman   Pac Man Babies 6000
+pmba8000            Pac Man Babies 8000
+pmbamaz   puckman   Pac Man Babies Maze
+pmbaplus            Pac Man Babies Plus
+pmbluep             Pac Man Blue Plus
+pmdeluxe            Pac Man Deluxe
+pmextra             Pac Man Extra
+pmextrap            Pac Man Extra Plus
+pmfever             Pac Man Fever
+pmfeverp            Pac Man Fever Plus
+pmgrenp             Pac Man Green Plus
+pacgalu   mspacman  Pac-Gal (Uchida Bootleg)
+pacgalx   mspacman  Pac-GalX
+pacipede  centiped  Pacipede (Centipede Hack)
+paclandd            Pac-Land
+paclandb            Pac-Land (Benelux Edition)
+pacbaby   puckman   Pacman (Baby Maze 1)
+pacbaby2  puckman   Pacman (Baby Maze 2)
+pacbaby3  puckman   Pacman (Baby Maze 3)
+baby4     puckman   Pacman (Baby Maze 4)
+pacbell   puckman   Pacman (Bell)
+chtpac    puckman   Pac-Man (Cheat)
+pcrunchy  puckman   Pacman (Crunchy)
+pacelec   puckman   Pacman (Electric Cowboy)
+fastpac   puckman   Pac-Man (Fast)
+hearts    puckman   Pacman (Hearts Bootleg)
+pacjail   puckman   Pacman (Jail)
+pacm255   puckman   Pac-Man (Midway 255th Maze)
+pmanaltm  puckman   Pac-Man (Midway Vertical Tunnels)
+pacmsa1   puckman   Pacman (Ms. Pacman Attack 1)
+pacmsa2   puckman   Pacman (Ms. Pacman Attack 2)
+pacmsa3   puckman   Pacman (Ms. Pacman Attack 3)
+pacmsa4   puckman   Pacman (Ms. Pacman Attack 4)
+pacms1    puckman   Pacman (Ms. Pacman Maze 1)
+pacms2    puckman   Pacman (Ms. Pacman Maze 2)
+pacms3    puckman   Pacman (Ms. Pacman Maze 3)
+pacms4    puckman   Pacman (Ms. Pacman Maze 4)
+pacn255             Pac-Man (Namco 255th Maze)
+namcosil  pacman    Pac-Man (Namco) (Sil hack)
+pacinvis  puckman   Pacman (Original Inviso)
+pacpopey  pacman    Pac-Man (Popeye)
+pacshuf   puckman   Pacman (Shuffle)
+pacweird  puckman   Pacman (Six Map Weird)
+pacspeed  puckman   Pacman (Speedy)
+chtpop    puckman   Pac-Man / Popeye (Cheat)
+fastpop   puckman   Pac-Man / Popeye (Fast)
+pacmn6m2  puckman   Pacman 2000 (Set 2)
+snakeyes  puckman   Pacman 2000 (Snake Eyes Mazes)
+tbone     puckman   Pacman 2000 (T-Bone Mazes)
+pmad6m    puckman   Pacman 2000 After Dark
+pacman3d  puckman   Pac-Man 3D
+pacman6   mspacman  Pacman 6
+pmad      puckman   Pac-Man After Dark
+pmada     puckman   Pac-Man After Dark (Alternate)
+pmad_a    pacman    Pac-Man After Dark (version 2)
+pmad00    puckman   Pac-Man After Dark 2000
+pheartb   puckman   Pacman Hearts 2
+pacjr1    puckman   Pacman Jr. (Maze 1)
+pacjr2    puckman   Pacman Jr. (Maze 2)
+pacjr3    puckman   Pacman Jr. (Maze 3)
+pacjr4    puckman   Pacman Jr. (Maze 4)
+plusfast  puckman   Pac-Man Plus (Fast)
+pacplusc  puckman   Pac-Man Plus (Unencrypted)
+pplusad   puckman   Pac-Man Plus After Dark
+pacplusx  pacplus   Pac-Man PlusX
+superabc  puckman   Pacman SuperABC
+punleash  mspacman  Pacman Unleashed
+fpnleash  mspacman  Pacman Unleashed (Flat)
+pmanalt   puckman   Pac-Man Vertical Tunnels (Cheat)
+pheartx   puckman   Pac-ManX (Hearts)
+pacmodx   puckman   Pac-ManX (Midway harder)
+pacmanxm  puckman   Pac-ManX (Midway)
+pacmulti  pacman    PacMulti (Pacman)
+pnc                 Pac'n'Chase
+pengopop  pengo     Pengo (Popcorn Music)
+vecpengo  pengo     Pengo (Vector sim)
+pengman   puckman   Pengo Man
+petshop   mspacman  Pet Shop Freak-Out!
+phoenixr  phoenix   PhoenixR (German Democratic Republic version)
+newpir    puckman   Piranha (Original - Encrypted)
+newpirb   puckman   Piranha (Original - Encrypted/Older)
+piranha2  mspacman  Piranha 2 Revenge!
+pc_bb2              PlayChoice-10: Bubble Bobble 2
+pc_ctfrc            PlayChoice-10: Contra Force
+pc_digdg            PlayChoice-10: Dig Dug
+pc_krsty            PlayChoice-10: Krusty's Funhouse
+pc_mman5            PlayChoice-10: Megaman 5
+pc_parsl            PlayChoice-10: Parasol Stars-The Story of Bubble Bobble 3
+pnicku              Pnickies (USA)
+pong                Pong
+pontoon             Pontoon
+chtpuck   puckman   Puck-Man (Cheat)
+fastpuck  puckman   Puck-Man (Fast)
+puckman2  puckman   Puck-Man II
+chtpman2  puckman   Puck-Man II (Cheat)
+fstpman2  puckman   Puck-Man II (Fast)
+puckren   puckman   Puckman Renaissance
+puckrenc  puckman   Puckman Renaissance (Cheat)
+npacmodx  puckman   PuckManX (harder?)
+pacmanx   puckman   PuckManX (Japan set 1)
+pacmanxj  puckman   PuckManX (Japan set 2)
+pbobbldx  pbobblen  Puzzle Bobble Deluxe / Bust-A-Move Deluxe (Neo-Geo)
+rxtron    rallyx    Rally-X Tron
+rastandh  rastan    Rastan Dragon Hack
+rastand2  rastan    Rastan Dragon Hack (set 2)
+rastaneh  rastan    Rastan Enemy Hack
+rastane2  rastan    Rastan Enemy Hack (set 2)
+roboman   puckman   Robo Man
+hwofa     wof       Sangokushi II (Asia)(Hack)
+silliped            Sillipede
+snowpac   puckman   Snowy Day Pacman
+sdreturn  dorunrun  Sticky Do Returns
+kouryu    sf2ce     Street Fighter 2 Kouryuv2
+sf2m1     sf2ce     Street Fighter 2-M1
+sf2m2     sf2ce     Street Fighter 2-M2
+sf2m3     sf2ce     Street Fighter 2-M3
+sf2m4     sf2ce     Street Fighter 2-M4
+sf2m5     sf2ce     Street Fighter 2-M5
+sf2m6     sf2ce     Street Fighter 2-M6
+sf2m7     sf2ce     Street Fighter 2-M7
+sfach     sfzch     Street Fighter ALPHA (Publicity CPS Changer)
+sfzch               Street Fighter ZERO - CPS Changer
+sueworld  mspacman  Sue's World
+sumelton  puckman   Summertime Elton
+sderby              Super Derby
+vectrsup  superpac  Super Pac-Man (Vector sim)
+superpcp            Super Pac-Man Plus
+sxvioush  xevious   Super Xevious 2002
+zolapac   mspacman  Super Zola Pac Gal
+zolaslow  mspacman  Super Zola Pac Gal (Slow)
+zolatunl  mspacman  Super Zola Pac Gal (Tunnels)
+zolaad    mspacman  Super Zola Pac Gal After Dark
+zolaatk   mspacman  Super Zola Pac Gal Attack
+superdog  scramble  Superdog
+stapper1  tapper    Tapper (Simpsons Hack ver.81)
+stapper   tapper    Tapper (Simpsons Hack)
+temped    tempest   TempEd
+tempall   tempest   Tempest All Levels
+tempestm  tempest   Tempest Mark's Hacks
+tmptwst3  tempest   Tempest Psycho Twist
+temptwst  tempest   Tempest Twisted
+tmptwst4  tempest   Tempest Twisted Maniac
+tmptwst2  tempest   Tempest Twisty's Revenge
+terror    galaga    Terrorist
+trukker   frogger   Trukker
+twincbu2  twincobr  Twin Cobra (Hack)
+twintwst  twincobr  Twin Twist (Twin Cobra Hack)
+ultra2    puckman   Ultra Pacman (TwoBit Score Mazes)
+ultrapac  puckman   UltraPac
+vantris             Vantris Tetris Hack
+vectiped  centiped  Vectipede (Centipede Hack)
+vectratk  mspacman  Vector Attack
+vgalaga   galaga    Vector Galaga
+vgalagaf  galaga    Vector Galaga Fast Shoot
+vgalagam  galaga    Vector Galaga Midway
+vhangly   puckman   Vector Hangly-Man (set 1)
+msvectr   mspacman  Vector Ms. Pac-Man
+msvctr6m  mspacman  Vector Ms. Pacman (6 Mazes)
+vectrpac  puckman   Vector Pac-Man
+vecbaby   puckman   Vector Pacman (Baby Maze 1)
+vecbaby2  puckman   Vector Pacman (Baby Maze 2)
+vecbaby3  puckman   Vector Pacman (Baby Maze 3)
+vpacbell  puckman   Vector Pacman (Bell)
+vcrunchy  puckman   Vector Pacman (Crunchy)
+vpacelec  puckman   Vector Pacman (Electric Cowboy)
+vpacjail  puckman   Vector Pacman (Jail)
+vpacmsa1  puckman   Vector Pacman (Ms. Pacman Attack 1)
+vpacmsa2  puckman   Vector Pacman (Ms. Pacman Attack 2)
+vpacmsa3  puckman   Vector Pacman (Ms. Pacman Attack 3)
+vpacmsa4  puckman   Vector Pacman (Ms. Pacman Attack 4)
+vpacms1   puckman   Vector Pacman (Ms. Pacman Maze 1)
+vpacms2   puckman   Vector Pacman (Ms. Pacman Maze 2)
+vpacms3   puckman   Vector Pacman (Ms. Pacman Maze 3)
+vpacms4   puckman   Vector Pacman (Ms. Pacman Maze 4)
+vpacshuf  puckman   Vector Pacman (Shuffle)
+vpspeed   puckman   Vector Pacman (Speedy)
+vectr6m   puckman   Vector Pacman 2000
+vectr6tb  puckman   Vector Pacman 2000 (T-Bone Mazes)
+vectplus  puckman   Vector Pac-Man Plus
+zolavect  mspacman  Vector Super Zola Pac Gal
+vectxens  puckman   Vector Xens Revenge
+vectrped  centiped  Vectorpede (Centipede Hack)
+mrio2002  suprmrio  Vs. Super Mario Bros 2002
+rastwack  rastan    Wacky Rastan
+xensrev   puckman   Xens Revenge
+xensad    puckman   Xens Revenge After Dark
+xviousah  xevious   Xevious 2002 (Atari set 1)
+xevioush  xevious   Xevious 2002 (Namco)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
