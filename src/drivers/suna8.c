@@ -46,14 +46,14 @@ extern data8_t suna8_unknown;
 
 /* Functions defined in vidhrdw: */
 
-WRITE_HANDLER( suna8_spriteram_w );			// for debug
-WRITE_HANDLER( suna8_banked_spriteram_w );	// for debug
+WRITE8_HANDLER( suna8_spriteram_w );			// for debug
+WRITE8_HANDLER( suna8_banked_spriteram_w );	// for debug
 
-READ_HANDLER( suna8_banked_paletteram_r );
-READ_HANDLER( suna8_banked_spriteram_r );
+READ8_HANDLER( suna8_banked_paletteram_r );
+READ8_HANDLER( suna8_banked_spriteram_r );
 
-WRITE_HANDLER( suna8_banked_paletteram_w );
-WRITE_HANDLER( brickzn_banked_paletteram_w );
+WRITE8_HANDLER( suna8_banked_paletteram_w );
+WRITE8_HANDLER( brickzn_banked_paletteram_w );
 
 VIDEO_START( suna8_textdim0 );
 VIDEO_START( suna8_textdim8 );
@@ -834,7 +834,7 @@ static DRIVER_INIT( sparkman )
 
 static data8_t protection_val;
 
-static READ_HANDLER( hardhead_protection_r )
+static READ8_HANDLER( hardhead_protection_r )
 {
 	if (protection_val & 0x80)
 		return	((~offset & 0x20)			?	0x20 : 0) |
@@ -845,7 +845,7 @@ static READ_HANDLER( hardhead_protection_r )
 				(((offset ^ protection_val) & 0x01)	?	0x84 : 0);
 }
 
-static WRITE_HANDLER( hardhead_protection_w )
+static WRITE8_HANDLER( hardhead_protection_w )
 {
 	if (data & 0x80)	protection_val = data;
 	else				protection_val = offset & 1;
@@ -866,7 +866,7 @@ static WRITE_HANDLER( hardhead_protection_w )
 
 static data8_t *hardhead_ip;
 
-static READ_HANDLER( hardhead_ip_r )
+static READ8_HANDLER( hardhead_ip_r )
 {
 	switch (*hardhead_ip)
 	{
@@ -885,7 +885,7 @@ static READ_HANDLER( hardhead_ip_r )
 	---4 ----
 	---- 3210	ROM Bank
 */
-static WRITE_HANDLER( hardhead_bankswitch_w )
+static WRITE8_HANDLER( hardhead_bankswitch_w )
 {
 	data8_t *RAM = memory_region(REGION_CPU1);
 	int bank = data & 0x0f;
@@ -903,7 +903,7 @@ static WRITE_HANDLER( hardhead_bankswitch_w )
 	---- -2--	Flip Screen
 	---- --10
 */
-static WRITE_HANDLER( hardhead_flipscreen_w )
+static WRITE8_HANDLER( hardhead_flipscreen_w )
 {
 	flip_screen_set(    data & 0x04);
 	coin_lockout_w ( 0,	data & 0x08);
@@ -956,7 +956,7 @@ ADDRESS_MAP_END
 	---- 3---
 	---- -210	ROM Bank
 */
-static WRITE_HANDLER( rranger_bankswitch_w )
+static WRITE8_HANDLER( rranger_bankswitch_w )
 {
 	data8_t *RAM = memory_region(REGION_CPU1);
 	int bank = data & 0x07;
@@ -981,7 +981,7 @@ static WRITE_HANDLER( rranger_bankswitch_w )
 	---- --1-	1 -> Interlude screens
 	---- ---0
 */
-static READ_HANDLER( rranger_soundstatus_r )
+static READ8_HANDLER( rranger_soundstatus_r )
 {
 	return 0x02;
 }
@@ -1028,14 +1028,14 @@ ADDRESS_MAP_END
 /*
 ?
 */
-static READ_HANDLER( brickzn_c140_r )
+static READ8_HANDLER( brickzn_c140_r )
 {
 	return 0xff;
 }
 
 /*
 */
-static WRITE_HANDLER( brickzn_palettebank_w )
+static WRITE8_HANDLER( brickzn_palettebank_w )
 {
 	suna8_palettebank = (data >> 1) & 1;
 	if (data & ~0x02) 	logerror("CPU #0 - PC %04X: unknown palettebank bits: %02X\n",activecpu_get_pc(),data);
@@ -1049,14 +1049,14 @@ static WRITE_HANDLER( brickzn_palettebank_w )
 	---- --1-	Ram Bank
 	---- ---0	Flip Screen
 */
-static WRITE_HANDLER( brickzn_spritebank_w )
+static WRITE8_HANDLER( brickzn_spritebank_w )
 {
 	suna8_spritebank = (data >> 1) & 1;
 	if (data & ~0x03) 	logerror("CPU #0 - PC %04X: unknown spritebank bits: %02X\n",activecpu_get_pc(),data);
 	flip_screen_set( data & 0x01 );
 }
 
-static WRITE_HANDLER( brickzn_unknown_w )
+static WRITE8_HANDLER( brickzn_unknown_w )
 {
 	suna8_unknown = data;
 }
@@ -1065,7 +1065,7 @@ static WRITE_HANDLER( brickzn_unknown_w )
 	7654 ----
 	---- 3210	ROM Bank
 */
-static WRITE_HANDLER( brickzn_rombank_w )
+static WRITE8_HANDLER( brickzn_rombank_w )
 {
 	data8_t *RAM = memory_region(REGION_CPU1);
 	int bank = data & 0x0f;
@@ -1119,7 +1119,7 @@ ADDRESS_MAP_END
 static data8_t suna8_nmi_enable;
 
 /* Probably wrong: */
-static WRITE_HANDLER( hardhea2_nmi_w )
+static WRITE8_HANDLER( hardhea2_nmi_w )
 {
 	suna8_nmi_enable = data & 0x01;
 //	if (data & ~0x01) 	logerror("CPU #0 - PC %04X: unknown nmi bits: %02X\n",activecpu_get_pc(),data);
@@ -1129,13 +1129,13 @@ static WRITE_HANDLER( hardhea2_nmi_w )
 	7654 321-
 	---- ---0	Flip Screen
 */
-static WRITE_HANDLER( hardhea2_flipscreen_w )
+static WRITE8_HANDLER( hardhea2_flipscreen_w )
 {
 	flip_screen_set(data & 0x01);
 	if (data & ~0x01) 	logerror("CPU #0 - PC %04X: unknown flipscreen bits: %02X\n",activecpu_get_pc(),data);
 }
 
-WRITE_HANDLER( hardhea2_leds_w )
+WRITE8_HANDLER( hardhea2_leds_w )
 {
 	set_led_status(0, data & 0x01);
 	set_led_status(1, data & 0x02);
@@ -1148,7 +1148,7 @@ WRITE_HANDLER( hardhea2_leds_w )
 	---- --1-	Ram Bank
 	---- ---0	Ram Bank?
 */
-static WRITE_HANDLER( hardhea2_spritebank_w )
+static WRITE8_HANDLER( hardhea2_spritebank_w )
 {
 	suna8_spritebank = (data >> 1) & 1;
 	if (data & ~0x02) 	logerror("CPU #0 - PC %04X: unknown spritebank bits: %02X\n",activecpu_get_pc(),data);
@@ -1158,7 +1158,7 @@ static WRITE_HANDLER( hardhea2_spritebank_w )
 	7654 ----
 	---- 3210	ROM Bank
 */
-static WRITE_HANDLER( hardhea2_rombank_w )
+static WRITE8_HANDLER( hardhea2_rombank_w )
 {
 	data8_t *ROM = memory_region(REGION_CPU1);
 	int bank = data & 0x0f;
@@ -1169,21 +1169,21 @@ static WRITE_HANDLER( hardhea2_rombank_w )
 	suna8_rombank = data;
 }
 
-static WRITE_HANDLER( hardhea2_spritebank_0_w )
+static WRITE8_HANDLER( hardhea2_spritebank_0_w )
 {
 	suna8_spritebank = 0;
 }
-static WRITE_HANDLER( hardhea2_spritebank_1_w )
+static WRITE8_HANDLER( hardhea2_spritebank_1_w )
 {
 	suna8_spritebank = 1;
 }
 
-static WRITE_HANDLER( hardhea2_rambank_0_w )
+static WRITE8_HANDLER( hardhea2_rambank_0_w )
 {
 	data8_t *RAM = memory_region(REGION_USER3);
 	cpu_setbank(2,&RAM[0x2000 * 0]);
 }
-static WRITE_HANDLER( hardhea2_rambank_1_w )
+static WRITE8_HANDLER( hardhea2_rambank_1_w )
 {
 	data8_t *RAM = memory_region(REGION_USER3);
 	cpu_setbank(2,&RAM[0x2000 * 1]);
@@ -1244,13 +1244,13 @@ ADDRESS_MAP_END
 ***************************************************************************/
 
 static data8_t spritebank_latch;
-static WRITE_HANDLER( starfigh_spritebank_latch_w )
+static WRITE8_HANDLER( starfigh_spritebank_latch_w )
 {
 	spritebank_latch = (data >> 2) & 1;
 	if (data & ~0x04) 	logerror("CPU #0 - PC %04X: unknown spritebank bits: %02X\n",activecpu_get_pc(),data);
 }
 
-static WRITE_HANDLER( starfigh_spritebank_w )
+static WRITE8_HANDLER( starfigh_spritebank_w )
 {
 	suna8_spritebank = spritebank_latch;
 }
@@ -1293,7 +1293,7 @@ ADDRESS_MAP_END
 ***************************************************************************/
 
 /* Probably wrong: */
-static WRITE_HANDLER( sparkman_nmi_w )
+static WRITE8_HANDLER( sparkman_nmi_w )
 {
 	suna8_nmi_enable = data & 0x01;
 	if (data & ~0x01) 	logerror("CPU #0 - PC %04X: unknown nmi bits: %02X\n",activecpu_get_pc(),data);
@@ -1303,13 +1303,13 @@ static WRITE_HANDLER( sparkman_nmi_w )
 	7654 321-
 	---- ---0	Flip Screen
 */
-static WRITE_HANDLER( sparkman_flipscreen_w )
+static WRITE8_HANDLER( sparkman_flipscreen_w )
 {
 	flip_screen_set(data & 0x01);
 	if (data & ~0x01) 	logerror("CPU #0 - PC %04X: unknown flipscreen bits: %02X\n",activecpu_get_pc(),data);
 }
 
-WRITE_HANDLER( sparkman_leds_w )
+WRITE8_HANDLER( sparkman_leds_w )
 {
 	set_led_status(0, data & 0x01);
 	set_led_status(1, data & 0x02);
@@ -1322,7 +1322,7 @@ WRITE_HANDLER( sparkman_leds_w )
 	---- --1-	Ram Bank
 	---- ---0	Ram Bank?
 */
-static WRITE_HANDLER( sparkman_spritebank_w )
+static WRITE8_HANDLER( sparkman_spritebank_w )
 {
 	suna8_spritebank = (data >> 1) & 1;
 	if (data & ~0x02) 	logerror("CPU #0 - PC %04X: unknown spritebank bits: %02X\n",activecpu_get_pc(),data);
@@ -1332,7 +1332,7 @@ static WRITE_HANDLER( sparkman_spritebank_w )
 	7654 ----
 	---- 3210	ROM Bank
 */
-static WRITE_HANDLER( sparkman_rombank_w )
+static WRITE8_HANDLER( sparkman_rombank_w )
 {
 	data8_t *RAM = memory_region(REGION_CPU1);
 	int bank = data & 0x0f;
@@ -1345,7 +1345,7 @@ static WRITE_HANDLER( sparkman_rombank_w )
 	suna8_rombank = data;
 }
 
-static READ_HANDLER( sparkman_c0a3_r )
+static READ8_HANDLER( sparkman_c0a3_r )
 {
 	return (cpu_getcurrentframe() & 1) ? 0x80 : 0;
 }
@@ -1481,7 +1481,7 @@ static ADDRESS_MAP_START( brickzn_pcm_writemem, ADDRESS_SPACE_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static WRITE_HANDLER( brickzn_pcm_w )
+static WRITE8_HANDLER( brickzn_pcm_w )
 {
 	DAC_signed_data_w( offset, (data & 0xf) * 0x11 );
 }
@@ -1504,12 +1504,12 @@ ADDRESS_MAP_END
 ***************************************************************************/
 
 #define JOY(_n_) \
-	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER##_n_ ) \
+	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1        ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2        ) PORT_PLAYER(_n_) \
 	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_START##_n_ ) \
 	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_COIN##_n_  )
 
@@ -1547,7 +1547,7 @@ INPUT_PORTS_START( hardhead )
 	PORT_DIPSETTING(    0x60, DEF_STR( 1C_2C ) )
 	PORT_DIPSETTING(    0x50, DEF_STR( 1C_3C ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( 1C_4C ) )
-	PORT_BITX(    0x80, 0x80, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Invulnerability", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(    0x80, 0x80, IPT_DIPSWITCH_NAME ) PORT_NAME("Invulnerability") PORT_CHEAT
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
@@ -1635,7 +1635,7 @@ INPUT_PORTS_START( rranger )
 	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Demo_Sounds ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BITX(    0x80, 0x80, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Invulnerability", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(    0x80, 0x80, IPT_DIPSWITCH_NAME ) PORT_NAME("Invulnerability") PORT_CHEAT
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
@@ -1673,7 +1673,7 @@ INPUT_PORTS_START( brickzn )
 	PORT_DIPSETTING(    0x10, "Harder" )
 	PORT_DIPSETTING(    0x08, "Very Hard" )
 	PORT_DIPSETTING(    0x00, "Hardest" )
-//	PORT_BITX(    0x40, 0x40, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Invulnerability", IP_KEY_NONE, IP_JOY_NONE )
+//	PORT_BIT(    0x40, 0x40, IPT_DIPSWITCH_NAME ) PORT_NAME("Invulnerability") PORT_CHEAT
 //	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 //	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_SERVICE(       0x40, IP_ACTIVE_LOW )	// + Invulnerability
@@ -1707,10 +1707,10 @@ INPUT_PORTS_START( brickzn )
 	PORT_DIPSETTING(    0x00, "5" )
 
 	PORT_START	// IN4 - Player 1 - $c108
-	PORT_ANALOG( 0xff, 0x00, IPT_TRACKBALL_X | IPF_REVERSE, 50, 0, 0, 0)
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_MINMAX(0,0) PORT_SENSITIVITY(50) PORT_KEYDELTA(0) PORT_REVERSE
 
 	PORT_START	// IN5 - Player 2 - $c10c
-	PORT_ANALOG( 0xff, 0x00, IPT_TRACKBALL_X | IPF_REVERSE, 50, 0, 0, 0)
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_MINMAX(0,0) PORT_SENSITIVITY(50) PORT_KEYDELTA(0) PORT_REVERSE
 
 INPUT_PORTS_END
 
@@ -1851,8 +1851,8 @@ INPUT_PORTS_START( sparkman )
 	PORT_DIPSETTING(    0x00, "5" )
 
 	PORT_START	// IN4 - Buttons - $c080
-	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
+	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
+	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1901,7 +1901,7 @@ static struct GfxDecodeInfo suna8_gfxdecodeinfo[] =
 
 static void soundirq(int state)
 {
-	cpu_set_irq_line(1, 0, state);
+	cpunum_set_input_line(1, 0, state);
 }
 
 /* In games with only 2 CPUs, port A&B of the AY8910 are probably used
@@ -2054,8 +2054,8 @@ static struct DACinterface brickzn_dac_interface =
 
 INTERRUPT_GEN( brickzn_interrupt )
 {
-	if (cpu_getiloops()) cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
-	else				 cpu_set_irq_line(0, 0, HOLD_LINE);
+	if (cpu_getiloops()) cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
+	else				 cpunum_set_input_line(0, 0, HOLD_LINE);
 }
 
 static MACHINE_DRIVER_START( brickzn )
@@ -2108,9 +2108,9 @@ INTERRUPT_GEN( hardhea2_interrupt )
 {
 	if (cpu_getiloops())
 	{
-		if (suna8_nmi_enable)	cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+		if (suna8_nmi_enable)	cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 	}
-	else cpu_set_irq_line(0, 0, HOLD_LINE);
+	else cpunum_set_input_line(0, 0, HOLD_LINE);
 }
 
 static MACHINE_INIT( hardhea2 )
@@ -2196,9 +2196,9 @@ static INTERRUPT_GEN( sparkman_interrupt )
 {
 	if (cpu_getiloops())
 	{
-		if (suna8_nmi_enable)	cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+		if (suna8_nmi_enable)	cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 	}
-	else cpu_set_irq_line(0, 0, HOLD_LINE);
+	else cpunum_set_input_line(0, 0, HOLD_LINE);
 }
 
 static MACHINE_DRIVER_START( sparkman )

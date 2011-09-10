@@ -21,41 +21,41 @@ static UINT8 *shared_workram;
 static UINT8 xxmissio_status;
 
 
-WRITE_HANDLER( xxmissio_scroll_x_w );
-WRITE_HANDLER( xxmissio_scroll_y_w );
-WRITE_HANDLER( xxmissio_flipscreen_w );
+WRITE8_HANDLER( xxmissio_scroll_x_w );
+WRITE8_HANDLER( xxmissio_scroll_y_w );
+WRITE8_HANDLER( xxmissio_flipscreen_w );
 
-READ_HANDLER( xxmissio_videoram_r );
-WRITE_HANDLER( xxmissio_videoram_w );
-READ_HANDLER( xxmissio_fgram_r );
-WRITE_HANDLER( xxmissio_fgram_w );
+READ8_HANDLER( xxmissio_videoram_r );
+WRITE8_HANDLER( xxmissio_videoram_w );
+READ8_HANDLER( xxmissio_fgram_r );
+WRITE8_HANDLER( xxmissio_fgram_w );
 
-WRITE_HANDLER( xxmissio_paletteram_w );
+WRITE8_HANDLER( xxmissio_paletteram_w );
 
-WRITE_HANDLER( shared_workram_w )
+WRITE8_HANDLER( shared_workram_w )
 {
 	shared_workram[offset ^ 0x1000] = data;
 }
 
-READ_HANDLER( shared_workram_r )
+READ8_HANDLER( shared_workram_r )
 {
 	return shared_workram[offset ^ 0x1000];
 }
 
-WRITE_HANDLER( xxmissio_bank_sel_w )
+WRITE8_HANDLER( xxmissio_bank_sel_w )
 {
 	UINT8 *BANK = memory_region(REGION_USER1);
 	UINT32 bank_address = (data & 0x07) * 0x4000;
 	cpu_setbank(1, &BANK[bank_address]);
 }
 
-READ_HANDLER( xxmissio_status_r )
+READ8_HANDLER( xxmissio_status_r )
 {
 	xxmissio_status = (xxmissio_status | 2) & ( readinputport(4) | 0xfd );
 	return xxmissio_status;
 }
 
-WRITE_HANDLER ( xxmissio_status_m_w )
+WRITE8_HANDLER ( xxmissio_status_m_w )
 {
 	switch (data)
 	{
@@ -65,7 +65,7 @@ WRITE_HANDLER ( xxmissio_status_m_w )
 
 		case 0x40:
 			xxmissio_status &= ~0x08;
-			cpu_set_irq_line_and_vector(1,0,HOLD_LINE,0x10);
+			cpunum_set_input_line_and_vector(1,0,HOLD_LINE,0x10);
 			break;
 
 		case 0x80:
@@ -74,7 +74,7 @@ WRITE_HANDLER ( xxmissio_status_m_w )
 	}
 }
 
-WRITE_HANDLER ( xxmissio_status_s_w )
+WRITE8_HANDLER ( xxmissio_status_s_w )
 {
 	switch (data)
 	{
@@ -88,7 +88,7 @@ WRITE_HANDLER ( xxmissio_status_s_w )
 
 		case 0x80:
 			xxmissio_status &= ~0x04;
-			cpu_set_irq_line_and_vector(0,0,HOLD_LINE,0x10);
+			cpunum_set_input_line_and_vector(0,0,HOLD_LINE,0x10);
 			break;
 	}
 }
@@ -96,13 +96,13 @@ WRITE_HANDLER ( xxmissio_status_s_w )
 INTERRUPT_GEN( xxmissio_interrupt_m )
 {
 	xxmissio_status &= ~0x20;
-	cpu_set_irq_line(0, 0, HOLD_LINE);
+	cpunum_set_input_line(0, 0, HOLD_LINE);
 }
 
 INTERRUPT_GEN( xxmissio_interrupt_s )
 {
 	xxmissio_status &= ~0x10;
-	cpu_set_irq_line(1, 0, HOLD_LINE);
+	cpunum_set_input_line(1, 0, HOLD_LINE);
 }
 
 /****************************************************************************/
@@ -206,20 +206,20 @@ INPUT_PORTS_START( xxmissio )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
 
 	PORT_START
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
 
 	PORT_START	/* DSW1 */
 	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )
@@ -239,7 +239,7 @@ INPUT_PORTS_START( xxmissio )
 	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Cabinet ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Cocktail ) )
-	PORT_BITX(    0x40, 0x40, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Endless Game", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(    0x40, 0x40, IPT_DIPSWITCH_NAME ) PORT_NAME("Endless Game") PORT_CHEAT
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )

@@ -19,6 +19,10 @@
 #define POSITION_AFTER_COINS	2
 #define POSITION_AFTER_MIXER	3
 
+#define EXTRACT_PLAYER(x)		(((x) >> 16) & 7)
+#define EXTRACT_TYPE(x)			((x) & 0xffff)
+#define ENCODE_PLAYER(x,p)		(x) = (EXTRACT_TYPE(x) | ((p) << 16))
+
 
 
 /***************************************************************************
@@ -142,13 +146,39 @@ static void writeword(mame_file *f,UINT16 num)
 
 
 /***************************************************************************
-	legacy code
+	input_port_read_ver_X
 ***************************************************************************/
 
-#ifndef NOLEGACY
-#include "legacy.h"
-#endif
+static int input_port_read_ver_X(mame_file *f, struct InputPort *in,
+	int (*seq_read_proc)(mame_file *f, InputSeq *seq))
+{
+	int i;
+	UINT32 d;
+	UINT16 w;
 
+	for (i = 0; i < input_port_seq_count(in); i++)
+	{
+		if (readint(f, &d) != 0)
+			return -1;
+		in->type = EXTRACT_TYPE(d);
+		if (i > 0)
+			in->type -= IPT_EXTENSION;
+		in->player = EXTRACT_PLAYER(d);
+
+		if (readword(f, &w) != 0)
+			return -1;
+		in->mask = w;
+
+		if (readword(f, &w) != 0)
+			return -1;
+		in->default_value = w;
+
+		if (seq_read_proc(f, &in->seq[i]) != 0)
+			return -1;
+	}
+
+	return 0;
+}
 
 
 /***************************************************************************
@@ -184,24 +214,7 @@ static int seq_read_ver_8(mame_file *f, InputSeq *seq)
 
 static int input_port_read_ver_8(mame_file *f, struct InputPort *in)
 {
-	UINT32 i;
-	UINT16 w;
-	if (readint(f,&i) != 0)
-		return -1;
-	in->type = i;
-
-	if (readword(f,&w) != 0)
-		return -1;
-	in->mask = w;
-
-	if (readword(f,&w) != 0)
-		return -1;
-	in->default_value = w;
-
-	if (seq_read_ver_8(f,&in->seq) != 0)
-		return -1;
-
-	return 0;
+	return input_port_read_ver_X(f, in, seq_read_ver_8);
 }
 
 
@@ -216,20 +229,6 @@ static config_file *config_init(const char *name, int save)
 	{
 		/* mame 0.74 with 8 coin counters */
 		{ "MAMECFG\x9",	"MAMEDEF\x7",	input_port_read_ver_8, seq_read_ver_8, 8 },
-
-#ifndef NOLEGACY
-		/* mame 0.36b16 with key/joy merge */
-		{ "MAMECFG\x8",	"MAMEDEF\x7",	input_port_read_ver_8, seq_read_ver_8, 4 },
-
-		/* mame 0.36b13 with and/or/not combination */
-		{ "MAMECFG\x7",	"MAMEDEF\x6",	input_port_read_ver_7, seq_read_ver_7, 4 },
-
-		/* mame 0.36b12 with multi key/joy extension */
-		{ "MAMECFG\x6",	"MAMEDEF\x5",	input_port_read_ver_6, seq_read_ver_6, 4 },
-
-		/* mame 0.36b11 */
-		{ "MAMECFG\x5",	"MAMEDEF\x4",	input_port_read_ver_5, seq_read_ver_5, 4 }
-#endif
 	};
 
 	config_file *cfg;
@@ -298,7 +297,7 @@ static unsigned int count_input_ports(const struct InputPort *in)
 	unsigned int total = 0;
 	while (in->type != IPT_END)
 	{
-		total++;
+		total += input_port_seq_count(in);
 		in++;
 	}
 	return total;
@@ -366,20 +365,30 @@ int config_read_ports(config_file *cfg, struct InputPort *input_ports_default, s
 	/* read array size */
 	if (readint(cfg->file, &saved_total) != 0)
 		return CONFIG_ERROR_CORRUPT;
+	if (saved_total != total)
+		return CONFIG_ERROR_CORRUPT;
 
 	/* read the original settings and compare them with the ones defined in the driver */
-	in = (struct InputPort *) input_ports_default;
+	in = input_ports_default;
 	while (in->type != IPT_END)
 	{
+		int seqnum;
+		
 		if (read_input_port(cfg->file, &saved) != 0)
 			return CONFIG_ERROR_CORRUPT;
-
+			
 		if (in->mask != saved.mask ||
-				in->default_value != saved.default_value ||
-				in->type != saved.type ||
-				seq_cmp(&in->seq, &saved.seq) !=0 )
+			in->default_value != saved.default_value ||
+			in->type != saved.type ||
+			in->player != saved.player)
 		{
 			return CONFIG_ERROR_CORRUPT;	/* the default values are different */
+		}
+
+		for (seqnum = 0; seqnum < input_port_seq_count(&saved); seqnum++)
+		{
+			if (seq_cmp(&in->seq[seqnum], &saved.seq[seqnum]) !=0 )
+				return CONFIG_ERROR_CORRUPT;	/* the default values are different */
 		}
 
 		in++;
@@ -407,6 +416,7 @@ int config_read_ports(config_file *cfg, struct InputPort *input_ports_default, s
 int config_read_default_ports(config_file *cfg, struct ipd *input_ports_default)
 {
 	UINT32 type;
+	int player, seqnum;
 	InputSeq def_seq;
 	InputSeq seq;
 	int i;
@@ -423,6 +433,14 @@ int config_read_default_ports(config_file *cfg, struct ipd *input_ports_default)
 	{
 		if (readint(cfg->file, &type) != 0)
 			break;
+		player = EXTRACT_PLAYER(type);
+		type = EXTRACT_TYPE(type);
+		seqnum = 0;
+		if (type >= __ipt_max)
+		{
+			seqnum = 1;
+			type -= IPT_EXTENSION;
+		}
 
 		if (read_seq(cfg->file, &def_seq)!=0)
 			break;
@@ -432,11 +450,11 @@ int config_read_default_ports(config_file *cfg, struct ipd *input_ports_default)
 		i = 0;
 		while (input_ports_default[i].type != IPT_END)
 		{
-			if (input_ports_default[i].type == type)
+			if (input_ports_default[i].type == type && (input_ports_default[i].player == 0 || input_ports_default[i].player == player))
 			{
 				/* load stored settings only if the default hasn't changed */
-				if (seq_cmp(&input_ports_default[i].seq, &def_seq)==0)
-					seq_copy(&input_ports_default[i].seq, &seq);
+				if (seq_cmp(&input_ports_default[i].seq[seqnum], &def_seq)==0)
+					seq_copy(&input_ports_default[i].seq[seqnum], &seq);
 			}
 
 			i++;
@@ -545,10 +563,19 @@ static void seq_write(mame_file *f, const InputSeq *seq)
 
 static void input_port_write(mame_file *f, const struct InputPort *in)
 {
-	writeint(f, in->type);
-	writeword(f, in->mask);
-	writeword(f, in->default_value);
-	seq_write(f, &in->seq);
+	int i;
+
+	for (i = 0; i < input_port_seq_count(in); i++)
+	{
+		UINT32 type_and_player = in->type;
+		if (i > 0)
+			type_and_player += IPT_EXTENSION;
+		ENCODE_PLAYER(type_and_player, in->player);
+		writeint(f, type_and_player);
+		writeword(f, in->mask);
+		writeword(f, in->default_value);
+		seq_write(f, &in->seq[i]);
+	}
 }
 
 
@@ -601,7 +628,7 @@ int config_write_ports(config_file *cfg, const struct InputPort *input_ports_def
 
 int config_write_default_ports(config_file *cfg, const struct ipd *input_ports_default_backup, const struct ipd *input_ports_default)
 {
-	int i = 0;
+	int i = 0, j;
 
 	if (!cfg->is_write || !cfg->is_default)
 		return CONFIG_ERROR_BADMODE;
@@ -612,9 +639,18 @@ int config_write_default_ports(config_file *cfg, const struct ipd *input_ports_d
 	{
 		if (input_ports_default[i].type != IPT_OSD_RESERVED)
 		{
-			writeint(cfg->file, input_ports_default[i].type);
-			seq_write(cfg->file, &input_ports_default_backup[i].seq);
-			seq_write(cfg->file, &input_ports_default[i].seq);
+			int seq_count = (input_ports_default[i].type > IPT_ANALOG_START && input_ports_default[i].type < IPT_ANALOG_END) ? 2 : 1;
+			for (j = 0; j < seq_count; j++)
+			{
+				UINT32 type_and_player = input_ports_default[i].type;
+				if (j > 0)
+					type_and_player += IPT_EXTENSION;
+				if (input_ports_default[i].player != 0)
+					ENCODE_PLAYER(type_and_player, input_ports_default[i].player - 1);
+				writeint(cfg->file, type_and_player);
+				seq_write(cfg->file, &input_ports_default_backup[i].seq[j]);
+				seq_write(cfg->file, &input_ports_default[i].seq[j]);
+			}
 		}
 		i++;
 	}

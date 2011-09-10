@@ -117,7 +117,7 @@ static WRITE32_HANDLER( color_ram_w )
 
 static void groundfx_interrupt5(int x)
 {
-	cpu_set_irq_line(0,5,HOLD_LINE); //from 5... ADC port
+	cpunum_set_input_line(0,5,HOLD_LINE); //from 5... ADC port
 }
 
 
@@ -355,7 +355,7 @@ INPUT_PORTS_START( groundfx )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW,  IPT_UNUSED )
 
 	PORT_START      /* IN2 */
-	PORT_BITX(0x01, IP_ACTIVE_LOW,  IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_LOW,  IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_SERVICE1 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_COIN1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_COIN2 )
@@ -365,16 +365,16 @@ INPUT_PORTS_START( groundfx )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNUSED )
 
 	PORT_START	/* IN 2, steering wheel */
-	PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER1, 25, 15, 0, 0xff )
+	PORT_BIT( 0xff, 0x7f, IPT_AD_STICK_X ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(25) PORT_KEYDELTA(15) PORT_REVERSE PORT_PLAYER(1)
 
 	PORT_START	/* IN 3, accel */
-	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_PLAYER1, 20, 10, 0, 0xff)
+	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_PLAYER(1)
 
 	PORT_START	/* IN 4, sound volume */
-	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER2, 20, 10, 0, 0xff)
+	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_X ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(2)
 
 	PORT_START	/* IN 5, unknown */
-	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_PLAYER2, 20, 10, 0, 0xff)
+	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_PLAYER(2)
 INPUT_PORTS_END
 
 /**********************************************************
@@ -454,7 +454,7 @@ static struct ES5505interface es5505_interface =
 static INTERRUPT_GEN( groundfx_interrupt )
 {
 	frame_counter^=1;
-	cpu_set_irq_line(0, 4, HOLD_LINE);
+	cpunum_set_input_line(0, 4, HOLD_LINE);
 }
 
 static MACHINE_DRIVER_START( groundfx )
@@ -552,7 +552,7 @@ DRIVER_INIT( groundfx )
 	int data;
 
 	/* Speedup handlers */
-	install_mem_read32_handler(0, 0x20b574, 0x20b577, irq_speedup_r_groundfx);
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x20b574, 0x20b577, 0, 0, irq_speedup_r_groundfx);
 
 	/* make piv tile GFX format suitable for gfxdecode */
 	offset = size/2;

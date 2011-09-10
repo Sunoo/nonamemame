@@ -45,7 +45,7 @@ static int start, end, bank;
 
 void gcpinbal_interrupt1(int x)
 {
-	cpu_set_irq_line(0,1,HOLD_LINE);
+	cpunum_set_input_line(0,1,HOLD_LINE);
 }
 
 void gcpinbal_interrupt3(int x)
@@ -53,7 +53,7 @@ void gcpinbal_interrupt3(int x)
 	// IRQ3 is from the M6585
 	if (!ADPCM_playing(0))
 	{
-		cpu_set_irq_line(0,3,HOLD_LINE);
+		cpunum_set_input_line(0,3,HOLD_LINE);
 	}
 }
 
@@ -63,7 +63,7 @@ static INTERRUPT_GEN( gcpinbal_interrupt )
 
 	timer_set(TIME_IN_CYCLES(500,0),0, gcpinbal_interrupt1);
 	timer_set(TIME_IN_CYCLES(1000,0),0, gcpinbal_interrupt3);
-	cpu_set_irq_line(0, 4, HOLD_LINE);
+	cpunum_set_input_line(0, 4, HOLD_LINE);
 }
 
 
@@ -279,18 +279,18 @@ INPUT_PORTS_START( gcpinbal )
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER1 )	// Item right
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )	// Inner flipper right
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 )	// Outer flipper right
-	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON8 | IPF_PLAYER1 )	// Tilt right
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(1)	// Item right
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)	// Inner flipper right
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)	// Outer flipper right
+	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON8 ) PORT_PLAYER(1)	// Tilt right
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER1 )	// Item left
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )	// Inner flipper left
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )	// Outer flipper left
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON7 | IPF_PLAYER1 )	// Tilt left
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(1)	// Item left
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)	// Inner flipper left
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)	// Outer flipper left
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON7 ) PORT_PLAYER(1)	// Tilt left
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START1 )
 
 	PORT_START	/* IN1 */

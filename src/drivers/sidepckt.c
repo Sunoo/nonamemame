@@ -23,31 +23,31 @@ PALETTE_INIT( sidepckt );
 VIDEO_START( sidepckt );
 VIDEO_UPDATE( sidepckt );
 
-WRITE_HANDLER( sidepckt_flipscreen_w );
-WRITE_HANDLER( sidepckt_videoram_w );
-WRITE_HANDLER( sidepckt_colorram_w );
+WRITE8_HANDLER( sidepckt_flipscreen_w );
+WRITE8_HANDLER( sidepckt_videoram_w );
+WRITE8_HANDLER( sidepckt_colorram_w );
 static int i8751_return;
 
 
-static WRITE_HANDLER( sound_cpu_command_w )
+static WRITE8_HANDLER( sound_cpu_command_w )
 {
     soundlatch_w(offset,data);
-    cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
+    cpunum_set_input_line(1,INPUT_LINE_NMI,PULSE_LINE);
 }
 
-static READ_HANDLER( sidepckt_i8751_r )
+static READ8_HANDLER( sidepckt_i8751_r )
 {
 	return i8751_return;
 }
 
-static WRITE_HANDLER( sidepckt_i8751_w )
+static WRITE8_HANDLER( sidepckt_i8751_w )
 {
 	int table_1[]={5,3,2};
 	int table_2[]={0x8e,0x42,0xad,0x58,0xec,0x85,0xdd,0x4c,0xad,0x9f,0x00,0x4c,0x7e,0x42,0xa2,0xff};
 	int table_3[]={0xbd,0x73,0x80,0xbd,0x73,0xa7,0xbd,0x73,0xe0,0x7e,0x72,0x56,0xff,0xff,0xff,0xff};
 	static int current_ptr=0,current_table=0,in_math=0,math_param;
 
-	cpu_set_irq_line(0,M6809_FIRQ_LINE,HOLD_LINE); /* i8751 triggers FIRQ on main cpu */
+	cpunum_set_input_line(0,M6809_FIRQ_LINE,HOLD_LINE); /* i8751 triggers FIRQ on main cpu */
 
 	/* This function takes multiple parameters */
 	if (in_math==1) {
@@ -81,14 +81,14 @@ static WRITE_HANDLER( sidepckt_i8751_w )
 	}
 }
 
-static WRITE_HANDLER( sidepctj_i8751_w )
+static WRITE8_HANDLER( sidepctj_i8751_w )
 {
 	int table_1[]={5,3,0};
 	int table_2[]={0x8e,0x42,0xb2,0x58,0xec,0x85,0xdd,0x4c,0xad,0x9f,0x00,0x4c,0x7e,0x42,0xa7,0xff};
 	int table_3[]={0xbd,0x71,0xc8,0xbd,0x71,0xef,0xbd,0x72,0x28,0x7e,0x70,0x9e,0xff,0xff,0xff,0xff};
 	static int current_ptr=0,current_table=0,in_math,math_param;
 
-	cpu_set_irq_line(0,M6809_FIRQ_LINE,HOLD_LINE); /* i8751 triggers FIRQ on main cpu */
+	cpunum_set_input_line(0,M6809_FIRQ_LINE,HOLD_LINE); /* i8751 triggers FIRQ on main cpu */
 
 	/* This function takes multiple parameters */
 	if (in_math==1) {
@@ -178,10 +178,10 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( sidepckt )
     PORT_START /* 0x3000 */
-    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY )
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY )
-    PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY )
+    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+    PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
     PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
     PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
     PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
@@ -189,12 +189,12 @@ INPUT_PORTS_START( sidepckt )
 
     PORT_START /* 0x3001 */
 	/* I haven't found a way to make the game use the 2p controls */
-    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_COCKTAIL )
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY | IPF_COCKTAIL )
-    PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_COCKTAIL )
-    PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-    PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+    PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+    PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+    PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
     PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN2 )
     PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
 
@@ -224,7 +224,7 @@ INPUT_PORTS_START( sidepckt )
 
     PORT_START /* 0x3003 */
 	PORT_DIPNAME( 0x03, 0x03, "Timer Speed" )
-	PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Stopped", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0,       0x00, IPT_DIPSWITCH_SETTING ) PORT_NAME("Stopped") PORT_CHEAT
 	PORT_DIPSETTING(    0x03, "Slow" )
 	PORT_DIPSETTING(    0x02, "Medium" )
 	PORT_DIPSETTING(    0x01, "Fast" )
@@ -232,7 +232,7 @@ INPUT_PORTS_START( sidepckt )
 	PORT_DIPSETTING(    0x04, "2" )
 	PORT_DIPSETTING(    0x08, "3" )
 	PORT_DIPSETTING(    0x0c, "6" )
-	PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0,       0x00, IPT_DIPSWITCH_SETTING ) PORT_NAME("Infinite") PORT_CHEAT
 	PORT_DIPNAME( 0x30, 0x00, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x00, "0" )
 	PORT_DIPSETTING(    0x10, "1" )
@@ -280,7 +280,7 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 /* handler called by the 3526 emulator when the internal timers cause an IRQ */
 static void irqhandler(int linestate)
 {
-	cpu_set_irq_line(1,0,linestate);
+	cpunum_set_input_line(1,0,linestate);
 }
 
 static struct YM2203interface ym2203_interface =

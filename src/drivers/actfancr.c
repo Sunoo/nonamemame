@@ -22,12 +22,12 @@
 
 VIDEO_UPDATE( actfancr );
 VIDEO_UPDATE( triothep );
-WRITE_HANDLER( actfancr_pf1_data_w );
-READ_HANDLER( actfancr_pf1_data_r );
-WRITE_HANDLER( actfancr_pf1_control_w );
-WRITE_HANDLER( actfancr_pf2_data_w );
-READ_HANDLER( actfancr_pf2_data_r );
-WRITE_HANDLER( actfancr_pf2_control_w );
+WRITE8_HANDLER( actfancr_pf1_data_w );
+READ8_HANDLER( actfancr_pf1_data_r );
+WRITE8_HANDLER( actfancr_pf1_control_w );
+WRITE8_HANDLER( actfancr_pf2_data_w );
+READ8_HANDLER( actfancr_pf2_data_r );
+WRITE8_HANDLER( actfancr_pf2_control_w );
 VIDEO_START( actfancr );
 VIDEO_START( triothep );
 
@@ -36,12 +36,12 @@ static unsigned char *actfancr_ram;
 
 /******************************************************************************/
 
-static READ_HANDLER( actfan_control_0_r )
+static READ8_HANDLER( actfan_control_0_r )
 {
 	return readinputport(2); /* VBL */
 }
 
-static READ_HANDLER( actfan_control_1_r )
+static READ8_HANDLER( actfan_control_1_r )
 {
 	switch (offset) {
 		case 0: return readinputport(0); /* Player 1 */
@@ -54,12 +54,12 @@ static READ_HANDLER( actfan_control_1_r )
 
 static int trio_control_select;
 
-static WRITE_HANDLER( triothep_control_select_w )
+static WRITE8_HANDLER( triothep_control_select_w )
 {
 	trio_control_select=data;
 }
 
-static READ_HANDLER( triothep_control_r )
+static READ8_HANDLER( triothep_control_r )
 {
 	switch (trio_control_select) {
 		case 0: return readinputport(0); /* Player 1 */
@@ -72,10 +72,10 @@ static READ_HANDLER( triothep_control_r )
 	return 0xff;
 }
 
-static WRITE_HANDLER( actfancr_sound_w )
+static WRITE8_HANDLER( actfancr_sound_w )
 {
 	soundlatch_w(0,data & 0xff);
-	cpu_set_irq_line(1, IRQ_LINE_NMI, PULSE_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 }
 
 /******************************************************************************/
@@ -155,22 +155,22 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( actfancr )
 	PORT_START	/* Player 1 controls */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
 
 	PORT_START	/* Player 2 controls */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
@@ -213,7 +213,7 @@ INPUT_PORTS_START( actfancr )
 	PORT_DIPSETTING(    0x03, "3" )
 	PORT_DIPSETTING(    0x02, "4" )
 	PORT_DIPSETTING(    0x01, "5" )
-	PORT_BITX(0,  0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "100", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(0,  0x00, IPT_DIPSWITCH_SETTING ) PORT_NAME("100") PORT_CHEAT
 	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Difficulty ) )
 	PORT_DIPSETTING(    0x04, "Easy" )
 	PORT_DIPSETTING(    0x0c, "Normal" )
@@ -235,23 +235,23 @@ INPUT_PORTS_END
 
 INPUT_PORTS_START( triothep )
 	PORT_START	/* Player 1 controls */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
 
 	PORT_START	/* Player 2 controls */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_COCKTAIL
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
 	PORT_START	/* start buttons */
@@ -372,7 +372,7 @@ static struct GfxDecodeInfo triothep_gfxdecodeinfo[] =
 
 static void sound_irq(int linestate)
 {
-	cpu_set_irq_line(1,0,linestate); /* IRQ */
+	cpunum_set_input_line(1,0,linestate); /* IRQ */
 }
 
 static struct YM2203interface ym2203_interface =
@@ -600,7 +600,7 @@ ROM_END
 
 /******************************************************************************/
 
-static READ_HANDLER( cycle_r )
+static READ8_HANDLER( cycle_r )
 {
 	int pc=activecpu_get_pc();
 	int ret=actfancr_ram[0x26];
@@ -615,7 +615,7 @@ static READ_HANDLER( cycle_r )
 	return ret;
 }
 
-static READ_HANDLER( cyclej_r )
+static READ8_HANDLER( cyclej_r )
 {
 	int pc=activecpu_get_pc();
 	int ret=actfancr_ram[0x26];
@@ -632,12 +632,12 @@ static READ_HANDLER( cyclej_r )
 
 static DRIVER_INIT( actfancr )
 {
-	install_mem_read_handler(0, 0x1f0026, 0x1f0027, cycle_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x1f0026, 0x1f0027, 0, 0, cycle_r);
 }
 
 static DRIVER_INIT( actfancj )
 {
-	install_mem_read_handler(0, 0x1f0026, 0x1f0027, cyclej_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x1f0026, 0x1f0027, 0, 0, cyclej_r);
 }
 
 

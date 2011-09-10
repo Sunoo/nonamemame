@@ -59,14 +59,14 @@ extern unsigned char *dday_colorram;
 PALETTE_INIT( dday );
 VIDEO_START( dday );
 VIDEO_UPDATE( dday );
-WRITE_HANDLER( dday_bgvideoram_w );
-WRITE_HANDLER( dday_fgvideoram_w );
-WRITE_HANDLER( dday_textvideoram_w );
-WRITE_HANDLER( dday_colorram_w );
-READ_HANDLER( dday_colorram_r );
-WRITE_HANDLER( dday_control_w );
-WRITE_HANDLER( dday_sl_control_w );
-READ_HANDLER( dday_countdown_timer_r );
+WRITE8_HANDLER( dday_bgvideoram_w );
+WRITE8_HANDLER( dday_fgvideoram_w );
+WRITE8_HANDLER( dday_textvideoram_w );
+WRITE8_HANDLER( dday_colorram_w );
+READ8_HANDLER( dday_colorram_r );
+WRITE8_HANDLER( dday_control_w );
+WRITE8_HANDLER( dday_sl_control_w );
+READ8_HANDLER( dday_countdown_timer_r );
 
 
 static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
@@ -181,7 +181,7 @@ INPUT_PORTS_START( dday )
 	PORT_DIPSETTING(    0x10, DEF_STR( 1C_8C ) )
 
 	PORT_START      /* IN1 */
-	PORT_ANALOG(0xff, 96, IPT_PADDLE, 20, 10, 0, 191 )
+	PORT_BIT(0xff, 96, IPT_PADDLE ) PORT_MINMAX(0,191) PORT_SENSITIVITY(20) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 INPUT_PORTS_START( ddayc )
@@ -254,7 +254,7 @@ INPUT_PORTS_START( ddayc )
 	PORT_DIPSETTING(    0x10, DEF_STR( 1C_8C ) )
 
 	PORT_START      /* IN1 */
-	PORT_ANALOG(0xff, 96, IPT_PADDLE, 20, 10, 0, 191 )
+	PORT_BIT(0xff, 96, IPT_PADDLE ) PORT_MINMAX(0,191) PORT_SENSITIVITY(20) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 

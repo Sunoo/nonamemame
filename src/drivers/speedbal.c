@@ -57,22 +57,22 @@ size_t speedbal_sprites_dataram_size;
 
 VIDEO_START( speedbal );
 VIDEO_UPDATE( speedbal );
-READ_HANDLER( speedbal_foreground_videoram_r );
-WRITE_HANDLER( speedbal_foreground_videoram_w );
-READ_HANDLER( speedbal_background_videoram_r );
-WRITE_HANDLER( speedbal_background_videoram_w );
+READ8_HANDLER( speedbal_foreground_videoram_r );
+WRITE8_HANDLER( speedbal_foreground_videoram_w );
+READ8_HANDLER( speedbal_background_videoram_r );
+WRITE8_HANDLER( speedbal_background_videoram_w );
 
 
 unsigned char *speedbal_sharedram;
 
-READ_HANDLER( speedbal_sharedram_r )
+READ8_HANDLER( speedbal_sharedram_r )
 {
 //  if (offset==0x0) speedbal_sharedram[offset]+=1;
   return speedbal_sharedram[offset];
 }
 
 
-WRITE_HANDLER( speedbal_sharedram_w )
+WRITE8_HANDLER( speedbal_sharedram_w )
 {
     speedbal_sharedram[offset] = data;
 }
@@ -187,10 +187,10 @@ INPUT_PORTS_START( speedbal )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW , IPT_COIN1 )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW , IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW , IPT_BUTTON2 | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW , IPT_BUTTON4 | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW , IPT_BUTTON3 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW , IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW , IPT_BUTTON2 ) PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW , IPT_BUTTON4 ) PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW , IPT_BUTTON3 ) PORT_COCKTAIL
 	PORT_BIT( 0x10, IP_ACTIVE_LOW , IPT_TILT    )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )

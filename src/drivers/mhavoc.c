@@ -191,7 +191,7 @@
  *
  *************************************/
 
-static READ_HANDLER( dual_pokey_r )
+static READ8_HANDLER( dual_pokey_r )
 {
 	int pokey_num = (offset >> 3) & 0x01;
 	int control = (offset & 0x10) >> 1;
@@ -204,7 +204,7 @@ static READ_HANDLER( dual_pokey_r )
 }
 
 
-static WRITE_HANDLER( dual_pokey_w )
+static WRITE8_HANDLER( dual_pokey_w )
 {
 	int pokey_num = (offset >> 3) & 0x01;
 	int control = (offset & 0x10) >> 1;
@@ -226,12 +226,12 @@ static WRITE_HANDLER( dual_pokey_w )
 
 static data8_t *gammaram;
 
-static READ_HANDLER( mhavoc_gammaram_r )
+static READ8_HANDLER( mhavoc_gammaram_r )
 {
 	return gammaram[offset & 0x7ff];
 }
 
-static WRITE_HANDLER( mhavoc_gammaram_w )
+static WRITE8_HANDLER( mhavoc_gammaram_w )
 {
 	gammaram[offset & 0x7ff] = data;
 }
@@ -369,19 +369,19 @@ INPUT_PORTS_START( mhavoc )
 	PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT )
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )
-	PORT_BITX( 0x20, IP_ACTIVE_LOW, IPT_SERVICE, "Diag Step/Coin C", KEYCODE_F1, IP_JOY_NONE )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Diag Step/Coin C") PORT_CODE(KEYCODE_F1)
 	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_COIN1 )	/* Left Coin Switch  */
 	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )	/* Right Coin */
 
 	PORT_START	/* IN1 - gamma */
 	PORT_BIT ( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
 
 	PORT_START	/* IN2 - gamma */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_REVERSE, 100, 40, 0, 0 )
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(100) PORT_KEYDELTA(40) PORT_REVERSE
 
 	PORT_START /* DIP Switch at position 13/14S */
 	PORT_DIPNAME( 0x01, 0x00, "Adaptive Difficulty" )
@@ -440,19 +440,19 @@ INPUT_PORTS_START( mhavocp )
 	PORT_START	/* IN0 - alpha (player_1 = 0) */
 	PORT_BIT ( 0x0f, IP_ACTIVE_HIGH, IPT_SPECIAL )
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX( 0x20, IP_ACTIVE_LOW, IPT_SERVICE, "Diag Step/Coin C", KEYCODE_F1, IP_JOY_NONE )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Diag Step/Coin C") PORT_CODE(KEYCODE_F1)
 	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_COIN1 )	/* Left Coin Switch  */
 	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )	/* Right Coin */
 
 	PORT_START	/* IN1 - gamma */
 	PORT_BIT ( 0x0f, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
 
 	PORT_START	/* IN2 - gamma */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_REVERSE, 100, 40, 0, 0 )
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(100) PORT_KEYDELTA(40) PORT_REVERSE
 
 	PORT_START /* DIP Switch at position 13/14S */
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )
@@ -520,7 +520,7 @@ INPUT_PORTS_START( alphaone )
 	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
 
 	PORT_START	/* IN2 - gamma */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_REVERSE, 100, 40, 0, 0 )
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(100) PORT_KEYDELTA(40) PORT_REVERSE
 INPUT_PORTS_END
 
 

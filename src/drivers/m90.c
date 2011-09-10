@@ -37,8 +37,8 @@ extern unsigned char *m90_video_data;
 
 VIDEO_UPDATE( m90 );
 VIDEO_UPDATE( m90_bootleg );
-WRITE_HANDLER( m90_video_control_w );
-WRITE_HANDLER( m90_video_w );
+WRITE8_HANDLER( m90_video_control_w );
+WRITE8_HANDLER( m90_video_w );
 VIDEO_START( m90 );
 
 /***************************************************************************/
@@ -55,7 +55,7 @@ static void set_m90_bank(void)
 
 /***************************************************************************/
 
-static WRITE_HANDLER( m90_coincounter_w )
+static WRITE8_HANDLER( m90_coincounter_w )
 {
 	if (offset==0)
 	{
@@ -66,7 +66,7 @@ static WRITE_HANDLER( m90_coincounter_w )
 	}
 }
 
-static WRITE_HANDLER( quizf1_bankswitch_w )
+static WRITE8_HANDLER( quizf1_bankswitch_w )
 {
 	if (offset == 0)
 	{
@@ -366,23 +366,23 @@ INPUT_PORTS_END
 
 INPUT_PORTS_START( quizf1 )
 	PORT_START
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_START
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	IREM_COINS
 
 	PORT_START	/* Dip switch bank 1 */
@@ -526,7 +526,7 @@ static struct DACinterface dac_interface =
 
 static INTERRUPT_GEN( m90_interrupt )
 {
-	cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, 0x60/4);
+	cpunum_set_input_line_and_vector(0, 0, HOLD_LINE, 0x60/4);
 }
 
 
@@ -902,7 +902,7 @@ static DRIVER_INIT( bombrman )
 }
 
 /* Bomberman World executes encrypted code from RAM! */
-static WRITE_HANDLER (bbmanw_ram_write)
+static WRITE8_HANDLER (bbmanw_ram_write)
 {
 	unsigned char *RAM = memory_region(REGION_CPU1);
 	RAM[0x0a0c00+offset]=data;
@@ -913,7 +913,7 @@ static DRIVER_INIT( bbmanw )
 {
 	irem_cpu_decrypt(0,dynablaster_decryption_table);
 
-	install_mem_write_handler(0, 0xa0c00, 0xa0cff, bbmanw_ram_write);
+	memory_install_write8_handler(0, ADDRESS_SPACE_PROGRAM, 0xa0c00, 0xa0cff, 0, 0, bbmanw_ram_write);
 }
 
 static DRIVER_INIT( quizf1 )

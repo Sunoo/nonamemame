@@ -27,8 +27,8 @@ Sound: AY-3-8912
 #include "vidhrdw/crtc6845.h"
 
 /* vidhrdw */
-WRITE_HANDLER( usg_videoram_w );
-WRITE_HANDLER( usg_charram_w );
+WRITE8_HANDLER( usg_videoram_w );
+WRITE8_HANDLER( usg_charram_w );
 VIDEO_START(usg);
 PALETTE_INIT(usg);
 VIDEO_UPDATE(usg);
@@ -38,7 +38,7 @@ extern struct tilemap *usg_tilemap;
 extern data8_t *usg_videoram,*usg_charram;
 
 
-static WRITE_HANDLER( usg_rombank_w )
+static WRITE8_HANDLER( usg_rombank_w )
 {
 	unsigned char *RAM = memory_region(REGION_CPU1);
 
@@ -48,7 +48,7 @@ static WRITE_HANDLER( usg_rombank_w )
 	cpu_setbank( 1,&RAM[ 0x10000 + 0x4000 * data] );
 }
 
-static WRITE_HANDLER( lamps1_w )
+static WRITE8_HANDLER( lamps1_w )
 {
 	/* button lamps */
 	set_led_status(0,data & 0x01);
@@ -60,7 +60,7 @@ static WRITE_HANDLER( lamps1_w )
 	/* bit 5 toggles all the time - extra lamp? */
 }
 
-static WRITE_HANDLER( lamps2_w )
+static WRITE8_HANDLER( lamps2_w )
 {
 	/* bit 5 toggles all the time - extra lamp? */
 }
@@ -140,11 +140,11 @@ static ADDRESS_MAP_START( usg185_writemem, ADDRESS_SPACE_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 #define USGPC1\
-	PORT_BITX(0x01, IP_ACTIVE_LOW, IPT_BUTTON1, "Button 1", KEYCODE_Z, IP_JOY_DEFAULT )\
-	PORT_BITX(0x02, IP_ACTIVE_LOW, IPT_BUTTON2, "Button 2", KEYCODE_X, IP_JOY_DEFAULT )\
-	PORT_BITX(0x04, IP_ACTIVE_LOW, IPT_BUTTON3, "Button 3", KEYCODE_C, IP_JOY_DEFAULT )\
-	PORT_BITX(0x08, IP_ACTIVE_LOW, IPT_BUTTON4, "Button 4", KEYCODE_V, IP_JOY_DEFAULT )\
-	PORT_BITX(0x10, IP_ACTIVE_LOW, IPT_BUTTON5, "Button 5", KEYCODE_B, IP_JOY_DEFAULT )\
+	PORT_BIT(0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Button 1") PORT_CODE(KEYCODE_Z)\
+	PORT_BIT(0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Button 2") PORT_CODE(KEYCODE_X)\
+	PORT_BIT(0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("Button 3") PORT_CODE(KEYCODE_C)\
+	PORT_BIT(0x08, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("Button 4") PORT_CODE(KEYCODE_V)\
+	PORT_BIT(0x10, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("Button 5") PORT_CODE(KEYCODE_B)\
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )\
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )\
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )\
@@ -215,7 +215,7 @@ USGPC1
 	PORT_DIPNAME( 0x01, 0x01, "Service Keyboard Attached?" )
 	PORT_DIPSETTING(    0x01, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	PORT_BITX(0x02, IP_ACTIVE_HIGH, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -248,7 +248,7 @@ INPUT_PORTS_START( usg83 )
 	PORT_DIPNAME( 0x01, 0x01, "Service Keyboard Attached?" )
 	PORT_DIPSETTING(    0x01, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
-	PORT_BITX(0x02, IP_ACTIVE_HIGH, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_DIPNAME( 0x04, 0x04, "Test_Switch" )
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )

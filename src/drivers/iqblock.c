@@ -50,7 +50,7 @@ Stephh's notes :
 #include "iqblock.h"
 
 
-static WRITE_HANDLER( iqblock_prot_w )
+static WRITE8_HANDLER( iqblock_prot_w )
 {
     UINT8 *mem = memory_region( REGION_CPU1 );
 
@@ -59,7 +59,7 @@ static WRITE_HANDLER( iqblock_prot_w )
     mem[0xfe1c] = data;
 }
 
-static WRITE_HANDLER( grndtour_prot_w )
+static WRITE8_HANDLER( grndtour_prot_w )
 {
     UINT8 *mem = memory_region( REGION_CPU1 );
 
@@ -73,23 +73,23 @@ static WRITE_HANDLER( grndtour_prot_w )
 static INTERRUPT_GEN( iqblock_interrupt )
 {
 	if (cpu_getiloops() & 1)
-		cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);	/* ???? */
+		cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);	/* ???? */
 	else
-		cpu_set_irq_line(0, 0, ASSERT_LINE);			/* ???? */
+		cpunum_set_input_line(0, 0, ASSERT_LINE);			/* ???? */
 }
 
-static WRITE_HANDLER( iqblock_irqack_w )
+static WRITE8_HANDLER( iqblock_irqack_w )
 {
-	cpu_set_irq_line(0, 0, CLEAR_LINE);
+	cpunum_set_input_line(0, 0, CLEAR_LINE);
 }
 
-static READ_HANDLER( extrarom_r )
+static READ8_HANDLER( extrarom_r )
 {
 	return memory_region(REGION_USER1)[offset];
 }
 
 
-static WRITE_HANDLER( port_C_w )
+static WRITE8_HANDLER( port_C_w )
 {
 	/* bit 4 unknown; it is pulsed at the end of every NMI */
 
@@ -157,28 +157,28 @@ INPUT_PORTS_START( iqblock )
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 )				// "test mode" only
 
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )					// "test mode" only
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )	// "test mode" only
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL	// "test mode" only
 
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 )				// "test mode" only
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON4 )				// "test mode" only
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_COCKTAIL )	// "test mode" only
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_COCKTAIL )	// "test mode" only
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_COCKTAIL	// "test mode" only
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_COCKTAIL	// "test mode" only
 	PORT_BIT( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START
@@ -427,7 +427,7 @@ static DRIVER_INIT( iqblock )
 	paletteram_2       = rom + 0x12800;
 	iqblock_fgvideoram = rom + 0x16800;
 	iqblock_bgvideoram = rom + 0x17000;
-	install_mem_write_handler( 0, 0xfe26, 0xfe26, iqblock_prot_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_PROGRAM, 0xfe26, 0xfe26, 0, 0, iqblock_prot_w);
 	iqblock_vidhrdw_type=1;
 }
 
@@ -449,7 +449,7 @@ static DRIVER_INIT( grndtour )
 	paletteram_2       = rom + 0x12800;
 	iqblock_fgvideoram = rom + 0x16800;
 	iqblock_bgvideoram = rom + 0x17000;
-	install_mem_write_handler( 0, 0xfe39, 0xfe39, grndtour_prot_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_PROGRAM, 0xfe39, 0xfe39, 0, 0, grndtour_prot_w);
 	iqblock_vidhrdw_type=0;
 }
 

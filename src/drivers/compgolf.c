@@ -16,23 +16,23 @@ as well.
 extern data8_t *compgolf_bg_ram;
 extern int compgolf_scrollx_lo, compgolf_scrolly_lo, compgolf_scrollx_hi, compgolf_scrolly_hi;
 
-extern WRITE_HANDLER( compgolf_video_w );
-extern WRITE_HANDLER( compgolf_back_w );
+extern WRITE8_HANDLER( compgolf_video_w );
+extern WRITE8_HANDLER( compgolf_back_w );
 extern PALETTE_INIT ( compgolf );
 extern VIDEO_START  ( compgolf );
 extern VIDEO_UPDATE ( compgolf );
 
-static WRITE_HANDLER( compgolf_scrollx_lo_w )
+static WRITE8_HANDLER( compgolf_scrollx_lo_w )
 {
 	compgolf_scrollx_lo = data;
 }
 
-static WRITE_HANDLER( compgolf_scrolly_lo_w )
+static WRITE8_HANDLER( compgolf_scrolly_lo_w )
 {
 	compgolf_scrolly_lo = data;
 }
 
-static WRITE_HANDLER( compgolf_ctrl_w )
+static WRITE8_HANDLER( compgolf_ctrl_w )
 {
 	/* bit 4 and 6 are always set */
 
@@ -92,12 +92,12 @@ INPUT_PORTS_START( compgolf )
 
 	/* Player 2 Port */
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1	|IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2	|IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP	  |IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  |IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  |IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT |IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1	 ) PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2	 ) PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP	 ) PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
 
@@ -198,7 +198,7 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 
 static void sound_irq(int linestate)
 {
-	cpu_set_irq_line(0,0,linestate);
+	cpunum_set_input_line(0,0,linestate);
 }
 
 static struct YM2203interface ym2203_interface =

@@ -82,14 +82,14 @@ extern UINT8 *tecfri_colorram;
 extern UINT8 *tecfri_videoram2;
 extern UINT8 *tecfri_colorram2;
 
-extern WRITE_HANDLER( tecfri_videoram_w );
-extern WRITE_HANDLER( tecfri_colorram_w );
-extern WRITE_HANDLER( tecfri_videoram2_w );
-extern WRITE_HANDLER( tecfri_colorram2_w );
-extern WRITE_HANDLER( tecfri_scroll_bg_w );
-extern WRITE_HANDLER( flip_screen_w );
-extern WRITE_HANDLER( sauro_scroll_fg_w );
-extern WRITE_HANDLER( trckydoc_spriteram_mirror_w );
+extern WRITE8_HANDLER( tecfri_videoram_w );
+extern WRITE8_HANDLER( tecfri_colorram_w );
+extern WRITE8_HANDLER( tecfri_videoram2_w );
+extern WRITE8_HANDLER( tecfri_colorram2_w );
+extern WRITE8_HANDLER( tecfri_scroll_bg_w );
+extern WRITE8_HANDLER( flip_screen_w );
+extern WRITE8_HANDLER( sauro_scroll_fg_w );
+extern WRITE8_HANDLER( trckydoc_spriteram_mirror_w );
 
 extern VIDEO_START( sauro );
 extern VIDEO_START( trckydoc );
@@ -98,26 +98,26 @@ extern VIDEO_UPDATE( sauro );
 extern VIDEO_UPDATE( trckydoc );
 
 
-static WRITE_HANDLER( sauro_sound_command_w )
+static WRITE8_HANDLER( sauro_sound_command_w )
 {
 	data |= 0x80;
 	soundlatch_w(offset, data);
 }
 
-static READ_HANDLER( sauro_sound_command_r )
+static READ8_HANDLER( sauro_sound_command_r )
 {
 	int ret	= soundlatch_r(offset);
 	soundlatch_clear_w(offset, 0);
 	return ret;
 }
 
-static WRITE_HANDLER( sauro_coin1_w )
+static WRITE8_HANDLER( sauro_coin1_w )
 {
 	coin_counter_w(0, data);
 	coin_counter_w(0, 0); // to get the coin counter working in sauro, as it doesn't write 0
 }
 
-static WRITE_HANDLER( sauro_coin2_w )
+static WRITE8_HANDLER( sauro_coin2_w )
 {
 	coin_counter_w(1, data);
 	coin_counter_w(1, 0); // to get the coin counter working in sauro, as it doesn't write 0
@@ -208,20 +208,20 @@ INPUT_PORTS_START( tecfri )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN2 )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY
 
 	PORT_START      /* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START2 )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_COCKTAIL | IPF_8WAY )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL | IPF_8WAY )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_COCKTAIL | IPF_8WAY )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_COCKTAIL | IPF_8WAY )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
 
 	PORT_START
 	PORT_SERVICE( 0x01, IP_ACTIVE_HIGH )
@@ -327,8 +327,8 @@ static struct GfxDecodeInfo trckydoc_gfxdecodeinfo[] =
 
 static INTERRUPT_GEN( sauro_interrupt )
 {
-	cpu_set_irq_line(1, IRQ_LINE_NMI, PULSE_LINE);
-	cpu_set_irq_line(1, 0, HOLD_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
+	cpunum_set_input_line(1, 0, HOLD_LINE);
 }
 
 static struct YM3526interface ym3812_interface =

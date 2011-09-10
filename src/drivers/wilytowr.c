@@ -88,7 +88,7 @@ PALETTE_INIT( wilytowr )
 	}
 }
 
-static WRITE_HANDLER( wilytowr_videoram_w )
+static WRITE8_HANDLER( wilytowr_videoram_w )
 {
 	if (videoram[offset] != data)
 	{
@@ -97,7 +97,7 @@ static WRITE_HANDLER( wilytowr_videoram_w )
 	}
 }
 
-static WRITE_HANDLER( wilytowr_colorram_w )
+static WRITE8_HANDLER( wilytowr_colorram_w )
 {
 	if (colorram[offset] != data)
 	{
@@ -106,7 +106,7 @@ static WRITE_HANDLER( wilytowr_colorram_w )
 	}
 }
 
-static WRITE_HANDLER( wilytowr_videoram2_w )
+static WRITE8_HANDLER( wilytowr_videoram2_w )
 {
 	if (wilytowr_videoram2[offset] != data)
 	{
@@ -115,7 +115,7 @@ static WRITE_HANDLER( wilytowr_videoram2_w )
 	}
 }
 
-static WRITE_HANDLER( wilytwr_palbank_w )
+static WRITE8_HANDLER( wilytwr_palbank_w )
 {
 	if (pal_bank != (data & 0x01))
 	{
@@ -124,7 +124,7 @@ static WRITE_HANDLER( wilytwr_palbank_w )
 	}
 }
 
-WRITE_HANDLER( wilytwr_flipscreen_w )
+WRITE8_HANDLER( wilytwr_flipscreen_w )
 {
 	if (flip_screen != (~data & 0x01))
 	{
@@ -212,21 +212,21 @@ VIDEO_UPDATE( wilytowr )
 }
 
 
-static WRITE_HANDLER( coin_w )
+static WRITE8_HANDLER( coin_w )
 {
 	coin_counter_w(offset, data & 0x01);
 }
 
 
-static WRITE_HANDLER( snd_irq_w )
+static WRITE8_HANDLER( snd_irq_w )
 {
-	cpu_set_irq_line(1, 0, PULSE_LINE);
+	cpunum_set_input_line(1, 0, PULSE_LINE);
 }
 
 
 static int p1,p2;
 
-static WRITE_HANDLER( snddata_w )
+static WRITE8_HANDLER( snddata_w )
 {
 	if ((p2 & 0xf0) == 0xe0)
 		AY8910_control_port_0_w(0,offset);
@@ -241,12 +241,12 @@ static WRITE_HANDLER( snddata_w )
 		logerror("%04x: snddata_w ctrl = %02x, p1 = %02x, p2 = %02x, data = %02x\n",activecpu_get_pc(),data,p1,p2,offset);
 }
 
-static WRITE_HANDLER( p1_w )
+static WRITE8_HANDLER( p1_w )
 {
 	p1 = data;
 }
 
-static WRITE_HANDLER( p2_w )
+static WRITE8_HANDLER( p2_w )
 {
 	p2 = data;
 }
@@ -304,20 +304,20 @@ ADDRESS_MAP_END
 INPUT_PORTS_START( wilytowr )
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -367,13 +367,13 @@ INPUT_PORTS_START( wilytowr )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
 	/* In stop mode, press 1 to stop and 2 to restart */
-	PORT_BITX   ( 0x10, 0x00, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Stop Mode", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT   ( 0x10, 0x00, IPT_DIPSWITCH_NAME ) PORT_NAME("Stop Mode") PORT_CHEAT
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( On ) )
 	PORT_DIPNAME( 0x20, 0x00, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-	PORT_BITX(    0x40, 0x00, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Invulnerability", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(    0x40, 0x00, IPT_DIPSWITCH_NAME ) PORT_NAME("Invulnerability") PORT_CHEAT
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
 	PORT_SERVICE( 0x80, IP_ACTIVE_HIGH )

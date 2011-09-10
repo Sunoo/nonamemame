@@ -23,8 +23,8 @@ extern int skyfox_bg_pos, skyfox_bg_ctrl;
 
 /* Functions defined in vidhrdw: */
 
-READ_HANDLER( skyfox_vregs_r );
-WRITE_HANDLER( skyfox_vregs_w );
+READ8_HANDLER( skyfox_vregs_r );
+WRITE8_HANDLER( skyfox_vregs_w );
 
 PALETTE_INIT( skyfox );
 
@@ -173,7 +173,7 @@ INPUT_PORTS_START( skyfox )
 	PORT_DIPSETTING(    0x04, "5" )
 //	PORT_DIPSETTING(    0x05, "5" )
 //	PORT_DIPSETTING(    0x06, "5" )
-	PORT_BITX( 0x07, 0x07, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0x07, 0x07, IPT_DIPSWITCH_SETTING ) PORT_NAME("Infinite") PORT_CHEAT
 	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -181,8 +181,8 @@ INPUT_PORTS_START( skyfox )
 	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	// IN4 - Fake input port, polled every VBLANK to generate an NMI upon coin insertion
-	PORT_BIT_IMPULSE(  0x01, IP_ACTIVE_LOW, IPT_COIN1, 1 )
-	PORT_BIT_IMPULSE(  0x02, IP_ACTIVE_LOW, IPT_COIN2, 1 )
+	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(1)
+	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(1)
 
 
 INPUT_PORTS_END
@@ -250,7 +250,7 @@ static INTERRUPT_GEN( skyfox_interrupt )
 	skyfox_bg_pos += (skyfox_bg_ctrl >> 1) & 0x7;	// maybe..
 
 	/* Check coin 1 & 2 */
-	if ((readinputport(4) & 3) != 3) cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+	if ((readinputport(4) & 3) != 3) cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 }
 
 static struct YM2203interface skyfox_ym2203_interface =

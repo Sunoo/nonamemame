@@ -168,15 +168,15 @@ static READ16_HANDLER( dassault_sub_control_r )
 static WRITE16_HANDLER( dassault_sound_w )
 {
 	soundlatch_w(0,data&0xff);
-	cpu_set_irq_line(2,0,HOLD_LINE); /* IRQ1 */
+	cpunum_set_input_line(2,0,HOLD_LINE); /* IRQ1 */
 }
 
 /* The CPU-CPU irq controller is overlaid onto the end of the shared memory */
 static READ16_HANDLER( dassault_irq_r )
 {
 	switch (offset) {
-		case 0: cpu_set_irq_line(0, 5, CLEAR_LINE); break;
-		case 1: cpu_set_irq_line(1, 6, CLEAR_LINE); break;
+		case 0: cpunum_set_input_line(0, 5, CLEAR_LINE); break;
+		case 1: cpunum_set_input_line(1, 6, CLEAR_LINE); break;
 	}
 	return shared_ram[(0xffc/2)+offset]; /* The values probably don't matter */
 }
@@ -184,8 +184,8 @@ static READ16_HANDLER( dassault_irq_r )
 static WRITE16_HANDLER( dassault_irq_w )
 {
 	switch (offset) {
-		case 0: cpu_set_irq_line(0, 5, ASSERT_LINE); break;
-		case 1: cpu_set_irq_line(1, 6, ASSERT_LINE); break;
+		case 0: cpunum_set_input_line(0, 5, ASSERT_LINE); break;
+		case 1: cpunum_set_input_line(1, 6, ASSERT_LINE); break;
 	}
 
 	COMBINE_DATA(&shared_ram[(0xffc/2)+offset]); /* The values probably don't matter */
@@ -287,22 +287,22 @@ ADDRESS_MAP_END
 /**********************************************************************************/
 
 #define DASSAULT_PLAYER_INPUT( player, start ) \
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | player ) \
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | player ) \
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | player ) \
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | player ) \
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | player ) \
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | player ) \
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(player) \
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(player) \
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED ) \
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, start )
 
 
 INPUT_PORTS_START( thndzone )
 	PORT_START
-	DASSAULT_PLAYER_INPUT( IPF_PLAYER1, IPT_START1 )
+	DASSAULT_PLAYER_INPUT( 1, IPT_START1 )
 
 	PORT_START
-	DASSAULT_PLAYER_INPUT( IPF_PLAYER2, IPT_START2 )
+	DASSAULT_PLAYER_INPUT( 2, IPT_START2 )
 
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
@@ -369,18 +369,18 @@ INPUT_PORTS_START( thndzone )
 	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_VBLANK )
 
 	PORT_START
-	DASSAULT_PLAYER_INPUT( IPF_PLAYER3, IPT_COIN3 )
+	DASSAULT_PLAYER_INPUT( 3, IPT_COIN3 )
 
 	PORT_START
-	DASSAULT_PLAYER_INPUT( IPF_PLAYER4, IPT_COIN4 )
+	DASSAULT_PLAYER_INPUT( 4, IPT_COIN4 )
 INPUT_PORTS_END
 
 INPUT_PORTS_START( dassault )
 	PORT_START
-	DASSAULT_PLAYER_INPUT( IPF_PLAYER1, IPT_START1 )
+	DASSAULT_PLAYER_INPUT( 1, IPT_START1 )
 
 	PORT_START
-	DASSAULT_PLAYER_INPUT( IPF_PLAYER2, IPT_START2 )
+	DASSAULT_PLAYER_INPUT( 2, IPT_START2 )
 
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
@@ -442,18 +442,18 @@ INPUT_PORTS_START( dassault )
 	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_VBLANK )
 
 	PORT_START
-	DASSAULT_PLAYER_INPUT( IPF_PLAYER3, IPT_COIN3 )
+	DASSAULT_PLAYER_INPUT( 3, IPT_COIN3 )
 
 	PORT_START
-	DASSAULT_PLAYER_INPUT( IPF_PLAYER4, IPT_COIN4 )
+	DASSAULT_PLAYER_INPUT( 4, IPT_COIN4 )
 INPUT_PORTS_END
 
 INPUT_PORTS_START( dassaul4 )
 	PORT_START
-	DASSAULT_PLAYER_INPUT( IPF_PLAYER1, IPT_UNUSED )
+	DASSAULT_PLAYER_INPUT( 1, IPT_UNUSED )
 
 	PORT_START
-	DASSAULT_PLAYER_INPUT( IPF_PLAYER2, IPT_UNUSED )
+	DASSAULT_PLAYER_INPUT( 2, IPT_UNUSED )
 
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
@@ -516,10 +516,10 @@ INPUT_PORTS_START( dassaul4 )
 	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_VBLANK )
 
 	PORT_START
-	DASSAULT_PLAYER_INPUT( IPF_PLAYER3, IPT_COIN3 )
+	DASSAULT_PLAYER_INPUT( 3, IPT_COIN3 )
 
 	PORT_START
-	DASSAULT_PLAYER_INPUT( IPF_PLAYER4, IPT_COIN4 )
+	DASSAULT_PLAYER_INPUT( 4, IPT_COIN4 )
 INPUT_PORTS_END
 
 /**********************************************************************************/
@@ -575,10 +575,10 @@ static struct YM2203interface ym2203_interface =
 
 static void sound_irq(int state)
 {
-	cpu_set_irq_line(2,1,state);
+	cpunum_set_input_line(2,1,state);
 }
 
-WRITE_HANDLER( sound_bankswitch_w )
+WRITE8_HANDLER( sound_bankswitch_w )
 {
 	/* the second OKIM6295 ROM is bank switched */
 	OKIM6295_set_bank_base(1, (data & 1) * 0x40000);
@@ -848,7 +848,7 @@ static void init_dassault(void)
 	free(tmp);
 
 	/* Save time waiting on vblank bit */
-	install_mem_read16_handler(0, 0x3f8000, 0x3f8001, dassault_main_skip);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x3f8000, 0x3f8001, 0, 0, dassault_main_skip);
 }
 
 static void init_thndzone(void)
@@ -868,7 +868,7 @@ static void init_thndzone(void)
 	free(tmp);
 
 	/* Save time waiting on vblank bit */
-	install_mem_read16_handler(0, 0x3f8000, 0x3f8001, thndzone_main_skip);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x3f8000, 0x3f8001, 0, 0, thndzone_main_skip);
 }
 
 /**********************************************************************************/

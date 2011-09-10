@@ -138,7 +138,7 @@ VIDEO_START( supertnk )
 
 
 
-WRITE_HANDLER( supertnk_videoram_w )
+WRITE8_HANDLER( supertnk_videoram_w )
 {
 	int x, y, i, col, col0, col1, col2;
 
@@ -168,7 +168,7 @@ WRITE_HANDLER( supertnk_videoram_w )
 
 
 
-READ_HANDLER( supertnk_videoram_r )
+READ8_HANDLER( supertnk_videoram_r )
 {
 	if (supertnk_video_bitplane < 3)
 		return supertnk_videoram[0x2000 * supertnk_video_bitplane + offset];
@@ -184,14 +184,14 @@ VIDEO_UPDATE( supertnk )
 
 
 
-WRITE_HANDLER( supertnk_intack )
+WRITE8_HANDLER( supertnk_intack )
 {
-	cpu_set_irq_line(0, 0, CLEAR_LINE);
+	cpunum_set_input_line(0, 0, CLEAR_LINE);
 }
 
 
 
-WRITE_HANDLER( supertnk_bankswitch_w )
+WRITE8_HANDLER( supertnk_bankswitch_w )
 {
 	int bankaddress;
 	UINT8 *ROM = memory_region(REGION_CPU1);
@@ -212,7 +212,7 @@ WRITE_HANDLER( supertnk_bankswitch_w )
 
 
 
-WRITE_HANDLER( supertnk_set_video_bitplane )
+WRITE8_HANDLER( supertnk_set_video_bitplane )
 {
 	switch (offset)
 	{
@@ -232,7 +232,7 @@ WRITE_HANDLER( supertnk_set_video_bitplane )
 INTERRUPT_GEN( supertnk_interrupt )
 {
 	/* On a TMS9980, a 6 on the interrupt bus means a level 4 interrupt */
-	cpu_set_irq_line_and_vector(0, 0, ASSERT_LINE, 6);
+	cpunum_set_input_line_and_vector(0, 0, ASSERT_LINE, 6);
 }
 
 
@@ -315,24 +315,24 @@ MACHINE_DRIVER_END
 
 INPUT_PORTS_START( supertnk )
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
 
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT_IMPULSE( 0x02, IP_ACTIVE_LOW, IPT_COIN1, 1 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 
 	PORT_START
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Unknown ) )

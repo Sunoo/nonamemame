@@ -65,12 +65,12 @@ sign is intact, however Credit is spelt incorrectly.
 #include "cpu/m6809/m6809.h"
 
 
-extern WRITE_HANDLER( exprraid_videoram_w );
-extern WRITE_HANDLER( exprraid_colorram_w );
-extern WRITE_HANDLER( exprraid_flipscreen_w );
-extern WRITE_HANDLER( exprraid_bgselect_w );
-extern WRITE_HANDLER( exprraid_scrollx_w );
-extern WRITE_HANDLER( exprraid_scrolly_w );
+extern WRITE8_HANDLER( exprraid_videoram_w );
+extern WRITE8_HANDLER( exprraid_colorram_w );
+extern WRITE8_HANDLER( exprraid_flipscreen_w );
+extern WRITE8_HANDLER( exprraid_bgselect_w );
+extern WRITE8_HANDLER( exprraid_scrollx_w );
+extern WRITE8_HANDLER( exprraid_scrolly_w );
 
 extern VIDEO_START( exprraid );
 extern VIDEO_UPDATE( exprraid );
@@ -80,7 +80,7 @@ extern VIDEO_UPDATE( exprraid );
 /* Emulate Protection ( only for original express raider, code is cracked on the bootleg */
 /*****************************************************************************************/
 
-static READ_HANDLER( exprraid_protection_r )
+static READ8_HANDLER( exprraid_protection_r )
 {
 	switch (offset)
 	{
@@ -93,13 +93,13 @@ static READ_HANDLER( exprraid_protection_r )
 	return 0;
 }
 
-static WRITE_HANDLER( sound_cpu_command_w )
+static WRITE8_HANDLER( sound_cpu_command_w )
 {
     soundlatch_w(0,data);
-    cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
+    cpunum_set_input_line(1,INPUT_LINE_NMI,PULSE_LINE);
 }
 
-static READ_HANDLER( vblank_r )
+static READ8_HANDLER( vblank_r )
 {
 	int val = readinputport( 0 );
 
@@ -169,22 +169,22 @@ INPUT_PORTS_START( exprraid )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START /* IN 1 - 0x1801 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
 	PORT_START /* IN 2 - 0x1802 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
 
@@ -279,7 +279,7 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 /* handler called by the 3812 emulator when the internal timers cause an IRQ */
 static void irqhandler(int linestate)
 {
-	cpu_set_irq_line_and_vector(1,0,linestate,0xff);
+	cpunum_set_input_line_and_vector(1,0,linestate,0xff);
 }
 
 static struct YM2203interface ym2203_interface =
@@ -308,7 +308,7 @@ static INTERRUPT_GEN( exprraid_interrupt )
 	if ( ( ~readinputport( 3 ) ) & 0xc0 ) {
 		if ( coin == 0 ) {
 			coin = 1;
-			cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+			cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 		}
 	} else
 		coin = 0;
@@ -557,13 +557,13 @@ static DRIVER_INIT( exprraid )
 
 static DRIVER_INIT( wexpresb )
 {
-	install_mem_read_handler(0, 0x3800, 0x3800, vblank_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x3800, 0x3800, 0, 0, vblank_r);
 	exprraid_gfx_expand();
 }
 
 static DRIVER_INIT( wexpresc )
 {
-	install_mem_read_handler(0, 0xFFC0, 0xFFC0, vblank_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0xFFC0, 0xFFC0, 0, 0, vblank_r);
 	exprraid_gfx_expand();
 }
 

@@ -133,7 +133,7 @@ out:
 
 
 
-static WRITE_HANDLER( wardner_ramrom_bank_sw )
+static WRITE8_HANDLER( wardner_ramrom_bank_sw )
 {
 	if (wardner_membank != data) {
 		int bankaddress = 0;
@@ -143,7 +143,7 @@ static WRITE_HANDLER( wardner_ramrom_bank_sw )
 		wardner_membank = data;
 
 		if (data) {
-			memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x8000, 0xffff, 0, MRA8_BANK1);
+			memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x8000, 0xffff, 0, 0, MRA8_BANK1);
 			switch (data) {
 				case 2:  bankaddress = 0x10000; break;
 				case 3:  bankaddress = 0x18000; break;
@@ -158,10 +158,10 @@ static WRITE_HANDLER( wardner_ramrom_bank_sw )
 		}
 		else {
 			cpu_setbank(1,&RAM[0x0000]);
-			memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x8000, 0x8fff, 0, wardner_sprite_r);
-			memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0xa000, 0xadff, 0, paletteram_r);
-			memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0xae00, 0xafff, 0, MRA8_RAM);
-			memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0xc000, 0xc7ff, 0, MRA8_RAM);
+			memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x8000, 0x8fff, 0, 0, wardner_sprite_r);
+			memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0xa000, 0xadff, 0, 0, paletteram_r);
+			memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0xae00, 0xafff, 0, 0, MRA8_RAM);
+			memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0xc000, 0xc7ff, 0, 0, MRA8_RAM);
 		}
 	}
 }
@@ -256,14 +256,14 @@ ADDRESS_MAP_END
 
 #define  WARDNER_PLAYER_INPUT( player )										 \
 	PORT_START 				/* Player 1 button 3 skips video RAM tests */	 \
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY | player ) \
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | player ) \
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | player ) \
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | player ) \
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 | player)	/* Fire */		 \
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 | player)	/* Jump */		 \
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON3 | player)	/* Shot C */	 \
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON4 | player)	/* Shot D */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(player)	/* Fire */		 \
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(player)	/* Jump */		 \
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_PLAYER(player)	/* Shot C */	 \
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_PLAYER(player)	/* Shot D */
 
 #define  WARDNER_SYSTEM_INPUTS												\
 	PORT_START				/* test button doesnt seem to do anything ? */	\
@@ -329,8 +329,8 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( wardner )
 	WARDNER_SYSTEM_INPUTS
-	WARDNER_PLAYER_INPUT( IPF_PLAYER1 )
-	WARDNER_PLAYER_INPUT( IPF_PLAYER2 )
+	WARDNER_PLAYER_INPUT( 1 )
+	WARDNER_PLAYER_INPUT( 2 )
 
 	PORT_START		/* DSW A */
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Cabinet ) )
@@ -361,8 +361,8 @@ INPUT_PORTS_END
 
 INPUT_PORTS_START( pyros )
 	WARDNER_SYSTEM_INPUTS
-	WARDNER_PLAYER_INPUT( IPF_PLAYER1 )
-	WARDNER_PLAYER_INPUT( IPF_PLAYER2 )
+	WARDNER_PLAYER_INPUT( 1 )
+	WARDNER_PLAYER_INPUT( 2 )
 	PYROS_DSW_A
 
 	PORT_START		/* DSW B */
@@ -391,8 +391,8 @@ INPUT_PORTS_END
 
 INPUT_PORTS_START( wardnerj )
 	WARDNER_SYSTEM_INPUTS
-	WARDNER_PLAYER_INPUT( IPF_PLAYER1 )
-	WARDNER_PLAYER_INPUT( IPF_PLAYER2 )
+	WARDNER_PLAYER_INPUT( 1 )
+	WARDNER_PLAYER_INPUT( 2 )
 	PYROS_DSW_A
 	WARDNER_DSW_B
 INPUT_PORTS_END
@@ -437,7 +437,7 @@ static struct GfxLayout spritelayout =
 /* handler called by the 3812 emulator when the internal timers cause an IRQ */
 static void irqhandler(int linestate)
 {
-	cpu_set_irq_line(1,0,linestate);
+	cpunum_set_input_line(1,0,linestate);
 }
 
 static struct YM3812interface ym3812_interface =

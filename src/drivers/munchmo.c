@@ -27,16 +27,16 @@ extern UINT8 *mnchmobl_sprite_tile;
 
 PALETTE_INIT( mnchmobl );
 VIDEO_START( mnchmobl );
-WRITE_HANDLER( mnchmobl_palette_bank_w );
-WRITE_HANDLER( mnchmobl_flipscreen_w );
-READ_HANDLER( mnchmobl_sprite_xpos_r );
-WRITE_HANDLER( mnchmobl_sprite_xpos_w );
-READ_HANDLER( mnchmobl_sprite_attr_r );
-WRITE_HANDLER( mnchmobl_sprite_attr_w );
-READ_HANDLER( mnchmobl_sprite_tile_r );
-WRITE_HANDLER( mnchmobl_sprite_tile_w );
-READ_HANDLER( mnchmobl_videoram_r );
-WRITE_HANDLER( mnchmobl_videoram_w );
+WRITE8_HANDLER( mnchmobl_palette_bank_w );
+WRITE8_HANDLER( mnchmobl_flipscreen_w );
+READ8_HANDLER( mnchmobl_sprite_xpos_r );
+WRITE8_HANDLER( mnchmobl_sprite_xpos_w );
+READ8_HANDLER( mnchmobl_sprite_attr_r );
+WRITE8_HANDLER( mnchmobl_sprite_attr_w );
+READ8_HANDLER( mnchmobl_sprite_tile_r );
+WRITE8_HANDLER( mnchmobl_sprite_tile_w );
+READ8_HANDLER( mnchmobl_videoram_r );
+WRITE8_HANDLER( mnchmobl_videoram_w );
 VIDEO_UPDATE( mnchmobl );
 
 
@@ -44,7 +44,7 @@ VIDEO_UPDATE( mnchmobl );
 
 static int mnchmobl_nmi_enable = 0;
 
-static WRITE_HANDLER( mnchmobl_nmi_enable_w )
+static WRITE8_HANDLER( mnchmobl_nmi_enable_w )
 {
 	mnchmobl_nmi_enable = data;
 }
@@ -53,19 +53,19 @@ static INTERRUPT_GEN( mnchmobl_interrupt )
 {
 	static int which;
 	which = !which;
-	if( which ) cpu_set_irq_line(0, 0, HOLD_LINE);
-	else if( mnchmobl_nmi_enable ) cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+	if( which ) cpunum_set_input_line(0, 0, HOLD_LINE);
+	else if( mnchmobl_nmi_enable ) cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 }
 
-WRITE_HANDLER( mnchmobl_soundlatch_w )
+WRITE8_HANDLER( mnchmobl_soundlatch_w )
 {
 	soundlatch_w( offset, data );
-	cpu_set_irq_line( 1, 0, HOLD_LINE );
+	cpunum_set_input_line( 1, 0, HOLD_LINE );
 }
 
-WRITE_HANDLER( sound_nmi_ack_w )
+WRITE8_HANDLER( sound_nmi_ack_w )
 {
-	cpu_set_nmi_line(1, CLEAR_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, CLEAR_LINE);
 }
 
 static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
@@ -149,21 +149,21 @@ INPUT_PORTS_START( mnchmobl )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START /* P1 controls */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_LEFT | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_LEFT | IPF_2WAY )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_RIGHT | IPF_2WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_LEFT ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_LEFT ) PORT_2WAY
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_RIGHT ) PORT_2WAY
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START /* P2 controls */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_LEFT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_LEFT | IPF_2WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_RIGHT | IPF_2WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_LEFT ) PORT_2WAY PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_RIGHT ) PORT_2WAY PORT_COCKTAIL
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* DSW1 0xbe02 */

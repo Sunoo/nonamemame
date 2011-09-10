@@ -214,14 +214,14 @@ Notes:
 #include "machine/namcoio.h"
 
 
-#define POLEPOS_TOGGLE	IPF_TOGGLE
+#define POLEPOS_TOGGLE	PORT_TOGGLE
 
 
 /* from sndhrdw */
 int polepos_sh_start(const struct MachineSound *msound);
 void polepos_sh_stop(void);
-WRITE_HANDLER( polepos_engine_sound_lsb_w );
-WRITE_HANDLER( polepos_engine_sound_msb_w );
+WRITE8_HANDLER( polepos_engine_sound_lsb_w );
+WRITE8_HANDLER( polepos_engine_sound_msb_w );
 
 /* from vidhrdw */
 extern data16_t *polepos_view16_memory;
@@ -237,20 +237,20 @@ WRITE16_HANDLER( polepos_view16_w );
 WRITE16_HANDLER( polepos_road16_w );
 WRITE16_HANDLER( polepos_alpha16_w );
 WRITE16_HANDLER( polepos_sprite16_w );
-WRITE_HANDLER( polepos_view_w );
-WRITE_HANDLER( polepos_road_w );
-WRITE_HANDLER( polepos_alpha_w );
-WRITE_HANDLER( polepos_sprite_w );
-WRITE_HANDLER( polepos_chacl_w );
+WRITE8_HANDLER( polepos_view_w );
+WRITE8_HANDLER( polepos_road_w );
+WRITE8_HANDLER( polepos_alpha_w );
+WRITE8_HANDLER( polepos_sprite_w );
+WRITE8_HANDLER( polepos_chacl_w );
 
 READ16_HANDLER( polepos_view16_r );
 READ16_HANDLER( polepos_road16_r );
 READ16_HANDLER( polepos_alpha16_r );
 READ16_HANDLER( polepos_sprite16_r );
-READ_HANDLER( polepos_view_r );
-READ_HANDLER( polepos_road_r );
-READ_HANDLER( polepos_alpha_r );
-READ_HANDLER( polepos_sprite_r );
+READ8_HANDLER( polepos_view_r );
+READ8_HANDLER( polepos_road_r );
+READ8_HANDLER( polepos_alpha_r );
+READ8_HANDLER( polepos_sprite_r );
 WRITE16_HANDLER( polepos_view16_hscroll_w );
 WRITE16_HANDLER( polepos_road16_vscroll_w );
 
@@ -319,7 +319,7 @@ static WRITE8_HANDLER( polepos_latch_w )
 		case 0x00:	/* IRQON */
 			cpu_interrupt_enable(0,bit);
 			if (!bit)
-				cpu_set_irq_line(0, 0, CLEAR_LINE);
+				cpunum_set_input_line(0, 0, CLEAR_LINE);
 			break;
 
 		case 0x01:	/* IOSEL */
@@ -340,11 +340,11 @@ static WRITE8_HANDLER( polepos_latch_w )
 			break;
 
 		case 0x04:	/* RESB */
-			cpu_set_reset_line(1,bit ? CLEAR_LINE : ASSERT_LINE);
+			cpunum_set_input_line(1, INPUT_LINE_RESET, bit ? CLEAR_LINE : ASSERT_LINE);
 			break;
 
 		case 0x05:	/* RESA */
-			cpu_set_reset_line(2,bit ? CLEAR_LINE : ASSERT_LINE);
+			cpunum_set_input_line(2, INPUT_LINE_RESET, bit ? CLEAR_LINE : ASSERT_LINE);
 			break;
 
 		case 0x06:	/* SB0 */
@@ -365,7 +365,7 @@ static WRITE16_HANDLER( polepos_z8002_nvi_enable_w )
 
 	cpu_interrupt_enable(which,data);
 	if (!data)
-		cpu_set_irq_line(which, 0, CLEAR_LINE);
+		cpunum_set_input_line(which, 0, CLEAR_LINE);
 }
 
 
@@ -418,8 +418,8 @@ static MACHINE_INIT( polepos )
 		NAMCOIO_54XX, NULL);
 
 	/* set the interrupt vectors (this shouldn't be needed) */
-	cpu_irq_line_vector_w(1, 0, Z8000_NVI);
-	cpu_irq_line_vector_w(2, 0, Z8000_NVI);
+	cpunum_set_input_line_vector(1, 0, Z8000_NVI);
+	cpunum_set_input_line_vector(2, 0, Z8000_NVI);
 }
 
 
@@ -475,7 +475,7 @@ ADDRESS_MAP_END
 INPUT_PORTS_START( polepos )
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX(0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | POLEPOS_TOGGLE, "Gear Change", KEYCODE_SPACE, IP_JOY_DEFAULT ) /* Gear */
+	PORT_BIT(0x02, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Gear Change") PORT_CODE(KEYCODE_SPACE) POLEPOS_TOGGLE /* Gear */
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SPECIAL )	// start 1, program controlled
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN1 )
@@ -534,20 +534,20 @@ INPUT_PORTS_START( polepos )
 	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
 
 	PORT_START /* IN1 - Brake */
-	PORT_ANALOGX( 0xff, 0x00, IPT_PEDAL2, 100, 16, 0, 0x90, KEYCODE_LALT, IP_JOY_DEFAULT, IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT( 0xff, 0x00, IPT_PEDAL2 ) PORT_MINMAX(0,0x90) PORT_SENSITIVITY(100) PORT_KEYDELTA(16) PORT_CODE_DEC(KEYCODE_LALT)
 
 	PORT_START /* IN2 - Accel */
-	PORT_ANALOGX( 0xff, 0x00, IPT_PEDAL, 100, 16, 0, 0x90, KEYCODE_LCONTROL, IP_JOY_DEFAULT, IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_MINMAX(0,0x90) PORT_SENSITIVITY(100) PORT_KEYDELTA(16) PORT_CODE_DEC(KEYCODE_LCONTROL)
 
 	PORT_START /* IN3 - Steering */
-	PORT_ANALOG ( 0xff, 0x00, IPT_DIAL, 30, 4, 0, 0 )
+	PORT_BIT ( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(30) PORT_KEYDELTA(4)
 INPUT_PORTS_END
 
 
 INPUT_PORTS_START( poleposa )
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX(0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | POLEPOS_TOGGLE, "Gear Change", KEYCODE_SPACE, IP_JOY_DEFAULT ) /* Gear */
+	PORT_BIT(0x02, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Gear Change") PORT_CODE(KEYCODE_SPACE) POLEPOS_TOGGLE /* Gear */
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SPECIAL )	// start 1, program controlled
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN1 )
@@ -606,20 +606,20 @@ INPUT_PORTS_START( poleposa )
 	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
 
 	PORT_START /* IN1 - Brake */
-	PORT_ANALOGX( 0xff, 0x00, IPT_PEDAL2, 100, 16, 0, 0x90, KEYCODE_LALT, IP_JOY_DEFAULT, IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT( 0xff, 0x00, IPT_PEDAL2 ) PORT_MINMAX(0,0x90) PORT_SENSITIVITY(100) PORT_KEYDELTA(16) PORT_CODE_DEC(KEYCODE_LALT)
 
 	PORT_START /* IN2 - Accel */
-	PORT_ANALOGX( 0xff, 0x00, IPT_PEDAL, 100, 16, 0, 0x90, KEYCODE_LCONTROL, IP_JOY_DEFAULT, IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_MINMAX(0,0x90) PORT_SENSITIVITY(100) PORT_KEYDELTA(16) PORT_CODE_DEC(KEYCODE_LCONTROL)
 
 	PORT_START /* IN3 - Steering */
-	PORT_ANALOG ( 0xff, 0x00, IPT_DIAL, 30, 4, 0, 0 )
+	PORT_BIT ( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(30) PORT_KEYDELTA(4)
 INPUT_PORTS_END
 
 
 INPUT_PORTS_START( polepos2 )
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX(0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | POLEPOS_TOGGLE, "Gear Change", KEYCODE_SPACE, IP_JOY_DEFAULT ) /* Gear */
+	PORT_BIT(0x02, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Gear Change") PORT_CODE(KEYCODE_SPACE) POLEPOS_TOGGLE /* Gear */
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SPECIAL )	// start 1, program controlled
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN1 )
@@ -676,13 +676,13 @@ INPUT_PORTS_START( polepos2 )
 	PORT_DIPSETTING(	0x00, "High" )
 
 	PORT_START /* IN1 - Brake */
-	PORT_ANALOGX( 0xff, 0x00, IPT_PEDAL2, 100, 16, 0, 0x90, KEYCODE_LALT, IP_JOY_DEFAULT, IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT( 0xff, 0x00, IPT_PEDAL2 ) PORT_MINMAX(0,0x90) PORT_SENSITIVITY(100) PORT_KEYDELTA(16) PORT_CODE_DEC(KEYCODE_LALT)
 
 	PORT_START /* IN2 - Accel */
-	PORT_ANALOGX( 0xff, 0x00, IPT_PEDAL, 100, 16, 0, 0x90, KEYCODE_LCONTROL, IP_JOY_DEFAULT, IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_MINMAX(0,0x90) PORT_SENSITIVITY(100) PORT_KEYDELTA(16) PORT_CODE_DEC(KEYCODE_LCONTROL)
 
 	PORT_START /* IN3 - Steering */
-	PORT_ANALOG ( 0xff, 0x00, IPT_DIAL, 30, 4, 0, 0 )
+	PORT_BIT ( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(30) PORT_KEYDELTA(4)
 INPUT_PORTS_END
 
 
@@ -1397,7 +1397,7 @@ ROM_END
 static DRIVER_INIT( polepos2 )
 {
 	/* note that the bootleg version doesn't need this custom IC; it has a hacked ROM in its place */
-	install_mem_read16_handler(1, 0x4000, 0x5fff, polepos2_ic25_r);
+	memory_install_read16_handler(1, ADDRESS_SPACE_PROGRAM, 0x4000, 0x5fff, 0, 0, polepos2_ic25_r);
 }
 
 

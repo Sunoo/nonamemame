@@ -73,9 +73,9 @@ Based on sketch made by Tormod
 #include "vidhrdw/generic.h"
 #include "sndhrdw/seibu.h"
 
-WRITE_HANDLER( mustache_videoram_w );
-WRITE_HANDLER( mustache_scroll_w );
-WRITE_HANDLER ( mustache_video_control_w);
+WRITE8_HANDLER( mustache_videoram_w );
+WRITE8_HANDLER( mustache_scroll_w );
+WRITE8_HANDLER ( mustache_video_control_w);
 VIDEO_START( mustache );
 VIDEO_UPDATE( mustache );
 PALETTE_INIT( mustache );
@@ -83,7 +83,7 @@ PALETTE_INIT( mustache );
 
 static int read_coins=0;
 
-READ_HANDLER ( mustache_coin_hack_r )
+READ8_HANDLER ( mustache_coin_hack_r )
 {
 	return (read_coins)?((offset&1	)?(input_port_5_r(0)<<5)|(input_port_5_r(0)<<7):(input_port_5_r(0)<<4)):0;
 }
@@ -127,12 +127,12 @@ INPUT_PORTS_START( mustache )
 
 	PORT_START	/* IN 2 */
 
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY| IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY| IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY| IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT| IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1| IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2| IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 
 	PORT_START	/* IN 3 */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1  )
@@ -183,7 +183,7 @@ INPUT_PORTS_START( mustache )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START
-	PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_HIGH, IPT_COIN1, 1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
 
 INPUT_PORTS_END
 
@@ -220,7 +220,7 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 INTERRUPT_GEN( mustache_interrupt)
 {
 	read_coins^=1;
-	cpu_set_irq_line(0, 0, PULSE_LINE);
+	cpunum_set_input_line(0, 0, PULSE_LINE);
 }
 
 
@@ -318,7 +318,7 @@ static DRIVER_INIT( mustache )
 
 	seibu_sound_decrypt(REGION_CPU1,0x8000);
 
-	install_mem_read_handler( 0, 0xd400, 0xd401, mustache_coin_hack_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0xd400, 0xd401, 0, 0, mustache_coin_hack_r);
 }
 
 

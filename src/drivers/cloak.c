@@ -112,12 +112,12 @@
 
 static int cloak_nvram_enabled;
 
-extern WRITE_HANDLER( cloak_videoram_w );
-extern WRITE_HANDLER( cloak_paletteram_w );
-extern WRITE_HANDLER( cloak_clearbmp_w );
-extern WRITE_HANDLER( graph_processor_w );
-extern WRITE_HANDLER( cloak_flipscreen_w );
-extern READ_HANDLER( graph_processor_r );
+extern WRITE8_HANDLER( cloak_videoram_w );
+extern WRITE8_HANDLER( cloak_paletteram_w );
+extern WRITE8_HANDLER( cloak_clearbmp_w );
+extern WRITE8_HANDLER( graph_processor_w );
+extern WRITE8_HANDLER( cloak_flipscreen_w );
+extern READ8_HANDLER( graph_processor_r );
 
 extern VIDEO_START( cloak );
 extern VIDEO_UPDATE( cloak );
@@ -129,31 +129,31 @@ extern VIDEO_UPDATE( cloak );
  *
  *************************************/
 
-static WRITE_HANDLER( cloak_led_w )
+static WRITE8_HANDLER( cloak_led_w )
 {
 	set_led_status(1 - offset, ~data & 0x80);
 }
 
-static WRITE_HANDLER( cloak_coin_counter_w )
+static WRITE8_HANDLER( cloak_coin_counter_w )
 {
 	coin_counter_w(1 - offset, data & 0x80);
 }
 
-static WRITE_HANDLER( cloak_custom_w )
+static WRITE8_HANDLER( cloak_custom_w )
 {
 }
 
-static WRITE_HANDLER( cloak_irq_reset_0_w )
+static WRITE8_HANDLER( cloak_irq_reset_0_w )
 {
-	cpu_set_irq_line(0, 0, CLEAR_LINE);
+	cpunum_set_input_line(0, 0, CLEAR_LINE);
 }
 
-static WRITE_HANDLER( cloak_irq_reset_1_w )
+static WRITE8_HANDLER( cloak_irq_reset_1_w )
 {
-	cpu_set_irq_line(1, 0, CLEAR_LINE);
+	cpunum_set_input_line(1, 0, CLEAR_LINE);
 }
 
-static WRITE_HANDLER( cloak_nvram_enable_w )
+static WRITE8_HANDLER( cloak_nvram_enable_w )
 {
 	cloak_nvram_enabled = data & 0x01;
 }
@@ -215,14 +215,14 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( cloak )
 	PORT_START	/* IN0 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_DOWN  | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_UP    | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN   | IPF_8WAY )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP     | IPF_8WAY )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT  | IPF_8WAY )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_LEFT   | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_DOWN ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_UP ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_LEFT ) PORT_8WAY
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN ) PORT_8WAY
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP ) PORT_8WAY
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_LEFT ) PORT_8WAY
 
 	PORT_START	/* IN1 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )		// player 2 controls, not used

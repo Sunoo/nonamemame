@@ -159,7 +159,7 @@ static ADDRESS_MAP_START( writemem, ADDRESS_SPACE_PROGRAM, 8 )
 												/* here only to initialize the pointer */
 ADDRESS_MAP_END
 
-static READ_HANDLER( sega_sh_r )
+static READ8_HANDLER( sega_sh_r )
 {
 	/* 0x80 = universal sound board ready */
 	/* 0x01 = speech ready, theorically, but the schematics show it unconnected */
@@ -242,9 +242,9 @@ ADDRESS_MAP_END
 INPUT_PORTS_START( spacfury )
 	PORT_START	/* IN0 - port 0xf8 */
 	/* The next bit is referred to as the Service switch in the self test - it just adds a credit */
-	PORT_BIT_IMPULSE( 0x20, IP_ACTIVE_LOW, IPT_COIN3, 3 )
-	PORT_BIT_IMPULSE( 0x40, IP_ACTIVE_LOW, IPT_COIN2, 3 )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_LOW, IPT_COIN1, 3 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN3 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(3)
 
 	PORT_START	/* IN1 - port 0xf9 */
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_START2 )
@@ -267,7 +267,7 @@ INPUT_PORTS_START( spacfury )
 	PORT_START	/* IN5 - FAKE */
 	/* This fake input port is used to get the status of the F2 key, */
 	/* and activate the test mode, which is triggered by a NMI */
-	PORT_BITX(0x01, IP_ACTIVE_HIGH, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 
 	PORT_START	/* FAKE */
 		/* This fake input port is used for DIP Switch 1 */
@@ -296,19 +296,19 @@ INPUT_PORTS_START( spacfury )
 		COINAGE
 
 	PORT_START	/* IN8 - port 0xfc */
-	PORT_BIT ( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 )
-	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
+	PORT_BIT ( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
 INPUT_PORTS_END
 
 
 INPUT_PORTS_START( zektor )
 	PORT_START	/* IN0 - port 0xf8 */
 	/* The next bit is referred to as the Service switch in the self test - it just adds a credit */
-	PORT_BIT_IMPULSE( 0x20, IP_ACTIVE_LOW, IPT_COIN3, 3 )
-	PORT_BIT_IMPULSE( 0x40, IP_ACTIVE_LOW, IPT_COIN2, 3 )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_LOW, IPT_COIN1, 3 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN3 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(3)
 
 	PORT_START	/* IN1 - port 0xf9 */
 	PORT_BIT ( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -329,7 +329,7 @@ INPUT_PORTS_START( zektor )
 	PORT_START	/* IN5 - FAKE */
 	/* This fake input port is used to get the status of the F2 key, */
 	/* and activate the test mode, which is triggered by a NMI */
-	PORT_BITX(0x01, IP_ACTIVE_HIGH, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 
 	PORT_START	/* FAKE */
 	/* This fake input port is used for DIP Switch 1 */
@@ -358,16 +358,16 @@ INPUT_PORTS_START( zektor )
 	COINAGE
 
 	PORT_START		/* IN8 - FAKE port for the dial */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_CENTER, 100, 10, 0, 0 )
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_CENTER
 INPUT_PORTS_END
 
 
 INPUT_PORTS_START( startrek )
 	PORT_START	/* IN0 - port 0xf8 */
 	/* The next bit is referred to as the Service switch in the self test - it just adds a credit */
-	PORT_BIT_IMPULSE( 0x20, IP_ACTIVE_LOW, IPT_COIN3, 3 )
-	PORT_BIT_IMPULSE( 0x40, IP_ACTIVE_LOW, IPT_COIN2, 3 )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_LOW, IPT_COIN1, 3 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN3 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(3)
 
 	PORT_START	/* IN1 - port 0xf9 */
 	PORT_BIT ( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -390,7 +390,7 @@ INPUT_PORTS_START( startrek )
 	PORT_START	/* IN5 - FAKE */
 	/* This fake input port is used to get the status of the F2 key, */
 	/* and activate the test mode, which is triggered by a NMI */
-	PORT_BITX(0x01, IP_ACTIVE_HIGH, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 
 	PORT_START	/* FAKE */
 	/* This fake input port is used for DIP Switch 1 */
@@ -419,16 +419,16 @@ INPUT_PORTS_START( startrek )
 	COINAGE
 
 	PORT_START		/* IN8 - dummy port for the dial */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_CENTER, 100, 10, 0, 0 )
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_CENTER
 INPUT_PORTS_END
 
 
 INPUT_PORTS_START( tacscan )
 	PORT_START	/* IN0 - port 0xf8 */
 	/* The next bit is referred to as the Service switch in the self test - it just adds a credit */
-	PORT_BIT_IMPULSE( 0x20, IP_ACTIVE_LOW, IPT_COIN3, 3 )
-	PORT_BIT_IMPULSE( 0x40, IP_ACTIVE_LOW, IPT_COIN2, 3 )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_LOW, IPT_COIN1, 3 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN3 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(3)
 
 	PORT_START	/* IN1 - port 0xf9 */
 	PORT_BIT ( 0xf0, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -449,7 +449,7 @@ INPUT_PORTS_START( tacscan )
 	PORT_START	/* IN5 - FAKE */
 	/* This fake input port is used to get the status of the F2 key, */
 	/* and activate the test mode, which is triggered by a NMI */
-	PORT_BITX(0x01, IP_ACTIVE_HIGH, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 
 	PORT_START	/* FAKE */
 	/* This fake input port is used for DIP Switch 1 */
@@ -478,16 +478,16 @@ INPUT_PORTS_START( tacscan )
 	COINAGE
 
 	PORT_START		/* IN8 - FAKE port for the dial */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_CENTER, 100, 10, 0, 0 )
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_CENTER
 INPUT_PORTS_END
 
 
 INPUT_PORTS_START( elim2 )
 	PORT_START	/* IN0 - port 0xf8 */
 	/* The next bit is referred to as the Service switch in the self test - it just adds a credit */
-	PORT_BIT_IMPULSE( 0x20, IP_ACTIVE_LOW, IPT_COIN3, 3 )
-	PORT_BIT_IMPULSE( 0x40, IP_ACTIVE_LOW, IPT_COIN2, 3 )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_LOW, IPT_COIN1, 3 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN3 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(3)
 
 	PORT_START	/* IN1 - port 0xf9 */
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_START2 )
@@ -501,20 +501,20 @@ INPUT_PORTS_START( elim2 )
 	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* IN3 - port 0xfb */
-	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	| IPF_PLAYER2 )
+	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	 ) PORT_PLAYER(2)
 	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT ( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* IN4 - port 0xfc - read in machine/sega.c */
-	PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1		| IPF_PLAYER2 )
-	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2		| IPF_PLAYER2 )
-	PORT_BIT ( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
+	PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1		 ) PORT_PLAYER(2)
+	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2		 ) PORT_PLAYER(2)
+	PORT_BIT ( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
 	PORT_BIT ( 0xf8, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_START	/* IN5 - FAKE */
 	/* This fake input port is used to get the status of the F2 key, */
 	/* and activate the test mode, which is triggered by a NMI */
-	PORT_BITX(0x01, IP_ACTIVE_HIGH, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 
 	PORT_START	/* FAKE */
 		/* This fake input port is used for DIP Switch 1 */
@@ -545,40 +545,40 @@ INPUT_PORTS_START( elim4 )
 	PORT_START	/* IN0 - port 0xf8 */
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	/* The next bit is referred to as the Service switch in the self test - it just adds a credit */
-	PORT_BIT_IMPULSE( 0x20, IP_ACTIVE_LOW, IPT_COIN1, 3 )
-	PORT_BIT_IMPULSE( 0x40, IP_ACTIVE_LOW, IPT_COIN2, 3 )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_LOW, IPT_COIN3, 3 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN3 ) PORT_IMPULSE(3)
 
 	PORT_START	/* IN1 - port 0xf9 */
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 )
-	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 		| IPF_PLAYER2 )
+	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 		 ) PORT_PLAYER(2)
 	PORT_BIT ( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* IN2 - port 0xfa */
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT )
-	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	| IPF_PLAYER2 )
-	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 		| IPF_PLAYER2 )
+	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT	 ) PORT_PLAYER(2)
+	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 		 ) PORT_PLAYER(2)
 	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* IN3 - port 0xfb */
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )
-	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	| IPF_PLAYER2 )
+	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT	 ) PORT_PLAYER(2)
 	PORT_BIT ( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* IN4 - port 0xfc - read in machine/sega.c */
-	PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1		| IPF_PLAYER3 )
-	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2		| IPF_PLAYER3 )
-	PORT_BIT ( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_PLAYER3 )
-	PORT_BIT ( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT	| IPF_PLAYER3 )
-	PORT_BIT ( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1		| IPF_PLAYER4 )
-	PORT_BIT ( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2		| IPF_PLAYER4 )
-	PORT_BIT ( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_PLAYER4 )
-	PORT_BIT ( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT	| IPF_PLAYER4 )
+	PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1		 ) PORT_PLAYER(3)
+	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2		 ) PORT_PLAYER(3)
+	PORT_BIT ( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(3)
+	PORT_BIT ( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT	 ) PORT_PLAYER(3)
+	PORT_BIT ( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1		 ) PORT_PLAYER(4)
+	PORT_BIT ( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2		 ) PORT_PLAYER(4)
+	PORT_BIT ( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(4)
+	PORT_BIT ( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT	 ) PORT_PLAYER(4)
 
 	PORT_START	/* IN5 - FAKE */
 	/* This fake input port is used to get the status of the F2 key, */
 	/* and activate the test mode, which is triggered by a NMI */
-	PORT_BITX(0x01, IP_ACTIVE_HIGH, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 
 	PORT_START	/* FAKE */
 		/* This fake input port is used for DIP Switch 1 */
@@ -605,10 +605,10 @@ INPUT_PORTS_START( elim4 )
 		PORT_BIT ( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 		PORT_START		/* IN8 - FAKE - port 0xfc - read in machine/sega.c */
-	PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_HIGH, IPT_COIN1, 3 )
-	PORT_BIT_IMPULSE( 0x02, IP_ACTIVE_HIGH, IPT_COIN2, 3 )
-	PORT_BIT_IMPULSE( 0x04, IP_ACTIVE_HIGH, IPT_COIN3, 3 )
-	PORT_BIT_IMPULSE( 0x08, IP_ACTIVE_HIGH, IPT_COIN4, 3 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN3 ) PORT_IMPULSE(3)
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN4 ) PORT_IMPULSE(3)
 	PORT_BIT ( 0xf0, IP_ACTIVE_HIGH, IPT_UNUSED )
 INPUT_PORTS_END
 
@@ -1148,12 +1148,12 @@ DRIVER_INIT( spacfury )
 	/* This game uses the 315-0064 security chip */
 	sega_security(64);
 
-	install_port_read_handler(0, 0xfc, 0xfc, input_port_8_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_IO, 0xfc, 0xfc, 0, 0, input_port_8_r);
 
-	install_port_write_handler(0, 0x38, 0x38, sega_sh_speechboard_w);
-	install_port_write_handler(0, 0x3e, 0x3e, spacfury1_sh_w);
-	install_port_write_handler(0, 0x3f, 0x3f, spacfury2_sh_w);
-	install_port_write_handler(0, 0xf8, 0xf8, MWA8_NOP);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x38, 0x38, 0, 0, sega_sh_speechboard_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x3e, 0x3e, 0, 0, spacfury1_sh_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x3f, 0x3f, 0, 0, spacfury2_sh_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0xf8, 0xf8, 0, 0, MWA8_NOP);
 }
 
 
@@ -1162,11 +1162,11 @@ DRIVER_INIT( zektor )
 	/* This game uses the 315-0082 security chip */
 	sega_security(82);
 
-	install_port_read_handler(0, 0xfc, 0xfc, sega_IN4_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_IO, 0xfc, 0xfc, 0, 0, sega_IN4_r);
 
-	install_port_write_handler(0, 0x38, 0x38, sega_sh_speechboard_w);
-	install_port_write_handler(0, 0x3e, 0x3e, zektor1_sh_w);
-	install_port_write_handler(0, 0x3f, 0x3f, zektor2_sh_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x38, 0x38, 0, 0, sega_sh_speechboard_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x3e, 0x3e, 0, 0, zektor1_sh_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x3f, 0x3f, 0, 0, zektor2_sh_w);
 }
 
 
@@ -1175,10 +1175,10 @@ DRIVER_INIT( elim2 )
 	/* This game uses the 315-0070 security chip */
 	sega_security(70);
 
-	install_port_read_handler(0, 0xfc, 0xfc, input_port_4_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_IO, 0xfc, 0xfc, 0, 0, input_port_4_r);
 
-	install_port_write_handler(0, 0x3e, 0x3e, elim1_sh_w);
-	install_port_write_handler(0, 0x3f, 0x3f, elim2_sh_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x3e, 0x3e, 0, 0, elim1_sh_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x3f, 0x3f, 0, 0, elim2_sh_w);
 }
 
 
@@ -1187,10 +1187,10 @@ DRIVER_INIT( elim4 )
 	/* This game uses the 315-0076 security chip */
 	sega_security(76);
 
-	install_port_read_handler(0, 0xfc, 0xfc, elim4_IN4_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_IO, 0xfc, 0xfc, 0, 0, elim4_IN4_r);
 
-	install_port_write_handler(0, 0x3e, 0x3e, elim1_sh_w);
-	install_port_write_handler(0, 0x3f, 0x3f, elim2_sh_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x3e, 0x3e, 0, 0, elim1_sh_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x3f, 0x3f, 0, 0, elim2_sh_w);
 }
 
 
@@ -1199,10 +1199,10 @@ DRIVER_INIT( startrek )
 	/* This game uses the 315-0064 security chip */
 	sega_security(64);
 
-	install_port_read_handler(0, 0xfc, 0xfc, sega_IN4_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_IO, 0xfc, 0xfc, 0, 0, sega_IN4_r);
 
-	install_port_write_handler(0, 0x38, 0x38, sega_sh_speechboard_w);
-	install_port_write_handler(0, 0x3f, 0x3f, startrek_sh_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x38, 0x38, 0, 0, sega_sh_speechboard_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x3f, 0x3f, 0, 0, startrek_sh_w);
 }
 
 
@@ -1211,9 +1211,9 @@ DRIVER_INIT( tacscan )
 	/* This game uses the 315-0076 security chip */
 	sega_security(76);
 
-	install_port_read_handler(0, 0xfc, 0xfc, sega_IN4_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_IO, 0xfc, 0xfc, 0, 0, sega_IN4_r);
 
-	install_port_write_handler(0, 0x3f, 0x3f, tacscan_sh_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x3f, 0x3f, 0, 0, tacscan_sh_w);
 }
 
 

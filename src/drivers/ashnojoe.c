@@ -101,7 +101,7 @@ static WRITE16_HANDLER( ashnojoe_soundlatch_w )
 	{
 		soundlatch_w(0,data & 0xff);
 		//needed?
-		cpu_set_irq_line(1,0,HOLD_LINE);
+		cpunum_set_input_line(1,0,HOLD_LINE);
 	}
 }
 
@@ -136,7 +136,7 @@ static ADDRESS_MAP_START( ashnojoe_writemem, ADDRESS_SPACE_PROGRAM, 16 )
 	AM_RANGE(0x080000, 0x0bffff) AM_WRITE(MWA16_ROM)
 ADDRESS_MAP_END
 
-static READ_HANDLER(fake_6_r)
+static READ8_HANDLER(fake_6_r)
 {
 	// if it returns 0 the cpu doesn't read from port $4 ?
 	int ret = 0;
@@ -147,7 +147,7 @@ static READ_HANDLER(fake_6_r)
 	return rand();
 }
 
-static WRITE_HANDLER( adpcm_data_w )
+static WRITE8_HANDLER( adpcm_data_w )
 {
 	MSM5205_data_w(0, data & 0xf);
 	MSM5205_data_w(0, data>>4);
@@ -180,12 +180,12 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( ashnojoe )
 	PORT_START	/* player 1 16-bit */
-	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1 )
+	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_UNKNOWN )  // anything else and the controls don't work
 	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
@@ -199,12 +199,12 @@ INPUT_PORTS_START( ashnojoe )
 	PORT_BIT( 0x8000, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
 	PORT_START	/* player 2 16-bit */
-	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER2 )
+	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_UNKNOWN )  // anything else and the controls don't work
 	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
@@ -301,24 +301,24 @@ static struct GfxDecodeInfo ashnojoe_gfxdecodeinfo[] =
 
 static void irqhandler(int irq)
 {
-	cpu_set_irq_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
-static WRITE_HANDLER(writeA)
+static WRITE8_HANDLER(writeA)
 {
 	if (data == 0xff) return;	// this gets called at 8910 startup with 0xff before the 5205 exists, causing a crash
 
 	MSM5205_reset_w(0, !(data & 0x01));
 }
 
-static WRITE_HANDLER(writeB)
+static WRITE8_HANDLER(writeB)
 {
 	cpu_setbank(4, memory_region(REGION_SOUND1) + ((data & 0xf) * 0x8000));
 }
 
 static void ashnojoe_adpcm_int (int data)
 {
-	cpu_set_nmi_line(1, PULSE_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 }
 
 static struct MSM5205interface msm5205_interface =

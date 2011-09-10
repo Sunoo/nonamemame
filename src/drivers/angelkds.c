@@ -131,23 +131,23 @@ Dumped by Chackn
 #include "cpu/z80/z80.h"
 #include "machine/segacrpt.h"
 
-static READ_HANDLER( angelkds_sound_r );
-static WRITE_HANDLER( angelkds_sound_w );
+static READ8_HANDLER( angelkds_sound_r );
+static WRITE8_HANDLER( angelkds_sound_w );
 
 extern data8_t *angelkds_txvideoram, *angelkds_bgtopvideoram, *angelkds_bgbotvideoram;
 
-WRITE_HANDLER( angelkds_bgtopvideoram_w );
-WRITE_HANDLER( angelkds_bgbotvideoram_w );
-WRITE_HANDLER( angelkds_txvideoram_w );
+WRITE8_HANDLER( angelkds_bgtopvideoram_w );
+WRITE8_HANDLER( angelkds_bgbotvideoram_w );
+WRITE8_HANDLER( angelkds_txvideoram_w );
 
-WRITE_HANDLER( angelkds_bgtopbank_write );
-WRITE_HANDLER( angelkds_bgtopscroll_write );
-WRITE_HANDLER( angelkds_bgbotbank_write );
-WRITE_HANDLER( angelkds_bgbotscroll_write );
-WRITE_HANDLER( angelkds_txbank_write );
+WRITE8_HANDLER( angelkds_bgtopbank_write );
+WRITE8_HANDLER( angelkds_bgtopscroll_write );
+WRITE8_HANDLER( angelkds_bgbotbank_write );
+WRITE8_HANDLER( angelkds_bgbotscroll_write );
+WRITE8_HANDLER( angelkds_txbank_write );
 
-WRITE_HANDLER( angelkds_paletteram_w );
-WRITE_HANDLER( angelkds_layer_ctrl_write );
+WRITE8_HANDLER( angelkds_paletteram_w );
+WRITE8_HANDLER( angelkds_layer_ctrl_write );
 
 VIDEO_START( angelkds );
 VIDEO_UPDATE( angelkds );
@@ -156,7 +156,7 @@ VIDEO_UPDATE( angelkds );
 
 */
 
-static WRITE_HANDLER ( angelkds_cpu_bank_write )
+static WRITE8_HANDLER ( angelkds_cpu_bank_write )
 {
 	int bankaddress;
 	unsigned char *RAM = memory_region(REGION_USER1);
@@ -176,7 +176,7 @@ these make the game a bit easier for testing purposes
 
 #if FAKEINPUTS
 
-static READ_HANDLER( angelkds_input_r )
+static READ8_HANDLER( angelkds_input_r )
 {
 	int fake = readinputport(6+offset);
 
@@ -185,7 +185,7 @@ static READ_HANDLER( angelkds_input_r )
 
 #else
 
-static READ_HANDLER( angelkds_input_r )
+static READ8_HANDLER( angelkds_input_r )
 {
 	return readinputport(4+offset);
 }
@@ -295,23 +295,23 @@ I haven't found how to exit the tests. The only way seems to reset the game.
 */
 
 #define ANGELDSK_PLAYERS_INPUT( player ) \
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_UP    | IPF_8WAY | player ) \
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_DOWN  | IPF_8WAY | player ) \
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_LEFT  | IPF_8WAY | player ) \
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_RIGHT | IPF_8WAY | player ) \
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP     | IPF_8WAY | player ) \
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN   | IPF_8WAY | player ) \
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_LEFT   | IPF_8WAY | player ) \
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT  | IPF_8WAY | player )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_UP ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_DOWN ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_LEFT ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICKRIGHT_RIGHT ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_UP ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_DOWN ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_LEFT ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICKLEFT_RIGHT ) PORT_PLAYER(player) PORT_8WAY
 
 #define ANGELDSK_FAKE_PLAYERS_INPUT( player ) \
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 | player )	/* To enter initials */ \
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(player)	/* To enter initials */ \
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )		/* Unused */ \
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | player ) \
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | player ) \
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | player ) \
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | player ) \
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 | player )	/* To shorten the rope and */ \
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(player) PORT_8WAY \
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(player)	/* To shorten the rope and */ \
 										/* move right in hiscores table */
 
 
@@ -369,7 +369,7 @@ INPUT_PORTS_START( angelkds )
 	PORT_DIPSETTING(	0x30, "3" )
 	PORT_DIPSETTING(	0x20, "4" )
 	PORT_DIPSETTING(	0x10, "5" )
-	PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "99", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0,       0x00, IPT_DIPSWITCH_SETTING ) PORT_NAME("99") PORT_CHEAT
 	PORT_DIPNAME( 0xc0, 0xc0, DEF_STR( Unknown ) )	// Stored at 0xc023
 	PORT_DIPSETTING(	0xc0, "4" )
 	PORT_DIPSETTING(	0x40, "5" )
@@ -381,9 +381,9 @@ INPUT_PORTS_START( angelkds )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )	// duplicated IPT_JOYSTICK_LEFTRIGHT  | IPF_8WAY
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )	// duplicated IPT_JOYSTICK_LEFTRIGHT  | IPF_8WAY | IPF_COCKTAIL
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )	// duplicated IPT_JOYSTICK_LEFTRIGHT
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN ) PORT_8WAY	// duplicated IPT_JOYSTICK_LEFTRIGHT
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START		/* inport $80 */
@@ -397,10 +397,10 @@ INPUT_PORTS_START( angelkds )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
 	PORT_START		/* inport $81 */
-	ANGELDSK_PLAYERS_INPUT( IPF_PLAYER1 )
+	ANGELDSK_PLAYERS_INPUT( 1 )
 
 	PORT_START		/* inport $82 */
-	ANGELDSK_PLAYERS_INPUT( IPF_PLAYER2 )
+	ANGELDSK_PLAYERS_INPUT( 2 )
 
 #if FAKEINPUTS
 
@@ -409,13 +409,13 @@ INPUT_PORTS_START( angelkds )
 	PORT_DIPNAME( 0x01, 0x00, "FAKE (for debug) Joysticks (Player 1)" )
 	PORT_DIPSETTING(	0x01, "1" )
 	PORT_DIPSETTING(	0x00, "2" )
-	ANGELDSK_FAKE_PLAYERS_INPUT( IPF_PLAYER1 )
+	ANGELDSK_FAKE_PLAYERS_INPUT( 1 )
 
 	PORT_START
 	PORT_DIPNAME( 0x01, 0x00, "FAKE (for debug) Joysticks (Player 2)" )
 	PORT_DIPSETTING(	0x01, "1" )
 	PORT_DIPSETTING(	0x00, "2" )
-	ANGELDSK_FAKE_PLAYERS_INPUT( IPF_PLAYER2 )
+	ANGELDSK_FAKE_PLAYERS_INPUT( 2 )
 
 #endif
 
@@ -431,19 +431,19 @@ sound related ?
 
 static UINT8 angelkds_sound[4];
 
-static WRITE_HANDLER( angelkds_sound_w )
+static WRITE8_HANDLER( angelkds_sound_w )
 {
 	angelkds_sound[offset]=data;
 }
 
-static READ_HANDLER( angelkds_sound_r )
+static READ8_HANDLER( angelkds_sound_r )
 {
 	return angelkds_sound[offset];
 }
 
 static void irqhandler(int irq)
 {
-	cpu_set_irq_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM2203interface ym2203_interface =

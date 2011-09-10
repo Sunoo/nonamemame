@@ -26,10 +26,10 @@ extern UINT8 *sbasketb_scroll;
 extern UINT8 *sbasketb_palettebank;
 extern UINT8 *sbasketb_spriteram_select;
 
-extern WRITE_HANDLER( sbasketb_videoram_w );
-extern WRITE_HANDLER( sbasketb_colorram_w );
-extern WRITE_HANDLER( sbasketb_flipscreen_w );
-extern WRITE_HANDLER( sbasketb_scroll_w );
+extern WRITE8_HANDLER( sbasketb_videoram_w );
+extern WRITE8_HANDLER( sbasketb_colorram_w );
+extern WRITE8_HANDLER( sbasketb_flipscreen_w );
+extern WRITE8_HANDLER( sbasketb_scroll_w );
 
 extern PALETTE_INIT( sbasketb );
 extern VIDEO_START( sbasketb );
@@ -39,18 +39,18 @@ extern struct VLM5030interface konami_vlm5030_interface;
 extern struct SN76496interface konami_sn76496_interface;
 extern struct DACinterface konami_dac_interface;
 
-extern WRITE_HANDLER( konami_SN76496_latch_w );
-extern WRITE_HANDLER( konami_SN76496_0_w );
-extern WRITE_HANDLER( hyperspt_sound_w );
-extern READ_HANDLER( hyperspt_sh_timer_r );
+extern WRITE8_HANDLER( konami_SN76496_latch_w );
+extern WRITE8_HANDLER( konami_SN76496_0_w );
+extern WRITE8_HANDLER( hyperspt_sound_w );
+extern READ8_HANDLER( hyperspt_sh_timer_r );
 
 
-WRITE_HANDLER( sbasketb_sh_irqtrigger_w )
+WRITE8_HANDLER( sbasketb_sh_irqtrigger_w )
 {
-	cpu_set_irq_line_and_vector(1,0,HOLD_LINE,0xff);
+	cpunum_set_input_line_and_vector(1,0,HOLD_LINE,0xff);
 }
 
-static WRITE_HANDLER( sbasketb_coin_counter_w )
+static WRITE8_HANDLER( sbasketb_coin_counter_w )
 {
 	coin_counter_w(offset,data);
 }
@@ -115,23 +115,23 @@ INPUT_PORTS_START( sbasketb )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	/* IN2 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_COCKTAIL  )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3  ) PORT_COCKTAIL
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	/* DSW0 */

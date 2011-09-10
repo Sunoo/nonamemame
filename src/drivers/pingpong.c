@@ -1,8 +1,8 @@
 #include "driver.h"
 #include "vidhrdw/generic.h"
 
-extern WRITE_HANDLER( pingpong_videoram_w );
-extern WRITE_HANDLER( pingpong_colorram_w );
+extern WRITE8_HANDLER( pingpong_videoram_w );
+extern WRITE8_HANDLER( pingpong_colorram_w );
 
 extern PALETTE_INIT( pingpong );
 extern VIDEO_START( pingpong );
@@ -10,7 +10,7 @@ extern VIDEO_UPDATE( pingpong );
 
 static int intenable;
 
-static WRITE_HANDLER( coin_w )
+static WRITE8_HANDLER( coin_w )
 {
 	/* bit 2 = irq enable, bit 3 = nmi enable */
 	intenable = data & 0x0c;
@@ -26,11 +26,11 @@ static INTERRUPT_GEN( pingpong_interrupt )
 {
 	if (cpu_getiloops() == 0)
 	{
-		if (intenable & 0x04) cpu_set_irq_line(0, 0, HOLD_LINE);
+		if (intenable & 0x04) cpunum_set_input_line(0, 0, HOLD_LINE);
 	}
 	else if (cpu_getiloops() % 2)
 	{
-		if (intenable & 0x08) cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+		if (intenable & 0x08) cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 	}
 }
 
@@ -73,13 +73,13 @@ INPUT_PORTS_START( pingpong )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
 
 	PORT_START	/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_2WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT| IPF_2WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_2WAY )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
 
 	PORT_START	/* DSW1 */

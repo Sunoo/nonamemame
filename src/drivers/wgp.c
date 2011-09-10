@@ -386,7 +386,7 @@ static void parse_control(void)
 	/* bit 0 enables cpu B */
 	/* however this fails when recovering from a save state
 	   if cpu B is disabled !! */
-	cpu_set_reset_line(2,(cpua_ctrl &0x1) ? CLEAR_LINE : ASSERT_LINE);
+	cpunum_set_input_line(2, INPUT_LINE_RESET, (cpua_ctrl &0x1) ? CLEAR_LINE : ASSERT_LINE);
 
 	/* bit 1 is "vibration" acc. to test mode */
 }
@@ -412,20 +412,20 @@ static WRITE16_HANDLER( cpua_ctrl_w )	/* assumes Z80 sandwiched between 68Ks */
 /*
 void wgp_interrupt4(int x)
 {
-	cpu_set_irq_line(0,4,HOLD_LINE);
+	cpunum_set_input_line(0,4,HOLD_LINE);
 }
 */
 
 void wgp_interrupt6(int x)
 {
-	cpu_set_irq_line(0,6,HOLD_LINE);
+	cpunum_set_input_line(0,6,HOLD_LINE);
 }
 
 /* 68000 B */
 
 void wgp_cpub_interrupt6(int x)
 {
-	cpu_set_irq_line(2,6,HOLD_LINE);	/* assumes Z80 sandwiched between the 68Ks */
+	cpunum_set_input_line(2,6,HOLD_LINE);	/* assumes Z80 sandwiched between the 68Ks */
 }
 
 
@@ -438,7 +438,7 @@ void wgp_cpub_interrupt6(int x)
 static INTERRUPT_GEN( wgp_cpub_interrupt )
 {
 	timer_set(TIME_IN_CYCLES(200000-500,0),0, wgp_cpub_interrupt6);
-	cpu_set_irq_line(2, 4, HOLD_LINE);
+	cpunum_set_input_line(2, 4, HOLD_LINE);
 }
 
 
@@ -571,7 +571,7 @@ static void reset_sound_region(void)	/* assumes Z80 sandwiched between the 68Ks 
 	cpu_setbank( 10, memory_region(REGION_CPU2) + (banknum * 0x4000) + 0x10000 );
 }
 
-static WRITE_HANDLER( sound_bankswitch_w )
+static WRITE8_HANDLER( sound_bankswitch_w )
 {
 	banknum = (data - 1) & 7;
 	reset_sound_region();
@@ -808,9 +808,9 @@ INPUT_PORTS_START( wgp )
 	WGP_MACHINE_ID_8
 
 	PORT_START      /* IN0 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON7 | IPF_PLAYER1 )	/* freeze */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON4 | IPF_PLAYER1 )	/* shift up */
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_BUTTON3 | IPF_PLAYER1 )	/* shift down */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON7 ) PORT_PLAYER(1)	/* freeze */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON4 ) PORT_PLAYER(1)	/* shift up */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_PLAYER(1)	/* shift down */
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN )
@@ -818,8 +818,8 @@ INPUT_PORTS_START( wgp )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_START      /* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1 )	/* "start lump" (lamp?) */
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER1 )	/* "brake lump" (lamp?) */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_PLAYER(1)	/* "start lump" (lamp?) */
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON6 ) PORT_PLAYER(1)	/* "brake lump" (lamp?) */
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
@@ -835,15 +835,15 @@ INPUT_PORTS_START( wgp )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START      /* fake inputs, allowing digital steer etc. */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(1)
 	PORT_DIPNAME( 0x10, 0x10, "Steering type" )
 	PORT_DIPSETTING(    0x10, "Digital" )
 	PORT_DIPSETTING(    0x00, "Analogue" )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )	/* accel */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1 )	/* brake */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)	/* accel */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(1)	/* brake */
 
 /* It's not clear for accel and brake which is the input and
    which the offset, but that doesn't matter. These continuous
@@ -851,20 +851,20 @@ INPUT_PORTS_START( wgp )
    input port above, so keyboard control is feasible. */
 
 //	PORT_START	/* accel, 0-255 */
-//	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_REVERSE | IPF_PLAYER1, 20, 25, 0, 0xff)
+//	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(25) PORT_REVERSE PORT_PLAYER(1)
 
 	PORT_START	/* steer */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER1, 20, 25, 0, 0xff)
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(25) PORT_REVERSE PORT_PLAYER(1)
 
 //	PORT_START	/* steer offset */
 
 //	PORT_START	/* accel offset */
 
 //	PORT_START	/* brake, 0-0x30: needs to start at 0xff; then 0xcf is max brake */
-//	PORT_ANALOG( 0xff, 0xff, IPT_AD_STICK_X | IPF_PLAYER2, 10, 5, 0xcf, 0xff)
+//	PORT_BIT( 0xff, 0xff, IPT_AD_STICK_X ) PORT_MINMAX(0xcf,0xff) PORT_SENSITIVITY(10) PORT_KEYDELTA(5) PORT_PLAYER(2)
 
 	PORT_START	/* unknown */
-	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_PLAYER2, 20, 10, 0, 0xff)
+	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_PLAYER(2)
 INPUT_PORTS_END
 
 /* Same as 'wgp', but different coinage */
@@ -890,9 +890,9 @@ INPUT_PORTS_START( wgpj )
 	WGP_MACHINE_ID_8
 
 	PORT_START      /* IN0 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON7 | IPF_PLAYER1 )	/* freeze */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON4 | IPF_PLAYER1 )	/* shift up */
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_BUTTON3 | IPF_PLAYER1 )	/* shift down */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON7 ) PORT_PLAYER(1)	/* freeze */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON4 ) PORT_PLAYER(1)	/* shift up */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_PLAYER(1)	/* shift down */
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN )
@@ -900,8 +900,8 @@ INPUT_PORTS_START( wgpj )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_START      /* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1 )	/* "start lump" (lamp?) */
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER1 )	/* "brake lump" (lamp?) */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_PLAYER(1)	/* "start lump" (lamp?) */
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON6 ) PORT_PLAYER(1)	/* "brake lump" (lamp?) */
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
@@ -917,15 +917,15 @@ INPUT_PORTS_START( wgpj )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START      /* fake inputs, allowing digital steer etc. */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(1)
 	PORT_DIPNAME( 0x10, 0x10, "Steering type" )
 	PORT_DIPSETTING(    0x10, "Digital" )
 	PORT_DIPSETTING(    0x00, "Analogue" )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )	/* accel */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1 )	/* brake */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)	/* accel */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(1)	/* brake */
 
 /* It's not clear for accel and brake which is the input and
    which the offset, but that doesn't matter. These continuous
@@ -933,20 +933,20 @@ INPUT_PORTS_START( wgpj )
    input port above, so keyboard control is feasible. */
 
 //	PORT_START	/* accel, 0-255 */
-//	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_REVERSE | IPF_PLAYER1, 20, 25, 0, 0xff)
+//	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(25) PORT_REVERSE PORT_PLAYER(1)
 
 	PORT_START	/* steer */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER1, 20, 25, 0, 0xff)
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(25) PORT_REVERSE PORT_PLAYER(1)
 
 //	PORT_START	/* steer offset */
 
 //	PORT_START	/* accel offset */
 
 //	PORT_START	/* brake, 0-0x30: needs to start at 0xff; then 0xcf is max brake */
-//	PORT_ANALOG( 0xff, 0xff, IPT_AD_STICK_X | IPF_PLAYER2, 10, 5, 0xcf, 0xff)
+//	PORT_BIT( 0xff, 0xff, IPT_AD_STICK_X ) PORT_MINMAX(0xcf,0xff) PORT_SENSITIVITY(10) PORT_KEYDELTA(5) PORT_PLAYER(2)
 
 	PORT_START	/* unknown */
-	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_PLAYER2, 20, 10, 0, 0xff)
+	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_PLAYER(2)
 INPUT_PORTS_END
 
 INPUT_PORTS_START( wgpjoy )
@@ -978,10 +978,10 @@ INPUT_PORTS_START( wgpjoy )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START      /* IN0 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNKNOWN )
@@ -998,10 +998,10 @@ INPUT_PORTS_START( wgpjoy )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_START      /* IN2 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1035,9 +1035,9 @@ INPUT_PORTS_START( wgp2 )	/* Wgp2 has no "lumps" ? */
 	WGP_MACHINE_ID_8
 
 	PORT_START      /* IN0 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON7 | IPF_PLAYER1 )	/* freeze */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON4 | IPF_PLAYER1 )	/* shift up */
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_BUTTON3 | IPF_PLAYER1 )	/* shift down */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON7 ) PORT_PLAYER(1)	/* freeze */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON4 ) PORT_PLAYER(1)	/* shift up */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_PLAYER(1)	/* shift down */
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_START1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN )
@@ -1045,8 +1045,8 @@ INPUT_PORTS_START( wgp2 )	/* Wgp2 has no "lumps" ? */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_START      /* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1 )	/* "start lump" (lamp?) */
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER1 )	/* "brake lump" (lamp?) */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_PLAYER(1)	/* "start lump" (lamp?) */
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON6 ) PORT_PLAYER(1)	/* "brake lump" (lamp?) */
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
@@ -1062,15 +1062,15 @@ INPUT_PORTS_START( wgp2 )	/* Wgp2 has no "lumps" ? */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START      /* fake inputs, allowing digital steer etc. */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(1)
 	PORT_DIPNAME( 0x10, 0x10, "Steering type" )
 	PORT_DIPSETTING(    0x10, "Digital" )
 	PORT_DIPSETTING(    0x00, "Analogue" )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )	/* accel */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1 )	/* brake */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)	/* accel */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(1)	/* brake */
 
 /* It's not clear for accel and brake which is the input and
    which the offset, but that doesn't matter. These continuous
@@ -1078,20 +1078,20 @@ INPUT_PORTS_START( wgp2 )	/* Wgp2 has no "lumps" ? */
    input port above, so keyboard control is feasible. */
 
 //	PORT_START	/* accel, 0-255 */
-//	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_REVERSE | IPF_PLAYER1, 20, 25, 0, 0xff)
+//	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(25) PORT_REVERSE PORT_PLAYER(1)
 
 	PORT_START	/* steer */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER1, 20, 25, 0, 0xff)
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(25) PORT_REVERSE PORT_PLAYER(1)
 
 //	PORT_START	/* steer offset */
 
 //	PORT_START	/* accel offset */
 
 //	PORT_START	/* brake, 0-0x30: needs to start at 0xff; then 0xcf is max brake */
-//	PORT_ANALOG( 0xff, 0xff, IPT_AD_STICK_X | IPF_PLAYER2, 10, 5, 0xcf, 0xff)
+//	PORT_BIT( 0xff, 0xff, IPT_AD_STICK_X ) PORT_MINMAX(0xcf,0xff) PORT_SENSITIVITY(10) PORT_KEYDELTA(5) PORT_PLAYER(2)
 
 	PORT_START	/* unknown */
-	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_PLAYER2, 20, 10, 0, 0xff)
+	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_PLAYER(2)
 INPUT_PORTS_END
 
 
@@ -1151,7 +1151,7 @@ static struct GfxDecodeInfo wgp_gfxdecodeinfo[] =
 /* handler called by the YM2610 emulator when the internal timers cause an IRQ */
 static void irqhandler(int irq)	// assumes Z80 sandwiched between 68Ks
 {
-	cpu_set_irq_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM2610interface ym2610_interface =

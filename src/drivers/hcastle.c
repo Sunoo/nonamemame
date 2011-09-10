@@ -17,14 +17,14 @@ VIDEO_START( hcastle );
 
 extern data8_t *hcastle_pf1_videoram,*hcastle_pf2_videoram;
 
-WRITE_HANDLER( hcastle_pf1_video_w );
-WRITE_HANDLER( hcastle_pf2_video_w );
-READ_HANDLER( hcastle_gfxbank_r );
-WRITE_HANDLER( hcastle_gfxbank_w );
-WRITE_HANDLER( hcastle_pf1_control_w );
-WRITE_HANDLER( hcastle_pf2_control_w );
+WRITE8_HANDLER( hcastle_pf1_video_w );
+WRITE8_HANDLER( hcastle_pf2_video_w );
+READ8_HANDLER( hcastle_gfxbank_r );
+WRITE8_HANDLER( hcastle_gfxbank_w );
+WRITE8_HANDLER( hcastle_pf1_control_w );
+WRITE8_HANDLER( hcastle_pf2_control_w );
 
-static WRITE_HANDLER( hcastle_bankswitch_w )
+static WRITE8_HANDLER( hcastle_bankswitch_w )
 {
 	unsigned char *RAM = memory_region(REGION_CPU1);
 	int bankaddress;
@@ -33,18 +33,18 @@ static WRITE_HANDLER( hcastle_bankswitch_w )
 	cpu_setbank(1,&RAM[bankaddress]);
 }
 
-static WRITE_HANDLER( hcastle_soundirq_w )
+static WRITE8_HANDLER( hcastle_soundirq_w )
 {
-	cpu_set_irq_line( 1, 0, HOLD_LINE );
+	cpunum_set_input_line( 1, 0, HOLD_LINE );
 }
 
-static WRITE_HANDLER( hcastle_coin_w )
+static WRITE8_HANDLER( hcastle_coin_w )
 {
 	coin_counter_w(0,data & 0x40);
 	coin_counter_w(1,data & 0x80);
 }
 
-static READ_HANDLER( speedup_r )
+static READ8_HANDLER( speedup_r )
 {
 	unsigned char *RAM = memory_region(REGION_CPU1);
 
@@ -102,7 +102,7 @@ ADDRESS_MAP_END
 
 /*****************************************************************************/
 
-static WRITE_HANDLER( sound_bank_w )
+static WRITE8_HANDLER( sound_bank_w )
 {
 	int bank_A=(data&0x3);
 	int bank_B=((data>>2)&0x3);
@@ -144,22 +144,22 @@ INPUT_PORTS_START( hcastle )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* IN2 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
@@ -261,7 +261,7 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 
 static void irqhandler(int linestate)
 {
-//	cpu_set_irq_line(1,0,linestate);
+//	cpunum_set_input_line(1,0,linestate);
 }
 
 static void volume_callback(int v)

@@ -165,9 +165,9 @@ static void update_interrupts(void)
 
 	/* set the new state of the IRQ lines */
 	if (newstate)
-		cpu_set_irq_line(0, newstate, ASSERT_LINE);
+		cpunum_set_input_line(0, newstate, ASSERT_LINE);
 	else
-		cpu_set_irq_line(0, 7, CLEAR_LINE);
+		cpunum_set_input_line(0, 7, CLEAR_LINE);
 }
 
 
@@ -310,7 +310,7 @@ static READ16_HANDLER( port4_r )
  *
  *************************************/
 
-static READ_HANDLER( switch_6502_r )
+static READ8_HANDLER( switch_6502_r )
 {
 	int temp = readinputport(5);
 
@@ -344,19 +344,19 @@ static READ_HANDLER( switch_6502_r )
  *	        D5 = 	LED (out)
  */
 
-static WRITE_HANDLER( via_pa_w )
+static WRITE8_HANDLER( via_pa_w )
 {
 	tms5220_out_data = data;
 }
 
 
-static READ_HANDLER( via_pa_r )
+static READ8_HANDLER( via_pa_r )
 {
 	return tms5220_in_data;
 }
 
 
-static WRITE_HANDLER( via_pb_w )
+static WRITE8_HANDLER( via_pb_w )
 {
 	data8_t old = tms5220_ctl;
 	tms5220_ctl = data;
@@ -375,7 +375,7 @@ static WRITE_HANDLER( via_pb_w )
 }
 
 
-static READ_HANDLER( via_pb_r )
+static READ8_HANDLER( via_pb_r )
 {
 	return (!tms5220_ready_r() << 2) | (!tms5220_int_r() << 3);
 }
@@ -397,7 +397,7 @@ static struct via6522_interface via_interface =
  *
  *************************************/
 
-static WRITE_HANDLER( led_w )
+static WRITE8_HANDLER( led_w )
 {
 	set_led_status(offset, ~data & 1);
 }
@@ -503,16 +503,16 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( marble )
 	PORT_START  /* F20000 */
-    PORT_ANALOG( 0xff, 0x00, IPT_TRACKBALL_X | IPF_REVERSE | IPF_PLAYER1, 30, 30, 0, 0 )
+    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_MINMAX(0,0) PORT_SENSITIVITY(30) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(1)
 
 	PORT_START  /* F20002 */
-    PORT_ANALOG( 0xff, 0x00, IPT_TRACKBALL_Y | IPF_PLAYER1, 30, 30, 0, 0 )
+    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_MINMAX(0,0) PORT_SENSITIVITY(30) PORT_KEYDELTA(30) PORT_PLAYER(1)
 
 	PORT_START  /* F20004 */
-    PORT_ANALOG( 0xff, 0x00, IPT_TRACKBALL_X | IPF_REVERSE | IPF_PLAYER2, 30, 30, 0, 0 )
+    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_MINMAX(0,0) PORT_SENSITIVITY(30) PORT_KEYDELTA(30) PORT_REVERSE PORT_PLAYER(2)
 
 	PORT_START  /* F20006 */
-    PORT_ANALOG( 0xff, 0x00, IPT_TRACKBALL_Y | IPF_PLAYER2, 30, 30, 0, 0 )
+    PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_Y ) PORT_MINMAX(0,0) PORT_SENSITIVITY(30) PORT_KEYDELTA(30) PORT_PLAYER(2)
 
 	PORT_START	/* F60000 */
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_START1 )
@@ -618,10 +618,10 @@ INPUT_PORTS_END
 
 INPUT_PORTS_START( roadrunn )
 	PORT_START	/* F40000 */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_PLAYER1, 100, 10, 0x10, 0xf0 )
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(1)
 
 	PORT_START	/* F40002 */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER1, 100, 10, 0x10, 0xf0 )
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(1)
 
 	PORT_START	/* n/a */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -654,10 +654,10 @@ INPUT_PORTS_END
 
 INPUT_PORTS_START( roadblst )
 	PORT_START	/* F20000 */
-	PORT_ANALOG( 0xff, 0x40, IPT_DIAL | IPF_REVERSE, 25, 10, 0x00, 0x7f )
+	PORT_BIT( 0xff, 0x40, IPT_DIAL ) PORT_MINMAX(0x00,0x7f) PORT_SENSITIVITY(25) PORT_KEYDELTA(10) PORT_REVERSE
 
 	PORT_START	/* F40000 */
-	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL, 100, 64, 0x00, 0xff )
+	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_MINMAX(0x00,0xff) PORT_SENSITIVITY(100) PORT_KEYDELTA(64)
 
 	PORT_START	/* n/a */
 	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNUSED )

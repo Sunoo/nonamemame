@@ -108,37 +108,37 @@ VIDEO_START( mjkoiura );
 VIDEO_UPDATE( mscoutm );
 VIDEO_START( mscoutm );
 
-READ_HANDLER( sailorws_palette_r );
-WRITE_HANDLER( sailorws_palette_w );
-READ_HANDLER( mscoutm_palette_r );
-WRITE_HANDLER( mscoutm_palette_w );
+READ8_HANDLER( sailorws_palette_r );
+WRITE8_HANDLER( sailorws_palette_w );
+READ8_HANDLER( mscoutm_palette_r );
+WRITE8_HANDLER( mscoutm_palette_w );
 
-WRITE_HANDLER( sailorws_gfxflag_0_w );
-WRITE_HANDLER( sailorws_scrollx_0_w );
-WRITE_HANDLER( sailorws_scrolly_0_w );
-WRITE_HANDLER( sailorws_radr_0_w );
-WRITE_HANDLER( sailorws_sizex_0_w );
-WRITE_HANDLER( sailorws_sizey_0_w );
-WRITE_HANDLER( sailorws_drawx_0_w );
-WRITE_HANDLER( sailorws_drawy_0_w );
+WRITE8_HANDLER( sailorws_gfxflag_0_w );
+WRITE8_HANDLER( sailorws_scrollx_0_w );
+WRITE8_HANDLER( sailorws_scrolly_0_w );
+WRITE8_HANDLER( sailorws_radr_0_w );
+WRITE8_HANDLER( sailorws_sizex_0_w );
+WRITE8_HANDLER( sailorws_sizey_0_w );
+WRITE8_HANDLER( sailorws_drawx_0_w );
+WRITE8_HANDLER( sailorws_drawy_0_w );
 
-WRITE_HANDLER( sailorws_gfxflag_1_w );
-WRITE_HANDLER( sailorws_scrollx_1_w );
-WRITE_HANDLER( sailorws_scrolly_1_w );
-WRITE_HANDLER( sailorws_radr_1_w );
-WRITE_HANDLER( sailorws_sizex_1_w );
-WRITE_HANDLER( sailorws_sizey_1_w );
-WRITE_HANDLER( sailorws_drawx_1_w );
-WRITE_HANDLER( sailorws_drawy_1_w );
+WRITE8_HANDLER( sailorws_gfxflag_1_w );
+WRITE8_HANDLER( sailorws_scrollx_1_w );
+WRITE8_HANDLER( sailorws_scrolly_1_w );
+WRITE8_HANDLER( sailorws_radr_1_w );
+WRITE8_HANDLER( sailorws_sizex_1_w );
+WRITE8_HANDLER( sailorws_sizey_1_w );
+WRITE8_HANDLER( sailorws_drawx_1_w );
+WRITE8_HANDLER( sailorws_drawy_1_w );
 
 void sailorws_gfxflag2_w(int data);
 void sailorws_paltblnum_w(int data);
-WRITE_HANDLER( sailorws_paltbl_0_w );
-WRITE_HANDLER( sailorws_paltbl_1_w );
-READ_HANDLER( sailorws_gfxbusy_0_r );
-READ_HANDLER( sailorws_gfxbusy_1_r );
-READ_HANDLER( sailorws_gfxrom_0_r );
-READ_HANDLER( sailorws_gfxrom_1_r );
+WRITE8_HANDLER( sailorws_paltbl_0_w );
+WRITE8_HANDLER( sailorws_paltbl_1_w );
+READ8_HANDLER( sailorws_gfxbusy_0_r );
+READ8_HANDLER( sailorws_gfxbusy_1_r );
+READ8_HANDLER( sailorws_gfxrom_0_r );
+READ8_HANDLER( sailorws_gfxrom_1_r );
 
 
 static int sailorws_inputport;
@@ -176,7 +176,7 @@ static int sailorws_sound_r(int offset)
 	return soundlatch_r(0);
 }
 
-static WRITE_HANDLER( sailorws_sound_w )
+static WRITE8_HANDLER( sailorws_sound_w )
 {
 	soundlatch_w(0, data);
 }
@@ -197,7 +197,7 @@ static void sailorws_outcoin_flag_w(int data)
 	else sailorws_outcoin_flag = 1;
 }
 
-static WRITE_HANDLER( sailorws_inputportsel_w )
+static WRITE8_HANDLER( sailorws_inputportsel_w )
 {
 	sailorws_inputport = (data ^ 0xff);
 }
@@ -231,7 +231,7 @@ static void mscoutm_inputportsel_w(int data)
 	mscoutm_inputport = (data ^ 0xff);
 }
 
-static READ_HANDLER( mscoutm_dipsw_0_r )
+static READ8_HANDLER( mscoutm_dipsw_0_r )
 {
 	// DIPSW A
 	return (((readinputport(0) & 0x01) << 7) | ((readinputport(0) & 0x02) << 5) |
@@ -240,7 +240,7 @@ static READ_HANDLER( mscoutm_dipsw_0_r )
 	        ((readinputport(0) & 0x40) >> 5) | ((readinputport(0) & 0x80) >> 7));
 }
 
-static READ_HANDLER( mscoutm_dipsw_1_r )
+static READ8_HANDLER( mscoutm_dipsw_1_r )
 {
 	// DIPSW B
 	return (((readinputport(1) & 0x01) << 7) | ((readinputport(1) & 0x02) << 5) |
@@ -496,64 +496,64 @@ static void tmpz84c011_pio_w(int offset, int data)
 /* CPU interface */
 
 /* device 0 */
-static READ_HANDLER( tmpz84c011_0_pa_r ) { return (tmpz84c011_pio_r(0) & ~pio_dir[0]) | (pio_latch[0] & pio_dir[0]); }
-static READ_HANDLER( tmpz84c011_0_pb_r ) { return (tmpz84c011_pio_r(1) & ~pio_dir[1]) | (pio_latch[1] & pio_dir[1]); }
-static READ_HANDLER( tmpz84c011_0_pc_r ) { return (tmpz84c011_pio_r(2) & ~pio_dir[2]) | (pio_latch[2] & pio_dir[2]); }
-static READ_HANDLER( tmpz84c011_0_pd_r ) { return (tmpz84c011_pio_r(3) & ~pio_dir[3]) | (pio_latch[3] & pio_dir[3]); }
-static READ_HANDLER( tmpz84c011_0_pe_r ) { return (tmpz84c011_pio_r(4) & ~pio_dir[4]) | (pio_latch[4] & pio_dir[4]); }
+static READ8_HANDLER( tmpz84c011_0_pa_r ) { return (tmpz84c011_pio_r(0) & ~pio_dir[0]) | (pio_latch[0] & pio_dir[0]); }
+static READ8_HANDLER( tmpz84c011_0_pb_r ) { return (tmpz84c011_pio_r(1) & ~pio_dir[1]) | (pio_latch[1] & pio_dir[1]); }
+static READ8_HANDLER( tmpz84c011_0_pc_r ) { return (tmpz84c011_pio_r(2) & ~pio_dir[2]) | (pio_latch[2] & pio_dir[2]); }
+static READ8_HANDLER( tmpz84c011_0_pd_r ) { return (tmpz84c011_pio_r(3) & ~pio_dir[3]) | (pio_latch[3] & pio_dir[3]); }
+static READ8_HANDLER( tmpz84c011_0_pe_r ) { return (tmpz84c011_pio_r(4) & ~pio_dir[4]) | (pio_latch[4] & pio_dir[4]); }
 
-static WRITE_HANDLER( tmpz84c011_0_pa_w ) { pio_latch[0] = data; tmpz84c011_pio_w(0, data); }
-static WRITE_HANDLER( tmpz84c011_0_pb_w ) { pio_latch[1] = data; tmpz84c011_pio_w(1, data); }
-static WRITE_HANDLER( tmpz84c011_0_pc_w ) { pio_latch[2] = data; tmpz84c011_pio_w(2, data); }
-static WRITE_HANDLER( tmpz84c011_0_pd_w ) { pio_latch[3] = data; tmpz84c011_pio_w(3, data); }
-static WRITE_HANDLER( tmpz84c011_0_pe_w ) { pio_latch[4] = data; tmpz84c011_pio_w(4, data); }
+static WRITE8_HANDLER( tmpz84c011_0_pa_w ) { pio_latch[0] = data; tmpz84c011_pio_w(0, data); }
+static WRITE8_HANDLER( tmpz84c011_0_pb_w ) { pio_latch[1] = data; tmpz84c011_pio_w(1, data); }
+static WRITE8_HANDLER( tmpz84c011_0_pc_w ) { pio_latch[2] = data; tmpz84c011_pio_w(2, data); }
+static WRITE8_HANDLER( tmpz84c011_0_pd_w ) { pio_latch[3] = data; tmpz84c011_pio_w(3, data); }
+static WRITE8_HANDLER( tmpz84c011_0_pe_w ) { pio_latch[4] = data; tmpz84c011_pio_w(4, data); }
 
-static READ_HANDLER( tmpz84c011_0_dir_pa_r ) { return pio_dir[0]; }
-static READ_HANDLER( tmpz84c011_0_dir_pb_r ) { return pio_dir[1]; }
-static READ_HANDLER( tmpz84c011_0_dir_pc_r ) { return pio_dir[2]; }
-static READ_HANDLER( tmpz84c011_0_dir_pd_r ) { return pio_dir[3]; }
-static READ_HANDLER( tmpz84c011_0_dir_pe_r ) { return pio_dir[4]; }
+static READ8_HANDLER( tmpz84c011_0_dir_pa_r ) { return pio_dir[0]; }
+static READ8_HANDLER( tmpz84c011_0_dir_pb_r ) { return pio_dir[1]; }
+static READ8_HANDLER( tmpz84c011_0_dir_pc_r ) { return pio_dir[2]; }
+static READ8_HANDLER( tmpz84c011_0_dir_pd_r ) { return pio_dir[3]; }
+static READ8_HANDLER( tmpz84c011_0_dir_pe_r ) { return pio_dir[4]; }
 
-static WRITE_HANDLER( tmpz84c011_0_dir_pa_w ) { pio_dir[0] = data; }
-static WRITE_HANDLER( tmpz84c011_0_dir_pb_w ) { pio_dir[1] = data; }
-static WRITE_HANDLER( tmpz84c011_0_dir_pc_w ) { pio_dir[2] = data; }
-static WRITE_HANDLER( tmpz84c011_0_dir_pd_w ) { pio_dir[3] = data; }
-static WRITE_HANDLER( tmpz84c011_0_dir_pe_w ) { pio_dir[4] = data; }
+static WRITE8_HANDLER( tmpz84c011_0_dir_pa_w ) { pio_dir[0] = data; }
+static WRITE8_HANDLER( tmpz84c011_0_dir_pb_w ) { pio_dir[1] = data; }
+static WRITE8_HANDLER( tmpz84c011_0_dir_pc_w ) { pio_dir[2] = data; }
+static WRITE8_HANDLER( tmpz84c011_0_dir_pd_w ) { pio_dir[3] = data; }
+static WRITE8_HANDLER( tmpz84c011_0_dir_pe_w ) { pio_dir[4] = data; }
 
 /* device 1 */
-static READ_HANDLER( tmpz84c011_1_pa_r ) { return (tmpz84c011_pio_r(5) & ~pio_dir[5]) | (pio_latch[5] & pio_dir[5]); }
-static READ_HANDLER( tmpz84c011_1_pb_r ) { return (tmpz84c011_pio_r(6) & ~pio_dir[6]) | (pio_latch[6] & pio_dir[6]); }
-static READ_HANDLER( tmpz84c011_1_pc_r ) { return (tmpz84c011_pio_r(7) & ~pio_dir[7]) | (pio_latch[7] & pio_dir[7]); }
-static READ_HANDLER( tmpz84c011_1_pd_r ) { return (tmpz84c011_pio_r(8) & ~pio_dir[8]) | (pio_latch[8] & pio_dir[8]); }
-static READ_HANDLER( tmpz84c011_1_pe_r ) { return (tmpz84c011_pio_r(9) & ~pio_dir[9]) | (pio_latch[9] & pio_dir[9]); }
+static READ8_HANDLER( tmpz84c011_1_pa_r ) { return (tmpz84c011_pio_r(5) & ~pio_dir[5]) | (pio_latch[5] & pio_dir[5]); }
+static READ8_HANDLER( tmpz84c011_1_pb_r ) { return (tmpz84c011_pio_r(6) & ~pio_dir[6]) | (pio_latch[6] & pio_dir[6]); }
+static READ8_HANDLER( tmpz84c011_1_pc_r ) { return (tmpz84c011_pio_r(7) & ~pio_dir[7]) | (pio_latch[7] & pio_dir[7]); }
+static READ8_HANDLER( tmpz84c011_1_pd_r ) { return (tmpz84c011_pio_r(8) & ~pio_dir[8]) | (pio_latch[8] & pio_dir[8]); }
+static READ8_HANDLER( tmpz84c011_1_pe_r ) { return (tmpz84c011_pio_r(9) & ~pio_dir[9]) | (pio_latch[9] & pio_dir[9]); }
 
-static WRITE_HANDLER( tmpz84c011_1_pa_w ) { pio_latch[5] = data; tmpz84c011_pio_w(5, data); }
-static WRITE_HANDLER( tmpz84c011_1_pb_w ) { pio_latch[6] = data; tmpz84c011_pio_w(6, data); }
-static WRITE_HANDLER( tmpz84c011_1_pc_w ) { pio_latch[7] = data; tmpz84c011_pio_w(7, data); }
-static WRITE_HANDLER( tmpz84c011_1_pd_w ) { pio_latch[8] = data; tmpz84c011_pio_w(8, data); }
-static WRITE_HANDLER( tmpz84c011_1_pe_w ) { pio_latch[9] = data; tmpz84c011_pio_w(9, data); }
+static WRITE8_HANDLER( tmpz84c011_1_pa_w ) { pio_latch[5] = data; tmpz84c011_pio_w(5, data); }
+static WRITE8_HANDLER( tmpz84c011_1_pb_w ) { pio_latch[6] = data; tmpz84c011_pio_w(6, data); }
+static WRITE8_HANDLER( tmpz84c011_1_pc_w ) { pio_latch[7] = data; tmpz84c011_pio_w(7, data); }
+static WRITE8_HANDLER( tmpz84c011_1_pd_w ) { pio_latch[8] = data; tmpz84c011_pio_w(8, data); }
+static WRITE8_HANDLER( tmpz84c011_1_pe_w ) { pio_latch[9] = data; tmpz84c011_pio_w(9, data); }
 
-static READ_HANDLER( tmpz84c011_1_dir_pa_r ) { return pio_dir[5]; }
-static READ_HANDLER( tmpz84c011_1_dir_pb_r ) { return pio_dir[6]; }
-static READ_HANDLER( tmpz84c011_1_dir_pc_r ) { return pio_dir[7]; }
-static READ_HANDLER( tmpz84c011_1_dir_pd_r ) { return pio_dir[8]; }
-static READ_HANDLER( tmpz84c011_1_dir_pe_r ) { return pio_dir[9]; }
+static READ8_HANDLER( tmpz84c011_1_dir_pa_r ) { return pio_dir[5]; }
+static READ8_HANDLER( tmpz84c011_1_dir_pb_r ) { return pio_dir[6]; }
+static READ8_HANDLER( tmpz84c011_1_dir_pc_r ) { return pio_dir[7]; }
+static READ8_HANDLER( tmpz84c011_1_dir_pd_r ) { return pio_dir[8]; }
+static READ8_HANDLER( tmpz84c011_1_dir_pe_r ) { return pio_dir[9]; }
 
-static WRITE_HANDLER( tmpz84c011_1_dir_pa_w ) { pio_dir[5] = data; }
-static WRITE_HANDLER( tmpz84c011_1_dir_pb_w ) { pio_dir[6] = data; }
-static WRITE_HANDLER( tmpz84c011_1_dir_pc_w ) { pio_dir[7] = data; }
-static WRITE_HANDLER( tmpz84c011_1_dir_pd_w ) { pio_dir[8] = data; }
-static WRITE_HANDLER( tmpz84c011_1_dir_pe_w ) { pio_dir[9] = data; }
+static WRITE8_HANDLER( tmpz84c011_1_dir_pa_w ) { pio_dir[5] = data; }
+static WRITE8_HANDLER( tmpz84c011_1_dir_pb_w ) { pio_dir[6] = data; }
+static WRITE8_HANDLER( tmpz84c011_1_dir_pc_w ) { pio_dir[7] = data; }
+static WRITE8_HANDLER( tmpz84c011_1_dir_pd_w ) { pio_dir[8] = data; }
+static WRITE8_HANDLER( tmpz84c011_1_dir_pe_w ) { pio_dir[9] = data; }
 
 
 static void ctc0_interrupt(int state)
 {
-	cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, Z80_VECTOR(0, state));
+	cpunum_set_input_line_and_vector(0, 0, HOLD_LINE, Z80_VECTOR(0, state));
 }
 
 static void ctc1_interrupt(int state)
 {
-	cpu_set_irq_line_and_vector(1, 0, HOLD_LINE, Z80_VECTOR(0, state));
+	cpunum_set_input_line_and_vector(1, 0, HOLD_LINE, Z80_VECTOR(0, state));
 }
 
 /* CTC of main cpu, ch0 trigger is vblank */
@@ -1991,33 +1991,33 @@ ADDRESS_MAP_END
 #define MJCTRL_SAILORWS_PORT1 \
 	PORT_START	/* (3) PORT 1-0 */ \
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 ) \
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "P1 Kan", KEYCODE_LCONTROL, IP_JOY_NONE ) \
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "P1 M", KEYCODE_M, IP_JOY_NONE ) \
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "P1 I", KEYCODE_I, IP_JOY_NONE ) \
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "P1 E", KEYCODE_E, IP_JOY_NONE ) \
-	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "P1 A", KEYCODE_A, IP_JOY_NONE ) \
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Kan") PORT_CODE(KEYCODE_LCONTROL) \
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 M") PORT_CODE(KEYCODE_M) \
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 I") PORT_CODE(KEYCODE_I) \
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 E") PORT_CODE(KEYCODE_E) \
+	PORT_BIT(0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 A") PORT_CODE(KEYCODE_A) \
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 #define MJCTRL_SAILORWS_PORT2 \
 	PORT_START	/* (4) PORT 1-1 */ \
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "P1 Bet", KEYCODE_2, IP_JOY_NONE ) \
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "P1 Reach", KEYCODE_LSHIFT, IP_JOY_NONE ) \
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "P1 N", KEYCODE_N, IP_JOY_NONE ) \
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "P1 J", KEYCODE_J, IP_JOY_NONE ) \
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "P1 F", KEYCODE_F, IP_JOY_NONE ) \
-	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "P1 B", KEYCODE_B, IP_JOY_NONE ) \
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Bet") PORT_CODE(KEYCODE_2) \
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Reach") PORT_CODE(KEYCODE_LSHIFT) \
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 N") PORT_CODE(KEYCODE_N) \
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 J") PORT_CODE(KEYCODE_J) \
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 F") PORT_CODE(KEYCODE_F) \
+	PORT_BIT(0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 B") PORT_CODE(KEYCODE_B) \
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 #define MJCTRL_SAILORWS_PORT3 \
 	PORT_START	/* (5) PORT 1-2 */ \
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "P1 Ron", KEYCODE_Z, IP_JOY_NONE ) \
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "P1 Chi", KEYCODE_SPACE, IP_JOY_NONE ) \
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "P1 K", KEYCODE_K, IP_JOY_NONE ) \
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "P1 G", KEYCODE_G, IP_JOY_NONE ) \
-	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "P1 C", KEYCODE_C, IP_JOY_NONE ) \
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Ron") PORT_CODE(KEYCODE_Z) \
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Chi") PORT_CODE(KEYCODE_SPACE) \
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 K") PORT_CODE(KEYCODE_K) \
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 G") PORT_CODE(KEYCODE_G) \
+	PORT_BIT(0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 C") PORT_CODE(KEYCODE_C) \
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
@@ -2025,54 +2025,54 @@ ADDRESS_MAP_END
 	PORT_START	/* (6) PORT 1-3 */ \
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "P1 Pon", KEYCODE_LALT, IP_JOY_NONE ) \
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "P1 L", KEYCODE_L, IP_JOY_NONE ) \
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "P1 H", KEYCODE_H, IP_JOY_NONE ) \
-	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "P1 D", KEYCODE_D, IP_JOY_NONE ) \
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Pon") PORT_CODE(KEYCODE_LALT) \
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 L") PORT_CODE(KEYCODE_L) \
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 H") PORT_CODE(KEYCODE_H) \
+	PORT_BIT(0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 D") PORT_CODE(KEYCODE_D) \
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 #define MJCTRL_SAILORWS_PORT5 \
 	PORT_START	/* (7) PORT 1-4 */ \
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "P1 Small", KEYCODE_BACKSPACE, IP_JOY_NONE ) \
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "P1 Big", KEYCODE_ENTER, IP_JOY_NONE ) \
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "P1 Flip", KEYCODE_X, IP_JOY_NONE ) \
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "P1 Double Up", KEYCODE_RSHIFT, IP_JOY_NONE ) \
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "P1 Take Score", KEYCODE_RCONTROL, IP_JOY_NONE ) \
-	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "P1 Last Chance", KEYCODE_RALT, IP_JOY_NONE ) \
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Small") PORT_CODE(KEYCODE_BACKSPACE) \
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Big") PORT_CODE(KEYCODE_ENTER) \
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Flip") PORT_CODE(KEYCODE_X) \
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Double Up") PORT_CODE(KEYCODE_RSHIFT) \
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Take Score") PORT_CODE(KEYCODE_RCONTROL) \
+	PORT_BIT(0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Last Chance") PORT_CODE(KEYCODE_RALT) \
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 #define MJCTRL_MSCOUTM_PORT1 \
 	PORT_START	/* (3) PORT 1-0 */ \
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 ) \
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "P1 Kan", KEYCODE_LCONTROL, IP_JOY_NONE ) \
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "P1 M", KEYCODE_M, IP_JOY_NONE ) \
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "P1 I", KEYCODE_I, IP_JOY_NONE ) \
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "P1 E", KEYCODE_E, IP_JOY_NONE ) \
-	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "P1 A", KEYCODE_A, IP_JOY_NONE ) \
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Kan") PORT_CODE(KEYCODE_LCONTROL) \
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 M") PORT_CODE(KEYCODE_M) \
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 I") PORT_CODE(KEYCODE_I) \
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 E") PORT_CODE(KEYCODE_E) \
+	PORT_BIT(0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 A") PORT_CODE(KEYCODE_A) \
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 #define MJCTRL_MSCOUTM_PORT2 \
 	PORT_START	/* (4) PORT 1-1 */ \
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "P1 Bet", KEYCODE_2, IP_JOY_NONE ) \
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "P1 Reach", KEYCODE_LSHIFT, IP_JOY_NONE ) \
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "P1 N", KEYCODE_N, IP_JOY_NONE ) \
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "P1 J", KEYCODE_J, IP_JOY_NONE ) \
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "P1 F", KEYCODE_F, IP_JOY_NONE ) \
-	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "P1 B", KEYCODE_B, IP_JOY_NONE ) \
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Bet") PORT_CODE(KEYCODE_2) \
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Reach") PORT_CODE(KEYCODE_LSHIFT) \
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 N") PORT_CODE(KEYCODE_N) \
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 J") PORT_CODE(KEYCODE_J) \
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 F") PORT_CODE(KEYCODE_F) \
+	PORT_BIT(0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 B") PORT_CODE(KEYCODE_B) \
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 #define MJCTRL_MSCOUTM_PORT3 \
 	PORT_START	/* (5) PORT 1-2 */ \
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "P1 Ron", KEYCODE_Z, IP_JOY_NONE ) \
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "P1 Chi", KEYCODE_SPACE, IP_JOY_NONE ) \
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "P1 K", KEYCODE_K, IP_JOY_NONE ) \
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "P1 G", KEYCODE_G, IP_JOY_NONE ) \
-	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "P1 C", KEYCODE_C, IP_JOY_NONE ) \
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Ron") PORT_CODE(KEYCODE_Z) \
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Chi") PORT_CODE(KEYCODE_SPACE) \
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 K") PORT_CODE(KEYCODE_K) \
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 G") PORT_CODE(KEYCODE_G) \
+	PORT_BIT(0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 C") PORT_CODE(KEYCODE_C) \
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
@@ -2080,21 +2080,21 @@ ADDRESS_MAP_END
 	PORT_START	/* (6) PORT 1-3 */ \
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "P1 Pon", KEYCODE_LALT, IP_JOY_NONE ) \
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "P1 L", KEYCODE_L, IP_JOY_NONE ) \
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "P1 H", KEYCODE_H, IP_JOY_NONE ) \
-	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "P1 D", KEYCODE_D, IP_JOY_NONE ) \
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Pon") PORT_CODE(KEYCODE_LALT) \
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 L") PORT_CODE(KEYCODE_L) \
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 H") PORT_CODE(KEYCODE_H) \
+	PORT_BIT(0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 D") PORT_CODE(KEYCODE_D) \
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) \
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 #define MJCTRL_MSCOUTM_PORT5 \
 	PORT_START	/* (7) PORT 1-4 */ \
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "P1 Small", KEYCODE_BACKSPACE, IP_JOY_NONE ) \
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "P1 Big", KEYCODE_ENTER, IP_JOY_NONE ) \
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "P1 Flip", KEYCODE_X, IP_JOY_NONE ) \
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "P1 Double Up", KEYCODE_RSHIFT, IP_JOY_NONE ) \
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "P1 Take Score", KEYCODE_RCONTROL, IP_JOY_NONE ) \
-	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "P1 Last Chance", KEYCODE_RALT, IP_JOY_NONE ) \
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Small") PORT_CODE(KEYCODE_BACKSPACE) \
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Big") PORT_CODE(KEYCODE_ENTER) \
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Flip") PORT_CODE(KEYCODE_X) \
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Double Up") PORT_CODE(KEYCODE_RSHIFT) \
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Take Score") PORT_CODE(KEYCODE_RCONTROL) \
+	PORT_BIT(0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 Last Chance") PORT_CODE(KEYCODE_RALT) \
 	PORT_SERVICE( 0x40, IP_ACTIVE_LOW ) \
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
 

@@ -34,7 +34,7 @@
 
 #include "driver.h"
 
-extern WRITE_HANDLER( canyon_videoram_w );
+extern WRITE8_HANDLER( canyon_videoram_w );
 
 extern VIDEO_START( canyon );
 extern VIDEO_UPDATE( canyon );
@@ -67,7 +67,7 @@ static PALETTE_INIT( canyon )
  *
  *************************************/
 
-static READ_HANDLER( canyon_switches_r )
+static READ8_HANDLER( canyon_switches_r )
 {
 	UINT8 val = 0;
 
@@ -84,13 +84,13 @@ static READ_HANDLER( canyon_switches_r )
 }
 
 
-static READ_HANDLER( canyon_options_r )
+static READ8_HANDLER( canyon_options_r )
 {
 	return (readinputport(0) >> (2 * (~offset & 3))) & 3;
 }
 
 
-static READ_HANDLER( canyon_wram_r )
+static READ8_HANDLER( canyon_wram_r )
 {
 	return memory_region(REGION_CPU1)[offset];
 }
@@ -103,37 +103,37 @@ static READ_HANDLER( canyon_wram_r )
  *
  *************************************/
 
-static WRITE_HANDLER( canyon_led_w )
+static WRITE8_HANDLER( canyon_led_w )
 {
 	set_led_status(offset & 0x01, offset & 0x02);
 }
 
 
-static WRITE_HANDLER( canyon_motor_w )
+static WRITE8_HANDLER( canyon_motor_w )
 {
 	discrete_sound_w(offset & 0x01, data & 0x0f);
 }
 
 
-static WRITE_HANDLER( canyon_explode_w )
+static WRITE8_HANDLER( canyon_explode_w )
 {
 	discrete_sound_w(6, data / 16);
 }
 
 
-static WRITE_HANDLER( canyon_attract_w )
+static WRITE8_HANDLER( canyon_attract_w )
 {
 	discrete_sound_w(4 + (offset & 0x01), !(offset & 0x02));
 }
 
 
-static WRITE_HANDLER( canyon_whistle_w )
+static WRITE8_HANDLER( canyon_whistle_w )
 {
 	discrete_sound_w(2 + (offset & 0x01), (offset & 0x02) >> 1);
 }
 
 
-static WRITE_HANDLER( canyon_wram_w )
+static WRITE8_HANDLER( canyon_wram_w )
 {
 	memory_region(REGION_CPU1)[offset] = data;
 }
@@ -190,8 +190,8 @@ INPUT_PORTS_START( canyon )
 	PORT_START      /* IN1 */
 	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_UNUSED )
 	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_UNUSED )
-	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT(0x08, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
 
 	PORT_START      /* IN2 */
 	PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
@@ -200,7 +200,7 @@ INPUT_PORTS_START( canyon )
 	PORT_BIT ( 0x08, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_SERVICE( 0x10, IP_ACTIVE_HIGH )
 	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_VBLANK )
-	PORT_BITX( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON7, "Hiscore Reset", KEYCODE_H, IP_JOY_DEFAULT )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON7 ) PORT_NAME("Hiscore Reset") PORT_CODE(KEYCODE_H)
 	PORT_BIT ( 0x80, IP_ACTIVE_HIGH, IPT_TILT ) /* SLAM */
 
 	PORT_START

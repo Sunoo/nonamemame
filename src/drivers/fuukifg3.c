@@ -160,7 +160,7 @@ static WRITE32_HANDLER( fuuki32_sound_command_w )
 	if (!(mem_mask & 0x00ff0000))
 	{
 		soundlatch_w(0,(data>>16) & 0xff);
-//		cpu_set_nmi_line(1,PULSE_LINE);
+//		cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 		cpu_spinuntil_time(TIME_IN_USEC(50));	// Allow the other CPU to reply
 	}
 }
@@ -263,19 +263,19 @@ ADDRESS_MAP_END
 
 ***************************************************************************/
 
-static WRITE_HANDLER ( fuuki32_sound_bw_w )
+static WRITE8_HANDLER ( fuuki32_sound_bw_w )
 {
 	data8_t *rom = memory_region(REGION_CPU2);
 
 	cpu_setbank(1, rom + 0x10000 + (data * 0x8000));
 }
 
-static READ_HANDLER( snd_z80_r )
+static READ8_HANDLER( snd_z80_r )
 {
 	return fuuki32_shared_ram[offset];
 }
 
-static WRITE_HANDLER( snd_z80_w )
+static WRITE8_HANDLER( snd_z80_w )
 {
 	fuuki32_shared_ram[offset] = data;
 }
@@ -332,21 +332,21 @@ INPUT_PORTS_START( asurabld )
 	PORT_BIT(  0xfe00, IP_ACTIVE_LOW, IPT_UNKNOWN  )
 
 	PORT_START	// IN1 - $810000.w/$810002.w
-	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
-	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )
-	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
-	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 )
-	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER1 )
-	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER1 )
+	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
+	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
+	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
+	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
+	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
+	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
 	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN                      )
-	PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
-	PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
-	PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
-	PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-	PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 )
-	PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER2 )
-	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER2 )
+	PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
+	PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
+	PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN                      )
 
 	PORT_START	// IN2 - $880000.w/$880002.w
@@ -485,13 +485,13 @@ static struct GfxDecodeInfo fuuki32_gfxdecodeinfo[] =
 static INTERRUPT_GEN( fuuki32_interrupt )
 {
 	if ( cpu_getiloops() == 1 )
-		cpu_set_irq_line(0, 1, PULSE_LINE);
+		cpunum_set_input_line(0, 1, PULSE_LINE);
 
 	if ( cpu_getiloops() == 0 )
 	{
-		cpu_set_irq_line(0, 3, PULSE_LINE);	// VBlank IRQ
+		cpunum_set_input_line(0, 3, PULSE_LINE);	// VBlank IRQ
 
-		if (keyboard_pressed_memory(KEYCODE_F1))
+		if (code_pressed_memory(KEYCODE_F1))
 		{
 			fuuki32_raster_enable ^= 1;
 			usrintf_showmessage("raster effects %sabled",fuuki32_raster_enable ? "en" : "dis");
@@ -500,14 +500,14 @@ static INTERRUPT_GEN( fuuki32_interrupt )
 
 	if ( ((fuuki32_vregs[0x1c/4]>>16) & 0xff) == (INTERRUPTS_NUM-1 - cpu_getiloops()) )
 	{
-		cpu_set_irq_line(0, 5, PULSE_LINE);	// Raster Line IRQ
+		cpunum_set_input_line(0, 5, PULSE_LINE);	// Raster Line IRQ
 		if(fuuki32_raster_enable) force_partial_update(cpu_getscanline());
 	}
 }
 
 static void irqhandler(int irq)
 {
-	cpu_set_irq_line(1, 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1, 0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YMF278B_interface ymf278b_interface =

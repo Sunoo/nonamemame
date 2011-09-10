@@ -18,10 +18,10 @@ Sound:	YM2151
 
 /* Variables & functions defined in vidhrdw: */
 
-WRITE_HANDLER( amspdwy_videoram_w );
-WRITE_HANDLER( amspdwy_colorram_w );
-WRITE_HANDLER( amspdwy_paletteram_w );
-WRITE_HANDLER( amspdwy_flipscreen_w );
+WRITE8_HANDLER( amspdwy_videoram_w );
+WRITE8_HANDLER( amspdwy_colorram_w );
+WRITE8_HANDLER( amspdwy_paletteram_w );
+WRITE8_HANDLER( amspdwy_flipscreen_w );
 
 VIDEO_START( amspdwy );
 VIDEO_UPDATE( amspdwy );
@@ -43,7 +43,7 @@ VIDEO_UPDATE( amspdwy );
 	Or last value when wheel delta = 0
 */
 #define AMSPDWY_WHEEL_R( _n_ ) \
-READ_HANDLER( amspdwy_wheel_##_n_##_r ) \
+READ8_HANDLER( amspdwy_wheel_##_n_##_r ) \
 { \
 	static data8_t wheel_old, ret; \
 	data8_t wheel = readinputport(5 + _n_); \
@@ -60,15 +60,15 @@ AMSPDWY_WHEEL_R( 0 )
 AMSPDWY_WHEEL_R( 1 )
 
 
-READ_HANDLER( amspdwy_sound_r )
+READ8_HANDLER( amspdwy_sound_r )
 {
 	return (YM2151_status_port_0_r(0) & ~ 0x30) | readinputport(4);
 }
 
-WRITE_HANDLER( amspdwy_sound_w )
+WRITE8_HANDLER( amspdwy_sound_w )
 {
 	soundlatch_w(0,data);
-	cpu_set_nmi_line(1,PULSE_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 }
 
 static ADDRESS_MAP_START( amspdwy_readmem, ADDRESS_SPACE_PROGRAM, 8 )
@@ -103,7 +103,7 @@ static ADDRESS_MAP_START( amspdwy_writemem, ADDRESS_SPACE_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-READ_HANDLER( amspdwy_port_r )
+READ8_HANDLER( amspdwy_port_r )
 {
 	data8_t *Tracks = memory_region(REGION_CPU1)+0x10000;
 	return Tracks[offset];
@@ -185,23 +185,23 @@ INPUT_PORTS_START( amspdwy )
 
 	PORT_START	// IN2 - Player 1 Wheel + Coins
 	PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL )	// wheel
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_HIGH, IPT_COIN1, 2 )	// 2-3f
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(2)	// 2-3f
 
 	PORT_START	// IN3 - Player 2 Wheel + Coins
 	PORT_BIT( 0x1f, IP_ACTIVE_HIGH, IPT_SPECIAL )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_HIGH, IPT_COIN2, 2 )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_IMPULSE(2)
 
 	PORT_START	// IN4 - Player 1&2 Pedals + YM2151 Sound Status
 	PORT_BIT( 0x0f, IP_ACTIVE_HIGH, IPT_SPECIAL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0xc0, IP_ACTIVE_HIGH, IPT_SPECIAL )
 
 	PORT_START	// IN5 - Player 1 Analog Fake Port
-	PORT_ANALOGX( 0xffff, 0x0000, IPT_DIAL | IPF_PLAYER1, 15, 20, 0, 0, KEYCODE_LEFT, KEYCODE_RIGHT, IP_JOY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0xffff, 0x0000, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(15) PORT_KEYDELTA(20) PORT_CODE_DEC(KEYCODE_LEFT) PORT_CODE_INC(KEYCODE_RIGHT) PORT_PLAYER(1)
 
 	PORT_START	// IN6 - Player 2 Analog Fake Port
-	PORT_ANALOGX( 0xffff, 0x0000, IPT_DIAL | IPF_PLAYER2, 15, 20, 0, 0, KEYCODE_D, KEYCODE_G, IP_JOY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0xffff, 0x0000, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(15) PORT_KEYDELTA(20) PORT_CODE_DEC(KEYCODE_D) PORT_CODE_INC(KEYCODE_G) PORT_PLAYER(2)
 
 INPUT_PORTS_END
 
@@ -246,7 +246,7 @@ static struct GfxDecodeInfo amspdwy_gfxdecodeinfo[] =
 
 static void irq_handler(int irq)
 {
-	cpu_set_irq_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM2151interface amspdwy_ym2151_interface =

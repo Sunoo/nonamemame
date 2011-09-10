@@ -23,20 +23,20 @@ extern unsigned char *contra_text_vram,*contra_text_cram;
 
 PALETTE_INIT( contra );
 
-WRITE_HANDLER( contra_fg_vram_w );
-WRITE_HANDLER( contra_fg_cram_w );
-WRITE_HANDLER( contra_bg_vram_w );
-WRITE_HANDLER( contra_bg_cram_w );
-WRITE_HANDLER( contra_text_vram_w );
-WRITE_HANDLER( contra_text_cram_w );
+WRITE8_HANDLER( contra_fg_vram_w );
+WRITE8_HANDLER( contra_fg_cram_w );
+WRITE8_HANDLER( contra_bg_vram_w );
+WRITE8_HANDLER( contra_bg_cram_w );
+WRITE8_HANDLER( contra_text_vram_w );
+WRITE8_HANDLER( contra_text_cram_w );
 
-WRITE_HANDLER( contra_K007121_ctrl_0_w );
-WRITE_HANDLER( contra_K007121_ctrl_1_w );
+WRITE8_HANDLER( contra_K007121_ctrl_0_w );
+WRITE8_HANDLER( contra_K007121_ctrl_1_w );
 VIDEO_UPDATE( contra );
 VIDEO_START( contra );
 
 
-WRITE_HANDLER( contra_bankswitch_w )
+WRITE8_HANDLER( contra_bankswitch_w )
 {
 	int bankaddress;
 	unsigned char *RAM = memory_region(REGION_CPU1);
@@ -47,18 +47,18 @@ WRITE_HANDLER( contra_bankswitch_w )
 		cpu_setbank(1,&RAM[bankaddress]);
 }
 
-WRITE_HANDLER( contra_sh_irqtrigger_w )
+WRITE8_HANDLER( contra_sh_irqtrigger_w )
 {
-	cpu_set_irq_line(1,M6809_IRQ_LINE,HOLD_LINE);
+	cpunum_set_input_line(1,M6809_IRQ_LINE,HOLD_LINE);
 }
 
-WRITE_HANDLER( contra_coin_counter_w )
+WRITE8_HANDLER( contra_coin_counter_w )
 {
 	if (data & 0x01) coin_counter_w(0,data & 0x01);
 	if (data & 0x02) coin_counter_w(1,(data & 0x02) >> 1);
 }
 
-static WRITE_HANDLER( cpu_sound_command_w )
+static WRITE8_HANDLER( cpu_sound_command_w )
 {
 	if(Machine->gamedrv->name == "metlcnta"){
 
@@ -228,22 +228,22 @@ INPUT_PORTS_START( contra )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	/* IN2 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 

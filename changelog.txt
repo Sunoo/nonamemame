@@ -1,9 +1,13 @@
-0.83.14:
+0.84u1.14 Alpha:
+ - Updated to MAME 0.84u1 source and broke everything
  - Updated to MameAnalog+ 0.83.2 source (u_rebelscum)
  - Switched back to MadeInMame 0.83 (LG)
  - Updated to new Hardware folder (Bz)
  - Removed the need for dummy ROMs
  - Added region hacked CPS2 games
+ - Removed players and buttons inis temporarily
+ - Removed region hacked games temporarily
+ - Fixed -artworkfilledges (SirPoonga)
 
 0.83.13:
  - Updated to MAME 0.83 source

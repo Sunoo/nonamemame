@@ -157,11 +157,11 @@ extern void equites_8404init(void);
 extern void equites_8404rule(unsigned pc, int offset, int data);
 
 extern READ16_HANDLER(equites_8404_r);
-extern WRITE_HANDLER(equites_5232_w);
-extern WRITE_HANDLER(equites_8910control_w);
-extern WRITE_HANDLER(equites_8910data_w);
-extern WRITE_HANDLER(equites_dac0_w);
-extern WRITE_HANDLER(equites_dac1_w);
+extern WRITE8_HANDLER(equites_5232_w);
+extern WRITE8_HANDLER(equites_8910control_w);
+extern WRITE8_HANDLER(equites_8910data_w);
+extern WRITE8_HANDLER(equites_dac0_w);
+extern WRITE8_HANDLER(equites_dac1_w);
 
 extern data16_t *equites_8404ram;
 extern struct MSM5232interface equites_5232intf;
@@ -245,18 +245,18 @@ int splndrbt_flip;
 static INTERRUPT_GEN( equites_interrupt )
 {
 	if (cpu_getiloops())
-		cpu_set_irq_line(0, 2, HOLD_LINE);
+		cpunum_set_input_line(0, 2, HOLD_LINE);
 	else
-		cpu_set_irq_line(0, 1, HOLD_LINE);
+		cpunum_set_input_line(0, 1, HOLD_LINE);
 }
 
 // Splendor Blast Hareware
 static INTERRUPT_GEN( splndrbt_interrupt )
 {
 	if (cpu_getiloops())
-		cpu_set_irq_line(0, 2, HOLD_LINE);
+		cpunum_set_input_line(0, 2, HOLD_LINE);
 	else
-		cpu_set_irq_line(0, 1, HOLD_LINE);
+		cpunum_set_input_line(0, 1, HOLD_LINE);
 }
 
 /******************************************************************************/
@@ -386,23 +386,23 @@ ADDRESS_MAP_END
 // Common Port Map
 
 #define EQUITES_PLAYER_INPUT_LSB( button1, button2, button3, start ) \
-	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY ) \
-	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY ) \
-	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY ) \
-	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY ) \
+	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY \
+	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY \
+	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY \
+	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY \
 	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, button1 ) \
 	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, button2 ) \
 	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, button3 ) \
 	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, start )
 
 #define EQUITES_PLAYER_INPUT_MSB( button1, button2, button3, start ) \
-	PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL ) \
-	PORT_BIT( 0x0200, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL ) \
-	PORT_BIT( 0x0400, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL ) \
-	PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL ) \
-	PORT_BIT( 0x1000, IP_ACTIVE_HIGH, button1 | IPF_COCKTAIL ) \
-	PORT_BIT( 0x2000, IP_ACTIVE_HIGH, button2 | IPF_COCKTAIL ) \
-	PORT_BIT( 0x4000, IP_ACTIVE_HIGH, button3 | IPF_COCKTAIL ) \
+	PORT_BIT( 0x0100, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL \
+	PORT_BIT( 0x0200, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL \
+	PORT_BIT( 0x0400, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL \
+	PORT_BIT( 0x0800, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL \
+	PORT_BIT( 0x1000, IP_ACTIVE_HIGH, button1 ) PORT_COCKTAIL \
+	PORT_BIT( 0x2000, IP_ACTIVE_HIGH, button2 ) PORT_COCKTAIL \
+	PORT_BIT( 0x4000, IP_ACTIVE_HIGH, button3 ) PORT_COCKTAIL \
 	PORT_BIT( 0x8000, IP_ACTIVE_HIGH, start )
 
 /******************************************************************************/
@@ -1244,7 +1244,7 @@ static DRIVER_INIT( hvoltage )
 	int i;
 
 #if HVOLTAGE_HACK
-	install_mem_read16_handler(0, 0x000038, 0x000039, hvoltage_debug_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x000038, 0x000039, 0, 0, hvoltage_debug_r);
 #endif
 
 	equites_id = 0x8511;

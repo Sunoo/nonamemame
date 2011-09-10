@@ -21,7 +21,7 @@ static VIDEO_UPDATE( embargo )
 }
 
 
-static WRITE_HANDLER( embargo_videoram_w )
+static WRITE8_HANDLER( embargo_videoram_w )
 {
 	int col = offset % 32;
 	int row = offset / 32;
@@ -37,13 +37,13 @@ static WRITE_HANDLER( embargo_videoram_w )
 }
 
 
-static READ_HANDLER( embargo_input_r )
+static READ8_HANDLER( embargo_input_r )
 {
 	return (readinputport(1) << (7 - input_select)) & 0x80;
 }
 
 
-static READ_HANDLER( embargo_dial_r )
+static READ8_HANDLER( embargo_dial_r )
 {
 	UINT8 lo = 0;
 	UINT8 hi = 0;
@@ -91,17 +91,17 @@ static READ_HANDLER( embargo_dial_r )
 }
 
 
-static WRITE_HANDLER( embargo_port1_w )
+static WRITE8_HANDLER( embargo_port1_w )
 {
 	dial_enable_1 = data & 1; /* other bits unknown */
 }
-static WRITE_HANDLER( embargo_port2_w )
+static WRITE8_HANDLER( embargo_port2_w )
 {
 	dial_enable_2 = data & 1; /* other bits unknown */
 }
 
 
-static WRITE_HANDLER( embargo_input_w )
+static WRITE8_HANDLER( embargo_input_w )
 {
 	input_select = data & 7;
 }
@@ -150,22 +150,22 @@ INPUT_PORTS_START( embargo )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START3 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START4 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER3 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER4 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(3)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(4)
 
 	PORT_START /* S2650_DATA_PORT */
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN1 )
 
 	PORT_START
-	PORT_ANALOG( 0xff, 0x80, IPT_DIAL | IPF_PLAYER1, 50, 8, 0, 0 )
+	PORT_BIT( 0xff, 0x80, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(50) PORT_KEYDELTA(8) PORT_PLAYER(1)
 	PORT_START
-	PORT_ANALOG( 0xff, 0x80, IPT_DIAL | IPF_PLAYER2, 50, 8, 0, 0 )
+	PORT_BIT( 0xff, 0x80, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(50) PORT_KEYDELTA(8) PORT_PLAYER(2)
 	PORT_START
-	PORT_ANALOG( 0xff, 0x80, IPT_DIAL | IPF_PLAYER3, 50, 8, 0, 0 )
+	PORT_BIT( 0xff, 0x80, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(50) PORT_KEYDELTA(8) PORT_PLAYER(3)
 	PORT_START
-	PORT_ANALOG( 0xff, 0x80, IPT_DIAL | IPF_PLAYER4, 50, 8, 0, 0 )
+	PORT_BIT( 0xff, 0x80, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(50) PORT_KEYDELTA(8) PORT_PLAYER(4)
 
 INPUT_PORTS_END
 

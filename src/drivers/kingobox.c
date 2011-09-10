@@ -23,12 +23,12 @@ extern UINT8 *kingofb_videoram2;
 extern UINT8 *kingofb_colorram2;
 extern UINT8 *kingofb_scroll_y;
 
-extern WRITE_HANDLER( kingofb_videoram_w );
-extern WRITE_HANDLER( kingofb_colorram_w );
-extern WRITE_HANDLER( kingofb_videoram2_w );
-extern WRITE_HANDLER( kingofb_colorram2_w );
+extern WRITE8_HANDLER( kingofb_videoram_w );
+extern WRITE8_HANDLER( kingofb_colorram_w );
+extern WRITE8_HANDLER( kingofb_videoram2_w );
+extern WRITE8_HANDLER( kingofb_colorram2_w );
 
-extern WRITE_HANDLER( kingofb_f800_w );
+extern WRITE8_HANDLER( kingofb_f800_w );
 
 extern PALETTE_INIT( kingofb );
 extern VIDEO_START( kingofb );
@@ -42,38 +42,38 @@ static UINT8 *video_shared;
 static UINT8 *sprite_shared;
 int kingofb_nmi_enable = 0;
 
-static READ_HANDLER( video_shared_r ) {
+static READ8_HANDLER( video_shared_r ) {
 	return video_shared[offset];
 }
 
-static WRITE_HANDLER( video_shared_w ) {
+static WRITE8_HANDLER( video_shared_w ) {
 	video_shared[offset] = data;
 }
 
-static READ_HANDLER( sprite_shared_r ) {
+static READ8_HANDLER( sprite_shared_r ) {
 	return sprite_shared[offset];
 }
 
-static WRITE_HANDLER( sprite_shared_w ) {
+static WRITE8_HANDLER( sprite_shared_w ) {
 	sprite_shared[offset] = data;
 }
 
-static WRITE_HANDLER( video_interrupt_w ) {
-	cpu_set_irq_line_and_vector( 1, 0, HOLD_LINE, 0xff );
+static WRITE8_HANDLER( video_interrupt_w ) {
+	cpunum_set_input_line_and_vector( 1, 0, HOLD_LINE, 0xff );
 }
 
-static WRITE_HANDLER( sprite_interrupt_w ) {
-	cpu_set_irq_line_and_vector( 2, 0, HOLD_LINE, 0xff );
+static WRITE8_HANDLER( sprite_interrupt_w ) {
+	cpunum_set_input_line_and_vector( 2, 0, HOLD_LINE, 0xff );
 }
 
-static WRITE_HANDLER( scroll_interrupt_w ) {
+static WRITE8_HANDLER( scroll_interrupt_w ) {
 	sprite_interrupt_w( offset, data );
 	*kingofb_scroll_y = data;
 }
 
-static WRITE_HANDLER( sound_command_w ) {
+static WRITE8_HANDLER( sound_command_w ) {
 	soundlatch_w( 0, data );
-	cpu_set_irq_line_and_vector( 3, 0, HOLD_LINE, 0xff );
+	cpunum_set_input_line_and_vector( 3, 0, HOLD_LINE, 0xff );
 }
 
 
@@ -296,12 +296,12 @@ INPUT_PORTS_START( kingofb )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
     PORT_START /* IN 1 - 0xfc03 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
@@ -317,7 +317,7 @@ INPUT_PORTS_START( kingofb )
 
     PORT_START /* IN 3 - 0xfc05 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON3 )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_COCKTAIL )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -382,12 +382,12 @@ INPUT_PORTS_START( ringking )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
     PORT_START /* IN 1 - 0xe003 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
@@ -403,7 +403,7 @@ INPUT_PORTS_START( ringking )
 
     PORT_START /* IN 3 - 0xfc05 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_COCKTAIL )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -555,7 +555,7 @@ static struct DACinterface dac_interface =
 static INTERRUPT_GEN( kingofb_interrupt ) {
 
 	if ( kingofb_nmi_enable )
-		cpu_set_irq_line(cpu_getactivecpu(), IRQ_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(cpu_getactivecpu(), INPUT_LINE_NMI, PULSE_LINE);
 }
 
 static MACHINE_DRIVER_START( kingofb )

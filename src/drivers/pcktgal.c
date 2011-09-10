@@ -16,8 +16,8 @@
 #include "vidhrdw/generic.h"
 #include "cpu/m6502/m6502.h"
 
-extern WRITE_HANDLER( pcktgal_videoram_w );
-extern WRITE_HANDLER( pcktgal_flipscreen_w );
+extern WRITE8_HANDLER( pcktgal_videoram_w );
+extern WRITE8_HANDLER( pcktgal_flipscreen_w );
 
 extern PALETTE_INIT( pcktgal );
 extern VIDEO_START( pcktgal );
@@ -25,7 +25,7 @@ extern VIDEO_UPDATE( pcktgal );
 
 /***************************************************************************/
 
-static WRITE_HANDLER( pcktgal_bank_w )
+static WRITE8_HANDLER( pcktgal_bank_w )
 {
 	unsigned char *RAM = memory_region(REGION_CPU1);
 
@@ -36,7 +36,7 @@ static WRITE_HANDLER( pcktgal_bank_w )
 	else { cpu_setbank(2,&RAM[0x12000]); }
 }
 
-static WRITE_HANDLER( pcktgal_sound_bank_w )
+static WRITE8_HANDLER( pcktgal_sound_bank_w )
 {
 	unsigned char *RAM = memory_region(REGION_CPU2);
 
@@ -44,10 +44,10 @@ static WRITE_HANDLER( pcktgal_sound_bank_w )
 	else { cpu_setbank(3,&RAM[0x10000]); }
 }
 
-static WRITE_HANDLER( pcktgal_sound_w )
+static WRITE8_HANDLER( pcktgal_sound_w )
 {
 	soundlatch_w(0,data);
-	cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
+	cpunum_set_input_line(1,INPUT_LINE_NMI,PULSE_LINE);
 }
 
 static int msm5205next;
@@ -61,15 +61,15 @@ static void pcktgal_adpcm_int(int data)
 
 	toggle = 1 - toggle;
 	if (toggle)
-		cpu_set_irq_line(1,M6502_IRQ_LINE,HOLD_LINE);
+		cpunum_set_input_line(1,M6502_IRQ_LINE,HOLD_LINE);
 }
 
-static WRITE_HANDLER( pcktgal_adpcm_data_w )
+static WRITE8_HANDLER( pcktgal_adpcm_data_w )
 {
 	msm5205next=data;
 }
 
-static READ_HANDLER( pcktgal_adpcm_reset_r )
+static READ8_HANDLER( pcktgal_adpcm_reset_r )
 {
 	MSM5205_reset_w(0,0);
 	return 0;
@@ -123,24 +123,24 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( pcktgal )
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_COIN2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 
 	PORT_START	/* Dip switch */
 	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Coinage ) )

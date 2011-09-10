@@ -11,9 +11,9 @@
 
 extern UINT8 *scotrsht_scroll;
 
-extern WRITE_HANDLER( scotrsht_videoram_w );
-extern WRITE_HANDLER( scotrsht_colorram_w );
-extern WRITE_HANDLER( scotrsht_charbank_w );
+extern WRITE8_HANDLER( scotrsht_videoram_w );
+extern WRITE8_HANDLER( scotrsht_colorram_w );
+extern WRITE8_HANDLER( scotrsht_charbank_w );
 
 extern PALETTE_INIT( scotrsht );
 extern VIDEO_START( scotrsht );
@@ -21,7 +21,7 @@ extern VIDEO_UPDATE( scotrsht );
 
 static int irq_enable;
 
-static WRITE_HANDLER( ctrl_w )
+static WRITE8_HANDLER( ctrl_w )
 {
 	irq_enable = data & 0x02;
 	flip_screen_set(data & 0x08);
@@ -30,16 +30,16 @@ static WRITE_HANDLER( ctrl_w )
 static INTERRUPT_GEN( scotrsht_interrupt )
 {
 	if (irq_enable)
-		cpu_set_irq_line(0, 0, HOLD_LINE);
+		cpunum_set_input_line(0, 0, HOLD_LINE);
 }
 
-static WRITE_HANDLER( scotrsht_soundlatch_w )
+static WRITE8_HANDLER( scotrsht_soundlatch_w )
 {
 	soundlatch_w(0,data);
-	cpu_set_irq_line(1, 0, HOLD_LINE);
+	cpunum_set_input_line(1, 0, HOLD_LINE);
 }
 
-static WRITE_HANDLER( scotrsht_coin_counters_w )
+static WRITE8_HANDLER( scotrsht_coin_counters_w )
 {
 	coin_counter_w(0, data & 1);
 	coin_counter_w(1, data & 2);
@@ -91,20 +91,20 @@ INPUT_PORTS_START( scotrsht )
 	PORT_BIT( 0xe0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* IN1 - $3301 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* IN2 - $3302 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 

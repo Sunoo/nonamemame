@@ -25,7 +25,7 @@ static void get_tile_info(int tile_index)
 }
 
 
-static WRITE_HANDLER( mgolf_vram_w )
+static WRITE8_HANDLER( mgolf_vram_w )
 {
 	if (mgolf_video_ram[offset] != data)
 	{
@@ -87,7 +87,7 @@ static void update_plunger(void)
 
 			if (!mask)
 			{
-				cpu_set_nmi_line(0, PULSE_LINE);
+				cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 			}
 		}
 		else
@@ -104,7 +104,7 @@ static void interrupt_callback(int scanline)
 {
 	update_plunger();
 
-	cpu_set_irq_line(0, 0, PULSE_LINE);
+	cpunum_set_input_line(0, 0, PULSE_LINE);
 
 	scanline = scanline + 32;
 
@@ -138,13 +138,13 @@ static PALETTE_INIT( mgolf )
 }
 
 
-static READ_HANDLER( mgolf_wram_r )
+static READ8_HANDLER( mgolf_wram_r )
 {
 	return mgolf_video_ram[0x380 + offset];
 }
 
 
-static READ_HANDLER( mgolf_dial_r )
+static READ8_HANDLER( mgolf_dial_r )
 {
 	UINT8 val = readinputport(1);
 
@@ -161,7 +161,7 @@ static READ_HANDLER( mgolf_dial_r )
 }
 
 
-static READ_HANDLER( mgolf_misc_r )
+static READ8_HANDLER( mgolf_misc_r )
 {
 	double plunger = calc_plunger_pos(); /* see Video Pinball */
 
@@ -180,7 +180,7 @@ static READ_HANDLER( mgolf_misc_r )
 }
 
 
-static WRITE_HANDLER( mgolf_wram_w )
+static WRITE8_HANDLER( mgolf_wram_w )
 {
 	mgolf_video_ram[0x380 + offset] = data;
 }
@@ -240,17 +240,17 @@ INPUT_PORTS_START( mgolf )
 	PORT_START /* 60 */
 	PORT_SERVICE( 0x10, IP_ACTIVE_LOW )
 	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_TILT )
-	PORT_BIT_IMPULSE( 0x40, IP_ACTIVE_HIGH, IPT_COIN1, 1 )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_HIGH, IPT_COIN2, 1 )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN2 ) PORT_IMPULSE(1)
 
 	PORT_START /* 61 */
-	PORT_BITX( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2, "Course Select", KEYCODE_SPACE, IP_JOY_DEFAULT )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Course Select") PORT_CODE(KEYCODE_SPACE)
 	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_SPECIAL ) /* PLUNGER 1 */
 	PORT_BIT ( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL ) /* PLUNGER 2 */
 	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_START1 )
 
 	PORT_START
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL, 100, 25, 0, 0 )
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(100) PORT_KEYDELTA(25)
 
 	PORT_START
 	PORT_BIT ( 0xff, IP_ACTIVE_HIGH, IPT_BUTTON1 )

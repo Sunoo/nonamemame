@@ -207,7 +207,7 @@ static WRITE16_HANDLER( system_control_w )
 
 	dsp_HOLD_signal = (data & 4) ? CLEAR_LINE : ASSERT_LINE;
 
-	cpu_set_reset_line(2,(data & 1) ? CLEAR_LINE : ASSERT_LINE);
+	cpunum_set_input_line(2, INPUT_LINE_RESET, (data & 1) ? CLEAR_LINE : ASSERT_LINE);
 
 	logerror("68K:%06x writing %04x to TMS32025.  %s HOLD , %s RESET\n",activecpu_get_previouspc(),data,((data & 4) ? "Clear" : "Assert"),((data & 1) ? "Clear" : "Assert"));
 }
@@ -314,7 +314,7 @@ static void reset_sound_region(void)
 	cpu_setbank(1, memory_region(REGION_CPU2) + (banknum * 0x4000) + 0x10000);
 }
 
-static WRITE_HANDLER( sound_bankswitch_w )
+static WRITE8_HANDLER( sound_bankswitch_w )
 {
 	banknum = (data - 1) & 3;
 	reset_sound_region();
@@ -492,16 +492,16 @@ INPUT_PORTS_START( topland )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_SERVICE1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_TILT )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_START1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_BUTTON3 | IPF_PLAYER1 )	/* "door" (!) */
+	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_PLAYER(1)	/* "door" (!) */
 
 	PORT_START	/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON1 | IPF_PLAYER1 )	/* slot down */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON2 | IPF_PLAYER1 )	/* slot up */
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )	/* handle */
-	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1 )	/* freeze ??? */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON1 ) PORT_PLAYER(1)	/* slot down */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON2 ) PORT_PLAYER(1)	/* slot up */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)	/* handle */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_PLAYER(1)	/* freeze ??? */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	/* The range of these sticks reflects the range test mode displays.
@@ -510,13 +510,13 @@ INPUT_PORTS_START( topland )
 	   to make keyboard control feasible! */
 
 	PORT_START  /* Stick 1 (4) */
-	PORT_ANALOG( 0xffff, 0x0000, IPT_AD_STICK_X | IPF_PLAYER1, 30, 40, 0xf800, 0x7ff )
+	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_X ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1)
 
 	PORT_START  /* Stick 2 (5) */
-	PORT_ANALOG( 0xffff, 0x0000, IPT_AD_STICK_Y | IPF_PLAYER1, 30, 40, 0xf800, 0x7ff )
+	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_Y ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1)
 
 	PORT_START  /* Stick 3 (6) */
-	PORT_ANALOG( 0xffff, 0x0000, IPT_AD_STICK_Y | IPF_PLAYER2, 30, 40, 0xf800, 0x7ff )
+	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_Y ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(2)
 INPUT_PORTS_END
 
 INPUT_PORTS_START( ainferno )
@@ -562,13 +562,13 @@ INPUT_PORTS_START( ainferno )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_START2 )
 
 	PORT_START	/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON1 | IPF_PLAYER1 )	/* lever */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON2 | IPF_PLAYER1 )	/* handle x */
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_BUTTON3 | IPF_PLAYER1 )	/* handle y */
-	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_BUTTON4 | IPF_PLAYER1 )	/* fire */
-	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_BUTTON6 | IPF_PLAYER1 )	/* pedal r */
-	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_BUTTON5 | IPF_PLAYER1 )	/* pedal l */
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER1 )	/* freeze (code at $7d6 hangs) */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON1 ) PORT_PLAYER(1)	/* lever */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON2 ) PORT_PLAYER(1)	/* handle x */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_PLAYER(1)	/* handle y */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_BUTTON4 ) PORT_PLAYER(1)	/* fire */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_BUTTON6 ) PORT_PLAYER(1)	/* pedal r */
+	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_BUTTON5 ) PORT_PLAYER(1)	/* pedal l */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON7 ) PORT_PLAYER(1)	/* freeze (code at $7d6 hangs) */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	/* The range of these sticks reflects the range test mode displays.
@@ -577,13 +577,13 @@ INPUT_PORTS_START( ainferno )
 	   to make keyboard control feasible! */
 
 	PORT_START  /* Stick 1 (4) */
-	PORT_ANALOG( 0xffff, 0x0000, IPT_AD_STICK_X | IPF_PLAYER1, 30, 40, 0xf800, 0x7ff )
+	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_X ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1)
 
 	PORT_START  /* Stick 2 (5) */
-	PORT_ANALOG( 0xffff, 0x0000, IPT_AD_STICK_Y | IPF_PLAYER1, 30, 40, 0xf800, 0x7ff )
+	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_Y ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(1)
 
 	PORT_START  /* Stick 3 (6) */
-	PORT_ANALOG( 0xffff, 0x0000, IPT_AD_STICK_Y | IPF_PLAYER2, 30, 40, 0xf800, 0x7ff )
+	PORT_BIT( 0xffff, 0x0000, IPT_AD_STICK_Y ) PORT_MINMAX(0xf800,0x7ff) PORT_SENSITIVITY(30) PORT_KEYDELTA(40) PORT_PLAYER(2)
 INPUT_PORTS_END
 
 
@@ -620,7 +620,7 @@ static struct GfxDecodeInfo airsys_gfxdecodeinfo[] =
 /* Handler called by the YM2610 emulator when the internal timers cause an IRQ */
 static void irqhandler(int irq)
 {
-	cpu_set_irq_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM2610interface airsys_ym2610_interface =

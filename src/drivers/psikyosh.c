@@ -262,7 +262,7 @@ static READ32_HANDLER( psh_eeprom_r )
 
 static INTERRUPT_GEN(psikyosh_interrupt)
 {
-	cpu_set_irq_line(0, 4, HOLD_LINE);
+	cpunum_set_input_line(0, 4, HOLD_LINE);
 }
 
 static READ32_HANDLER(io32_r)
@@ -431,9 +431,9 @@ ADDRESS_MAP_END
 static void irqhandler(int linestate)
 {
 	if (linestate)
-		cpu_set_irq_line(0, 12, ASSERT_LINE);
+		cpunum_set_input_line(0, 12, ASSERT_LINE);
 	else
-		cpu_set_irq_line(0, 12, CLEAR_LINE);
+		cpunum_set_input_line(0, 12, CLEAR_LINE);
 }
 
 static struct YMF278B_interface ymf278b_interface =
@@ -498,26 +498,26 @@ MACHINE_DRIVER_END
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN  ) \
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN  ) \
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SERVICE1 ) \
-	PORT_BITX(0x20, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE ) \
+	PORT_BIT(0x20, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2) \
 	PORT_DIPNAME( 0x40, debug ? 0x00 : 0x40, "Debug" ) /* Must be high for dragnblz, low for others (Resets EEPROM?). Debug stuff */ \
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) ) \
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) ) \
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN  )
 
-#define PORT_PLAYER( player, start, buttons ) \
+#define PSIKYOSH_PORT_PLAYER( player, start, buttons ) \
 	PORT_START \
 	PORT_BIT(  0x01, IP_ACTIVE_LOW, start ) \
-	PORT_BIT(  0x02, IP_ACTIVE_LOW, (buttons>=3)?(IPT_BUTTON3 | player):IPT_UNKNOWN ) \
-	PORT_BIT(  0x04, IP_ACTIVE_LOW, (buttons>=2)?(IPT_BUTTON2 | player):IPT_UNKNOWN ) \
-	PORT_BIT(  0x08, IP_ACTIVE_LOW, (buttons>=1)?(IPT_BUTTON1 | player):IPT_UNKNOWN ) \
-	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | player ) \
-	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | player ) \
-	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | player ) \
-	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | player )
+	PORT_BIT(  0x02, IP_ACTIVE_LOW, (buttons>=3)?(IPT_BUTTON3 ) :IPT_UNKNOWN ) PORT_PLAYER(player) \
+	PORT_BIT(  0x04, IP_ACTIVE_LOW, (buttons>=2)?(IPT_BUTTON2 ) :IPT_UNKNOWN ) PORT_PLAYER(player) \
+	PORT_BIT(  0x08, IP_ACTIVE_LOW, (buttons>=1)?(IPT_BUTTON1 ) :IPT_UNKNOWN ) PORT_PLAYER(player)\
+	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_PLAYER(player) \
+	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(player) \
+	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  ) PORT_PLAYER(player) \
+	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    ) PORT_PLAYER(player)
 
 INPUT_PORTS_START( s1945ii )
-	PORT_PLAYER( IPF_PLAYER1, IPT_START1, 2 )
-	PORT_PLAYER( IPF_PLAYER2, IPT_START2, 2 )
+	PSIKYOSH_PORT_PLAYER( 1, IPT_START1, 2 )
+	PSIKYOSH_PORT_PLAYER( 2, IPT_START2, 2 )
 	UNUSED_PORT /* IN2 unused? */
 	PORT_COIN( 0 )
 
@@ -528,8 +528,8 @@ INPUT_PORTS_START( s1945ii )
 INPUT_PORTS_END
 
 INPUT_PORTS_START( soldivid )
-	PORT_PLAYER( IPF_PLAYER1, IPT_START1, 3 )
-	PORT_PLAYER( IPF_PLAYER2, IPT_START2, 3 )
+	PSIKYOSH_PORT_PLAYER( 1, IPT_START1, 3 )
+	PSIKYOSH_PORT_PLAYER( 2, IPT_START2, 3 )
 	UNUSED_PORT /* IN2 unused? */
 	PORT_COIN( 0 )
 
@@ -540,18 +540,18 @@ INPUT_PORTS_START( soldivid )
 INPUT_PORTS_END
 
 INPUT_PORTS_START( daraku )
-	PORT_PLAYER( IPF_PLAYER1, IPT_START1, 2 )
-	PORT_PLAYER( IPF_PLAYER2, IPT_START2, 2 )
+	PSIKYOSH_PORT_PLAYER( 1, IPT_START1, 2 )
+	PSIKYOSH_PORT_PLAYER( 2, IPT_START2, 2 )
 
 	PORT_START  /* IN2 more controls */
 	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_UNKNOWN                      )
 	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_UNKNOWN                      )
-	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_BUTTON4        | IPF_PLAYER2 )
-	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER2 )
+	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)
+	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_UNKNOWN                      )
 	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_UNKNOWN                      )
-	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_BUTTON4        | IPF_PLAYER1 )
-	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER1 )
+	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)
+	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
 
 	PORT_COIN( 0 )
 
@@ -562,8 +562,8 @@ INPUT_PORTS_START( daraku )
 INPUT_PORTS_END
 
 INPUT_PORTS_START( sbomberb )
-	PORT_PLAYER( IPF_PLAYER1, IPT_START1, 2 )
-	PORT_PLAYER( IPF_PLAYER2, IPT_START2, 2 )
+	PSIKYOSH_PORT_PLAYER( 1, IPT_START1, 2 )
+	PSIKYOSH_PORT_PLAYER( 2, IPT_START2, 2 )
 	UNUSED_PORT /* IN2 unused? */
 	PORT_COIN( 0 ) /* If HIGH then you can perform rom test, but EEPROM resets? */
 
@@ -574,8 +574,8 @@ INPUT_PORTS_START( sbomberb )
 INPUT_PORTS_END
 
 INPUT_PORTS_START( gunbird2 ) /* Different Region */
-	PORT_PLAYER( IPF_PLAYER1, IPT_START1, 3 )
-	PORT_PLAYER( IPF_PLAYER2, IPT_START2, 3 )
+	PSIKYOSH_PORT_PLAYER( 1, IPT_START1, 3 )
+	PSIKYOSH_PORT_PLAYER( 2, IPT_START2, 3 )
 	UNUSED_PORT /* IN2 unused? */
 	PORT_COIN( 0 ) /* If HIGH then you can perform rom test, but EEPROM resets */
 
@@ -587,8 +587,8 @@ INPUT_PORTS_START( gunbird2 ) /* Different Region */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( s1945iii ) /* Different Region again */
-	PORT_PLAYER( IPF_PLAYER1, IPT_START1, 3 )
-	PORT_PLAYER( IPF_PLAYER2, IPT_START2, 3 )
+	PSIKYOSH_PORT_PLAYER( 1, IPT_START1, 3 )
+	PSIKYOSH_PORT_PLAYER( 2, IPT_START2, 3 )
 	UNUSED_PORT /* IN2 unused? */
 	PORT_COIN( 0 ) /* If HIGH then you can perform rom test, EEPROM doesn't reset */
 
@@ -600,8 +600,8 @@ INPUT_PORTS_START( s1945iii ) /* Different Region again */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( dragnblz ) /* Security requires bit high */
-	PORT_PLAYER( IPF_PLAYER1, IPT_START1, 3 )
-	PORT_PLAYER( IPF_PLAYER2, IPT_START2, 3 )
+	PSIKYOSH_PORT_PLAYER( 1, IPT_START1, 3 )
+	PSIKYOSH_PORT_PLAYER( 2, IPT_START2, 3 )
 	UNUSED_PORT /* IN2 unused? */
 	PORT_COIN( 1 ) /* Must be HIGH (Or Security Error), so can perform test */
 
@@ -977,13 +977,13 @@ PC  :0602CAF2: BT      $0602CAE6
 
 static DRIVER_INIT( soldivid )
 {
-	install_mem_read32_handler(0, 0x600000c, 0x600000f, soldivid_speedup_r );
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x600000c, 0x600000f, 0, 0, soldivid_speedup_r );
 	use_factory_eeprom=EEPROM_0;
 }
 
 static DRIVER_INIT( s1945ii )
 {
-	install_mem_read32_handler(0, 0x600000c, 0x600000f, s1945ii_speedup_r );
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x600000c, 0x600000f, 0, 0, s1945ii_speedup_r );
 	use_factory_eeprom=EEPROM_DEFAULT;
 }
 
@@ -991,13 +991,13 @@ static DRIVER_INIT( daraku )
 {
 	unsigned char *RAM = memory_region(REGION_CPU1);
 	cpu_setbank(1,&RAM[0x100000]);
-	install_mem_read32_handler(0, 0x600000c, 0x600000f, daraku_speedup_r );
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x600000c, 0x600000f, 0, 0, daraku_speedup_r );
 	use_factory_eeprom=EEPROM_DARAKU;
 }
 
 static DRIVER_INIT( sbomberb )
 {
-	install_mem_read32_handler(0, 0x600000c, 0x600000f, sbomberb_speedup_r );
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x600000c, 0x600000f, 0, 0, sbomberb_speedup_r );
 	use_factory_eeprom=EEPROM_DEFAULT;
 }
 
@@ -1005,7 +1005,7 @@ static DRIVER_INIT( gunbird2 )
 {
 	unsigned char *RAM = memory_region(REGION_CPU1);
 	cpu_setbank(1,&RAM[0x100000]);
-	install_mem_read32_handler(0, 0x604000c, 0x604000f, gunbird2_speedup_r );
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x604000c, 0x604000f, 0, 0, gunbird2_speedup_r );
 	use_factory_eeprom=EEPROM_DEFAULT;
 }
 
@@ -1013,13 +1013,13 @@ static DRIVER_INIT( s1945iii )
 {
 	unsigned char *RAM = memory_region(REGION_CPU1);
 	cpu_setbank(1,&RAM[0x100000]);
-	install_mem_read32_handler(0, 0x606000c, 0x606000f, s1945iii_speedup_r );
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x606000c, 0x606000f, 0, 0, s1945iii_speedup_r );
 	use_factory_eeprom=EEPROM_S1945III;
 }
 
 static DRIVER_INIT( dragnblz )
 {
-	install_mem_read32_handler(0, 0x606000c, 0x606000f, dragnblz_speedup_r );
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x606000c, 0x606000f, 0, 0, dragnblz_speedup_r );
 	use_factory_eeprom=EEPROM_DRAGNBLZ;
 }
 

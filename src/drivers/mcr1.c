@@ -91,7 +91,7 @@ static const UINT8 *nvram_init;
  *
  *************************************/
 
-static READ_HANDLER( kick_dial_r )
+static READ8_HANDLER( kick_dial_r )
 {
 	return (readinputport(1) & 0x0f) | ((readinputport(6) << 4) & 0xf0);
 }
@@ -104,7 +104,7 @@ static READ_HANDLER( kick_dial_r )
  *
  *************************************/
 
-static READ_HANDLER( solarfox_input_0_r )
+static READ8_HANDLER( solarfox_input_0_r )
 {
 	/* This is a kludge; according to the wiring diagram, the player 2 */
 	/* controls are hooked up as documented below. If you go into test */
@@ -118,7 +118,7 @@ static READ_HANDLER( solarfox_input_0_r )
 }
 
 
-static READ_HANDLER( solarfox_input_1_r )
+static READ8_HANDLER( solarfox_input_1_r )
 {
 	/*  same deal as above */
 	if (mcr_cocktail_flip)
@@ -205,24 +205,24 @@ INPUT_PORTS_START( solarfox )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
 	PORT_START	/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_4WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_4WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_4WAY )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY PORT_COCKTAIL
 
 	PORT_START	/* IN2 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT( 0xfe, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* IN3 -- dipswitches */
@@ -262,7 +262,7 @@ INPUT_PORTS_START( kick )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
 	PORT_START	/* IN1 -- this is the Kick spinner input.  */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_REVERSE, 3, 50, 0, 0 )
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(3) PORT_KEYDELTA(50) PORT_REVERSE
 
 	PORT_START	/* IN2 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -296,10 +296,10 @@ INPUT_PORTS_START( kicka )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
 	PORT_START	/* IN1 -- this is the Kick spinner input.  */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_REVERSE, 3, 50, 0, 0 )
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(3) PORT_KEYDELTA(50) PORT_REVERSE
 
 	PORT_START	/* IN2 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT( 0xfe, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* IN3 -- dipswitches */
@@ -319,7 +319,7 @@ INPUT_PORTS_START( kicka )
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	/* (fake) player 2 dial */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_COCKTAIL, 3, 50, 0, 0 )
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(3) PORT_KEYDELTA(50) PORT_REVERSE PORT_COCKTAIL
 INPUT_PORTS_END
 
 
@@ -484,9 +484,9 @@ static DRIVER_INIT( solarfox )
 	nvram_init = hiscore_init;
 
 	MCR_CONFIGURE_SOUND(MCR_SSIO);
-	install_port_read_handler(0, 0x00, 0x00, solarfox_input_0_r);
-	install_port_read_handler(0, 0x01, 0x01, solarfox_input_1_r);
-	install_port_write_handler(0, 0x01, 0x01, mcr_control_port_w);
+	memory_install_read8_handler(0, ADDRESS_SPACE_IO, 0x00, 0x00, 0, 0, solarfox_input_0_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_IO, 0x01, 0x01, 0, 0, solarfox_input_1_r);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x01, 0x01, 0, 0, mcr_control_port_w);
 
 	mcr12_sprite_xoffs = 16;
 	mcr12_sprite_xoffs_flip = 0;
@@ -498,8 +498,8 @@ static DRIVER_INIT( kick )
 	nvram_init = NULL;
 
 	MCR_CONFIGURE_SOUND(MCR_SSIO);
-	install_port_read_handler(0, 0x01, 0x01, kick_dial_r);
-	install_port_write_handler(0, 0x03, 0x03, mcr_control_port_w);
+	memory_install_read8_handler(0, ADDRESS_SPACE_IO, 0x01, 0x01, 0, 0, kick_dial_r);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0x03, 0x03, 0, 0, mcr_control_port_w);
 
 	mcr12_sprite_xoffs = 0;
 	mcr12_sprite_xoffs_flip = 16;

@@ -159,12 +159,12 @@ static void update_irq_state(void)
 		{
 			if (irq & (1 << i))
 			{
-				cpu_set_irq_line(0, metro_irq_levels[i]&7, ASSERT_LINE);
+				cpunum_set_input_line(0, metro_irq_levels[i]&7, ASSERT_LINE);
 				return;
 			}
 			i++;
 		}
-		cpu_set_irq_line(0, 0, ASSERT_LINE);
+		cpunum_set_input_line(0, 0, ASSERT_LINE);
 	}
 	else
 	{
@@ -173,7 +173,7 @@ static void update_irq_state(void)
 			source by peeking a register (metro_irq_cause_r) */
 
 		int state =	(irq ? ASSERT_LINE : CLEAR_LINE);
-		cpu_set_irq_line(0, irq_line, state);
+		cpunum_set_input_line(0, irq_line, state);
 	}
 }
 
@@ -262,21 +262,28 @@ INTERRUPT_GEN( karatour_interrupt )
 	}
 }
 
+static void *mouja_irq_timer;
+
+static void mouja_irq_callback(int param)
+{
+	requested_int[0] = 1;
+	update_irq_state();
+}
+
+static WRITE16_HANDLER( mouja_irq_timer_ctrl_w )
+{
+	double timer;
+
+	timer = 58.0 + (0xff - (data & 0xff)) / 2.2;					/* 0xff=58Hz, 0x80=116Hz? */
+	timer_adjust(mouja_irq_timer, TIME_NOW, 0, TIME_IN_HZ(timer));
+}
+
 INTERRUPT_GEN( mouja_interrupt )
 {
-	switch ( cpu_getiloops() )
-	{
-		case 0:
-			requested_int[0] = 1;
-			update_irq_state();
-			break;
-
-		default:
-			requested_int[1] = 1;
-			update_irq_state();
-			break;
-	}
+	requested_int[1] = 1;
+	update_irq_state();
 }
+
 
 INTERRUPT_GEN( gakusai_interrupt )
 {
@@ -306,7 +313,7 @@ INTERRUPT_GEN( dokyusei_interrupt )
 
 static void ymf278b_interrupt(int active)
 {
-	cpu_set_irq_line(0, 2, active);
+	cpunum_set_input_line(0, 2, active);
 }
 
 /***************************************************************************
@@ -343,7 +350,7 @@ static WRITE16_HANDLER( metro_soundlatch_w )
 	if (ACCESSING_LSB)
 	{
 		soundlatch_w(0,data & 0xff);
-		cpu_set_nmi_line(1, PULSE_LINE);
+		cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 		cpu_spinuntil_int();
 		busy_sndcpu = 1;
 	}
@@ -367,7 +374,7 @@ static WRITE16_HANDLER( metro_soundstatus_w )
 }
 
 
-static WRITE_HANDLER( metro_sound_rombank_w )
+static WRITE8_HANDLER( metro_sound_rombank_w )
 {
 	int bankaddress;
 	data8_t *ROM = memory_region(REGION_CPU2);
@@ -378,7 +385,7 @@ static WRITE_HANDLER( metro_sound_rombank_w )
 	cpu_setbank(1, &ROM[bankaddress]);
 }
 
-static WRITE_HANDLER( daitorid_sound_rombank_w )
+static WRITE8_HANDLER( daitorid_sound_rombank_w )
 {
 	int bankaddress;
 	data8_t *ROM = memory_region(REGION_CPU2);
@@ -390,17 +397,17 @@ static WRITE_HANDLER( daitorid_sound_rombank_w )
 }
 
 
-static READ_HANDLER( metro_porta_r )
+static READ8_HANDLER( metro_porta_r )
 {
 	return porta;
 }
 
-static WRITE_HANDLER( metro_porta_w )
+static WRITE8_HANDLER( metro_porta_w )
 {
 	porta = data;
 }
 
-static WRITE_HANDLER( metro_portb_w )
+static WRITE8_HANDLER( metro_portb_w )
 {
 	/* port B layout:
 	   7 !clock latch for message to main CPU
@@ -444,37 +451,7 @@ static WRITE_HANDLER( metro_portb_w )
 }
 
 
-static WRITE_HANDLER( dharma_portb_w )
-{
-	/* port B layout:
-	   7 !clock latch for message to main CPU
-       6
-	   5
-	   4 !clock MSM6295 I/O
-	   3
-	   2 !enable write to 6295
-	   1
-	   0
-	*/
-
-	if (BIT(portb,7) && !BIT(data,7))	/* clock 1->0 */
-	{
-		busy_sndcpu = 0;
-		portb = data;
-		return;
-	}
-
-	if (BIT(portb,2) && !BIT(data,2))	/* clock 1->0 */
-	{
-		/* write */
-		if (!BIT(data,4))
-			OKIM6295_data_0_w(0,porta);
-	}
-	portb = data;
-}
-
-
-static WRITE_HANDLER( daitorid_portb_w )
+static WRITE8_HANDLER( daitorid_portb_w )
 {
 	/* port B layout:
 	   7 !clock latch for message to main CPU
@@ -532,9 +509,100 @@ static WRITE_HANDLER( daitorid_portb_w )
 
 /*******************/
 
+static int okim6295_command;
+static int mouja_m6295_rombank;
+static UINT32 volume_table[16];		/* M6295 volume lookup table */
+
+
+static void mouja_m6295_data_w(int data)
+{
+	/* if a command is pending, process the second half */
+	if (okim6295_command != -1)
+	{
+		int temp = data >> 4, i, start, stop;
+		data8_t *ROM = memory_region(REGION_SOUND1);
+
+		/* determine which voice(s) (voice is set by a 1 bit in the upper 4 bits of the second byte) */
+		for (i = 0; i < 4; i++, temp >>= 1)
+		{
+			if (temp & 1)
+			{
+				start = ((ROM[okim6295_command*8+0]<<16) + (ROM[okim6295_command*8+1]<<8) + ROM[okim6295_command*8+2]) & 0x3ffff;
+				stop  = ((ROM[okim6295_command*8+3]<<16) + (ROM[okim6295_command*8+4]<<8) + ROM[okim6295_command*8+5]) & 0x3ffff;
+
+				if ((start >= 0x20000) && mouja_m6295_rombank)
+				{
+					start += (mouja_m6295_rombank - 1) * 0x20000;			/* 0x00000-0x1ffff fixed rom  */
+					stop += (mouja_m6295_rombank - 1) * 0x20000;			/* 0x20000-0x3ffff banked rom */
+				}
+
+				if (start < stop)
+				{
+					if (!ADPCM_playing(i))
+					{
+						ADPCM_setvol(i, volume_table[data & 0x0f]);
+						ADPCM_play(i, start, 2 * (stop - start + 1));
+					}
+				}
+			}
+		}
+
+		/* reset the command */
+		okim6295_command = -1;
+	}
+
+	/* if this is the start of a command, remember the sample number for next time */
+	else if (data & 0x80)
+	{
+		okim6295_command = data & 0x7f;
+	}
+
+	/* otherwise, see if this is a silence command */
+	else
+	{
+		int temp = data >> 3, i;
+
+		/* determine which voice(s) (voice is set by a 1 bit in bits 3-6 of the command */
+		for (i = 0; i < 4; i++, temp >>= 1)
+		{
+			if (temp & 1)
+				ADPCM_stop(i);
+		}
+	}
+}
+
+static WRITE16_HANDLER( mouja_sound_rombank_w )
+{
+	if (ACCESSING_LSB)
+		mouja_m6295_rombank = (data >> 3) & 0x07;			/* M6295 special banked rom system */
+}
+
+static READ16_HANDLER( mouja_m6295_status_lsb_r )
+{
+	int i, result;
+
+	result = 0xf0;	/* naname expects bits 4-7 to be 1 */
+	/* set the bit to 1 if something is playing on a given channel */
+	for (i = 0; i < 4; i++)
+	{
+		if (ADPCM_playing(i))
+			result |= 1 << i;
+	}
+
+	return result;
+}
+
+static WRITE16_HANDLER( mouja_m6295_data_msb_w )
+{
+	if (ACCESSING_MSB)
+		mouja_m6295_data_w(data >> 8);
+}
+
+/*******************/
+
 static void metro_sound_irq_handler(int state)
 {
-	cpu_set_irq_line(1, UPD7810_INTF2, state ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1, UPD7810_INTF2, state ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM2151interface ym2151_interface =
@@ -584,8 +652,26 @@ static struct OKIM6295interface okim6295_interface =
 	1,
 	{ 1200000/128 },		/* 165=7272Hz? 128=9375Hz? */
 	{ REGION_SOUND1 },
-	{ 50 }
+	{ 10 }
 };
+
+static struct OKIM6295interface okim6295_intf_2151balanced =
+{
+	1,
+	{ 1200000/128 },		/* 165=7272Hz? 128=9375Hz? */
+	{ REGION_SOUND1 },
+	{ 40 }
+};
+
+static struct ADPCMinterface mouja_adpcm_interface =
+{
+	4,						/* 4 channels (M6295) */
+	16000000/1024,			/* 15625Hz */
+	REGION_SOUND1,
+	{ 35,35,35,35 }
+};
+
+
 static struct OKIM6295interface okim6295_intf_8kHz =
 {
 	1,
@@ -593,13 +679,7 @@ static struct OKIM6295interface okim6295_intf_8kHz =
 	{ REGION_SOUND1 },
 	{ 50 }
 };
-static struct OKIM6295interface okim6295_intf_12kHz =
-{
-	1,
-	{ 12000 },
-	{ REGION_SOUND1 },
-	{ 50 }
-};
+
 static struct OKIM6295interface okim6295_intf_16kHz =
 {
 	1,
@@ -615,7 +695,6 @@ static struct YM2413interface ym2413_interface =
 	3579545,
 	{ YM2413_VOL(100,MIXER_PAN_CENTER,100,MIXER_PAN_CENTER) }		/* Insufficient gain. */
 };
-
 
 static struct YM2413interface ym2413_intf_8MHz =
 {
@@ -940,14 +1019,6 @@ ADDRESS_MAP_END
 static ADDRESS_MAP_START( metro_snd_writeport, ADDRESS_SPACE_IO, 8 )
 	AM_RANGE(UPD7810_PORTA, UPD7810_PORTA) AM_WRITE(metro_porta_w)
 	AM_RANGE(UPD7810_PORTB, UPD7810_PORTB) AM_WRITE(metro_portb_w)
-	AM_RANGE(UPD7810_PORTC, UPD7810_PORTC) AM_WRITE(metro_sound_rombank_w)
-ADDRESS_MAP_END
-
-/*****************/
-
-static ADDRESS_MAP_START( dharma_snd_writeport, ADDRESS_SPACE_IO, 8 )
-	AM_RANGE(UPD7810_PORTA, UPD7810_PORTA) AM_WRITE(metro_porta_w)
-	AM_RANGE(UPD7810_PORTB, UPD7810_PORTB) AM_WRITE(dharma_portb_w)
 	AM_RANGE(UPD7810_PORTC, UPD7810_PORTC) AM_WRITE(metro_sound_rombank_w)
 ADDRESS_MAP_END
 
@@ -1911,10 +1982,10 @@ ADDRESS_MAP_END
 static WRITE16_HANDLER( blzntrnd_sound_w )
 {
 	soundlatch_w(offset, data>>8);
-	cpu_set_irq_line(1, IRQ_LINE_NMI, PULSE_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 }
 
-static WRITE_HANDLER( blzntrnd_sh_bankswitch_w )
+static WRITE8_HANDLER( blzntrnd_sh_bankswitch_w )
 {
 	unsigned char *RAM = memory_region(REGION_CPU2);
 	int bankaddress;
@@ -1925,7 +1996,7 @@ static WRITE_HANDLER( blzntrnd_sh_bankswitch_w )
 
 static void blzntrnd_irqhandler(int irq)
 {
-	cpu_set_irq_line(1, 0, irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1, 0, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM2610interface blzntrnd_ym2610_interface =
@@ -2034,7 +2105,7 @@ static ADDRESS_MAP_START( mouja_readmem, ADDRESS_SPACE_PROGRAM, 16 )
 	AM_RANGE(0x478882, 0x478883) AM_READ(input_port_1_word_r	)	//
 	AM_RANGE(0x478884, 0x478885) AM_READ(input_port_2_word_r	)	//
 	AM_RANGE(0x478886, 0x478887) AM_READ(input_port_3_word_r	)	//
-	AM_RANGE(0xd00000, 0xd00001) AM_READ(OKIM6295_status_0_lsb_r)
+	AM_RANGE(0xd00000, 0xd00001) AM_READ(mouja_m6295_status_lsb_r)
 #if 0
 	AM_RANGE(0x460000, 0x46ffff) AM_READ(metro_bankedrom_r		)	// Banked ROM
 #endif
@@ -2054,13 +2125,16 @@ static ADDRESS_MAP_START( mouja_writemem, ADDRESS_SPACE_PROGRAM, 16 )
 	AM_RANGE(0x478820, 0x47882f) AM_WRITE(MWA16_RAM) AM_BASE(&metro_irq_vectors	)	// IRQ Vectors
 	AM_RANGE(0x478830, 0x478831) AM_WRITE(MWA16_RAM) AM_BASE(&metro_irq_enable	)	// IRQ Enable
 	AM_RANGE(0x478832, 0x478833) AM_WRITE(metro_irq_cause_w				)	// IRQ Acknowledge
+	AM_RANGE(0x478834, 0x478835) AM_WRITE(mouja_irq_timer_ctrl_w		)	// IRQ set timer count
 	AM_RANGE(0x478836, 0x478837) AM_WRITE(watchdog_reset16_w			)	// Watchdog
 	AM_RANGE(0x478860, 0x47886b) AM_WRITE(metro_window_w) AM_BASE(&metro_window	)	// Tilemap Window
 	AM_RANGE(0x478850, 0x47885b) AM_WRITE(MWA16_RAM) AM_BASE(&metro_scroll		)	// Scroll Regs
+	AM_RANGE(0x478888, 0x478889) AM_WRITE(MWA16_NOP)								// ??
 	AM_RANGE(0x479700, 0x479713) AM_WRITE(MWA16_RAM) AM_BASE(&metro_videoregs	)	// Video Registers
 	AM_RANGE(0xc00000, 0xc00001) AM_WRITE(YM2413_register_port_0_lsb_w	)
 	AM_RANGE(0xc00002, 0xc00003) AM_WRITE(YM2413_data_port_0_lsb_w		)
-	AM_RANGE(0xd00000, 0xd00001) AM_WRITE(OKIM6295_data_0_msb_w)
+	AM_RANGE(0x800000, 0x800001) AM_WRITE(mouja_sound_rombank_w			)
+	AM_RANGE(0xd00000, 0xd00001) AM_WRITE(mouja_m6295_data_msb_w		)
 
 #if 0
 	AM_RANGE(0x478840, 0x47884d) AM_WRITE(metro_blitter_w) AM_BASE(&metro_blitter_regs	)	// Tiles Blitter
@@ -2080,32 +2154,32 @@ ADDRESS_MAP_END
 
 
 #define JOY_LSB(_n_, _b1_, _b2_, _b3_, _b4_) \
-	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_##_b1_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_##_b2_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_##_b3_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_##_b4_         | IPF_PLAYER##_n_ ) \
+	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_##_b1_         ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_##_b2_         ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_##_b3_         ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_##_b4_         ) PORT_PLAYER(_n_) \
 
 
 #define JOY_MSB(_n_, _b1_, _b2_, _b3_, _b4_) \
-	PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_##_b1_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_##_b2_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_##_b3_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_##_b4_         | IPF_PLAYER##_n_ ) \
+	PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_##_b1_         ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_##_b2_         ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_##_b3_         ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_##_b4_         ) PORT_PLAYER(_n_) \
 
 
 #define COINS \
 	PORT_BIT(  0x0001, IP_ACTIVE_LOW,  IPT_SERVICE1 ) \
 	PORT_BIT(  0x0002, IP_ACTIVE_LOW,  IPT_TILT     ) \
-	PORT_BIT_IMPULSE(  0x0004, IP_ACTIVE_LOW,  IPT_COIN1, 2    ) \
-	PORT_BIT_IMPULSE(  0x0008, IP_ACTIVE_LOW,  IPT_COIN2, 2    ) \
+	PORT_BIT(  0x0004, IP_ACTIVE_LOW,  IPT_COIN1 ) PORT_IMPULSE(2) \
+	PORT_BIT(  0x0008, IP_ACTIVE_LOW,  IPT_COIN2 ) PORT_IMPULSE(2) \
 	PORT_BIT(  0x0010, IP_ACTIVE_LOW,  IPT_START1   ) \
 	PORT_BIT(  0x0020, IP_ACTIVE_LOW,  IPT_START2   ) \
 	PORT_BIT(  0x0040, IP_ACTIVE_HIGH, IPT_UNKNOWN  ) \
@@ -2300,7 +2374,7 @@ INPUT_PORTS_START( blzntrnd )
 	PORT_DIPNAME( 0x0040, 0x0040, DEF_STR( Free_Play ) )
 	PORT_DIPSETTING(      0x0040, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_BITX(0x0080, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x0080, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_DIPNAME( 0x0300, 0x0300, "CP Single" )
 	PORT_DIPSETTING(      0x0300, "2:00" )
 	PORT_DIPSETTING(      0x0200, "2:30" )
@@ -2332,9 +2406,9 @@ INPUT_PORTS_START( blzntrnd )
 
 	PORT_START
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BITX(0x0002, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-	PORT_BIT_IMPULSE(  0x0004, IP_ACTIVE_LOW, IPT_COIN1, 2    )
-	PORT_BIT_IMPULSE(  0x0008, IP_ACTIVE_LOW, IPT_COIN2, 2    )
+	PORT_BIT(0x0002, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
+	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(2)
+	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(2)
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_START3 )
@@ -2390,7 +2464,7 @@ INPUT_PORTS_START( gstrik2 )
 	PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Flip_Screen ) )
 	PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
-	PORT_BITX(0x8000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x8000, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 
 	PORT_START
 	PORT_DIPNAME( 0x001f, 0x001f, DEF_STR( Coin_A ) )	
@@ -2467,9 +2541,9 @@ INPUT_PORTS_START( gstrik2 )
 
 	PORT_START
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BITX(0x0002, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
-	PORT_BIT_IMPULSE(  0x0004, IP_ACTIVE_LOW, IPT_COIN1, 2    )
-	PORT_BIT_IMPULSE(  0x0008, IP_ACTIVE_LOW, IPT_COIN2, 2    )
+	PORT_BIT(0x0002, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
+	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(2)
+	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(2)
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_START3 )
@@ -2572,7 +2646,7 @@ INPUT_PORTS_START( dharma )
 	PORT_DIPNAME( 0x4000, 0x4000, DEF_STR( Demo_Sounds ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x4000, DEF_STR( On ) )
-	PORT_BITX(    0x8000, 0x8000, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Freeze", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(    0x8000, 0x8000, IPT_DIPSWITCH_NAME ) PORT_NAME("Freeze") PORT_CHEAT
 	PORT_DIPSETTING(      0x8000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 
@@ -2875,43 +2949,43 @@ INPUT_PORTS_END
 INPUT_PORTS_START( dokyusei )
 	PORT_START	// IN0 - $478880.w
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX(0x0002, IP_ACTIVE_LOW, 0, "A",   KEYCODE_A,        IP_JOY_NONE )
-	PORT_BITX(0x0004, IP_ACTIVE_LOW, 0, "E",   KEYCODE_E,        IP_JOY_NONE )
-	PORT_BITX(0x0008, IP_ACTIVE_LOW, 0, "I",   KEYCODE_I,        IP_JOY_NONE )
-	PORT_BITX(0x0010, IP_ACTIVE_LOW, 0, "M",   KEYCODE_M,        IP_JOY_NONE )
-	PORT_BITX(0x0020, IP_ACTIVE_LOW, 0, "Kan", KEYCODE_LCONTROL, IP_JOY_NONE )
+	PORT_BIT(0x0002, IP_ACTIVE_LOW, 0 ) PORT_NAME("A") PORT_CODE(KEYCODE_A)
+	PORT_BIT(0x0004, IP_ACTIVE_LOW, 0 ) PORT_NAME("E") PORT_CODE(KEYCODE_E)
+	PORT_BIT(0x0008, IP_ACTIVE_LOW, 0 ) PORT_NAME("I") PORT_CODE(KEYCODE_I)
+	PORT_BIT(0x0010, IP_ACTIVE_LOW, 0 ) PORT_NAME("M") PORT_CODE(KEYCODE_M)
+	PORT_BIT(0x0020, IP_ACTIVE_LOW, 0 ) PORT_NAME("Kan") PORT_CODE(KEYCODE_LCONTROL)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_START1  )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	// IN1 - $478880.w
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX(0x0002, IP_ACTIVE_LOW, 0, "B",     KEYCODE_B, IP_JOY_NONE )
-	PORT_BITX(0x0004, IP_ACTIVE_LOW, 0, "F",     KEYCODE_F, IP_JOY_NONE )
-	PORT_BITX(0x0008, IP_ACTIVE_LOW, 0, "J",     KEYCODE_J, IP_JOY_NONE )
-	PORT_BITX(0x0010, IP_ACTIVE_LOW, 0, "N",     KEYCODE_N, IP_JOY_NONE )
-	PORT_BITX(0x0020, IP_ACTIVE_LOW, 0, "Reach", KEYCODE_LSHIFT, IP_JOY_NONE )
+	PORT_BIT(0x0002, IP_ACTIVE_LOW, 0 ) PORT_NAME("B") PORT_CODE(KEYCODE_B)
+	PORT_BIT(0x0004, IP_ACTIVE_LOW, 0 ) PORT_NAME("F") PORT_CODE(KEYCODE_F)
+	PORT_BIT(0x0008, IP_ACTIVE_LOW, 0 ) PORT_NAME("J") PORT_CODE(KEYCODE_J)
+	PORT_BIT(0x0010, IP_ACTIVE_LOW, 0 ) PORT_NAME("N") PORT_CODE(KEYCODE_N)
+	PORT_BIT(0x0020, IP_ACTIVE_LOW, 0 ) PORT_NAME("Reach") PORT_CODE(KEYCODE_LSHIFT)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	// IN2 - $478880.w
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX(0x0002, IP_ACTIVE_LOW, 0, "C",   KEYCODE_C,      IP_JOY_NONE )
-	PORT_BITX(0x0004, IP_ACTIVE_LOW, 0, "G",   KEYCODE_G,      IP_JOY_NONE )
-	PORT_BITX(0x0008, IP_ACTIVE_LOW, 0, "K",   KEYCODE_K,      IP_JOY_NONE )
-	PORT_BITX(0x0010, IP_ACTIVE_LOW, 0, "Chi", KEYCODE_SPACE, IP_JOY_NONE )
-	PORT_BITX(0x0020, IP_ACTIVE_LOW, 0, "Ron", KEYCODE_Z, IP_JOY_NONE )
+	PORT_BIT(0x0002, IP_ACTIVE_LOW, 0 ) PORT_NAME("C") PORT_CODE(KEYCODE_C)
+	PORT_BIT(0x0004, IP_ACTIVE_LOW, 0 ) PORT_NAME("G") PORT_CODE(KEYCODE_G)
+	PORT_BIT(0x0008, IP_ACTIVE_LOW, 0 ) PORT_NAME("K") PORT_CODE(KEYCODE_K)
+	PORT_BIT(0x0010, IP_ACTIVE_LOW, 0 ) PORT_NAME("Chi") PORT_CODE(KEYCODE_SPACE)
+	PORT_BIT(0x0020, IP_ACTIVE_LOW, 0 ) PORT_NAME("Ron") PORT_CODE(KEYCODE_Z)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	// IN3 - $478880.w
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX(0x0002, IP_ACTIVE_LOW, 0, "D",   KEYCODE_D,     IP_JOY_NONE )
-	PORT_BITX(0x0004, IP_ACTIVE_LOW, 0, "H",   KEYCODE_H,     IP_JOY_NONE )
-	PORT_BITX(0x0008, IP_ACTIVE_LOW, 0, "L",   KEYCODE_L,     IP_JOY_NONE )
-	PORT_BITX(0x0010, IP_ACTIVE_LOW, 0, "Pon", KEYCODE_LALT,   IP_JOY_NONE )
+	PORT_BIT(0x0002, IP_ACTIVE_LOW, 0 ) PORT_NAME("D") PORT_CODE(KEYCODE_D)
+	PORT_BIT(0x0004, IP_ACTIVE_LOW, 0 ) PORT_NAME("H") PORT_CODE(KEYCODE_H)
+	PORT_BIT(0x0008, IP_ACTIVE_LOW, 0 ) PORT_NAME("L") PORT_CODE(KEYCODE_L)
+	PORT_BIT(0x0010, IP_ACTIVE_LOW, 0 ) PORT_NAME("Pon") PORT_CODE(KEYCODE_LALT)
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -2922,9 +2996,9 @@ INPUT_PORTS_START( dokyusei )
 
 	PORT_START	// IN5 - $478882.w
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT_IMPULSE(  0x0002, IP_ACTIVE_LOW, IPT_COIN1, 2 )
+	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(2)
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BITX(0x0008, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x0008, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -2991,43 +3065,43 @@ INPUT_PORTS_END
 INPUT_PORTS_START( gakusai )
 	PORT_START	// IN0 - $278880.w
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX(0x0002, IP_ACTIVE_LOW, 0, "A",   KEYCODE_A,        IP_JOY_NONE )
-	PORT_BITX(0x0004, IP_ACTIVE_LOW, 0, "E",   KEYCODE_E,        IP_JOY_NONE )
-	PORT_BITX(0x0008, IP_ACTIVE_LOW, 0, "I",   KEYCODE_I,        IP_JOY_NONE )
-	PORT_BITX(0x0010, IP_ACTIVE_LOW, 0, "M",   KEYCODE_M,        IP_JOY_NONE )
-	PORT_BITX(0x0020, IP_ACTIVE_LOW, 0, "Kan", KEYCODE_LCONTROL, IP_JOY_NONE )
+	PORT_BIT(0x0002, IP_ACTIVE_LOW, 0 ) PORT_NAME("A") PORT_CODE(KEYCODE_A)
+	PORT_BIT(0x0004, IP_ACTIVE_LOW, 0 ) PORT_NAME("E") PORT_CODE(KEYCODE_E)
+	PORT_BIT(0x0008, IP_ACTIVE_LOW, 0 ) PORT_NAME("I") PORT_CODE(KEYCODE_I)
+	PORT_BIT(0x0010, IP_ACTIVE_LOW, 0 ) PORT_NAME("M") PORT_CODE(KEYCODE_M)
+	PORT_BIT(0x0020, IP_ACTIVE_LOW, 0 ) PORT_NAME("Kan") PORT_CODE(KEYCODE_LCONTROL)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_START1  )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	// IN1 - $278880.w
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX(0x0002, IP_ACTIVE_LOW, 0, "B",   KEYCODE_B, IP_JOY_NONE )
-	PORT_BITX(0x0004, IP_ACTIVE_LOW, 0, "F",   KEYCODE_F, IP_JOY_NONE )
-	PORT_BITX(0x0008, IP_ACTIVE_LOW, 0, "J",   KEYCODE_J, IP_JOY_NONE )
-	PORT_BITX(0x0010, IP_ACTIVE_LOW, 0, "N",   KEYCODE_N, IP_JOY_NONE )
-	PORT_BITX(0x0020, IP_ACTIVE_LOW, 0, "Reach", KEYCODE_LSHIFT, IP_JOY_NONE )
+	PORT_BIT(0x0002, IP_ACTIVE_LOW, 0 ) PORT_NAME("B") PORT_CODE(KEYCODE_B)
+	PORT_BIT(0x0004, IP_ACTIVE_LOW, 0 ) PORT_NAME("F") PORT_CODE(KEYCODE_F)
+	PORT_BIT(0x0008, IP_ACTIVE_LOW, 0 ) PORT_NAME("J") PORT_CODE(KEYCODE_J)
+	PORT_BIT(0x0010, IP_ACTIVE_LOW, 0 ) PORT_NAME("N") PORT_CODE(KEYCODE_N)
+	PORT_BIT(0x0020, IP_ACTIVE_LOW, 0 ) PORT_NAME("Reach") PORT_CODE(KEYCODE_LSHIFT)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	// IN2 - $278880.w
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX(0x0002, IP_ACTIVE_LOW, 0, "C",     KEYCODE_C,      IP_JOY_NONE )
-	PORT_BITX(0x0004, IP_ACTIVE_LOW, 0, "G",     KEYCODE_G,      IP_JOY_NONE )
-	PORT_BITX(0x0008, IP_ACTIVE_LOW, 0, "K",     KEYCODE_K,      IP_JOY_NONE )
-	PORT_BITX(0x0010, IP_ACTIVE_LOW, 0, "Chi", KEYCODE_SPACE, IP_JOY_NONE )
-	PORT_BITX(0x0020, IP_ACTIVE_LOW, 0, "Ron", KEYCODE_Z, IP_JOY_NONE )
+	PORT_BIT(0x0002, IP_ACTIVE_LOW, 0 ) PORT_NAME("C") PORT_CODE(KEYCODE_C)
+	PORT_BIT(0x0004, IP_ACTIVE_LOW, 0 ) PORT_NAME("G") PORT_CODE(KEYCODE_G)
+	PORT_BIT(0x0008, IP_ACTIVE_LOW, 0 ) PORT_NAME("K") PORT_CODE(KEYCODE_K)
+	PORT_BIT(0x0010, IP_ACTIVE_LOW, 0 ) PORT_NAME("Chi") PORT_CODE(KEYCODE_SPACE)
+	PORT_BIT(0x0020, IP_ACTIVE_LOW, 0 ) PORT_NAME("Ron") PORT_CODE(KEYCODE_Z)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	// IN3 - $278880.w
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX(0x0002, IP_ACTIVE_LOW, 0, "D",   KEYCODE_D,     IP_JOY_NONE )
-	PORT_BITX(0x0004, IP_ACTIVE_LOW, 0, "H",   KEYCODE_H,     IP_JOY_NONE )
-	PORT_BITX(0x0008, IP_ACTIVE_LOW, 0, "L",   KEYCODE_L,     IP_JOY_NONE )
-	PORT_BITX(0x0010, IP_ACTIVE_LOW, 0, "Pon",   KEYCODE_LALT,   IP_JOY_NONE )
+	PORT_BIT(0x0002, IP_ACTIVE_LOW, 0 ) PORT_NAME("D") PORT_CODE(KEYCODE_D)
+	PORT_BIT(0x0004, IP_ACTIVE_LOW, 0 ) PORT_NAME("H") PORT_CODE(KEYCODE_H)
+	PORT_BIT(0x0008, IP_ACTIVE_LOW, 0 ) PORT_NAME("L") PORT_CODE(KEYCODE_L)
+	PORT_BIT(0x0010, IP_ACTIVE_LOW, 0 ) PORT_NAME("Pon") PORT_CODE(KEYCODE_LALT)
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -3038,9 +3112,9 @@ INPUT_PORTS_START( gakusai )
 
 	PORT_START	// IN5 - $278882.w
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT_IMPULSE(  0x0002, IP_ACTIVE_LOW, IPT_COIN1, 2 )
+	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(2)
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BITX(0x0008, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x0008, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -3056,31 +3130,31 @@ INPUT_PORTS_END
 INPUT_PORTS_START( mouja )
 	PORT_START	// IN0 - $478880
 	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
-	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )
-	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
-	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
+	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
+	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
+	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
+	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
+	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
+	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
 	PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
-	PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
-	PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
-	PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-	PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
+	PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
+	PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
+	PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 
 	PORT_START	// IN1 - $478882
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT_IMPULSE(  0x0010, IP_ACTIVE_LOW, IPT_COIN1, 2    )
-	PORT_BIT_IMPULSE(  0x0020, IP_ACTIVE_LOW, IPT_COIN2, 2    )
+	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(2)
+	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(2)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BITX(0x0080, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x0080, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 
 	PORT_START	// IN2 - $478884
 	PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Free_Play ) )
@@ -3683,6 +3757,7 @@ static MACHINE_DRIVER_START( daitorid )
 	MDRV_CPU_VBLANK_INT(metro_interrupt,10)	/* ? */
 
 	MDRV_CPU_ADD(UPD7810, 12000000)
+	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_CONFIG(metro_cpu_config)
 	MDRV_CPU_PROGRAM_MAP(daitorid_snd_readmem,daitorid_snd_writemem)
 	MDRV_CPU_IO_MAP(daitorid_snd_readport,daitorid_snd_writeport)
@@ -3705,7 +3780,7 @@ static MACHINE_DRIVER_START( daitorid )
 	/* sound hardware */
 	MDRV_SOUND_ATTRIBUTES(SOUND_SUPPORTS_STEREO)
 	MDRV_SOUND_ADD(YM2151, ym2151_interface)
-	MDRV_SOUND_ADD(OKIM6295, okim6295_interface)
+	MDRV_SOUND_ADD(OKIM6295, okim6295_intf_2151balanced)
 MACHINE_DRIVER_END
 
 
@@ -3717,9 +3792,10 @@ static MACHINE_DRIVER_START( dharma )
 	MDRV_CPU_VBLANK_INT(metro_interrupt,10)	/* ? */
 
 	MDRV_CPU_ADD(UPD7810, 12000000)
+	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_CONFIG(metro_cpu_config)
 	MDRV_CPU_PROGRAM_MAP(metro_snd_readmem,metro_snd_writemem)
-	MDRV_CPU_IO_MAP(metro_snd_readport,dharma_snd_writeport)
+	MDRV_CPU_IO_MAP(metro_snd_readport,metro_snd_writeport)
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
@@ -3739,6 +3815,7 @@ static MACHINE_DRIVER_START( dharma )
 	/* sound hardware */
 	MDRV_SOUND_ATTRIBUTES(SOUND_SUPPORTS_STEREO)
 	MDRV_SOUND_ADD(OKIM6295, okim6295_interface)
+	MDRV_SOUND_ADD(YM2413, ym2413_interface)
 MACHINE_DRIVER_END
 
 
@@ -3750,6 +3827,7 @@ static MACHINE_DRIVER_START( karatour )
 	MDRV_CPU_VBLANK_INT(karatour_interrupt,10)	/* ? */
 
 	MDRV_CPU_ADD(UPD7810, 12000000)
+	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_CONFIG(metro_cpu_config)
 	MDRV_CPU_PROGRAM_MAP(metro_snd_readmem,metro_snd_writemem)
 	MDRV_CPU_IO_MAP(metro_snd_readport,metro_snd_writeport)
@@ -3784,6 +3862,7 @@ static MACHINE_DRIVER_START( 3kokushi )
 	MDRV_CPU_VBLANK_INT(karatour_interrupt,10)	/* ? */
 
 	MDRV_CPU_ADD(UPD7810, 12000000)
+	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_CONFIG(metro_cpu_config)
 	MDRV_CPU_PROGRAM_MAP(metro_snd_readmem,metro_snd_writemem)
 	MDRV_CPU_IO_MAP(metro_snd_readport,metro_snd_writeport)
@@ -3818,6 +3897,7 @@ static MACHINE_DRIVER_START( lastfort )
 	MDRV_CPU_VBLANK_INT(metro_interrupt,10)	/* ? */
 
 	MDRV_CPU_ADD(UPD7810, 12000000)
+	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_CONFIG(metro_cpu_config)
 	MDRV_CPU_PROGRAM_MAP(metro_snd_readmem,metro_snd_writemem)
 	MDRV_CPU_IO_MAP(metro_snd_readport,metro_snd_writeport)
@@ -3984,6 +4064,7 @@ static MACHINE_DRIVER_START( pangpoms )
 	MDRV_CPU_VBLANK_INT(metro_interrupt,10)	/* ? */
 
 	MDRV_CPU_ADD(UPD7810, 12000000)
+	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_CONFIG(metro_cpu_config)
 	MDRV_CPU_PROGRAM_MAP(metro_snd_readmem,metro_snd_writemem)
 	MDRV_CPU_IO_MAP(metro_snd_readport,metro_snd_writeport)
@@ -4018,6 +4099,7 @@ static MACHINE_DRIVER_START( poitto )
 	MDRV_CPU_VBLANK_INT(metro_interrupt,10)	/* ? */
 
 	MDRV_CPU_ADD(UPD7810, 12000000)
+	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_CONFIG(metro_cpu_config)
 	MDRV_CPU_PROGRAM_MAP(metro_snd_readmem,metro_snd_writemem)
 	MDRV_CPU_IO_MAP(metro_snd_readport,metro_snd_writeport)
@@ -4052,6 +4134,7 @@ static MACHINE_DRIVER_START( pururun )
 	MDRV_CPU_VBLANK_INT(metro_interrupt,10)	/* ? */
 
 	MDRV_CPU_ADD(UPD7810, 12000000)
+	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_CONFIG(metro_cpu_config)
 	MDRV_CPU_PROGRAM_MAP(daitorid_snd_readmem,daitorid_snd_writemem)
 	MDRV_CPU_IO_MAP(daitorid_snd_readport,daitorid_snd_writeport)
@@ -4074,7 +4157,7 @@ static MACHINE_DRIVER_START( pururun )
 	/* sound hardware */
 	MDRV_SOUND_ATTRIBUTES(SOUND_SUPPORTS_STEREO)
 	MDRV_SOUND_ADD(YM2151, ym2151_interface)
-	MDRV_SOUND_ADD(OKIM6295, okim6295_interface)
+	MDRV_SOUND_ADD(OKIM6295, okim6295_intf_2151balanced)
 MACHINE_DRIVER_END
 
 
@@ -4086,6 +4169,7 @@ static MACHINE_DRIVER_START( skyalert )
 	MDRV_CPU_VBLANK_INT(metro_interrupt,10)	/* ? */
 
 	MDRV_CPU_ADD(UPD7810, 12000000)
+	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_CONFIG(metro_cpu_config)
 	MDRV_CPU_PROGRAM_MAP(metro_snd_readmem,metro_snd_writemem)
 	MDRV_CPU_IO_MAP(metro_snd_readport,metro_snd_writeport)
@@ -4120,6 +4204,7 @@ static MACHINE_DRIVER_START( toride2g )
 	MDRV_CPU_VBLANK_INT(metro_interrupt,10)	/* ? */
 
 	MDRV_CPU_ADD(UPD7810, 12000000)
+	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_CONFIG(metro_cpu_config)
 	MDRV_CPU_PROGRAM_MAP(metro_snd_readmem,metro_snd_writemem)
 	MDRV_CPU_IO_MAP(metro_snd_readport,metro_snd_writeport)
@@ -4151,9 +4236,9 @@ static MACHINE_DRIVER_START( mouja )
 	/* basic machine hardware */
 	MDRV_CPU_ADD(M68000, 12000000)	/* ??? */
 	MDRV_CPU_PROGRAM_MAP(mouja_readmem,mouja_writemem)
-	MDRV_CPU_VBLANK_INT(mouja_interrupt,2)	/* ? */
+	MDRV_CPU_VBLANK_INT(mouja_interrupt,1)
 
-	MDRV_FRAMES_PER_SECOND(60)
+	MDRV_FRAMES_PER_SECOND(58)
 	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
 
 	MDRV_MACHINE_INIT(metro)
@@ -4170,8 +4255,8 @@ static MACHINE_DRIVER_START( mouja )
 
 	/* sound hardware */
 	MDRV_SOUND_ATTRIBUTES(SOUND_SUPPORTS_STEREO)
-	MDRV_SOUND_ADD(OKIM6295, okim6295_intf_12kHz)
-	MDRV_SOUND_ADD(YM2413, ym2413_intf_8MHz)
+	MDRV_SOUND_ADD(ADPCM, mouja_adpcm_interface)		/* M6295 special bankrom system */
+	MDRV_SOUND_ADD(YM2413, ym2413_interface)
 MACHINE_DRIVER_END
 
 
@@ -4350,8 +4435,24 @@ static DRIVER_INIT( blzntrnd )
 
 static DRIVER_INIT( mouja )
 {
+	int step;
+
 	metro_common();
 	irq_line = -1;	/* split interrupt handlers */
+
+	/* generate the OKI6295 volume table */
+	for (step = 0; step < 16; step++)
+	{
+		double out = 256.0;
+		int vol = step;
+
+		/* 3dB per step */
+		while (vol-- > 0)
+			out /= 1.412537545;	/* = 10 ^ (3/20) = 3dB */
+		volume_table[step] = (UINT32)out;
+	}
+
+	mouja_irq_timer = timer_alloc(mouja_irq_callback);
 }
 
 static DRIVER_INIT( gakusai )

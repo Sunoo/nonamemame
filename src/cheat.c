@@ -1469,7 +1469,7 @@ static int UIPressedRepeatThrottle(int code, int baseSpeed)
 
 	const int	kDelayRampTimer = 10;
 
-	if(seq_pressed(input_port_type_seq(code)))
+	if(seq_pressed(input_port_type_seq(code,0)))
 	{
 		if(lastCode != code)
 		{
@@ -8369,7 +8369,7 @@ static void HandleOverclock(int param)
 	UINT32   overclock = param & 0xFFFFFF00;
 	UINT8   cpu = param & 0xFF;
 
-	timer_set_overclock(cpu, ((double)overclock) / 65536.0);
+	cpunum_set_clockscale(cpu, ((double)overclock) / 65536.0);
 }
 
 static void HandleLocalCommandCheat(UINT32 type, UINT32 address, UINT32 data, UINT32 extendData, char * name, char * description)

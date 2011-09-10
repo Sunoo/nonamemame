@@ -158,8 +158,8 @@ VIDEO_UPDATE( coolpool )
 /*
 {
 	static int temp;
-	if (keyboard_pressed(KEYCODE_J) && temp > 0) temp -= 2;
-	else if (keyboard_pressed(KEYCODE_K)) temp += 2;
+	if (code_pressed(KEYCODE_J) && temp > 0) temp -= 2;
+	else if (code_pressed(KEYCODE_K)) temp += 2;
 	offset = temp;
 }*/
 
@@ -198,13 +198,13 @@ WRITE16_HANDLER( amerdart_input_w )
 {
 	logerror("%08X:IOP write = %04X\n", activecpu_get_pc(), data);
 	COMBINE_DATA(&input_data);
-	cpu_set_irq_line(0, 1, ASSERT_LINE);
+	cpunum_set_input_line(0, 1, ASSERT_LINE);
 }
 
 READ16_HANDLER( amerdart_input_r )
 {
 	logerror("%08X:IOP read\n", activecpu_get_pc());
-	cpu_set_irq_line(0, 1, CLEAR_LINE);
+	cpunum_set_input_line(0, 1, CLEAR_LINE);
 
 	switch (input_data)
 	{
@@ -228,7 +228,7 @@ static WRITE16_HANDLER( coolpool_misc_w )
 	coin_counter_w(0,~data & 0x0001);
 	coin_counter_w(1,~data & 0x0002);
 
-	cpu_set_reset_line(1,(data & 0x0400) ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_RESET, (data & 0x0400) ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static int cmd_pending,iop_cmd,iop_answer;
@@ -238,7 +238,7 @@ static WRITE16_HANDLER( coolpool_iop_w )
 	logerror("%08x:IOP write %04x\n",activecpu_get_pc(),data);
 	iop_cmd = data;
 	cmd_pending = 1;
-	cpu_set_irq_line(1, 0, HOLD_LINE);	/* ???  I have no idea who should generate this! */
+	cpunum_set_input_line(1, 0, HOLD_LINE);	/* ???  I have no idea who should generate this! */
 										/* the DSP polls the status bit so it isn't strictly */
 										/* necessary to also have an IRQ */
 }
@@ -246,7 +246,7 @@ static WRITE16_HANDLER( coolpool_iop_w )
 static READ16_HANDLER( coolpool_iop_r )
 {
 //	logerror("%08x:IOP read %04x\n",activecpu_get_pc(),iop_answer);
-	cpu_set_irq_line(0, 1, CLEAR_LINE);
+	cpunum_set_input_line(0, 1, CLEAR_LINE);
 
 	return iop_answer;
 }
@@ -263,7 +263,7 @@ static WRITE16_HANDLER( dsp_answer_w )
 	logerror("%08x:IOP answer %04x\n",activecpu_get_pc(),data);
 //usrintf_showmessage("IOP answer %04x",data);
 	iop_answer = data;
-	cpu_set_irq_line(0, 1, ASSERT_LINE);
+	cpunum_set_input_line(0, 1, ASSERT_LINE);
 }
 
 static READ16_HANDLER( dsp_bio_line_r )
@@ -442,8 +442,8 @@ INPUT_PORTS_START( amerdart )
 
 	PORT_START
 	PORT_BIT( 0x000f, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER3 )
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER3 )
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(3)
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(3)
 	PORT_BIT( 0xffc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START
@@ -458,8 +458,8 @@ INPUT_PORTS_START( amerdart )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_COIN4 )
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_START3 )
 	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX(0x0800, IP_ACTIVE_LOW, 0, "Volume Down", KEYCODE_MINUS, IP_JOY_NONE )
-	PORT_BITX(0x1000, IP_ACTIVE_LOW, 0, "Volume Up", KEYCODE_EQUALS, IP_JOY_NONE )
+	PORT_BIT(0x0800, IP_ACTIVE_LOW, 0 ) PORT_NAME("Volume Down") PORT_CODE(KEYCODE_MINUS)
+	PORT_BIT(0x1000, IP_ACTIVE_LOW, 0 ) PORT_NAME("Volume Up") PORT_CODE(KEYCODE_EQUALS)
 	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_SPECIAL ) /* coin door */
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_SPECIAL ) /* bill validator */
@@ -519,30 +519,30 @@ INPUT_PORTS_START( 9ballsht )
 	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_SERVICE4 )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START3 )
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_START4 )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )	// correct
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )	// correct
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )	// correct
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )	// correct
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )	// correct
-	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )	// correct
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)	// correct
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)	// correct
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)	// correct
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)	// correct
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)	// correct
+	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)	// correct
 
 	PORT_START
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_START1 )					// correct
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_START2 )					// correct
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_COIN1 )					// correct
-	PORT_BITX(0x0010, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x0010, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_COIN2 )					// correct
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_SERVICE1 )					// correct
-	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )	// correct
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )	// correct
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )	// correct
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )	// correct
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )	// correct
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )	// correct
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )	// correct
-	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )	// correct
+	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)	// correct
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)	// correct
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)	// correct
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)	// correct
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)	// correct
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)	// correct
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)	// correct
+	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)	// correct
 INPUT_PORTS_END
 
 

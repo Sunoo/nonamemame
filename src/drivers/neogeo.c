@@ -336,9 +336,9 @@ static void update_interrupts(void)
 
 	/* either set or clear the appropriate lines */
 	if (level)
-		cpu_set_irq_line(0, level, ASSERT_LINE);
+		cpunum_set_input_line(0, level, ASSERT_LINE);
 	else
-		cpu_set_irq_line(0, 7, CLEAR_LINE);
+		cpunum_set_input_line(0, 7, CLEAR_LINE);
 }
 
 static WRITE16_HANDLER( neo_irqack_w )
@@ -450,7 +450,7 @@ static void raster_interrupt(int busy)
 	{
 		current_rasterline = 0;
 
-		if (keyboard_pressed_memory(KEYCODE_F1))
+		if (code_pressed_memory(KEYCODE_F1))
 		{
 			neogeo_raster_enable ^= 1;
 			usrintf_showmessage("raster effects %sabled",neogeo_raster_enable ? "en" : "dis");
@@ -535,7 +535,7 @@ static WRITE16_HANDLER( neo_z80_w )
 
 	soundlatch_w(0,(data>>8)&0xff);
 	pending_command = 1;
-	cpu_set_irq_line(1, IRQ_LINE_NMI, PULSE_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 	/* spin for a while to let the Z80 read the command (fixes hanging sound in pspikes2) */
 //	cpu_spinuntil_time(TIME_IN_USEC(20));
 	cpu_boost_interleave(0, TIME_IN_USEC(20));
@@ -855,7 +855,7 @@ static UINT32 bank[4] = {
 };
 
 
-static READ_HANDLER( z80_port_r )
+static READ8_HANDLER( z80_port_r )
 {
 #if 0
 {
@@ -927,7 +927,7 @@ logerror("CPU #1 PC %04x: read unmapped port %02x\n",activecpu_get_pc(),offset&0
 	}
 }
 
-static WRITE_HANDLER( z80_port_w )
+static WRITE8_HANDLER( z80_port_w )
 {
 	switch (offset & 0xff)
 	{
@@ -987,20 +987,20 @@ INPUT_PORTS_START( neogeo )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 )
 
 	PORT_START		/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)
 
 	PORT_START		/* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )   /* Player 1 Start */
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "Next Game",KEYCODE_7, IP_JOY_NONE )
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("Next Game") PORT_CODE(KEYCODE_7)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 )   /* Player 2 Start */
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Previous Game",KEYCODE_8, IP_JOY_NONE )
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("Previous Game") PORT_CODE(KEYCODE_8)
 	PORT_BIT( 0x30, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* memory card inserted */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* memory card write protection */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1061,7 +1061,7 @@ INPUT_PORTS_START( neogeo )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL )  /* handled by fake IN5 */
-	PORT_BITX( 0x80, IP_ACTIVE_LOW, 0, "Test Switch", KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, 0 ) PORT_NAME("Test Switch") PORT_CODE(KEYCODE_F2)
 INPUT_PORTS_END
 
 INPUT_PORTS_START( mjneogeo )
@@ -1076,20 +1076,20 @@ INPUT_PORTS_START( mjneogeo )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 )
 
 	PORT_START		/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)
 
 	PORT_START		/* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )   /* Player 1 Start */
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "Next Game",KEYCODE_7, IP_JOY_NONE ) // select
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("Next Game") PORT_CODE(KEYCODE_7) // select
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 )   /* Player 2 Start */
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Previous Game",KEYCODE_8, IP_JOY_NONE )
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("Previous Game") PORT_CODE(KEYCODE_8)
 	PORT_BIT( 0x30, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* memory card inserted */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* memory card write protection */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1150,34 +1150,34 @@ INPUT_PORTS_START( mjneogeo )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL )  /* handled by fake IN5 */
-	PORT_BITX( 0x80, IP_ACTIVE_LOW, 0, "Test Switch", KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, 0 ) PORT_NAME("Test Switch") PORT_CODE(KEYCODE_F2)
 
 	PORT_START
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "A",   KEYCODE_A,        IP_JOY_NONE )
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "B",   KEYCODE_B,        IP_JOY_NONE )
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "C",   KEYCODE_C,        IP_JOY_NONE )
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "D",   KEYCODE_D,        IP_JOY_NONE )
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "E",   KEYCODE_E,        IP_JOY_NONE )
-	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "F",   KEYCODE_F,        IP_JOY_NONE )
-	PORT_BITX(0x40, IP_ACTIVE_LOW, 0, "G",   KEYCODE_G,        IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("A") PORT_CODE(KEYCODE_A)
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("B") PORT_CODE(KEYCODE_B)
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("C") PORT_CODE(KEYCODE_C)
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("D") PORT_CODE(KEYCODE_D)
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("E") PORT_CODE(KEYCODE_E)
+	PORT_BIT(0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("F") PORT_CODE(KEYCODE_F)
+	PORT_BIT(0x40, IP_ACTIVE_LOW, 0 ) PORT_NAME("G") PORT_CODE(KEYCODE_G)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "H",   KEYCODE_H,        IP_JOY_NONE )
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "I",   KEYCODE_I,        IP_JOY_NONE )
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "J",   KEYCODE_J,        IP_JOY_NONE )
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "K",   KEYCODE_K,        IP_JOY_NONE )
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "L",   KEYCODE_L,        IP_JOY_NONE )
-	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "M",   KEYCODE_M,        IP_JOY_NONE )
-	PORT_BITX(0x40, IP_ACTIVE_LOW, 0, "N",   KEYCODE_N,        IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("H") PORT_CODE(KEYCODE_H)
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("I") PORT_CODE(KEYCODE_I)
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("J") PORT_CODE(KEYCODE_J)
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("K") PORT_CODE(KEYCODE_K)
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("L") PORT_CODE(KEYCODE_L)
+	PORT_BIT(0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("M") PORT_CODE(KEYCODE_M)
+	PORT_BIT(0x40, IP_ACTIVE_LOW, 0 ) PORT_NAME("N") PORT_CODE(KEYCODE_N)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "Pon",   KEYCODE_LALT,     IP_JOY_NONE )
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "Chi",   KEYCODE_SPACE,    IP_JOY_NONE )
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "Kan",   KEYCODE_LCONTROL, IP_JOY_NONE )
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Ron",   KEYCODE_Z,        IP_JOY_NONE )
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Reach", KEYCODE_LSHIFT,   IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("Pon") PORT_CODE(KEYCODE_LALT)
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("Chi") PORT_CODE(KEYCODE_SPACE)
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("Kan") PORT_CODE(KEYCODE_LCONTROL)
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("Ron") PORT_CODE(KEYCODE_Z)
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("Reach") PORT_CODE(KEYCODE_LSHIFT)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1276,7 +1276,7 @@ INPUT_PORTS_END
 
 INPUT_PORTS_START( irrmaze )
 	PORT_START		/* IN0 multiplexed */
-	PORT_ANALOG( 0xff, 0x7f, IPT_TRACKBALL_X | IPF_REVERSE, 10, 20, 0, 0 )
+	PORT_BIT( 0xff, 0x7f, IPT_TRACKBALL_X ) PORT_MINMAX(0,0) PORT_SENSITIVITY(10) PORT_KEYDELTA(20) PORT_REVERSE
 
 	PORT_START		/* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1285,8 +1285,8 @@ INPUT_PORTS_START( irrmaze )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 
 	PORT_START		/* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )   /* Player 1 Start */
@@ -1348,10 +1348,10 @@ INPUT_PORTS_START( irrmaze )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )  /* This bit is used.. */
-	PORT_BITX( 0x80, IP_ACTIVE_LOW, 0, "Test Switch", KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, 0 ) PORT_NAME("Test Switch") PORT_CODE(KEYCODE_F2)
 
 	PORT_START		/* IN0 multiplexed */
-	PORT_ANALOG( 0xff, 0x7f, IPT_TRACKBALL_Y | IPF_REVERSE, 10, 20, 0, 0 )
+	PORT_BIT( 0xff, 0x7f, IPT_TRACKBALL_Y ) PORT_MINMAX(0,0) PORT_SENSITIVITY(10) PORT_KEYDELTA(20) PORT_REVERSE
 INPUT_PORTS_END
 
 INPUT_PORTS_START( popbounc )
@@ -1365,19 +1365,19 @@ INPUT_PORTS_START( popbounc )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
 
 	PORT_START		/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-	PORT_BIT( 0x90, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 ) // note it needs it from 0x80 when using paddle
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
+	PORT_BIT( 0x90, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2) // note it needs it from 0x80 when using paddle
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 
 	PORT_START		/* IN2 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )   /* Player 1 Start */
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "Next Game",KEYCODE_7, IP_JOY_NONE )
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("Next Game") PORT_CODE(KEYCODE_7)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 )   /* Player 2 Start */
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Previous Game",KEYCODE_8, IP_JOY_NONE )
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("Previous Game") PORT_CODE(KEYCODE_8)
 	PORT_BIT( 0x30, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* memory card inserted */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN ) /* memory card write protection */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1438,13 +1438,13 @@ INPUT_PORTS_START( popbounc )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL )  /* handled by fake IN5 */
-	PORT_BITX( 0x80, IP_ACTIVE_LOW, 0, "Test Switch", KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, 0 ) PORT_NAME("Test Switch") PORT_CODE(KEYCODE_F2)
 
 	PORT_START		/* IN0 multiplexed */
-	PORT_ANALOG( 0xff, 0x7f, IPT_DIAL, 10, 20, 0, 0 )
+	PORT_BIT( 0xff, 0x7f, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(10) PORT_KEYDELTA(20)
 
 	PORT_START		/* IN1 multiplexed */
-	PORT_ANALOG( 0xff, 0x7f, IPT_DIAL | IPF_PLAYER2 , 10, 20, 0, 0 )
+	PORT_BIT( 0xff, 0x7f, IPT_DIAL  ) PORT_MINMAX(0,0) PORT_SENSITIVITY(10) PORT_KEYDELTA(20) PORT_PLAYER(2)
 INPUT_PORTS_END
 
 /******************************************************************************/
@@ -1485,7 +1485,7 @@ static struct GfxDecodeInfo neogeo_mvs_gfxdecodeinfo[] =
 
 static void neogeo_sound_irq( int irq )
 {
-	cpu_set_irq_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 struct YM2610interface neogeo_ym2610_interface =
@@ -6519,8 +6519,8 @@ DRIVER_INIT( kof99 )
 	neogeo_fix_bank_type = 1;
 	kof99_neogeo_gfx_decrypt(0x00);
 	init_neogeo();
-	install_mem_read16_handler(0, 0x2ffff8, 0x2ffff9, sma_random_r);
-	install_mem_read16_handler(0, 0x2ffffa, 0x2ffffb, sma_random_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x2ffff8, 0x2ffff9, 0, 0, sma_random_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x2ffffa, 0x2ffffb, 0, 0, sma_random_r);
 }
 
 DRIVER_INIT( garou )
@@ -6558,8 +6558,8 @@ DRIVER_INIT( garou )
 	neogeo_fix_bank_type = 1;
 	kof99_neogeo_gfx_decrypt(0x06);
 	init_neogeo();
-	install_mem_read16_handler(0, 0x2fffcc, 0x2fffcd, sma_random_r);
-	install_mem_read16_handler(0, 0x2ffff0, 0x2ffff1, sma_random_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x2fffcc, 0x2fffcd, 0, 0, sma_random_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x2ffff0, 0x2ffff1, 0, 0, sma_random_r);
 }
 
 DRIVER_INIT( garouo )
@@ -6597,8 +6597,8 @@ DRIVER_INIT( garouo )
 	neogeo_fix_bank_type = 1;
 	kof99_neogeo_gfx_decrypt(0x06);
 	init_neogeo();
-	install_mem_read16_handler(0, 0x2fffcc, 0x2fffcd, sma_random_r);
-	install_mem_read16_handler(0, 0x2ffff0, 0x2ffff1, sma_random_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x2fffcc, 0x2fffcd, 0, 0, sma_random_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x2ffff0, 0x2ffff1, 0, 0, sma_random_r);
 }
 
 DRIVER_INIT( mslug3 )
@@ -6672,8 +6672,8 @@ DRIVER_INIT( kof2000 )
 	neogeo_fix_bank_type = 2;
 	kof2000_neogeo_gfx_decrypt(0x00);
 	init_neogeo();
-	install_mem_read16_handler(0, 0x2fffd8, 0x2fffd9, sma_random_r);
-	install_mem_read16_handler(0, 0x2fffda, 0x2fffdb, sma_random_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x2fffd8, 0x2fffd9, 0, 0, sma_random_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x2fffda, 0x2fffdb, 0, 0, sma_random_r);
 }
 
 
@@ -6816,7 +6816,7 @@ DRIVER_INIT ( kof98 )
 /* when 0x20aaaa contains 0x0090 (word) then 0x100 (normally the neogeo header) should return 0x00c200fd
    worked out using real hw */
 
-	install_mem_write16_handler(0, 0x20aaaa, 0x20aaab, kof98_prot_w);
+	memory_install_write16_handler(0, ADDRESS_SPACE_PROGRAM, 0x20aaaa, 0x20aaab, 0, 0, kof98_prot_w);
 
 	init_neogeo();
 
@@ -6824,16 +6824,16 @@ DRIVER_INIT ( kof98 )
 
 DRIVER_INIT( mjneogeo )
 {
-	install_mem_read16_handler (0, 0x300000, 0x300001, mjneogeo_r);
-	install_mem_write16_handler(0, 0x380000, 0x380001, mjneogeo_w);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x300000, 0x300001, 0, 0, mjneogeo_r);
+	memory_install_write16_handler(0, ADDRESS_SPACE_PROGRAM, 0x380000, 0x380001, 0, 0, mjneogeo_w);
 
 	init_neogeo();
 }
 
 DRIVER_INIT( popbounc )
 {
-	install_mem_read16_handler (0, 0x300000, 0x300001, popbounc1_16_r);
-	install_mem_read16_handler (0, 0x340000, 0x340001, popbounc2_16_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x300000, 0x300001, 0, 0, popbounc1_16_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x340000, 0x340001, 0, 0, popbounc2_16_r);
 
 	init_neogeo();
 }

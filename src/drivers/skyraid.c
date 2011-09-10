@@ -44,19 +44,19 @@ static PALETTE_INIT( skyraid )
 }
 
 
-static READ_HANDLER( skyraid_zeropage_r )
+static READ8_HANDLER( skyraid_zeropage_r )
 {
 	return memory_region(REGION_CPU1)[offset & 0xff];
 }
 
 
-static READ_HANDLER( skyraid_alpha_num_r)
+static READ8_HANDLER( skyraid_alpha_num_r)
 {
 	return skyraid_alpha_num_ram[offset & 0x7f];
 }
 
 
-static READ_HANDLER( skyraid_port_0_r )
+static READ8_HANDLER( skyraid_port_0_r )
 {
 	UINT8 val = readinputport(0);
 
@@ -69,19 +69,19 @@ static READ_HANDLER( skyraid_port_0_r )
 }
 
 
-static WRITE_HANDLER( skyraid_zeropage_w )
+static WRITE8_HANDLER( skyraid_zeropage_w )
 {
 	memory_region(REGION_CPU1)[offset & 0xff] = data;
 }
 
 
-static WRITE_HANDLER( skyraid_alpha_num_w )
+static WRITE8_HANDLER( skyraid_alpha_num_w )
 {
 	skyraid_alpha_num_ram[offset & 0x7f] = data;
 }
 
 
-static WRITE_HANDLER( skyraid_sound_w )
+static WRITE8_HANDLER( skyraid_sound_w )
 {
 	/* BIT0 => PLANE SWEEP */
 	/* BIT1 => MISSILE     */
@@ -94,19 +94,19 @@ static WRITE_HANDLER( skyraid_sound_w )
 }
 
 
-static WRITE_HANDLER( skyraid_range_w )
+static WRITE8_HANDLER( skyraid_range_w )
 {
 	analog_range = data & 0x3f;
 }
 
 
-static WRITE_HANDLER( skyraid_offset_w )
+static WRITE8_HANDLER( skyraid_offset_w )
 {
 	analog_offset = data & 0x3f;
 }
 
 
-static WRITE_HANDLER( skyraid_scroll_w )
+static WRITE8_HANDLER( skyraid_scroll_w )
 {
 	skyraid_scroll = data;
 }
@@ -195,15 +195,15 @@ INPUT_PORTS_START( skyraid )
 
 	PORT_START
 	PORT_BIT (0x10, IP_ACTIVE_LOW, IPT_TILT)
-	PORT_BITX(0x20, IP_ACTIVE_LOW, IPT_BUTTON7, "Hiscore Reset", KEYCODE_H, IP_JOY_DEFAULT)
+	PORT_BIT(0x20, IP_ACTIVE_LOW, IPT_BUTTON7 ) PORT_NAME("Hiscore Reset") PORT_CODE(KEYCODE_H)
 	PORT_BIT (0x40, IP_ACTIVE_LOW, IPT_START1)
 	PORT_SERVICE(0x80, IP_ACTIVE_LOW)
 
 	PORT_START
-	PORT_ANALOG( 0x3f, 0x20, IPT_AD_STICK_Y | IPF_REVERSE, 10, 10, 0, 63 )
+	PORT_BIT( 0x3f, 0x20, IPT_AD_STICK_Y ) PORT_MINMAX(0,63) PORT_SENSITIVITY(10) PORT_KEYDELTA(10) PORT_REVERSE
 
 	PORT_START
-	PORT_ANALOG( 0x3f, 0x20, IPT_AD_STICK_X, 10, 10, 0, 63 )
+	PORT_BIT( 0x3f, 0x20, IPT_AD_STICK_X ) PORT_MINMAX(0,63) PORT_SENSITIVITY(10) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 

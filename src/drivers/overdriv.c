@@ -151,20 +151,20 @@ static WRITE16_HANDLER( eeprom_w )
 
 static INTERRUPT_GEN( cpuA_interrupt )
 {
-	if (cpu_getiloops()) cpu_set_irq_line(0, 5, HOLD_LINE);
-	else cpu_set_irq_line(0, 4, HOLD_LINE);
+	if (cpu_getiloops()) cpunum_set_input_line(0, 5, HOLD_LINE);
+	else cpunum_set_input_line(0, 4, HOLD_LINE);
 }
 
 static INTERRUPT_GEN( cpuB_interrupt )
 {
-	if (K053246_is_IRQ_enabled()) cpu_set_irq_line(1, 4, HOLD_LINE);
+	if (K053246_is_IRQ_enabled()) cpunum_set_input_line(1, 4, HOLD_LINE);
 }
 
 
 static MACHINE_INIT( overdriv )
 {
 	/* start with cpu B halted */
-	cpu_set_reset_line(1,ASSERT_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_RESET, ASSERT_LINE);
 }
 
 static WRITE16_HANDLER( cpuA_ctrl_w )
@@ -172,7 +172,7 @@ static WRITE16_HANDLER( cpuA_ctrl_w )
 	if (ACCESSING_LSB)
 	{
 		/* bit 0 probably enables the second 68000 */
-		cpu_set_reset_line(1,(data & 0x01) ? CLEAR_LINE : ASSERT_LINE);
+		cpunum_set_input_line(1, INPUT_LINE_RESET, (data & 0x01) ? CLEAR_LINE : ASSERT_LINE);
 
 		/* bit 1 is clear during service mode - function unknown */
 
@@ -234,17 +234,17 @@ static READ16_HANDLER( overdriv_sound_1_r )
 
 static WRITE16_HANDLER( overdriv_soundirq_w )
 {
-	cpu_set_irq_line(2,M6809_IRQ_LINE,HOLD_LINE);
+	cpunum_set_input_line(2,M6809_IRQ_LINE,HOLD_LINE);
 }
 
 static WRITE16_HANDLER( overdriv_cpuB_irq5_w )
 {
-	cpu_set_irq_line(1,5,HOLD_LINE);
+	cpunum_set_input_line(1,5,HOLD_LINE);
 }
 
 static WRITE16_HANDLER( overdriv_cpuB_irq6_w )
 {
-	cpu_set_irq_line(1,6,HOLD_LINE);
+	cpunum_set_input_line(1,6,HOLD_LINE);
 }
 
 
@@ -340,7 +340,7 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( overdriv )
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_TOGGLE )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_TOGGLE
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -354,13 +354,13 @@ INPUT_PORTS_START( overdriv )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BITX(0x10, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x10, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_SPECIAL )	// ?
 
 	PORT_START
-	PORT_ANALOG( 0xff, 0x80, IPT_DIAL | IPF_CENTER, 100, 50, 0, 0 )
+	PORT_BIT( 0xff, 0x80, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(100) PORT_KEYDELTA(50) PORT_CENTER
 INPUT_PORTS_END
 
 

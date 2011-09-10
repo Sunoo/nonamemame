@@ -43,8 +43,8 @@
 
 UINT8 *shootout_textram;
 
-extern WRITE_HANDLER( shootout_videoram_w );
-extern WRITE_HANDLER( shootout_textram_w );
+extern WRITE8_HANDLER( shootout_videoram_w );
+extern WRITE8_HANDLER( shootout_textram_w );
 
 extern PALETTE_INIT( shootout );
 extern VIDEO_START( shootout );
@@ -53,7 +53,7 @@ extern VIDEO_UPDATE( shootouj );
 
 /*******************************************************************************/
 
-static WRITE_HANDLER( shootout_bankswitch_w )
+static WRITE8_HANDLER( shootout_bankswitch_w )
 {
 	int bankaddress;
 	UINT8 *RAM;
@@ -64,18 +64,18 @@ static WRITE_HANDLER( shootout_bankswitch_w )
 	cpu_setbank(1,&RAM[bankaddress]);
 }
 
-static WRITE_HANDLER( sound_cpu_command_w )
+static WRITE8_HANDLER( sound_cpu_command_w )
 {
 	soundlatch_w( offset, data );
-	cpu_set_irq_line( 1, IRQ_LINE_NMI, PULSE_LINE );
+	cpunum_set_input_line( 1, INPUT_LINE_NMI, PULSE_LINE );
 }
 
-static WRITE_HANDLER( shootout_flipscreen_w )
+static WRITE8_HANDLER( shootout_flipscreen_w )
 {
 	flip_screen_set(data & 0x01);
 }
 
-static WRITE_HANDLER( shootout_coin_counter_w )
+static WRITE8_HANDLER( shootout_coin_counter_w )
 {
 	coin_counter_w(0, data);
 }
@@ -175,22 +175,22 @@ INPUT_PORTS_START( shootout )
 	PORT_DIPSETTING(	0x00, DEF_STR( On ) )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
@@ -256,12 +256,12 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 
 static void shootout_snd_irq(int linestate)
 {
-	cpu_set_irq_line(1,0,linestate);
+	cpunum_set_input_line(1,0,linestate);
 }
 
 static void shootout_snd2_irq(int linestate)
 {
-	cpu_set_irq_line(0,0,linestate);
+	cpunum_set_input_line(0,0,linestate);
 }
 
 static struct YM2203interface ym2203_interface =

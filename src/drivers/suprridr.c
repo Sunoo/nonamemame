@@ -94,7 +94,7 @@ static UINT8 sound_data;
  *
  *************************************/
 
-static WRITE_HANDLER( nmi_enable_w )
+static WRITE8_HANDLER( nmi_enable_w )
 {
 	nmi_enable = data;
 }
@@ -103,7 +103,7 @@ static WRITE_HANDLER( nmi_enable_w )
 static INTERRUPT_GEN( main_nmi_gen )
 {
 	if (nmi_enable)
-		cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 }
 
 
@@ -117,25 +117,25 @@ static INTERRUPT_GEN( main_nmi_gen )
 static void delayed_sound_w(int param)
 {
 	sound_data = param;
-	cpu_set_irq_line(1, 0, ASSERT_LINE);
+	cpunum_set_input_line(1, 0, ASSERT_LINE);
 }
 
 
-static WRITE_HANDLER( sound_data_w )
+static WRITE8_HANDLER( sound_data_w )
 {
 	timer_set(TIME_NOW, data, delayed_sound_w);
 }
 
 
-static READ_HANDLER( sound_data_r )
+static READ8_HANDLER( sound_data_r )
 {
 	return sound_data;
 }
 
 
-static WRITE_HANDLER( sound_irq_ack_w )
+static WRITE8_HANDLER( sound_irq_ack_w )
 {
-	cpu_set_irq_line(1, 0, CLEAR_LINE);
+	cpunum_set_input_line(1, 0, CLEAR_LINE);
 }
 
 
@@ -146,7 +146,7 @@ static WRITE_HANDLER( sound_irq_ack_w )
  *
  *************************************/
 
-static WRITE_HANDLER( coin_lock_w )
+static WRITE8_HANDLER( coin_lock_w )
 {
 	/* cleared when 9 credits are hit, but never reset! */
 /*	coin_lockout_global_w(~data & 1); */
@@ -219,8 +219,8 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( suprridr )
 	PORT_START		/* IN0 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_2WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_2WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x0c, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 )

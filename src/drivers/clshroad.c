@@ -27,9 +27,9 @@ data8_t *clshroad_sharedram;
 extern data8_t *clshroad_vram_0, *clshroad_vram_1;
 extern data8_t *clshroad_vregs;
 
-WRITE_HANDLER( clshroad_vram_0_w );
-WRITE_HANDLER( clshroad_vram_1_w );
-WRITE_HANDLER( clshroad_flipscreen_w );
+WRITE8_HANDLER( clshroad_vram_0_w );
+WRITE8_HANDLER( clshroad_vram_1_w );
+WRITE8_HANDLER( clshroad_flipscreen_w );
 
 PALETTE_INIT( firebatl );
 PALETTE_INIT( clshroad );
@@ -40,7 +40,7 @@ VIDEO_UPDATE( clshroad );
 extern unsigned char *wiping_soundregs;
 int wiping_sh_start(const struct MachineSound *msound);
 void wiping_sh_stop(void);
-WRITE_HANDLER( wiping_sound_w );
+WRITE8_HANDLER( wiping_sound_w );
 
 
 
@@ -52,10 +52,10 @@ MACHINE_INIT( clshroad )
 
 /* Shared RAM with the sound CPU */
 
-READ_HANDLER ( clshroad_sharedram_r )	{	return clshroad_sharedram[offset];	}
-WRITE_HANDLER( clshroad_sharedram_w )	{	clshroad_sharedram[offset] = data;	}
+READ8_HANDLER ( clshroad_sharedram_r )	{	return clshroad_sharedram[offset];	}
+WRITE8_HANDLER( clshroad_sharedram_w )	{	clshroad_sharedram[offset] = data;	}
 
-READ_HANDLER( clshroad_input_r )
+READ8_HANDLER( clshroad_input_r )
 {
 	return	((~readinputport(0) & (1 << offset)) ? 1 : 0) |
 			((~readinputport(1) & (1 << offset)) ? 2 : 0) |
@@ -114,12 +114,12 @@ INPUT_PORTS_START( clshroad )
 	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_UNKNOWN  )
 
 	PORT_START	// IN1 - Player 2
-	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_COCKTAIL )
-	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_COCKTAIL )
-	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_COCKTAIL )
-	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
-	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
-	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_COCKTAIL
+	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_COCKTAIL
+	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
+	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
+	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
+	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_START2 )
 
@@ -137,7 +137,7 @@ INPUT_PORTS_START( clshroad )
 	PORT_DIPSETTING(    0x10, "Hard"    )	// A
 	PORT_DIPSETTING(    0x08, "Harder"  )	// C
 	PORT_DIPSETTING(    0x00, "Hardest" )	// E
-	PORT_BITX(    0x20, 0x20, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Invulnerability", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(    0x20, 0x20, IPT_DIPSWITCH_NAME ) PORT_NAME("Invulnerability") PORT_CHEAT
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x40, 0x40, "Unknown 1-6" )
@@ -198,12 +198,12 @@ INPUT_PORTS_START( firebatl )
 	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_UNKNOWN  )
 
 	PORT_START	// IN1 - Player 2
-	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_COCKTAIL )
-	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_COCKTAIL )
-	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_COCKTAIL )
-	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
-	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_COCKTAIL
+	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_COCKTAIL
+	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
+	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
+	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_START2 )
 

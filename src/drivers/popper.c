@@ -83,20 +83,20 @@ Notes:
 extern data8_t *popper_videoram, *popper_attribram, *popper_ol_videoram, *popper_ol_attribram, *popper_spriteram;
 extern size_t popper_spriteram_size;
 
-WRITE_HANDLER( popper_videoram_w );
-WRITE_HANDLER( popper_attribram_w );
-WRITE_HANDLER( popper_ol_videoram_w );
-WRITE_HANDLER( popper_ol_attribram_w );
-WRITE_HANDLER( popper_flipscreen_w );
-WRITE_HANDLER( popper_e002_w );
-WRITE_HANDLER( popper_gfx_bank_w );
+WRITE8_HANDLER( popper_videoram_w );
+WRITE8_HANDLER( popper_attribram_w );
+WRITE8_HANDLER( popper_ol_videoram_w );
+WRITE8_HANDLER( popper_ol_attribram_w );
+WRITE8_HANDLER( popper_flipscreen_w );
+WRITE8_HANDLER( popper_e002_w );
+WRITE8_HANDLER( popper_gfx_bank_w );
 
 PALETTE_INIT( popper );
 VIDEO_START( popper );
 VIDEO_UPDATE( popper );
 static data8_t *popper_sharedram;
 
-static READ_HANDLER( popper_sharedram_r )
+static READ8_HANDLER( popper_sharedram_r )
 {
 	return popper_sharedram[offset];
 }
@@ -128,7 +128,7 @@ static READ_HANDLER( popper_sharedram_r )
 //                      -----x--  free play
 //                      ------x-  continue
 //                      -------x  sound
-static READ_HANDLER( popper_input_ports_r )
+static READ8_HANDLER( popper_input_ports_r )
 {
 	data8_t data=0;
 	switch (offset)
@@ -146,13 +146,13 @@ static READ_HANDLER( popper_input_ports_r )
 	return data;
 }
 
-static READ_HANDLER( popper_soundcpu_nmi_r )
+static READ8_HANDLER( popper_soundcpu_nmi_r )
 {
-	cpu_set_nmi_line(1,PULSE_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 	return 0;
 }
 
-static WRITE_HANDLER( popper_sharedram_w )
+static WRITE8_HANDLER( popper_sharedram_w )
 {
 	popper_sharedram[offset]=data;
 }
@@ -213,21 +213,21 @@ INPUT_PORTS_START( popper )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 
 	PORT_START	/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY
 
 	PORT_START	/* IN2 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN2 )			//ignored if held for 12 or more frames
 
 	PORT_START	/* IN3 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_8WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
 
 	PORT_START	/* IN4 - FAKE DSW1 */
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Coin_A ) )		//SW1:1-2
@@ -261,7 +261,7 @@ INPUT_PORTS_START( popper )
 	PORT_DIPNAME( 0x04, 0x00, DEF_STR( Free_Play ) )	//SW2:3
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x04, DEF_STR( On ) )
-	PORT_BITX(    0x08, 0x00, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Pass (unlimited lives)", IP_KEY_NONE, IP_JOY_NONE )	//SW2:4
+	PORT_BIT(    0x08, 0x00, IPT_DIPSWITCH_NAME ) PORT_NAME("Pass (unlimited lives) PORT_CHEAT")	//SW2:4
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( On ) )
 	PORT_DIPNAME( 0x10, 0x00, DEF_STR( Flip_Screen ) )	//SW2:5
@@ -270,7 +270,7 @@ INPUT_PORTS_START( popper )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Cabinet ) )		//SW2:6
 	PORT_DIPSETTING(    0x20, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )
-	PORT_BITX(    0x40, 0x00, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Clear (current level)", IP_KEY_NONE, IP_JOY_NONE )	//SW2:7
+	PORT_BIT(    0x40, 0x00, IPT_DIPSWITCH_NAME ) PORT_NAME("Clear (current level) PORT_CHEAT")	//SW2:7
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x00, "Stop" )					//SW2:8

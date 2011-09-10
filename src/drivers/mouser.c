@@ -20,16 +20,16 @@ unsigned char mouser_nmi_enable;
 
 /* From "vidhrdw/mouser.c" */
 PALETTE_INIT( mouser );
-WRITE_HANDLER( mouser_flip_screen_x_w );
-WRITE_HANDLER( mouser_flip_screen_y_w );
-WRITE_HANDLER( mouser_spriteram_w );
-WRITE_HANDLER( mouser_colorram_w );
+WRITE8_HANDLER( mouser_flip_screen_x_w );
+WRITE8_HANDLER( mouser_flip_screen_y_w );
+WRITE8_HANDLER( mouser_spriteram_w );
+WRITE8_HANDLER( mouser_colorram_w );
 VIDEO_UPDATE( mouser );
 
 /* Mouser has external masking circuitry around
  * the NMI input on the main CPU */
 
-WRITE_HANDLER( mouser_nmi_enable_w )
+WRITE8_HANDLER( mouser_nmi_enable_w )
 {
 	mouser_nmi_enable = data;
 }
@@ -42,13 +42,13 @@ INTERRUPT_GEN( mouser_nmi_interrupt )
 
 /* Sound CPU interrupted on write */
 
-WRITE_HANDLER( mouser_sound_interrupt_w )
+WRITE8_HANDLER( mouser_sound_interrupt_w )
 {
 	mouser_sound_byte = data;
-	cpu_set_irq_line(1, 0, PULSE_LINE);
+	cpunum_set_input_line(1, 0, PULSE_LINE);
 }
 
-READ_HANDLER( mouser_sound_byte_r )
+READ8_HANDLER( mouser_sound_byte_r )
 {
 	return mouser_sound_byte;
 }
@@ -107,10 +107,10 @@ INPUT_PORTS_START( mouser )
     PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNUSED )
     PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNUSED )
     PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON1 )
-    PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY )
-    PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-    PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-    PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY )
+    PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY
+    PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY
+    PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY
+    PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 
     PORT_START
     PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
@@ -152,11 +152,11 @@ INPUT_PORTS_START( mouser )
     PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNUSED )
     PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNUSED )
     PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNUSED )
-    PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )
-    PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-    PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-    PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-    PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
+    PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL
+    PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+    PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+    PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+    PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
 INPUT_PORTS_END
 
 

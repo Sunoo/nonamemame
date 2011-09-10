@@ -33,12 +33,12 @@ HW info :
 
 extern unsigned char *ssrj_vram1,*ssrj_vram2,*ssrj_vram3,*ssrj_vram4,*ssrj_scrollram;
 
-WRITE_HANDLER(ssrj_vram1_w);
-WRITE_HANDLER(ssrj_vram2_w);
-WRITE_HANDLER(ssrj_vram4_w);
-READ_HANDLER(ssrj_vram1_r);
-READ_HANDLER(ssrj_vram2_r);
-READ_HANDLER(ssrj_vram4_r);
+WRITE8_HANDLER(ssrj_vram1_w);
+WRITE8_HANDLER(ssrj_vram2_w);
+WRITE8_HANDLER(ssrj_vram4_w);
+READ8_HANDLER(ssrj_vram1_r);
+READ8_HANDLER(ssrj_vram2_r);
+READ8_HANDLER(ssrj_vram4_r);
 
 VIDEO_START( ssrj );
 VIDEO_UPDATE( ssrj );
@@ -53,7 +53,7 @@ MACHINE_INIT(ssrj)
 	oldport=0x80;
 }
 
-static READ_HANDLER(ssrj_wheel_r)
+static READ8_HANDLER(ssrj_wheel_r)
 {
 	int port= input_port_1_r(0) -0x80;
 	int retval=port-oldport;
@@ -96,10 +96,10 @@ PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_TILT )
-	PORT_ANALOG( 0xe0, 0x00, IPT_PEDAL, 50, 0x20, 0, 0xe0 )
+	PORT_BIT( 0xe0, 0x00, IPT_PEDAL ) PORT_MINMAX(0,0xe0) PORT_SENSITIVITY(50) PORT_KEYDELTA(0x20)
 
  PORT_START
-	PORT_ANALOG( 0xff, 0x80, IPT_DIAL | IPF_REVERSE , 50, 4, 0x00, 0xff)
+	PORT_BIT( 0xff, 0x80, IPT_DIAL  ) PORT_MINMAX(0x00,0xff) PORT_SENSITIVITY(50) PORT_KEYDELTA(4) PORT_REVERSE
 
 
  PORT_START

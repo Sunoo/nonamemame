@@ -941,7 +941,7 @@ COMMAND_MODE:
 
 
 // draws Ben Bero Beh's color backdrop(verification required)
-static WRITE_HANDLER( bgtile_w )
+static WRITE8_HANDLER( bgtile_w )
 {
 	int yskip, xskip, ecx;
 	WORD *edi;
@@ -966,7 +966,7 @@ static WRITE_HANDLER( bgtile_w )
 }
 
 
-static READ_HANDLER( blitter_status_r )
+static READ8_HANDLER( blitter_status_r )
 {
 	if (game_id==GAME_HALLEYS && activecpu_get_pc()==0x8017) return(0x55); // HACK: trick SRAM test on startup
 
@@ -974,7 +974,7 @@ static READ_HANDLER( blitter_status_r )
 }
 
 
-static READ_HANDLER( blitter_r )
+static READ8_HANDLER( blitter_r )
 {
 	int i = offset & 0xf;
 
@@ -990,7 +990,7 @@ static void blitter_reset(int param)
 }
 
 
-static WRITE_HANDLER( blitter_w )
+static WRITE8_HANDLER( blitter_w )
 {
 	int i = offset & 0xf;
 
@@ -1003,7 +1003,7 @@ static WRITE_HANDLER( blitter_w )
 		if (i==0 || (i==4 && !data))
 		{
 			blitter_busy = 0;
-			if (firq_level) cpu_set_irq_line(0, M6809_FIRQ_LINE, ASSERT_LINE); // make up delayed FIRQ's
+			if (firq_level) cpunum_set_input_line(0, M6809_FIRQ_LINE, ASSERT_LINE); // make up delayed FIRQ's
 		}
 		else
 		{
@@ -1014,7 +1014,7 @@ static WRITE_HANDLER( blitter_w )
 }
 
 
-static READ_HANDLER( collision_id_r )
+static READ8_HANDLER( collision_id_r )
 {
 /*
 	Collision detection abstract:
@@ -1145,7 +1145,7 @@ static void halleys_decode_rgb(DWORD *r, DWORD *g, DWORD *b, int addr, int data)
 	*b = prom_6330[0x40 + (bit0|bit1|bit2|bit3|bit4)];
 }
 
-static WRITE_HANDLER( halleys_paletteram_IIRRGGBB_w )
+static WRITE8_HANDLER( halleys_paletteram_IIRRGGBB_w )
 {
 	DWORD d, r, g, b, i, j;
 	DWORD *pal_ptr = internal_palette;
@@ -1528,9 +1528,9 @@ static VIDEO_UPDATE( benberob )
 
 #if HALLEYS_DEBUG
 
-static READ_HANDLER( zero_r ) { return(0); }
+static READ8_HANDLER( zero_r ) { return(0); }
 
-static READ_HANDLER( debug_r ) { return(io_ram[offset]); }
+static READ8_HANDLER( debug_r ) { return(io_ram[offset]); }
 
 #endif
 
@@ -1567,7 +1567,7 @@ static INTERRUPT_GEN( halleys_interrupt )
 				fftail = (fftail + 1) & (MAX_SOUNDS - 1);
 				latch_delay = (latch_data) ? 0 : 4;
 				soundlatch_w(0, latch_data);
-				cpu_set_nmi_line(1, PULSE_LINE);
+				cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 			}
 
 			// clear collision list of this frame unconditionally
@@ -1576,16 +1576,16 @@ static INTERRUPT_GEN( halleys_interrupt )
 
 		// In Halley's Comet, NMI is used exclusively to handle coin input
 		case 1:
-			cpu_set_nmi_line(0, PULSE_LINE);
+			cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 		break;
 
 		// FIRQ drives gameplay; we need both types of NMI each frame.
 		case 2:
-			mVectorType = 1; cpu_set_irq_line(0, M6809_FIRQ_LINE, ASSERT_LINE);
+			mVectorType = 1; cpunum_set_input_line(0, M6809_FIRQ_LINE, ASSERT_LINE);
 		break;
 
 		case 3:
-			mVectorType = 0; cpu_set_irq_line(0, M6809_FIRQ_LINE, ASSERT_LINE);
+			mVectorType = 0; cpunum_set_input_line(0, M6809_FIRQ_LINE, ASSERT_LINE);
 		break;
 	}
 }
@@ -1607,45 +1607,45 @@ static INTERRUPT_GEN( benberob_interrupt )
 				fftail = (fftail + 1) & (MAX_SOUNDS - 1);
 				latch_delay = (latch_data) ? 0 : 4;
 				soundlatch_w(0, latch_data);
-				cpu_set_nmi_line(1, PULSE_LINE);
+				cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 			}
 		break;
 
 		case 1:
-			cpu_set_nmi_line(0, PULSE_LINE);
+			cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 		break;
 
 		case 2:
 		case 3:
 			// FIRQ must not happen when the blitter is being updated or it'll cause serious screen artifacts
-			if (!blitter_busy) cpu_set_irq_line(0, M6809_FIRQ_LINE, ASSERT_LINE); else firq_level++;
+			if (!blitter_busy) cpunum_set_input_line(0, M6809_FIRQ_LINE, ASSERT_LINE); else firq_level++;
 		break;
 	}
 }
 
 
-static READ_HANDLER( vector_r )
+static READ8_HANDLER( vector_r )
 {
 	return(cpu1_base[0xffe0 + (offset^(mVectorType<<4))]);
 }
 
 
-static WRITE_HANDLER( firq_ack_w )
+static WRITE8_HANDLER( firq_ack_w )
 {
 	io_ram[0x9c] = data;
 
 	if (firq_level) firq_level--;
-	cpu_set_irq_line(0, M6809_FIRQ_LINE, CLEAR_LINE);
+	cpunum_set_input_line(0, M6809_FIRQ_LINE, CLEAR_LINE);
 }
 
 
-static WRITE_HANDLER( sndnmi_msk_w )
+static WRITE8_HANDLER( sndnmi_msk_w )
 {
 	sndnmi_mask = data & 1;
 }
 
 
-static WRITE_HANDLER( soundcommand_w )
+static WRITE8_HANDLER( soundcommand_w )
 {
 	if (ffcount < MAX_SOUNDS)
 	{
@@ -1656,7 +1656,7 @@ static WRITE_HANDLER( soundcommand_w )
 }
 
 
-static READ_HANDLER( coin_lockout_r )
+static READ8_HANDLER( coin_lockout_r )
 {
 	// This is a hack, but it lets you coin up when COIN1 or COIN2 are signaled.
 	// See NMI for the twisted logic that is involved in handling coin input.
@@ -1670,7 +1670,7 @@ static READ_HANDLER( coin_lockout_r )
 }
 
 
-static READ_HANDLER( io_mirror_r )
+static READ8_HANDLER( io_mirror_r )
 {
 	return(readinputport(offset + 3));
 }
@@ -1820,7 +1820,7 @@ INPUT_PORTS_START( halleys )
 	PORT_DIPNAME( 0x20, 0x20, "Unknown(3-6)" )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BITX(    0x40, 0x40, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Invincibility", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(    0x40, 0x40, IPT_DIPSWITCH_NAME ) PORT_NAME("Invincibility") PORT_CHEAT
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x80, "Unknown(3-8)" )
@@ -1833,29 +1833,29 @@ INPUT_PORTS_START( halleys )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_START2 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_TILT )
-	PORT_BIT_IMPULSE( 0x20, IP_ACTIVE_LOW, IPT_SERVICE1, 12 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE1 ) PORT_IMPULSE(12)
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
 	PORT_START // 0xff91
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT| IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP   | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 ) // WARP
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) // FIRE
 
 	PORT_START // 0xff92
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY |IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT| IPF_8WAY |IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY |IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP   | IPF_8WAY |IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 |IPF_PLAYER2 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 |IPF_PLAYER2 )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 
 	PORT_START // 0xff93
 
@@ -1878,7 +1878,7 @@ INPUT_PORTS_START( benberob )
 	PORT_DIPSETTING(    0x04, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
 	PORT_DIPNAME( 0x18, 0x08, DEF_STR( Lives ) )
-	PORT_BITX   ( 0x00, 0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT   ( 0x00, 0x00, IPT_DIPSWITCH_SETTING ) PORT_NAME("Infinite") PORT_CHEAT
 	PORT_DIPSETTING(    0x08, "3" )
 	PORT_DIPSETTING(    0x10, "4" )
 	PORT_DIPSETTING(    0x18, "5" )
@@ -1948,7 +1948,7 @@ INPUT_PORTS_START( benberob )
 	PORT_DIPNAME( 0x20, 0x20, "Unknown(3-6)" )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BITX(    0x40, 0x40, IPT_DIPSWITCH_NAME | IPF_CHEAT, "No Hit", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(    0x40, 0x40, IPT_DIPSWITCH_NAME ) PORT_NAME("No Hit") PORT_CHEAT
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x80, "Unknown(3-8)" )
@@ -1961,29 +1961,29 @@ INPUT_PORTS_START( benberob )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_START2 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_TILT )
-	PORT_BIT_IMPULSE( 0x20, IP_ACTIVE_LOW, IPT_SERVICE1, 12 )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE1 ) PORT_IMPULSE(12)
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_COIN2 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 )
 
 	PORT_START // 0xff91
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT| IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP   | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 ) // JUMP
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) // EXTINGUISHER
 
 	PORT_START // 0xff92
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY |IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT| IPF_8WAY |IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY |IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP   | IPF_8WAY |IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 |IPF_PLAYER2 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 |IPF_PLAYER2 )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 
 	PORT_START // 0xff93
 INPUT_PORTS_END

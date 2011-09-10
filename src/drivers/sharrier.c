@@ -49,7 +49,7 @@ static WRITE16_HANDLER( hangon_io_w )
 					case 0x00: /* Port A : Z80 sound command */
 						ppi_reg[0][0] = data;
 						soundlatch_w(0, data & 0xff);
-						cpu_set_nmi_line(1, PULSE_LINE);
+						cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 						return;
 
 					case 0x01: /* Port B : Miscellaneous outputs */
@@ -99,15 +99,15 @@ static WRITE16_HANDLER( hangon_io_w )
 
 					/* To S.RES of second CPU */
 					if(data & 0x20)
-					cpu_set_reset_line(2, CLEAR_LINE);
+					cpunum_set_input_line(2, INPUT_LINE_RESET, CLEAR_LINE);
 					else
-					cpu_set_reset_line(2, ASSERT_LINE);
+					cpunum_set_input_line(2, INPUT_LINE_RESET, ASSERT_LINE);
 					
 					/* To S.INT of second CPU */
 					if(data & 0x10)
-					cpu_set_irq_line(2, 1, HOLD_LINE);
+					cpunum_set_input_line(2, 1, HOLD_LINE);
 					else
-					cpu_set_irq_line(2, 1, CLEAR_LINE);
+					cpunum_set_input_line(2, 1, CLEAR_LINE);
 #endif
 					return;
 				
@@ -335,13 +335,13 @@ static void set_page( int page[4], data16_t data ){
 
 static INTERRUPT_GEN( sys16_interrupt ){
 	if(sys16_custom_irq) sys16_custom_irq();
-	cpu_set_irq_line(cpu_getactivecpu(), 4, HOLD_LINE); /* Interrupt vector 4, used by VBlank */
+	cpunum_set_input_line(cpu_getactivecpu(), 4, HOLD_LINE); /* Interrupt vector 4, used by VBlank */
 }
 
 static WRITE16_HANDLER( sound_command_nmi_w ){
 	if( ACCESSING_LSB ){
 		soundlatch_w( 0,data&0xff );
-		cpu_set_nmi_line(1, PULSE_LINE);
+		cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 	}
 }
 
@@ -810,7 +810,7 @@ static WRITE16_HANDLER( er_io_analog_w )
 
 static READ16_HANDLER( er_reset2_r )
 {
-	cpu_set_reset_line(2,PULSE_LINE);
+	cpunum_set_input_line(2, INPUT_LINE_RESET, PULSE_LINE);
 	return 0;
 }
 
@@ -1442,9 +1442,9 @@ ROM_END
 
 INPUT_PORTS_START( hangon )
 	PORT_START	/* Steering */
-		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_REVERSE | IPF_CENTER , 100, 3, 0x48, 0xb7 )
+		PORT_BIT( 0xff, 0x7f, IPT_AD_STICK_X  ) PORT_MINMAX(0x48,0xb7) PORT_SENSITIVITY(100) PORT_KEYDELTA(3) PORT_CENTER PORT_REVERSE
 	PORT_START	/* Accel / Decel */
-		PORT_ANALOG( 0xff, 0x1, IPT_AD_STICK_Y | IPF_CENTER | IPF_REVERSE, 100, 16, 0, 0xa2 )
+		PORT_BIT( 0xff, 0x1, IPT_AD_STICK_Y ) PORT_MINMAX(0,0xa2) PORT_SENSITIVITY(100) PORT_KEYDELTA(16) PORT_CENTER PORT_REVERSE
 	SYS16_SERVICE
 	SYS16_COINAGE
 	PORT_START	/* DSW1 */
@@ -1465,12 +1465,12 @@ INPUT_PORTS_START( hangon )
 		PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 		PORT_DIPSETTING(    0x20, DEF_STR( On ) )
 	PORT_START	/* Brake */
-		PORT_ANALOG( 0xff, 0x1, IPT_AD_STICK_Z | IPF_CENTER | IPF_REVERSE, 100, 16, 0, 0xa2 )
+		PORT_BIT( 0xff, 0x1, IPT_AD_STICK_Z ) PORT_MINMAX(0,0xa2) PORT_SENSITIVITY(100) PORT_KEYDELTA(16) PORT_CENTER PORT_REVERSE
 INPUT_PORTS_END
 
 INPUT_PORTS_START( enduror )
 	PORT_START	/* handle right left */
-		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_REVERSE | IPF_CENTER, 100, 4, 0x0, 0xff )
+		PORT_BIT( 0xff, 0x7f, IPT_AD_STICK_X ) PORT_MINMAX(0x0,0xff) PORT_SENSITIVITY(100) PORT_KEYDELTA(4) PORT_CENTER PORT_REVERSE
 	PORT_START	/* Fake Buttons */
 		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 )	// accel
 		PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2 )	// brake
@@ -1478,7 +1478,7 @@ INPUT_PORTS_START( enduror )
 	PORT_START
 		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BITX(0x04, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT(0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 )
 		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -1508,7 +1508,7 @@ INPUT_PORTS_START( enduror )
 		PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 		PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	//PORT_START	/* Y */
-	//PORT_ANALOG( 0xff, 0x0, IPT_AD_STICK_Y | IPF_CENTER , 100, 8, 0x0, 0xff )
+	//PORT_BIT( 0xff, 0x0, IPT_AD_STICK_Y  ) PORT_MINMAX(0x0,0xff) PORT_SENSITIVITY(100) PORT_KEYDELTA(8) PORT_CENTER
 INPUT_PORTS_END
 
 INPUT_PORTS_START( sharrier )
@@ -1517,7 +1517,7 @@ INPUT_PORTS_START( sharrier )
 	PORT_START
 		PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 		PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-		PORT_BITX(0x04, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+		PORT_BIT(0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 		PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 )
 		PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1 )
 		PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 )
@@ -1548,9 +1548,9 @@ INPUT_PORTS_START( sharrier )
 		PORT_DIPSETTING(    0x40, "Hard" )
 		PORT_DIPSETTING(    0x00, "Hardest" )
 	PORT_START	/* X */
-		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X |  IPF_REVERSE, 100, 4, 0x20, 0xdf )
+		PORT_BIT( 0xff, 0x7f, IPT_AD_STICK_X ) PORT_MINMAX(0x20,0xdf) PORT_SENSITIVITY(100) PORT_KEYDELTA(4) PORT_REVERSE
 	PORT_START	/* Y */
-		PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_Y |  IPF_REVERSE, 100, 4, 0x60, 0x9f )
+		PORT_BIT( 0xff, 0x7f, IPT_AD_STICK_Y ) PORT_MINMAX(0x60,0x9f) PORT_SENSITIVITY(100) PORT_KEYDELTA(4) PORT_REVERSE
 INPUT_PORTS_END
 
 /***************************************************************************/

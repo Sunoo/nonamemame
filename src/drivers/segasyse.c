@@ -175,16 +175,16 @@ extern UINT8 *segae_vdp_regs[];		/* pointer to vdp's registers */
 
 /*-- Prototypes --*/
 
-static WRITE_HANDLER (segae_mem_8000_w);
+static WRITE8_HANDLER (segae_mem_8000_w);
 
-static WRITE_HANDLER (segae_port_f7_w);
-static READ_HANDLER (segae_port_7e_7f_r);
+static WRITE8_HANDLER (segae_port_f7_w);
+static READ8_HANDLER (segae_port_7e_7f_r);
 
-static READ_HANDLER (segae_port_ba_bb_r);
-static READ_HANDLER (segae_port_be_bf_r);
+static READ8_HANDLER (segae_port_ba_bb_r);
+static READ8_HANDLER (segae_port_be_bf_r);
 
-static WRITE_HANDLER (segae_port_ba_bb_w);
-static WRITE_HANDLER (segae_port_be_bf_w);
+static WRITE8_HANDLER (segae_port_ba_bb_w);
+static WRITE8_HANDLER (segae_port_be_bf_w);
 
 /*- in (vidhrdw/segasyse.c) -*/
 
@@ -256,7 +256,7 @@ ADDRESS_MAP_END
 
 /*-- Memory -- */
 
-static WRITE_HANDLER (segae_mem_8000_w)
+static WRITE8_HANDLER (segae_mem_8000_w)
 {
 	/* write the data the non-selected VRAM bank of the opposite number VDP chip stored in segae_8000bank */
 	segae_vdp_vram [1-segae_8000bank][offset + (0x4000-(segae_vdp_vrambank[1-segae_8000bank] * 0x4000))] = data;
@@ -265,7 +265,7 @@ static WRITE_HANDLER (segae_mem_8000_w)
 /*-- Ports --*/
 
 /***************************************
- WRITE_HANDLER (segae_port_f7_w)
+ WRITE8_HANDLER (segae_port_f7_w)
 ****************************************
  writes here control the banking of
  ROM and RAM
@@ -293,7 +293,7 @@ void segae_bankswitch (void)
 }
 
 
-static WRITE_HANDLER (segae_port_f7_w)
+static WRITE8_HANDLER (segae_port_f7_w)
 {
 	segae_vdp_vrambank[0] = (data & 0x80) >> 7; /* Back  Layer VDP (0) VRAM Bank */
 	segae_vdp_vrambank[1] = (data & 0x40) >> 6; /* Front Layer VDP (1) VRAM Bank */
@@ -305,7 +305,7 @@ static WRITE_HANDLER (segae_port_f7_w)
 
 /*- Beam Position -*/
 
-static READ_HANDLER (segae_port_7e_7f_r)
+static READ8_HANDLER (segae_port_7e_7f_r)
 {
 	UINT8 temp = 0;
 	UINT16 sline;
@@ -326,7 +326,7 @@ static READ_HANDLER (segae_port_7e_7f_r)
 
 /*- VDP Related -*/
 
-static READ_HANDLER (segae_port_ba_bb_r)
+static READ8_HANDLER (segae_port_ba_bb_r)
 {
 	/* These Addresses access the Back Layer VDP (0) */
 	UINT8 temp = 0;
@@ -341,7 +341,7 @@ static READ_HANDLER (segae_port_ba_bb_r)
 	return temp;
 }
 
-static READ_HANDLER (segae_port_be_bf_r)
+static READ8_HANDLER (segae_port_be_bf_r)
 {
 	/* These Addresses access the Front Layer VDP (1) */
 	UINT8 temp = 0;
@@ -356,7 +356,7 @@ static READ_HANDLER (segae_port_be_bf_r)
 	return temp;
 }
 
-static WRITE_HANDLER (segae_port_ba_bb_w)
+static WRITE8_HANDLER (segae_port_ba_bb_w)
 {
 	/* These Addresses access the Back Layer VDP (0) */
 	switch (offset)
@@ -368,7 +368,7 @@ static WRITE_HANDLER (segae_port_ba_bb_w)
 	}
 }
 
-static WRITE_HANDLER (segae_port_be_bf_w)
+static WRITE8_HANDLER (segae_port_be_bf_w)
 {
 	/* These Addresses access the Front Layer VDP (1) */
 	switch (offset)
@@ -382,7 +382,7 @@ static WRITE_HANDLER (segae_port_be_bf_w)
 
 /*- Hang On Jr. Specific -*/
 
-static READ_HANDLER (segae_hangonjr_port_f8_r)
+static READ8_HANDLER (segae_hangonjr_port_f8_r)
 {
 	UINT8 temp;
 
@@ -397,7 +397,7 @@ static READ_HANDLER (segae_hangonjr_port_f8_r)
 	return temp;
 }
 
-static WRITE_HANDLER (segae_hangonjr_port_fa_w)
+static WRITE8_HANDLER (segae_hangonjr_port_fa_w)
 {
 	/* Seems to write the same pattern again and again bits ---- xx-x used */
 	port_fa_last = data;
@@ -407,7 +407,7 @@ static WRITE_HANDLER (segae_hangonjr_port_fa_w)
 
 static int port_to_read,last1,last2,diff1,diff2;
 
-static READ_HANDLER (segae_ridleofp_port_f8_r)
+static READ8_HANDLER (segae_ridleofp_port_f8_r)
 {
 	switch (port_to_read)
 	{
@@ -419,7 +419,7 @@ static READ_HANDLER (segae_ridleofp_port_f8_r)
 	}
 }
 
-static WRITE_HANDLER (segae_ridleofp_port_fa_w)
+static WRITE8_HANDLER (segae_ridleofp_port_fa_w)
 {
 	/* 0x10 is written before reading the dial (hold counters?) */
 	/* 0x03 is written after reading the dial (reset counters?) */
@@ -507,7 +507,7 @@ INPUT_PORTS_START( transfrm ) /* Used By Transformer */
 	PORT_DIPSETTING(    0x0c, "3" )
 	PORT_DIPSETTING(    0x08, "4" )
 	PORT_DIPSETTING(    0x04, "5" )
-	PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite", 0, 0 )
+	PORT_BIT( 0,       0x00, IPT_DIPSWITCH_SETTING ) PORT_NAME("Infinite") PORT_CHEAT
 	PORT_DIPNAME( 0x30, 0x30, DEF_STR( Bonus_Life ) )
 	PORT_DIPSETTING(    0x20, "10k, 30k, 50k and 70k" )
 	PORT_DIPSETTING(    0x30, "20k, 60k, 100k and 140k"  )
@@ -522,7 +522,7 @@ INPUT_PORTS_START( transfrm ) /* Used By Transformer */
 	PORT_START	/* Read from Port 0xe0 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_COIN2 )
-	PORT_BITX(0x04, IP_ACTIVE_LOW,  IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x04, IP_ACTIVE_LOW,  IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_SERVICE1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN )
@@ -530,10 +530,10 @@ INPUT_PORTS_START( transfrm ) /* Used By Transformer */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_START2 )
 
 	PORT_START	/* Read from Port 0xe1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_JOYSTICK_UP | IPF_8WAY  )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_JOYSTICK_DOWN | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_JOYSTICK_UP  ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNUSED )
@@ -572,7 +572,7 @@ INPUT_PORTS_START( hangonjr ) /* Used By Hang On Jr */
 	PORT_START	/* Read from Port 0xe0 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_COIN2 )
-	PORT_BITX(0x04, IP_ACTIVE_LOW,  IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x04, IP_ACTIVE_LOW,  IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_SERVICE1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_START1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW,  IPT_UNKNOWN )
@@ -590,10 +590,10 @@ INPUT_PORTS_START( hangonjr ) /* Used By Hang On Jr */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_START	/* Read from Port 0xf8 */
-	PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_PLAYER1, 25, 15, 0, 0xff )
+	PORT_BIT( 0xff, 0x7f, IPT_AD_STICK_X ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(25) PORT_KEYDELTA(15) PORT_PLAYER(1)
 
 	PORT_START  /* Read from Port 0xf8 */
-	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_REVERSE | IPF_PLAYER1, 20, 10, 0, 0xff)
+	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(1)
 INPUT_PORTS_END
 
 INPUT_PORTS_START( ridleofp ) /* Used By Riddle Of Pythagoras */
@@ -608,7 +608,7 @@ INPUT_PORTS_START( ridleofp ) /* Used By Riddle Of Pythagoras */
 	PORT_DIPSETTING(    0x03, "2" )
 	PORT_DIPSETTING(    0x02, "3" )
 	PORT_DIPSETTING(    0x01, "4" )
-	PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "98", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0,       0x00, IPT_DIPSWITCH_SETTING ) PORT_NAME("98") PORT_CHEAT
 	PORT_DIPNAME( 0x04, 0x04, DEF_STR( Unknown ) )  // Unknown
 	PORT_DIPSETTING(    0x04, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -648,17 +648,17 @@ INPUT_PORTS_START( ridleofp ) /* Used By Riddle Of Pythagoras */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_START	/* Read from Port 0xf8 */
-	PORT_ANALOG( 0x0fff, 0x0000, IPT_DIAL, 50, 20, 0, 0 )
+	PORT_BIT( 0x0fff, 0x0000, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(50) PORT_KEYDELTA(20)
 	PORT_BIT( 0x1000, IP_ACTIVE_LOW,  IPT_BUTTON2 )	/* is this used in the game? */
 	PORT_BIT( 0x2000, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW,  IPT_BUTTON1 )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_START	/* Read from Port 0xf8 */
-	PORT_ANALOG( 0x0fff, 0x0000, IPT_DIAL | IPF_COCKTAIL, 50, 20, 0, 0 )
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW,  IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x0fff, 0x0000, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(50) PORT_KEYDELTA(20) PORT_COCKTAIL
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW,  IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x2000, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW,  IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW,  IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 INPUT_PORTS_END
 
@@ -694,7 +694,7 @@ INPUT_PORTS_END
 			hintpending = 1;
 
 			if  ((segae_vdp_regs[1][0] & 0x10)) {
-				cpu_set_irq_line(0, 0, HOLD_LINE);
+				cpunum_set_input_line(0, 0, HOLD_LINE);
 				return;
 			}
 
@@ -707,7 +707,7 @@ INPUT_PORTS_END
 		hintcount = segae_vdp_regs[1][10];
 
 		if ( (sline<0xe0) && (vintpending) ) {
-			cpu_set_irq_line(0, 0, HOLD_LINE);
+			cpunum_set_input_line(0, 0, HOLD_LINE);
 		}
 	}
 }
@@ -779,8 +779,8 @@ static DRIVER_INIT( segasyse )
 
 static DRIVER_INIT( hangonjr )
 {
-	install_port_read_handler (0, 0xf8, 0xf8, segae_hangonjr_port_f8_r);
-	install_port_write_handler(0, 0xfa, 0xfa, segae_hangonjr_port_fa_w);
+	memory_install_read8_handler(0, ADDRESS_SPACE_IO, 0xf8, 0xf8, 0, 0, segae_hangonjr_port_f8_r);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0xfa, 0xfa, 0, 0, segae_hangonjr_port_fa_w);
 
 	state_save_register_UINT8 ( "SEGASYSE-HOJ", 0, "port_fa_last",			&port_fa_last, 1);
 
@@ -789,8 +789,8 @@ static DRIVER_INIT( hangonjr )
 
 static DRIVER_INIT( ridleofp )
 {
-	install_port_read_handler (0, 0xf8, 0xf8, segae_ridleofp_port_f8_r);
-	install_port_write_handler(0, 0xfa, 0xfa, segae_ridleofp_port_fa_w);
+	memory_install_read8_handler(0, ADDRESS_SPACE_IO, 0xf8, 0xf8, 0, 0, segae_ridleofp_port_f8_r);
+	memory_install_write8_handler(0, ADDRESS_SPACE_IO, 0xfa, 0xfa, 0, 0, segae_ridleofp_port_fa_w);
 
 	init_segasyse();
 }

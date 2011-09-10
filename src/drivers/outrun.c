@@ -187,7 +187,7 @@ static WRITE16_HANDLER( sys16_3d_coinctrl_w )
 static WRITE16_HANDLER( sound_command_nmi_w ){
 	if( ACCESSING_LSB ){
 		soundlatch_w( 0,data&0xff );
-		cpu_set_nmi_line(1, PULSE_LINE);
+		cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 	}
 }
 #endif
@@ -214,7 +214,7 @@ static WRITE16_HANDLER( sys16_coinctrl_w )
 
 static INTERRUPT_GEN( sys16_interrupt ){
 	if(sys16_custom_irq) sys16_custom_irq();
-	cpu_set_irq_line(cpu_getactivecpu(), 4, HOLD_LINE); /* Interrupt vector 4, used by VBlank */
+	cpunum_set_input_line(cpu_getactivecpu(), 4, HOLD_LINE); /* Interrupt vector 4, used by VBlank */
 }
 
 static ADDRESS_MAP_START( sound_readport, ADDRESS_SPACE_IO, 8 )
@@ -252,10 +252,10 @@ static WRITE16_HANDLER( sound_shared_ram_w )
 	}
 }
 
-static READ_HANDLER( sound2_shared_ram_r ){
+static READ8_HANDLER( sound2_shared_ram_r ){
 	return sound_shared_ram[offset];
 }
-static WRITE_HANDLER( sound2_shared_ram_w ){
+static WRITE8_HANDLER( sound2_shared_ram_w ){
 	sound_shared_ram[offset] = data;
 }
 
@@ -962,10 +962,10 @@ static WRITE16_HANDLER( outrun_ctrl1_w )
 		ctrl1 = data;
 		if(changed & 1) {
 			if(data & 1) {
-				cpu_set_halt_line(2, CLEAR_LINE);
-				cpu_set_reset_line(2, PULSE_LINE);
+				cpunum_set_input_line(2, INPUT_LINE_HALT, CLEAR_LINE);
+				cpunum_set_input_line(2, INPUT_LINE_RESET, PULSE_LINE);
 			} else
-				cpu_set_halt_line(2, ASSERT_LINE);
+				cpunum_set_input_line(2, INPUT_LINE_HALT, ASSERT_LINE);
 		}
 
 //		sys16_kill_set(data & 0x20);
@@ -978,7 +978,7 @@ static WRITE16_HANDLER( outrun_ctrl1_w )
 
 static void outrun_reset(void)
 {
-       cpu_set_reset_line(2, PULSE_LINE);
+       cpunum_set_input_line(2, INPUT_LINE_RESET, PULSE_LINE);
 }
 
 
@@ -1202,8 +1202,8 @@ static DRIVER_INIT( outrunb )
 
 INPUT_PORTS_START( outrun )
 PORT_START	/* Steering */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X | IPF_CENTER, 100, 3, 0x48, 0xb8 )
-//	PORT_ANALOG( 0xff, 0x7f, IPT_PADDLE , 70, 3, 0x48, 0xb8 )
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_MINMAX(0x48,0xb8) PORT_SENSITIVITY(100) PORT_KEYDELTA(3) PORT_CENTER
+//	PORT_BIT( 0xff, 0x7f, IPT_PADDLE  ) PORT_MINMAX(0x48,0xb8) PORT_SENSITIVITY(70) PORT_KEYDELTA(3)
 
 #ifdef HANGON_DIGITAL_CONTROLS
 
@@ -1216,13 +1216,13 @@ PORT_START	/* Buttons */
 #else
 
 PORT_START	/* Accel / Decel */
-	PORT_ANALOG( 0xff, 0x30, IPT_AD_STICK_Y | IPF_CENTER | IPF_REVERSE, 100, 16, 0x30, 0x90 )
+	PORT_BIT( 0xff, 0x30, IPT_AD_STICK_Y ) PORT_MINMAX(0x30,0x90) PORT_SENSITIVITY(100) PORT_KEYDELTA(16) PORT_CENTER PORT_REVERSE
 
 #endif
 
 PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX(0x02, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x02, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 )
 //	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 )
@@ -1259,7 +1259,7 @@ PORT_START	/* DSW1 */
 #ifndef HANGON_DIGITAL_CONTROLS
 
 PORT_START	/* Brake */
-	PORT_ANALOG( 0xff, 0x30, IPT_AD_STICK_Y | IPF_PLAYER2 | IPF_CENTER | IPF_REVERSE, 100, 16, 0x30, 0x90 )
+	PORT_BIT( 0xff, 0x30, IPT_AD_STICK_Y ) PORT_MINMAX(0x30,0x90) PORT_SENSITIVITY(100) PORT_KEYDELTA(16) PORT_CENTER PORT_REVERSE PORT_PLAYER(2)
 
 #endif
 
@@ -1268,8 +1268,8 @@ INPUT_PORTS_END
 /***************************************************************************/
 static INTERRUPT_GEN( or_interrupt ){
 	int intleft=cpu_getiloops();
-	if(intleft!=0) cpu_set_irq_line(0, 2, HOLD_LINE);
-	else cpu_set_irq_line(0, 4, HOLD_LINE);
+	if(intleft!=0) cpunum_set_input_line(0, 2, HOLD_LINE);
+	else cpunum_set_input_line(0, 4, HOLD_LINE);
 }
 
 
@@ -1451,7 +1451,7 @@ static DRIVER_INIT( shangonb ){
 
 INPUT_PORTS_START( shangon )
 PORT_START	/* Steering */
-	PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_REVERSE | IPF_CENTER , 100, 3, 0x42, 0xbd )
+	PORT_BIT( 0xff, 0x7f, IPT_AD_STICK_X  ) PORT_MINMAX(0x42,0xbd) PORT_SENSITIVITY(100) PORT_KEYDELTA(3) PORT_CENTER PORT_REVERSE
 
 #ifdef HANGON_DIGITAL_CONTROLS
 
@@ -1462,14 +1462,14 @@ PORT_START	/* Buttons */
 #else
 
 PORT_START	/* Accel / Decel */
-	PORT_ANALOG( 0xff, 0x1, IPT_AD_STICK_Y | IPF_CENTER | IPF_REVERSE, 100, 16, 1, 0xa2 )
+	PORT_BIT( 0xff, 0x1, IPT_AD_STICK_Y ) PORT_MINMAX(1,0xa2) PORT_SENSITIVITY(100) PORT_KEYDELTA(16) PORT_CENTER PORT_REVERSE
 
 #endif
 
 PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-	PORT_BITX(0x04, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 )
@@ -1506,7 +1506,7 @@ PORT_START	/* DSW1 */
 #ifndef HANGON_DIGITAL_CONTROLS
 
 PORT_START	/* Brake */
-	PORT_ANALOG( 0xff, 0x1, IPT_AD_STICK_Y | IPF_PLAYER2 | IPF_CENTER | IPF_REVERSE, 100, 16, 1, 0xa2 )
+	PORT_BIT( 0xff, 0x1, IPT_AD_STICK_Y ) PORT_MINMAX(1,0xa2) PORT_SENSITIVITY(100) PORT_KEYDELTA(16) PORT_CENTER PORT_REVERSE PORT_PLAYER(2)
 
 #endif
 INPUT_PORTS_END

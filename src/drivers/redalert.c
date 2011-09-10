@@ -20,28 +20,28 @@ extern unsigned char *redalert_spriteram2;
 extern unsigned char *redalert_spriteram3;
 extern unsigned char *redalert_characterram;
 extern unsigned char *redalert_characterram2;
-WRITE_HANDLER( redalert_backram_w );
-WRITE_HANDLER( redalert_spriteram1_w );
-WRITE_HANDLER( redalert_spriteram2_w );
-WRITE_HANDLER( redalert_spriteram3_w );
-WRITE_HANDLER( redalert_spriteram4_w );
-WRITE_HANDLER( redalert_characterram_w );
-WRITE_HANDLER( redalert_characterram2_w );
+WRITE8_HANDLER( redalert_backram_w );
+WRITE8_HANDLER( redalert_spriteram1_w );
+WRITE8_HANDLER( redalert_spriteram2_w );
+WRITE8_HANDLER( redalert_spriteram3_w );
+WRITE8_HANDLER( redalert_spriteram4_w );
+WRITE8_HANDLER( redalert_characterram_w );
+WRITE8_HANDLER( redalert_characterram2_w );
 extern VIDEO_UPDATE( redalert );
-WRITE_HANDLER( redalert_c040_w );
-WRITE_HANDLER( demoneye_c040_w );
-WRITE_HANDLER( redalert_backcolor_w );
+WRITE8_HANDLER( redalert_c040_w );
+WRITE8_HANDLER( demoneye_c040_w );
+WRITE8_HANDLER( redalert_backcolor_w );
 
 
 /* sndhrdw/redalert.c */
-WRITE_HANDLER( redalert_c030_w );
-READ_HANDLER( redalert_voicecommand_r );
-WRITE_HANDLER( redalert_soundlatch_w );
-READ_HANDLER( redalert_AY8910_A_r );
-WRITE_HANDLER( redalert_AY8910_B_w );
-WRITE_HANDLER( redalert_AY8910_w );
-READ_HANDLER( redalert_sound_register_IC1_r );
-WRITE_HANDLER( redalert_sound_register_IC2_w );
+WRITE8_HANDLER( redalert_c030_w );
+READ8_HANDLER( redalert_voicecommand_r );
+WRITE8_HANDLER( redalert_soundlatch_w );
+READ8_HANDLER( redalert_AY8910_A_r );
+WRITE8_HANDLER( redalert_AY8910_B_w );
+WRITE8_HANDLER( redalert_AY8910_w );
+READ8_HANDLER( redalert_sound_register_IC1_r );
+WRITE8_HANDLER( redalert_sound_register_IC2_w );
 
 
 static ADDRESS_MAP_START( redalert_readmem, ADDRESS_SPACE_PROGRAM, 8 )
@@ -190,15 +190,15 @@ INPUT_PORTS_START( redalert )
 	PORT_START			   /* IN2  */
 	PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* Meter */
-	PORT_BIT ( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT ( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT ( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT ( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT ( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
-	PORT_BIT ( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
+	PORT_BIT ( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
+	PORT_BIT ( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
 	PORT_BIT ( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* Meter */
 
 	PORT_START			   /* Fake input for coins */
-	PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_HIGH, IPT_COIN1, 1)
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
 INPUT_PORTS_END
 
 
@@ -240,15 +240,15 @@ INPUT_PORTS_START( demoneye )
 	PORT_START			   /* IN2  */
 	PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* Meter */
-	PORT_BIT ( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT ( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT ( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT ( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT ( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
-	PORT_BIT ( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
+	PORT_BIT ( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
+	PORT_BIT ( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
 	PORT_BIT ( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN ) /* Meter */
 
 	PORT_START			   /* Fake input for coins */
-	PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_HIGH, IPT_COIN1, 1)
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
 INPUT_PORTS_END
 
 
@@ -340,11 +340,11 @@ static INTERRUPT_GEN( redalert_interrupt )
 {
 	if( readinputport(3) )
 	{
-		cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 	}
 	else
 	{
-		cpu_set_irq_line(0, 0, HOLD_LINE);
+		cpunum_set_input_line(0, 0, HOLD_LINE);
 	}
 }
 

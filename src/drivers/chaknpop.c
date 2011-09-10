@@ -10,12 +10,12 @@
 /* machine/chaknpop.c */
 DRIVER_INIT( chaknpop );
 MACHINE_INIT( chaknpop );
-READ_HANDLER( chaknpop_mcu_portA_r );
-READ_HANDLER( chaknpop_mcu_portB_r );
-READ_HANDLER( chaknpop_mcu_portC_r );
-WRITE_HANDLER( chaknpop_mcu_portA_w );
-WRITE_HANDLER( chaknpop_mcu_portB_w );
-WRITE_HANDLER( chaknpop_mcu_portC_w );
+READ8_HANDLER( chaknpop_mcu_portA_r );
+READ8_HANDLER( chaknpop_mcu_portB_r );
+READ8_HANDLER( chaknpop_mcu_portC_r );
+WRITE8_HANDLER( chaknpop_mcu_portA_w );
+WRITE8_HANDLER( chaknpop_mcu_portB_w );
+WRITE8_HANDLER( chaknpop_mcu_portC_w );
 
 
 /* vidhrdw/chaknpop.c */
@@ -29,12 +29,12 @@ PALETTE_INIT( chaknpop );
 VIDEO_START( chaknpop );
 VIDEO_UPDATE( chaknpop );
 
-READ_HANDLER( chaknpop_gfxmode_r );
-WRITE_HANDLER( chaknpop_gfxmode_w );
+READ8_HANDLER( chaknpop_gfxmode_r );
+WRITE8_HANDLER( chaknpop_gfxmode_w );
 
-WRITE_HANDLER( chaknpop_txram_w );
+WRITE8_HANDLER( chaknpop_txram_w );
 
-WRITE_HANDLER( chaknpop_attrram_w );
+WRITE8_HANDLER( chaknpop_attrram_w );
 
 
 /***************************************************************************
@@ -43,17 +43,17 @@ WRITE_HANDLER( chaknpop_attrram_w );
 
 ***************************************************************************/
 
-static WRITE_HANDLER ( unknown_port_1_w )
+static WRITE8_HANDLER ( unknown_port_1_w )
 {
 	//logerror("%04x: write to unknow port 1: 0x%02x\n", activecpu_get_pc(), data);
 }
 
-static WRITE_HANDLER ( unknown_port_2_w )
+static WRITE8_HANDLER ( unknown_port_2_w )
 {
 	//logerror("%04x: write to unknow port 2: 0x%02x\n", activecpu_get_pc(), data);
 }
 
-static WRITE_HANDLER ( coinlock_w )
+static WRITE8_HANDLER ( coinlock_w )
 {
 	logerror("%04x: coin lock %sable\n", activecpu_get_pc(), data ? "dis" : "en");
 }
@@ -134,22 +134,22 @@ INPUT_PORTS_START( chaknpop )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_TILT )
 
 	PORT_START      /* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START      /* IN2 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
@@ -163,7 +163,7 @@ INPUT_PORTS_START( chaknpop )
 	PORT_DIPNAME( 0x04, 0x04, "Super Chack'n" )
 	PORT_DIPSETTING(    0x04, "pi" )
 	PORT_DIPSETTING(    0x00, "1st Chance" )
-	PORT_BITX(    0x08, 0x08, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Endless", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(    0x08, 0x08, IPT_DIPSWITCH_NAME ) PORT_NAME("Endless") PORT_CHEAT
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x10, 0x10, "Credit Info" )
@@ -172,7 +172,7 @@ INPUT_PORTS_START( chaknpop )
 	PORT_DIPNAME( 0x20, 0x20, "Show Year" )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
-	PORT_BITX(    0x40, 0x40, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Infinite", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(    0x40, 0x40, IPT_DIPSWITCH_NAME ) PORT_NAME("Infinite") PORT_CHEAT
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x00, DEF_STR( Coinage ) )

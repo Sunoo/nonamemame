@@ -83,18 +83,18 @@ dcxx = /SPOSI (S36)
 
 
 /* in machine */
-READ_HANDLER( buggychl_68705_portA_r );
-WRITE_HANDLER( buggychl_68705_portA_w );
-WRITE_HANDLER( buggychl_68705_ddrA_w );
-READ_HANDLER( buggychl_68705_portB_r );
-WRITE_HANDLER( buggychl_68705_portB_w );
-WRITE_HANDLER( buggychl_68705_ddrB_w );
-READ_HANDLER( buggychl_68705_portC_r );
-WRITE_HANDLER( buggychl_68705_portC_w );
-WRITE_HANDLER( buggychl_68705_ddrC_w );
-WRITE_HANDLER( buggychl_mcu_w );
-READ_HANDLER( buggychl_mcu_r );
-READ_HANDLER( buggychl_mcu_status_r );
+READ8_HANDLER( buggychl_68705_portA_r );
+WRITE8_HANDLER( buggychl_68705_portA_w );
+WRITE8_HANDLER( buggychl_68705_ddrA_w );
+READ8_HANDLER( buggychl_68705_portB_r );
+WRITE8_HANDLER( buggychl_68705_portB_w );
+WRITE8_HANDLER( buggychl_68705_ddrB_w );
+READ8_HANDLER( buggychl_68705_portC_r );
+WRITE8_HANDLER( buggychl_68705_portC_w );
+WRITE8_HANDLER( buggychl_68705_ddrC_w );
+WRITE8_HANDLER( buggychl_mcu_w );
+READ8_HANDLER( buggychl_mcu_r );
+READ8_HANDLER( buggychl_mcu_status_r );
 
 /* in vidhrdw */
 extern unsigned char *buggychl_scrollv,*buggychl_scrollh;
@@ -103,17 +103,17 @@ extern unsigned char *buggychl_character_ram;
 
 PALETTE_INIT( buggychl );
 VIDEO_START( buggychl );
-WRITE_HANDLER( buggychl_chargen_w );
-WRITE_HANDLER( buggychl_sprite_lookup_bank_w );
-WRITE_HANDLER( buggychl_sprite_lookup_w );
-WRITE_HANDLER( buggychl_ctrl_w );
-WRITE_HANDLER( buggychl_bg_scrollx_w );
+WRITE8_HANDLER( buggychl_chargen_w );
+WRITE8_HANDLER( buggychl_sprite_lookup_bank_w );
+WRITE8_HANDLER( buggychl_sprite_lookup_w );
+WRITE8_HANDLER( buggychl_ctrl_w );
+WRITE8_HANDLER( buggychl_bg_scrollx_w );
 VIDEO_UPDATE( buggychl );
 
 
 
 
-static WRITE_HANDLER( bankswitch_w )
+static WRITE8_HANDLER( bankswitch_w )
 {
 	cpu_setbank(1,&memory_region(REGION_CPU1)[0x10000 + (data & 7) * 0x2000]);
 }
@@ -123,32 +123,32 @@ static int sound_nmi_enable,pending_nmi;
 
 static void nmi_callback(int param)
 {
-	if (sound_nmi_enable) cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
+	if (sound_nmi_enable) cpunum_set_input_line(1,INPUT_LINE_NMI,PULSE_LINE);
 	else pending_nmi = 1;
 }
 
-static WRITE_HANDLER( sound_command_w )
+static WRITE8_HANDLER( sound_command_w )
 {
 	soundlatch_w(0,data);
 	timer_set(TIME_NOW,data,nmi_callback);
 }
 
-static WRITE_HANDLER( nmi_disable_w )
+static WRITE8_HANDLER( nmi_disable_w )
 {
 	sound_nmi_enable = 0;
 }
 
-static WRITE_HANDLER( nmi_enable_w )
+static WRITE8_HANDLER( nmi_enable_w )
 {
 	sound_nmi_enable = 1;
 	if (pending_nmi)
 	{
-		cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
+		cpunum_set_input_line(1,INPUT_LINE_NMI,PULSE_LINE);
 		pending_nmi = 0;
 	}
 }
 
-static WRITE_HANDLER( sound_enable_w )
+static WRITE8_HANDLER( sound_enable_w )
 {
 	mixer_sound_enable_global_w(data & 1);
 }
@@ -312,7 +312,7 @@ INPUT_PORTS_START( buggychl )
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Yes ) )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNUSED )
-	PORT_BITX(    0x04, 0x04, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Fuel loss", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(    0x04, 0x04, IPT_DIPSWITCH_NAME ) PORT_NAME("Fuel loss") PORT_CHEAT
 	PORT_DIPSETTING(    0x04, "Normal" )
 	PORT_DIPSETTING(    0x00, "Crash only" )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )
@@ -322,7 +322,7 @@ INPUT_PORTS_START( buggychl )
 	PORT_DIPNAME( 0x20, 0x20, "Year Display" )
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Yes ) )
-	PORT_BITX(    0x40, 0x40, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Invulnerability", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(    0x40, 0x40, IPT_DIPSWITCH_NAME ) PORT_NAME("Invulnerability") PORT_CHEAT
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x80, 0x80, "Coin Slots" )
@@ -334,13 +334,13 @@ INPUT_PORTS_START( buggychl )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON2 )	/* shift */
-	PORT_BITX(0x10, IP_ACTIVE_HIGH, IPT_SERVICE, "Test Button", KEYCODE_F1, IP_JOY_NONE )
+	PORT_BIT(0x10, IP_ACTIVE_HIGH, IPT_SERVICE ) PORT_NAME("Test Button") PORT_CODE(KEYCODE_F1)
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
 	PORT_START /* IN4 - wheel */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_REVERSE, 30, 15, 0, 0)
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(30) PORT_KEYDELTA(15) PORT_REVERSE
 
 	PORT_START /* IN5 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 )
@@ -385,19 +385,19 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 
 
 
-static WRITE_HANDLER( portA_0_w )
+static WRITE8_HANDLER( portA_0_w )
 {
 	/* VOL/BAL   for the 7630 on this 8910 output */
 }
-static WRITE_HANDLER( portB_0_w )
+static WRITE8_HANDLER( portB_0_w )
 {
 	/* TRBL/BASS for the 7630 on this 8910 output */
 }
-static WRITE_HANDLER( portA_1_w )
+static WRITE8_HANDLER( portA_1_w )
 {
 	/* VOL/BAL   for the 7630 on this 8910 output */
 }
-static WRITE_HANDLER( portB_1_w )
+static WRITE8_HANDLER( portB_1_w )
 {
 	/* TRBL/BASS for the 7630 on this 8910 output */
 }

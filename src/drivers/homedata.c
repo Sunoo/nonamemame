@@ -232,12 +232,12 @@ static int vblank;
 static INTERRUPT_GEN( homedata_irq )
 {
 	vblank = 1;
-	cpu_set_irq_line(0,M6809_FIRQ_LINE,HOLD_LINE);
+	cpunum_set_input_line(0,M6809_FIRQ_LINE,HOLD_LINE);
 }
 
 static INTERRUPT_GEN( upd7807_irq )
 {
-	cpu_set_irq_line(1,UPD7810_INTF1,HOLD_LINE);
+	cpunum_set_input_line(1,UPD7810_INTF1,HOLD_LINE);
 }
 
 
@@ -251,7 +251,7 @@ static INTERRUPT_GEN( upd7807_irq )
 
 static int keyb;
 
-static READ_HANDLER( mrokumei_keyboard_r )
+static READ8_HANDLER( mrokumei_keyboard_r )
 {
 	int res = 0x3f,i;
 
@@ -284,7 +284,7 @@ static READ_HANDLER( mrokumei_keyboard_r )
 	return res;
 }
 
-static WRITE_HANDLER( mrokumei_keyboard_select_w )
+static WRITE8_HANDLER( mrokumei_keyboard_select_w )
 {
 	keyb = data;
 }
@@ -293,7 +293,7 @@ static WRITE_HANDLER( mrokumei_keyboard_select_w )
 
 static int sndbank;
 
-static READ_HANDLER( mrokumei_sound_io_r )
+static READ8_HANDLER( mrokumei_sound_io_r )
 {
 	if (sndbank & 4)
 		return(soundlatch_r(0));
@@ -301,7 +301,7 @@ static READ_HANDLER( mrokumei_sound_io_r )
 		return memory_region(REGION_CPU2)[0x10000 + offset + (sndbank & 1) * 0x10000];
 }
 
-static WRITE_HANDLER( mrokumei_sound_bank_w )
+static WRITE8_HANDLER( mrokumei_sound_bank_w )
 {
 	/* bit 0 = ROM bank
 	   bit 2 = ROM or soundlatch
@@ -309,7 +309,7 @@ static WRITE_HANDLER( mrokumei_sound_bank_w )
 	sndbank = data;
 }
 
-static WRITE_HANDLER( mrokumei_sound_io_w )
+static WRITE8_HANDLER( mrokumei_sound_io_w )
 {
 	switch (offset & 0xff)
 	{
@@ -322,10 +322,10 @@ static WRITE_HANDLER( mrokumei_sound_io_w )
 	}
 }
 
-static WRITE_HANDLER( mrokumei_sound_cmd_w )
+static WRITE8_HANDLER( mrokumei_sound_cmd_w )
 {
 	soundlatch_w(offset,data);
-	cpu_set_irq_line(1,0,HOLD_LINE);
+	cpunum_set_input_line(1,0,HOLD_LINE);
 }
 
 
@@ -339,17 +339,17 @@ static WRITE_HANDLER( mrokumei_sound_cmd_w )
 
 static int upd7807_porta,upd7807_portc;
 
-static READ_HANDLER( reikaids_upd7807_porta_r )
+static READ8_HANDLER( reikaids_upd7807_porta_r )
 {
 	return upd7807_porta;
 }
 
-static WRITE_HANDLER( reikaids_upd7807_porta_w )
+static WRITE8_HANDLER( reikaids_upd7807_porta_w )
 {
 	upd7807_porta = data;
 }
 
-static WRITE_HANDLER( reikaids_upd7807_portc_w )
+static WRITE8_HANDLER( reikaids_upd7807_portc_w )
 {
 	/* port C layout:
 	   7 coin counter
@@ -394,7 +394,7 @@ static MACHINE_INIT( reikaids_upd7807 )
 	reikaids_upd7807_portc_w(0,0xff);
 }
 
-READ_HANDLER( reikaids_io_r )
+READ8_HANDLER( reikaids_io_r )
 {
 	int res = readinputport(2);	// bit 4 = coin, bit 5 = service
 
@@ -412,13 +412,13 @@ READ_HANDLER( reikaids_io_r )
 
 static int snd_command;
 
-static READ_HANDLER( reikaids_snd_command_r )
+static READ8_HANDLER( reikaids_snd_command_r )
 {
 //logerror("%04x: sndmcd_r (%02x)\n",activecpu_get_pc(),snd_command);
 	return snd_command;
 }
 
-static WRITE_HANDLER( reikaids_snd_command_w )
+static WRITE8_HANDLER( reikaids_snd_command_w )
 {
 	snd_command = data;
 //logerror("%04x: coprocessor_command_w %02x\n",activecpu_get_pc(),data);
@@ -436,19 +436,19 @@ static WRITE_HANDLER( reikaids_snd_command_w )
 
 static int to_cpu,from_cpu;
 
-static WRITE_HANDLER( pteacher_snd_command_w )
+static WRITE8_HANDLER( pteacher_snd_command_w )
 {
 //logerror("%04x: snd_command_w %02x\n",activecpu_get_pc(),data);
 	from_cpu = data;
 }
 
-static READ_HANDLER( pteacher_snd_r )
+static READ8_HANDLER( pteacher_snd_r )
 {
 //logerror("%04x: pteacher_snd_r %02x\n",activecpu_get_pc(),to_cpu);
 	return to_cpu;
 }
 
-static READ_HANDLER( pteacher_io_r )
+static READ8_HANDLER( pteacher_io_r )
 {
 	/* bit 6: !vblank
 	 * bit 7: visible page
@@ -464,7 +464,7 @@ static READ_HANDLER( pteacher_io_r )
 	return res;
 }
 
-static READ_HANDLER( pteacher_keyboard_r )
+static READ8_HANDLER( pteacher_keyboard_r )
 {
 	int dips = readinputport(0);
 
@@ -486,7 +486,7 @@ static READ_HANDLER( pteacher_keyboard_r )
 	return 0xff;
 }
 
-static READ_HANDLER( pteacher_upd7807_porta_r )
+static READ8_HANDLER( pteacher_upd7807_porta_r )
 {
 	if (!BIT(upd7807_portc,6))
 		upd7807_porta = from_cpu;
@@ -496,18 +496,18 @@ logerror("%04x: read PA with PC *not* clear\n",activecpu_get_pc());
 	return upd7807_porta;
 }
 
-static WRITE_HANDLER( pteacher_snd_answer_w )
+static WRITE8_HANDLER( pteacher_snd_answer_w )
 {
 	to_cpu = data;
 //logerror("%04x: to_cpu = %02x\n",activecpu_get_pc(),to_cpu);
 }
 
-static WRITE_HANDLER( pteacher_upd7807_porta_w )
+static WRITE8_HANDLER( pteacher_upd7807_porta_w )
 {
 	upd7807_porta = data;
 }
 
-static WRITE_HANDLER( pteacher_upd7807_portc_w )
+static WRITE8_HANDLER( pteacher_upd7807_portc_w )
 {
 	/* port C layout:
 	   7 coin counter
@@ -542,7 +542,7 @@ static MACHINE_INIT( pteacher_upd7807 )
 /********************************************************************************/
 
 
-static WRITE_HANDLER( bankswitch_w )
+static WRITE8_HANDLER( bankswitch_w )
 {
 	data8_t *rom = memory_region(REGION_CPU1);
 	int len = memory_region_length(REGION_CPU1) - 0x10000+0x4000;
@@ -778,40 +778,40 @@ INPUT_PORTS_START( mjhokite )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_TILT )	// doesn't work in all games
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BITX(0x10, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x10, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "A",   KEYCODE_A,        IP_JOY_NONE )
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "E",   KEYCODE_E,        IP_JOY_NONE )
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "I",   KEYCODE_I,        IP_JOY_NONE )
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "M",   KEYCODE_M,        IP_JOY_NONE )
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Kan", KEYCODE_LCONTROL, IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("A") PORT_CODE(KEYCODE_A)
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("E") PORT_CODE(KEYCODE_E)
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("I") PORT_CODE(KEYCODE_I)
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("M") PORT_CODE(KEYCODE_M)
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("Kan") PORT_CODE(KEYCODE_LCONTROL)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1                              )
 
 	PORT_START
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "B",     KEYCODE_B,        IP_JOY_NONE )
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "F",     KEYCODE_F,        IP_JOY_NONE )
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "J",     KEYCODE_J,        IP_JOY_NONE )
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "N",     KEYCODE_N,        IP_JOY_NONE )
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Reach", KEYCODE_LSHIFT,   IP_JOY_NONE )
-	PORT_BITX(0x20, IP_ACTIVE_LOW, 0, "Bet",   KEYCODE_RCONTROL, IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("B") PORT_CODE(KEYCODE_B)
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("F") PORT_CODE(KEYCODE_F)
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("J") PORT_CODE(KEYCODE_J)
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("N") PORT_CODE(KEYCODE_N)
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("Reach") PORT_CODE(KEYCODE_LSHIFT)
+	PORT_BIT(0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("Bet") PORT_CODE(KEYCODE_RCONTROL)
 
 	PORT_START
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "C",   KEYCODE_C,     IP_JOY_NONE )
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "G",   KEYCODE_G,     IP_JOY_NONE )
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "K",   KEYCODE_K,     IP_JOY_NONE )
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Chi", KEYCODE_SPACE, IP_JOY_NONE )
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Ron", KEYCODE_Z,     IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("C") PORT_CODE(KEYCODE_C)
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("G") PORT_CODE(KEYCODE_G)
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("K") PORT_CODE(KEYCODE_K)
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("Chi") PORT_CODE(KEYCODE_SPACE)
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("Ron") PORT_CODE(KEYCODE_Z)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "D",   KEYCODE_D,    IP_JOY_NONE )
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "H",   KEYCODE_H,    IP_JOY_NONE )
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "L",   KEYCODE_L,    IP_JOY_NONE )
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Pon", KEYCODE_LALT, IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("D") PORT_CODE(KEYCODE_D)
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("H") PORT_CODE(KEYCODE_H)
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("L") PORT_CODE(KEYCODE_L)
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("Pon") PORT_CODE(KEYCODE_LALT)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
@@ -819,30 +819,30 @@ INPUT_PORTS_START( mjhokite )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Flip",   KEYCODE_X,        IP_JOY_NONE )
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("Flip") PORT_CODE(KEYCODE_X)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 INPUT_PORTS_END
 
 INPUT_PORTS_START( reikaids )
 	PORT_START	// IN0  - 0x7801
-	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 ) /* punch */
-	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 ) /* kick */
-	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 ) /* jump */
+	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1) /* punch */
+	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1) /* kick */
+	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1) /* jump */
 	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_START1 )
 
 	PORT_START	// IN1 - 0x7802
-	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 ) /* punch */
-	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 ) /* kick */
-	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 ) /* jump */
+	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2) /* punch */
+	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2) /* kick */
+	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2) /* jump */
 	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_START2 )
 
 	PORT_START	// IN2 - 0x7803
@@ -907,23 +907,23 @@ INPUT_PORTS_END
 
 INPUT_PORTS_START( battlcry )
 	PORT_START	// IN0  - 0x7801
-	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 ) /* punch */
-	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 ) /* kick */
-	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 ) /* jump */
+	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(1)
+	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1) /* punch */
+	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1) /* kick */
+	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1) /* jump */
 	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_START1 )
 
 	PORT_START	// IN1 - 0x7802
-	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 ) /* punch */
-	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 ) /* kick */
-	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 ) /* jump */
+	PORT_BIT(  0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT(  0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT(  0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT(  0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT(  0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2) /* punch */
+	PORT_BIT(  0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2) /* kick */
+	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2) /* jump */
 	PORT_BIT(  0x80, IP_ACTIVE_LOW, IPT_START2 )
 
 	PORT_START	// IN2 - 0x7803
@@ -980,45 +980,45 @@ INPUT_PORTS_END
 
 #define MJ_KEYBOARD																				\
 	PORT_START																					\
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "A",   KEYCODE_A,        IP_JOY_NONE )					\
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "B",   KEYCODE_B,        IP_JOY_NONE )					\
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "C",   KEYCODE_C,        IP_JOY_NONE )					\
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "D",   KEYCODE_D,        IP_JOY_NONE )					\
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("A") PORT_CODE(KEYCODE_A)					\
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("B") PORT_CODE(KEYCODE_B)					\
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("C") PORT_CODE(KEYCODE_C)					\
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("D") PORT_CODE(KEYCODE_D)					\
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )												\
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* dip switch (handled separately */		\
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )													\
 																								\
 	PORT_START																					\
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "E",   KEYCODE_E,        IP_JOY_NONE )					\
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "F",   KEYCODE_F,        IP_JOY_NONE )					\
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "G",   KEYCODE_G,        IP_JOY_NONE )					\
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "H",   KEYCODE_H,        IP_JOY_NONE )					\
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("E") PORT_CODE(KEYCODE_E)					\
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("F") PORT_CODE(KEYCODE_F)					\
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("G") PORT_CODE(KEYCODE_G)					\
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("H") PORT_CODE(KEYCODE_H)					\
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )												\
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* dip switch (handled separately */		\
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )													\
 																								\
 	PORT_START																					\
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "I",   KEYCODE_I,        IP_JOY_NONE )					\
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "J",   KEYCODE_J,        IP_JOY_NONE )					\
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "K",   KEYCODE_K,        IP_JOY_NONE )					\
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "L",   KEYCODE_L,        IP_JOY_NONE )					\
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("I") PORT_CODE(KEYCODE_I)					\
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("J") PORT_CODE(KEYCODE_J)					\
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("K") PORT_CODE(KEYCODE_K)					\
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("L") PORT_CODE(KEYCODE_L)					\
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )												\
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* dip switch (handled separately */		\
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )													\
 																								\
 	PORT_START																					\
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "M",    KEYCODE_M,        IP_JOY_NONE )					\
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "N",    KEYCODE_N,        IP_JOY_NONE )					\
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "Chi",  KEYCODE_SPACE, IP_JOY_NONE )						\
-	PORT_BITX(0x08, IP_ACTIVE_LOW, 0, "Pon",  KEYCODE_LALT,  IP_JOY_NONE )						\
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Flip", KEYCODE_X,        IP_JOY_NONE )					\
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("M") PORT_CODE(KEYCODE_M)					\
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("N") PORT_CODE(KEYCODE_N)					\
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("Chi") PORT_CODE(KEYCODE_SPACE)						\
+	PORT_BIT(0x08, IP_ACTIVE_LOW, 0 ) PORT_NAME("Pon") PORT_CODE(KEYCODE_LALT)						\
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("Flip") PORT_CODE(KEYCODE_X)					\
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* dip switch (handled separately */		\
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )													\
 																								\
 	PORT_START																					\
-	PORT_BITX(0x01, IP_ACTIVE_LOW, 0, "Kan", KEYCODE_LCONTROL, IP_JOY_NONE )					\
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "Reach", KEYCODE_LSHIFT,   IP_JOY_NONE )					\
-	PORT_BITX(0x04, IP_ACTIVE_LOW, 0, "Ron", KEYCODE_Z,     IP_JOY_NONE )						\
+	PORT_BIT(0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("Kan") PORT_CODE(KEYCODE_LCONTROL)					\
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("Reach") PORT_CODE(KEYCODE_LSHIFT)					\
+	PORT_BIT(0x04, IP_ACTIVE_LOW, 0 ) PORT_NAME("Ron") PORT_CODE(KEYCODE_Z)						\
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )												\
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )												\
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* dip switch (handled separately */		\
@@ -1026,7 +1026,7 @@ INPUT_PORTS_END
 																								\
 	PORT_START																					\
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )													\
-	PORT_BITX(0x02, IP_ACTIVE_LOW, 0, "Bet",   KEYCODE_RCONTROL, IP_JOY_NONE )					\
+	PORT_BIT(0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("Bet") PORT_CODE(KEYCODE_RCONTROL)					\
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )												\
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )												\
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )												\
@@ -1831,15 +1831,15 @@ static DRIVER_INIT( jogakuen )
 	/* it seems that Mahjong Jogakuen runs on the same board as the others,
 	   but with just these two addresses swapped. Instead of creating a new
 	   MachineDriver, I just fix them here. */
-	install_mem_write_handler(0, 0x8007, 0x8007, pteacher_blitter_bank_w);
-	install_mem_write_handler(0, 0x8005, 0x8005, pteacher_gfx_bank_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_PROGRAM, 0x8007, 0x8007, 0, 0, pteacher_blitter_bank_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_PROGRAM, 0x8005, 0x8005, 0, 0, pteacher_gfx_bank_w);
 }
 
 static DRIVER_INIT( mjikaga )
 {
 	/* Mahjong Ikagadesuka is different as well. */
-	install_mem_read_handler(0, 0x7802, 0x7802, pteacher_snd_r);
-	install_mem_write_handler(1, 0x0123, 0x0123, pteacher_snd_answer_w);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x7802, 0x7802, 0, 0, pteacher_snd_r);
+	memory_install_write8_handler(1, ADDRESS_SPACE_PROGRAM, 0x0123, 0x0123, 0, 0, pteacher_snd_answer_w);
 }
 
 static DRIVER_INIT( reikaids )

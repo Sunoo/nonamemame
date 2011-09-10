@@ -107,7 +107,7 @@ static void ultratnk_draw_sprites( struct mame_bitmap *bitmap )
  *
  *************************************/
 
-static WRITE_HANDLER( ultratnk_videoram_w )
+static WRITE8_HANDLER( ultratnk_videoram_w )
 {
 	if (videoram[offset] != data)
 	{
@@ -152,7 +152,7 @@ VIDEO_UPDATE( ultratnk )
  *
  *************************************/
 
-static WRITE_HANDLER( da_latch_w )
+static WRITE8_HANDLER( da_latch_w )
 {
 	int joybits = readinputport(4);
 	ultratnk_controls = readinputport(3); /* start and fire buttons */
@@ -178,19 +178,19 @@ static WRITE_HANDLER( da_latch_w )
 }
 
 
-static READ_HANDLER( ultratnk_controls_r )
+static READ8_HANDLER( ultratnk_controls_r )
 {
 	return (ultratnk_controls << offset) & 0x80;
 }
 
 
-static READ_HANDLER( ultratnk_barrier_r )
+static READ8_HANDLER( ultratnk_barrier_r )
 {
 	return readinputport(2) & 0x80;
 }
 
 
-static READ_HANDLER( ultratnk_coin_r )
+static READ8_HANDLER( ultratnk_coin_r )
 {
 	switch (offset & 0x06)
 	{
@@ -204,13 +204,13 @@ static READ_HANDLER( ultratnk_coin_r )
 }
 
 
-static READ_HANDLER( ultratnk_tilt_r )
+static READ8_HANDLER( ultratnk_tilt_r )
 {
 	return (readinputport(2) << 5) & 0x80;	/* tilt */
 }
 
 
-static READ_HANDLER( ultratnk_dipsw_r )
+static READ8_HANDLER( ultratnk_dipsw_r )
 {
 	int dipsw = readinputport(0);
 	switch( offset )
@@ -230,17 +230,17 @@ static READ_HANDLER( ultratnk_dipsw_r )
  *	Sound handlers
  *
  *************************************/
-WRITE_HANDLER( ultratnk_fire_w )
+WRITE8_HANDLER( ultratnk_fire_w )
 {
 	discrete_sound_w(offset/2, offset&1);
 }
 
-WRITE_HANDLER( ultratnk_attract_w )
+WRITE8_HANDLER( ultratnk_attract_w )
 {
 	discrete_sound_w(5, (data & 1));
 }
 
-WRITE_HANDLER( ultratnk_explosion_w )
+WRITE8_HANDLER( ultratnk_explosion_w )
 {
 	discrete_sound_w(4, data % 16);
 }
@@ -258,7 +258,7 @@ static INTERRUPT_GEN( ultratnk_interrupt )
 	if (readinputport(1) & 0x40 )
 	{
 		/* only do NMI interrupt if not in TEST mode */
-		cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 	}
 }
 
@@ -270,7 +270,7 @@ static INTERRUPT_GEN( ultratnk_interrupt )
  *
  *************************************/
 
-static READ_HANDLER( ultratnk_collision_r )
+static READ8_HANDLER( ultratnk_collision_r )
 {
 	/**	Note: hardware collision detection is not emulated.
 	 *	However, the game is fully playable, since the game software uses it
@@ -285,19 +285,19 @@ static READ_HANDLER( ultratnk_collision_r )
 }
 
 
-static WRITE_HANDLER( ultratnk_leds_w )
+static WRITE8_HANDLER( ultratnk_leds_w )
 {
 	set_led_status(offset/2,offset&1);
 }
 
 
-static READ_HANDLER( mirror_r )
+static READ8_HANDLER( mirror_r )
 {
 	return mirror_ram[offset];
 }
 
 
-static WRITE_HANDLER( mirror_w )
+static WRITE8_HANDLER( mirror_w )
 {
 	mirror_ram[offset] = data;
 }
@@ -381,9 +381,9 @@ INPUT_PORTS_START( ultratnk )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
 
 	PORT_START /* input#2 (arbitrarily arranged) */
-	PORT_BITX(0x80, IP_ACTIVE_HIGH, IPT_SERVICE1 | IPF_TOGGLE, "Option 1", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-	PORT_BITX(0x40, IP_ACTIVE_HIGH, IPT_SERVICE2 | IPF_TOGGLE, "Option 2", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-	PORT_BITX(0x20, IP_ACTIVE_HIGH, IPT_SERVICE3 | IPF_TOGGLE, "Option 3", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT(0x80, IP_ACTIVE_HIGH, IPT_SERVICE1 ) PORT_NAME("Option 1") PORT_TOGGLE
+	PORT_BIT(0x40, IP_ACTIVE_HIGH, IPT_SERVICE2 ) PORT_NAME("Option 2") PORT_TOGGLE
+	PORT_BIT(0x20, IP_ACTIVE_HIGH, IPT_SERVICE3 ) PORT_NAME("Option 3") PORT_TOGGLE
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_TILT )
@@ -393,20 +393,20 @@ INPUT_PORTS_START( ultratnk )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SPECIAL ) /* joystick (taken from below) */
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_SPECIAL ) /* joystick (taken from below) */
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SPECIAL ) /* joystick (taken from below) */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SPECIAL ) /* joystick (taken from below) */
 
 	PORT_START /* input#4 - fake */
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_DOWN  | IPF_PLAYER1 )
-	PORT_BIT( 0x0a, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_UP    | IPF_PLAYER1 )	/* note that this sets 2 bits */
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_DOWN | IPF_PLAYER1 )
-	PORT_BIT( 0x05, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_UP   | IPF_PLAYER1 )	/* note that this sets 2 bits */
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_DOWN  | IPF_PLAYER2 )
-	PORT_BIT( 0xa0, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_UP    | IPF_PLAYER2 )	/* note that this sets 2 bits */
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_DOWN | IPF_PLAYER2 )
-	PORT_BIT( 0x50, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_UP   | IPF_PLAYER2 )	/* note that this sets 2 bits */
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_DOWN ) PORT_PLAYER(1)
+	PORT_BIT( 0x0a, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_UP ) PORT_PLAYER(1)	/* note that this sets 2 bits */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_DOWN ) PORT_PLAYER(1)
+	PORT_BIT( 0x05, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_UP ) PORT_PLAYER(1)	/* note that this sets 2 bits */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0xa0, IP_ACTIVE_HIGH, IPT_JOYSTICKLEFT_UP ) PORT_PLAYER(2)	/* note that this sets 2 bits */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0x50, IP_ACTIVE_HIGH, IPT_JOYSTICKRIGHT_UP ) PORT_PLAYER(2)	/* note that this sets 2 bits */
 
 	PORT_START		/* 5 */
 	PORT_ADJUSTER( 5, "Motor 1 RPM" )

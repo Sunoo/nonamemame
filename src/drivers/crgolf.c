@@ -45,7 +45,7 @@ static data8_t main_to_sound_data, sound_to_main_data;
  *
  *************************************/
 
-static WRITE_HANDLER( rom_bank_select_w )
+static WRITE8_HANDLER( rom_bank_select_w )
 {
 	UINT8 *region_base = memory_region(REGION_CPU1);
 	cpu_setbank(1, region_base + 0x10000 + (data & 15) * 0x2000);
@@ -65,19 +65,19 @@ static MACHINE_INIT( crgolf )
  *
  *************************************/
 
-static READ_HANDLER( switch_input_r )
+static READ8_HANDLER( switch_input_r )
 {
 	return readinputport(port_select);
 }
 
 
-static READ_HANDLER( analog_input_r )
+static READ8_HANDLER( analog_input_r )
 {
 	return ((readinputport(7) >> 4) | (readinputport(8) & 0xf0)) ^ 0x88;
 }
 
 
-static WRITE_HANDLER( switch_input_select_w )
+static WRITE8_HANDLER( switch_input_select_w )
 {
 	if (!(data & 0x40)) port_select = 6;
 	if (!(data & 0x20)) port_select = 5;
@@ -89,7 +89,7 @@ static WRITE_HANDLER( switch_input_select_w )
 }
 
 
-static WRITE_HANDLER( unknown_w )
+static WRITE8_HANDLER( unknown_w )
 {
 	logerror("%04X:unknown_w = %02X\n", activecpu_get_pc(), data);
 }
@@ -104,20 +104,20 @@ static WRITE_HANDLER( unknown_w )
 
 static void main_to_sound_callback(int param)
 {
-	cpu_set_irq_line(1, IRQ_LINE_NMI, ASSERT_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, ASSERT_LINE);
 	main_to_sound_data = param;
 }
 
 
-static WRITE_HANDLER( main_to_sound_w )
+static WRITE8_HANDLER( main_to_sound_w )
 {
 	timer_set(TIME_NOW, data, main_to_sound_callback);
 }
 
 
-static READ_HANDLER( main_to_sound_r )
+static READ8_HANDLER( main_to_sound_r )
 {
-	cpu_set_irq_line(1, IRQ_LINE_NMI, CLEAR_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, CLEAR_LINE);
 	return main_to_sound_data;
 }
 
@@ -131,20 +131,20 @@ static READ_HANDLER( main_to_sound_r )
 
 static void sound_to_main_callback(int param)
 {
-	cpu_set_irq_line(0, IRQ_LINE_NMI, ASSERT_LINE);
+	cpunum_set_input_line(0, INPUT_LINE_NMI, ASSERT_LINE);
 	sound_to_main_data = param;
 }
 
 
-static WRITE_HANDLER( sound_to_main_w )
+static WRITE8_HANDLER( sound_to_main_w )
 {
 	timer_set(TIME_NOW, data, sound_to_main_callback);
 }
 
 
-static READ_HANDLER( sound_to_main_r )
+static READ8_HANDLER( sound_to_main_r )
 {
-	cpu_set_irq_line(0, IRQ_LINE_NMI, CLEAR_LINE);
+	cpunum_set_input_line(0, INPUT_LINE_NMI, CLEAR_LINE);
 	return sound_to_main_data;
 }
 
@@ -234,24 +234,24 @@ INPUT_PORTS_START( crgolf )
 	PORT_BIT( 0xe0, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_START	/* PLAY1 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER1 )			/* club select */
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1 )			/* backward address */
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER1 )			/* forward address */
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1 )			/* open stance */
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1 )			/* closed stance */
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_PLAYER1 )	/* direction left */
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )	/* direction right */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )			/* shot switch */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON6 ) PORT_PLAYER(1)			/* club select */
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(1)			/* backward address */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_PLAYER(1)			/* forward address */
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_PLAYER(1)			/* open stance */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_PLAYER(1)			/* closed stance */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)	/* direction left */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)	/* direction right */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)			/* shot switch */
 
 	PORT_START	/* PLAY2 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_COCKTAIL )		/* club select */
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_COCKTAIL )		/* backward address */
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_COCKTAIL )		/* forward address */
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_COCKTAIL )		/* open stance */
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_COCKTAIL )		/* closed stance */
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )	/* direction left */
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )	/* direction right */
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )		/* shot switch */
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON6 ) PORT_COCKTAIL		/* club select */
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_COCKTAIL		/* backward address */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_COCKTAIL		/* forward address */
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_COCKTAIL		/* open stance */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_COCKTAIL		/* closed stance */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL	/* direction left */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL	/* direction right */
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL		/* shot switch */
 
 	PORT_START	/* DIPSW */
 	PORT_DIPNAME( 0x01, 0x00, DEF_STR( Difficulty ))
@@ -281,10 +281,10 @@ INPUT_PORTS_START( crgolf )
 	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_START
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_REVERSE | IPF_CENTER, 70, 16, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(16) PORT_CENTER PORT_REVERSE
 
 	PORT_START
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_REVERSE | IPF_CENTER | IPF_COCKTAIL, 70, 16, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(16) PORT_CENTER PORT_REVERSE PORT_COCKTAIL
 INPUT_PORTS_END
 
 

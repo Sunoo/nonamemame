@@ -303,7 +303,7 @@ Notes & Todo:
 #define N2A03_DEFAULTCLOCK (21477272.724 / 12)
 
 /* from vidhrdw */
-extern WRITE_HANDLER( playch10_videoram_w );
+extern WRITE8_HANDLER( playch10_videoram_w );
 extern PALETTE_INIT( playch10 );
 extern VIDEO_START( playch10 );
 extern VIDEO_UPDATE( playch10 );
@@ -324,24 +324,24 @@ extern DRIVER_INIT( pcgboard_type2 ); /* g-board games with 4 screen mirror */
 extern DRIVER_INIT( pchboard );	/* h-board games */
 extern DRIVER_INIT( pciboard );	/* i-board games */
 extern DRIVER_INIT( pckboard );	/* k-board games */
-extern READ_HANDLER( pc10_port_0_r );
-extern READ_HANDLER( pc10_instrom_r );
-extern READ_HANDLER( pc10_prot_r );
-extern READ_HANDLER( pc10_detectclr_r );
-extern READ_HANDLER( pc10_in0_r );
-extern READ_HANDLER( pc10_in1_r );
-extern WRITE_HANDLER( pc10_SDCS_w );
-extern WRITE_HANDLER( pc10_CNTRLMASK_w );
-extern WRITE_HANDLER( pc10_DISPMASK_w );
-extern WRITE_HANDLER( pc10_SOUNDMASK_w );
-extern WRITE_HANDLER( pc10_NMIENABLE_w );
-extern WRITE_HANDLER( pc10_DOGDI_w );
-extern WRITE_HANDLER( pc10_GAMERES_w );
-extern WRITE_HANDLER( pc10_GAMESTOP_w );
-extern WRITE_HANDLER( pc10_PPURES_w );
-extern WRITE_HANDLER( pc10_prot_w );
-extern WRITE_HANDLER( pc10_CARTSEL_w );
-extern WRITE_HANDLER( pc10_in0_w );
+extern READ8_HANDLER( pc10_port_0_r );
+extern READ8_HANDLER( pc10_instrom_r );
+extern READ8_HANDLER( pc10_prot_r );
+extern READ8_HANDLER( pc10_detectclr_r );
+extern READ8_HANDLER( pc10_in0_r );
+extern READ8_HANDLER( pc10_in1_r );
+extern WRITE8_HANDLER( pc10_SDCS_w );
+extern WRITE8_HANDLER( pc10_CNTRLMASK_w );
+extern WRITE8_HANDLER( pc10_DISPMASK_w );
+extern WRITE8_HANDLER( pc10_SOUNDMASK_w );
+extern WRITE8_HANDLER( pc10_NMIENABLE_w );
+extern WRITE8_HANDLER( pc10_DOGDI_w );
+extern WRITE8_HANDLER( pc10_GAMERES_w );
+extern WRITE8_HANDLER( pc10_GAMESTOP_w );
+extern WRITE8_HANDLER( pc10_PPURES_w );
+extern WRITE8_HANDLER( pc10_prot_w );
+extern WRITE8_HANDLER( pc10_CARTSEL_w );
+extern WRITE8_HANDLER( pc10_in0_w );
 
 extern int pc10_sdcs;
 extern int pc10_nmi_enable;
@@ -353,12 +353,12 @@ extern int pc10_dog_di;
 static UINT8 *work_ram, *ram_8w;
 static int up_8w;
 
-static WRITE_HANDLER( up8w_w )
+static WRITE8_HANDLER( up8w_w )
 {
 	up_8w = data & 1;
 }
 
-static READ_HANDLER( ram_8w_r )
+static READ8_HANDLER( ram_8w_r )
 {
 	if ( offset >= 0x400 && up_8w )
 		return ram_8w[offset];
@@ -366,7 +366,7 @@ static READ_HANDLER( ram_8w_r )
 	return ram_8w[offset & 0x3ff];
 }
 
-static WRITE_HANDLER( ram_8w_w )
+static WRITE8_HANDLER( ram_8w_w )
 {
 	if ( offset >= 0x400 && up_8w )
 		ram_8w[offset] = data;
@@ -374,17 +374,17 @@ static WRITE_HANDLER( ram_8w_w )
 		ram_8w[offset & 0x3ff] = data;
 }
 
-static READ_HANDLER( mirror_ram_r )
+static READ8_HANDLER( mirror_ram_r )
 {
 	return work_ram[ offset & 0x7ff ];
 }
 
-static WRITE_HANDLER( mirror_ram_w )
+static WRITE8_HANDLER( mirror_ram_w )
 {
 	work_ram[ offset & 0x7ff ] = data;
 }
 
-static WRITE_HANDLER( sprite_dma_w )
+static WRITE8_HANDLER( sprite_dma_w )
 {
 	int source = ( data & 7 ) * 0x100;
 
@@ -473,9 +473,9 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( playch10 )
     PORT_START	/* These are the BIOS buttons */
-    PORT_BITX(0x01, IP_ACTIVE_HIGH, IPT_SERVICE2, "Channel Select", KEYCODE_0, JOYCODE_NONE )	/* CHSelect 		*/
-    PORT_BITX(0x02, IP_ACTIVE_HIGH, IPT_SERVICE3, "Enter", KEYCODE_MINUS, JOYCODE_NONE )				/* Enter button 	*/
-    PORT_BITX(0x04, IP_ACTIVE_HIGH, IPT_SERVICE4, "Reset", KEYCODE_EQUALS, JOYCODE_NONE ) 		/* Reset button 	*/
+    PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_SERVICE2 ) PORT_NAME("Channel Select") PORT_CODE(KEYCODE_0)	/* CHSelect 		*/
+    PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_SERVICE3 ) PORT_NAME("Enter") PORT_CODE(KEYCODE_MINUS)				/* Enter button 	*/
+    PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_SERVICE4 ) PORT_NAME("Reset") PORT_CODE(KEYCODE_EQUALS) 		/* Reset button 	*/
     PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )												/* INT Detect		*/
     PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNUSED )												/* N/C				*/
     PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_COIN2 )													/* Coin 2			*/
@@ -575,30 +575,30 @@ INPUT_PORTS_START( playch10 )
 	PORT_START	/* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON1 )
-	PORT_BITX( 0x04, IP_ACTIVE_HIGH, IPT_START1, "Select", KEYCODE_1, JOYCODE_NONE )/* select button - masked */
-	PORT_BITX( 0x08, IP_ACTIVE_HIGH, IPT_START2, "Start", KEYCODE_2, JOYCODE_NONE )	/* start button - masked */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 ) PORT_NAME("Select") PORT_CODE(KEYCODE_1)/* select button - masked */
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START2 ) PORT_NAME("Start") PORT_CODE(KEYCODE_2)	/* start button - masked */
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT )
 
 	PORT_START	/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNUSED )	/* wired to 1p select button */
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )	/* wired to 1p start button */
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_PLAYER2 )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
 INPUT_PORTS_END
 
 /*Input Ports for gun games*/
 INPUT_PORTS_START( playc10g )
     PORT_START	/* These are the BIOS buttons */
-    PORT_BITX(0x01, IP_ACTIVE_HIGH, IPT_SERVICE2, "Channel Select", KEYCODE_0, JOYCODE_NONE )	/* CHSelect 		*/
-    PORT_BITX(0x02, IP_ACTIVE_HIGH, IPT_SERVICE3, "Enter", KEYCODE_MINUS, JOYCODE_NONE )				/* Enter button 	*/
-    PORT_BITX(0x04, IP_ACTIVE_HIGH, IPT_SERVICE4, "Reset", KEYCODE_EQUALS, JOYCODE_NONE ) 		/* Reset button 	*/
+    PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_SERVICE2 ) PORT_NAME("Channel Select") PORT_CODE(KEYCODE_0)	/* CHSelect 		*/
+    PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_SERVICE3 ) PORT_NAME("Enter") PORT_CODE(KEYCODE_MINUS)				/* Enter button 	*/
+    PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_SERVICE4 ) PORT_NAME("Reset") PORT_CODE(KEYCODE_EQUALS) 		/* Reset button 	*/
     PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )												/* INT Detect		*/
     PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNUSED )												/* N/C				*/
     PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_COIN2 )													/* Coin 2			*/
@@ -698,28 +698,28 @@ INPUT_PORTS_START( playc10g )
 	PORT_START	/* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON1 )
-	PORT_BITX( 0x04, IP_ACTIVE_HIGH, IPT_START1, "Select", KEYCODE_1, JOYCODE_NONE )/* select button - masked */
-	PORT_BITX( 0x08, IP_ACTIVE_HIGH, IPT_START2, "Start", KEYCODE_2, JOYCODE_NONE )	/* start button - masked */
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 ) PORT_NAME("Select") PORT_CODE(KEYCODE_1)/* select button - masked */
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START2 ) PORT_NAME("Start") PORT_CODE(KEYCODE_2)	/* start button - masked */
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT )
 
 	PORT_START	/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNUSED )	/* wired to 1p select button */
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )	/* wired to 1p start button */
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_PLAYER2 )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
 
 	PORT_START	/* IN2 - FAKE - Gun X pos */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 70, 30, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(30)
 
 	PORT_START	/* IN3 - FAKE - Gun Y pos */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 50, 30, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(30)
 INPUT_PORTS_END
 
 
@@ -744,11 +744,11 @@ static INTERRUPT_GEN( playch10_interrupt ) {
 
 	/* LS161A, Sheet 1 - bottom left of Z80 */
 	if ( !pc10_dog_di && !pc10_nmi_enable ) {
-		cpu_set_reset_line( 0, PULSE_LINE );
+		cpunum_set_input_line(0, INPUT_LINE_RESET, PULSE_LINE );
 	}
 
 	else if ( pc10_nmi_enable )
-		cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 }
 
 static struct NESinterface nes_interface =

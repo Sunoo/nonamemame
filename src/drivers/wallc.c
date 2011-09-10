@@ -114,7 +114,7 @@ static PALETTE_INIT( wallc )
 	}
 }
 
-static WRITE_HANDLER( wallc_videoram_w )
+static WRITE8_HANDLER( wallc_videoram_w )
 {
 	if (videoram[offset] != data)
 	{
@@ -148,7 +148,7 @@ VIDEO_UPDATE( wallc )
 }
 
 static int wcb0=-1;
-static WRITE_HANDLER( wc_b0 )
+static WRITE8_HANDLER( wc_b0 )
 {
 	if (wcb0!=data)
 	{
@@ -157,7 +157,7 @@ static WRITE_HANDLER( wc_b0 )
 	}
 }
 static int wcb1=-1;
-static WRITE_HANDLER( wc_b1 )
+static WRITE8_HANDLER( wc_b1 )
 {
 	if (wcb1!=data)
 	{
@@ -166,7 +166,7 @@ static WRITE_HANDLER( wc_b1 )
 	}
 }
 static int wcb2=-1;
-static WRITE_HANDLER( wc_b2 )
+static WRITE8_HANDLER( wc_b2 )
 {
 	if (wcb2!=data)
 	{
@@ -246,7 +246,7 @@ INPUT_PORTS_START( wallc )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )	//ok
 
 	PORT_START	/* b400 - player position 8 bit analog input - value read is used as position of the player directly - what type of input is that ? DIAL ?*/
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_PLAYER1 | IPF_REVERSE, 50, 3, 0, 0 )
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(50) PORT_KEYDELTA(3) PORT_REVERSE PORT_PLAYER(1)
 
 	PORT_START	/* b600 - bits 0-5: coinage */
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Coin_A ) )

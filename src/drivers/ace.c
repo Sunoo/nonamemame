@@ -47,13 +47,13 @@ static unsigned char *ace_characterram;
 
 static int objpos[8];
 
-static WRITE_HANDLER( ace_objpos_w )
+static WRITE8_HANDLER( ace_objpos_w )
 {
 	objpos[offset]=data;
 }
 
 #if 0
-static READ_HANDLER( ace_objpos_r )
+static READ8_HANDLER( ace_objpos_r )
 {
 	return objpos[offset];
 }
@@ -116,12 +116,12 @@ static PALETTE_INIT( ace )
 }
 
 
-static READ_HANDLER( ace_characterram_r )
+static READ8_HANDLER( ace_characterram_r )
 {
 	return ace_characterram[offset];
 }
 
-static WRITE_HANDLER( ace_characterram_w )
+static WRITE8_HANDLER( ace_characterram_w )
 {
 	if (ace_characterram[offset] != data)
 	{
@@ -135,7 +135,7 @@ static WRITE_HANDLER( ace_characterram_w )
 }
 
 
-static READ_HANDLER( unk_r )
+static READ8_HANDLER( unk_r )
 {
 	return rand()&0xff;
 }
@@ -204,34 +204,34 @@ ADDRESS_MAP_END
 INPUT_PORTS_START( ace )
 
 	PORT_START	/* player thrust c008 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 
 	PORT_START	/* player slowdown c009 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
 
 	PORT_START	/* player left c00a */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
 
 	PORT_START	/* player right c00b */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
 
 	PORT_START	/* player fire c00c */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)
 
 	PORT_START	/* enemy thrust c00d */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
 
 	PORT_START	/* enemy slowdown c00e */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
 
 	PORT_START	/* enemy left c00f */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
 
 	PORT_START	/* enemy right c010 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
 
 	PORT_START	/* enemy fire c011 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(2)
 
 //c012
 

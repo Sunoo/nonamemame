@@ -55,7 +55,7 @@ static READ16_HANDLER( extrarom2_r )
 	return rom[offset] | (rom[offset+1] << 8);
 }
 
-static WRITE_HANDLER( f1gp_sh_bankswitch_w )
+static WRITE8_HANDLER( f1gp_sh_bankswitch_w )
 {
 	data8_t *rom = memory_region(REGION_CPU3) + 0x10000;
 
@@ -71,7 +71,7 @@ static WRITE16_HANDLER( sound_command_w )
 	{
 		pending_command = 1;
 		soundlatch_w(offset,data & 0xff);
-		cpu_set_irq_line(2, IRQ_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(2, INPUT_LINE_NMI, PULSE_LINE);
 	}
 }
 
@@ -80,7 +80,7 @@ static READ16_HANDLER( command_pending_r )
 	return (pending_command ? 0xff : 0);
 }
 
-static WRITE_HANDLER( pending_command_clear_w )
+static WRITE8_HANDLER( pending_command_clear_w )
 {
 	pending_command = 0;
 }
@@ -212,8 +212,8 @@ INPUT_PORTS_START( f1gp )
 	PORT_START
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_2WAY )
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY )
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -317,8 +317,8 @@ INPUT_PORTS_START( f1gp2 )
 	PORT_START
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_2WAY )
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY )
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON3 )
@@ -471,7 +471,7 @@ static struct GfxDecodeInfo f1gp2_gfxdecodeinfo[] =
 
 static void irqhandler(int irq)
 {
-	cpu_set_irq_line(2,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(2,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM2610interface ym2610_interface =

@@ -313,12 +313,12 @@ The first sprite data is located at f20b,then f21b and so on.
 #include "vidhrdw/generic.h"
 
 
-extern WRITE_HANDLER( psychic5_paged_ram_w );
-extern WRITE_HANDLER( psychic5_vram_page_select_w );
-extern WRITE_HANDLER( psychic5_title_screen_w );
+extern WRITE8_HANDLER( psychic5_paged_ram_w );
+extern WRITE8_HANDLER( psychic5_vram_page_select_w );
+extern WRITE8_HANDLER( psychic5_title_screen_w );
 
-extern READ_HANDLER( psychic5_paged_ram_r );
-extern READ_HANDLER( psychic5_vram_page_select_r );
+extern READ8_HANDLER( psychic5_paged_ram_r );
+extern READ8_HANDLER( psychic5_vram_page_select_r );
 
 extern MACHINE_INIT( psychic5 );
 
@@ -328,12 +328,12 @@ extern VIDEO_UPDATE( psychic5 );
 static int psychic5_bank_latch = 0x0;
 
 
-READ_HANDLER( psychic5_bankselect_r )
+READ8_HANDLER( psychic5_bankselect_r )
 {
 	return psychic5_bank_latch;
 }
 
-WRITE_HANDLER( psychic5_bankselect_w )
+WRITE8_HANDLER( psychic5_bankselect_w )
 {
 	UINT8 *RAM = memory_region(REGION_CPU1);
 	int bankaddress;
@@ -346,7 +346,7 @@ WRITE_HANDLER( psychic5_bankselect_w )
 	}
 }
 
-WRITE_HANDLER( psychic5_coin_counter_w )
+WRITE8_HANDLER( psychic5_coin_counter_w )
 {
 	coin_counter_w(0, data & 0x01);
 	coin_counter_w(1, data & 0x02);
@@ -361,9 +361,9 @@ WRITE_HANDLER( psychic5_coin_counter_w )
 INTERRUPT_GEN( psychic5_interrupt )
 {
 	if (cpu_getiloops() == 0)
-	   cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, 0xd7);		/* RST 10h */
+	   cpunum_set_input_line_and_vector(0, 0, HOLD_LINE, 0xd7);		/* RST 10h */
 	else
-   	   cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, 0xcf);		/* RST 08h */
+   	   cpunum_set_input_line_and_vector(0, 0, HOLD_LINE, 0xcf);		/* RST 08h */
 }
 
 
@@ -430,22 +430,22 @@ INPUT_PORTS_START( psychic5 )
     PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
 
     PORT_START		/* player 1 controls */
-    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-    PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
+    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+    PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
     PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 )
     PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 )
     PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
     PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
     PORT_START		/* player 2 controls */
-    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-    PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-    PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-    PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+    PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+    PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+    PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+    PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
     PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
     PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
@@ -475,7 +475,7 @@ INPUT_PORTS_START( psychic5 )
     PORT_DIPSETTING(    0x00, "5" )
 
     PORT_START  /* dsw1 */
-    PORT_BITX(    0x01, 0x01, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Invulnerability", IP_KEY_NONE, IP_JOY_NONE )
+    PORT_BIT(    0x01, 0x01, IPT_DIPSWITCH_NAME ) PORT_NAME("Invulnerability") PORT_CHEAT
     PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
     PORT_DIPSETTING(    0x00, DEF_STR( On ) )
     PORT_DIPNAME( 0x02, 0x02, DEF_STR( Unknown ) )
@@ -537,7 +537,7 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 
 static void irqhandler(int irq)
 {
-	cpu_set_irq_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM2203interface ym2203_interface =

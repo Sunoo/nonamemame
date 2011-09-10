@@ -90,7 +90,7 @@ static READ16_HANDLER( aquarium_coins_r )
 	return data;
 }
 
-static WRITE_HANDLER( aquarium_snd_ack_w )
+static WRITE8_HANDLER( aquarium_snd_ack_w )
 {
 	aquarium_snd_ack = 0x8000;
 }
@@ -100,10 +100,10 @@ static WRITE16_HANDLER( aquarium_sound_w )
 //	usrintf_showmessage("sound write %04x",data);
 
 	soundlatch_w(1,data&0xff);
-	cpu_set_irq_line( 1, IRQ_LINE_NMI, PULSE_LINE );
+	cpunum_set_input_line( 1, INPUT_LINE_NMI, PULSE_LINE );
 }
 
-static WRITE_HANDLER( aquarium_z80_bank_w )
+static WRITE8_HANDLER( aquarium_z80_bank_w )
 {
 	int soundbank = ((data & 0x7) + 1) * 0x8000;
 	data8_t *Z80 = (data8_t *)memory_region(REGION_CPU2);
@@ -127,12 +127,12 @@ static UINT8 aquarium_snd_bitswap(UINT8 scrambled_data)
 	return data;
 }
 
-static READ_HANDLER( aquarium_oki_r )
+static READ8_HANDLER( aquarium_oki_r )
 {
 	return (aquarium_snd_bitswap(OKIM6295_status_0_r(0)) );
 }
 
-static WRITE_HANDLER( aquarium_oki_w )
+static WRITE8_HANDLER( aquarium_oki_w )
 {
 	logerror("Z80-PC:%04x Writing %04x to the OKI M6295\n",activecpu_get_previouspc(),aquarium_snd_bitswap(data));
 	OKIM6295_data_0_w( 0, (aquarium_snd_bitswap(data)) );
@@ -241,20 +241,20 @@ INPUT_PORTS_START( aquarium )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
 
 	PORT_START	/* IN0 */
-	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
+	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
+	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_START1 )
 
@@ -363,7 +363,7 @@ struct GfxDecodeInfo gfxdecodeinfo[] =
 
 static void irq_handler(int irq)
 {
-	cpu_set_irq_line( 1, 0 , irq ? ASSERT_LINE : CLEAR_LINE );
+	cpunum_set_input_line( 1, 0 , irq ? ASSERT_LINE : CLEAR_LINE );
 }
 
 static struct YM2151interface ym2151_interface =

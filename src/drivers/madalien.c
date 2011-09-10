@@ -372,7 +372,7 @@ INTERRUPT_GEN( madalien_interrupt )
 		if (coin == 0)
 		{
 			coin = 1;
-			cpu_set_nmi_line(0, PULSE_LINE);
+			cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 		}
 	}
 	else
@@ -380,27 +380,27 @@ INTERRUPT_GEN( madalien_interrupt )
 }
 
 
-READ_HANDLER( madalien_shift_reg_lo_r )
+READ8_HANDLER( madalien_shift_reg_lo_r )
 {
 	return madalien_shift_reg_lo;
 }
 
-READ_HANDLER( madalien_shift_reg_hi_r )
+READ8_HANDLER( madalien_shift_reg_hi_r )
 {
 	return madalien_shift_reg_hi;
 }
 
-READ_HANDLER( madalien_videoram_r )
+READ8_HANDLER( madalien_videoram_r )
 {
 	return madalien_videoram[offset];
 }
 
-READ_HANDLER( madalien_charram_r )
+READ8_HANDLER( madalien_charram_r )
 {
 	return madalien_charram[offset];
 }
 
-WRITE_HANDLER(madalien_video_register_w)
+WRITE8_HANDLER(madalien_video_register_w)
 {
 	int bit0, bit2, bit3;
 
@@ -431,7 +431,7 @@ WRITE_HANDLER(madalien_video_register_w)
 	};
 }
 
-WRITE_HANDLER( madalien_charram_w )
+WRITE8_HANDLER( madalien_charram_w )
 {
 	if (madalien_charram[offset] != data)
 	{
@@ -440,12 +440,12 @@ WRITE_HANDLER( madalien_charram_w )
 	}
 }
 
-WRITE_HANDLER( madalien_scroll_light_w )
+WRITE8_HANDLER( madalien_scroll_light_w )
 {
 	madalien_scroll_light = data;
 }
 
-WRITE_HANDLER( madalien_scroll_v_w )
+WRITE8_HANDLER( madalien_scroll_v_w )
 {
 	madalien_scroll_v = (255 - (data & 0xfc));
 
@@ -459,17 +459,17 @@ WRITE_HANDLER( madalien_scroll_v_w )
 	tilemap_mark_all_tiles_dirty( fg_tilemap );
 }
 
-WRITE_HANDLER( madalien_scroll_l_w )
+WRITE8_HANDLER( madalien_scroll_l_w )
 {
 	madalien_scroll_l = data;
 }
 
-WRITE_HANDLER( madalien_scroll_r_w )
+WRITE8_HANDLER( madalien_scroll_r_w )
 {
 	madalien_scroll_r = data;
 }
 
-WRITE_HANDLER( madalien_shift_counter_w )
+WRITE8_HANDLER( madalien_shift_counter_w )
 {
 	madalien_shift_counter = data & 0x07;
 }
@@ -497,7 +497,7 @@ UINT8 swap_bits( int x )	/* special bit swap by wiring in Mad Alien hardware */
 	return n;
 }
 
-WRITE_HANDLER( madalien_shift_reg_w )
+WRITE8_HANDLER( madalien_shift_reg_w )
 {
 	int rom_addr_0, rom_addr_1;
 	rom_addr_0 = madalien_shift_counter * 256 + data;
@@ -506,7 +506,7 @@ WRITE_HANDLER( madalien_shift_reg_w )
 	madalien_shift_reg_hi = swap_bits( madalien_shift_data[rom_addr_1] );
 }
 
-WRITE_HANDLER( madalien_videoram_w )
+WRITE8_HANDLER( madalien_videoram_w )
 {
 	if (madalien_videoram[offset] != data)
 	{
@@ -515,7 +515,7 @@ WRITE_HANDLER( madalien_videoram_w )
 	}
 }
 
-WRITE_HANDLER( madalien_flip_screen_w )
+WRITE8_HANDLER( madalien_flip_screen_w )
 {
 	if (readinputport(1) & 0x40)	/* hack for screen flipping in cocktail mode - main board schematics needed */
 		madalien_flip_screen = (data & 1);
@@ -523,18 +523,18 @@ WRITE_HANDLER( madalien_flip_screen_w )
 		madalien_flip_screen = 0;
 }
 
-WRITE_HANDLER( madalien_sound_command_w )
+WRITE8_HANDLER( madalien_sound_command_w )
 {
 	soundlatch_w(offset, data);
-	cpu_set_irq_line(1, 0, HOLD_LINE);
+	cpunum_set_input_line(1, 0, HOLD_LINE);
 }
 
-WRITE_HANDLER( madalien_soundreg_w )
+WRITE8_HANDLER( madalien_soundreg_w )
 {
 	madalien_sound_reg = data;
 }
 
-READ_HANDLER( madalien_soundreg_r )
+READ8_HANDLER( madalien_soundreg_r )
 {
 	return madalien_sound_reg;
 }
@@ -637,11 +637,11 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( madalien )
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )
@@ -667,11 +667,11 @@ INPUT_PORTS_START( madalien )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK  )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNUSED )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNUSED )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNUSED )

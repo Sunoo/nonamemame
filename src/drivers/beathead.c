@@ -143,7 +143,7 @@ static void scanline_callback(int scanline)
 
 	/* on scanline zero, clear any halt condition */
 	if (scanline == 0)
-		cpu_set_halt_line(0, CLEAR_LINE);
+		cpunum_set_input_line(0, INPUT_LINE_HALT, CLEAR_LINE);
 
 	/* wrap around at 262 */
 	scanline++;
@@ -203,7 +203,7 @@ static void update_interrupts(void)
 	{
 		irq_line_state = gen_int;
 //		if (irq_line_state != CLEAR_LINE)
-			cpu_set_irq_line(0, ASAP_IRQ0, irq_line_state);
+			cpunum_set_input_line(0, ASAP_IRQ0, irq_line_state);
 //		else
 //			asap_set_irq_line(ASAP_IRQ0, irq_line_state);
 	}
@@ -316,7 +316,7 @@ static WRITE32_HANDLER( sound_data_w )
 static WRITE32_HANDLER( sound_reset_w )
 {
 	logerror("Sound reset = %d\n", !offset);
-	cpu_set_reset_line(1, offset ? CLEAR_LINE : ASSERT_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_RESET, offset ? CLEAR_LINE : ASSERT_LINE);
 }
 
 
@@ -378,28 +378,28 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( beathead )
 	PORT_START
-	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
-	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START
 	PORT_BIT( 0x00ff, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
+	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 )
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 )
-	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
+	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 
 	PORT_START
 	PORT_BIT( 0x000f, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -531,11 +531,10 @@ static DRIVER_INIT( beathead )
 	atarigen_eeprom_default = NULL;
 	atarijsa_init(1, 4, 2, 0x0040);
 	atarijsa3_init_adpcm(REGION_SOUND1);
-	atarigen_init_6502_speedup(1, 0x4321, 0x4339);
 
 	/* prepare the speedups */
-	speedup_data = install_mem_read32_handler(0, 0x00000ae8, 0x00000aeb, speedup_r);
-	movie_speedup_data = install_mem_read32_handler(0, 0x00000804, 0x00000807, movie_speedup_r);
+	speedup_data = memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x00000ae8, 0x00000aeb, 0, 0, speedup_r);
+	movie_speedup_data = memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x00000804, 0x00000807, 0, 0, movie_speedup_r);
 }
 
 

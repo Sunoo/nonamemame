@@ -23,7 +23,7 @@ VIDEO_UPDATE( rollerg );
 
 static int readzoomroms;
 
-static WRITE_HANDLER( rollerg_0010_w )
+static WRITE8_HANDLER( rollerg_0010_w )
 {
 logerror("%04x: write %02x to 0010\n",activecpu_get_pc(),data);
 
@@ -40,13 +40,13 @@ logerror("%04x: write %02x to 0010\n",activecpu_get_pc(),data);
 	/* other bits unknown */
 }
 
-static READ_HANDLER( rollerg_K051316_r )
+static READ8_HANDLER( rollerg_K051316_r )
 {
 	if (readzoomroms) return K051316_rom_0_r(offset);
 	else return K051316_0_r(offset);
 }
 
-static READ_HANDLER( rollerg_sound_r )
+static READ8_HANDLER( rollerg_sound_r )
 {
 	/* If the sound CPU is running, read the status, otherwise
 	   just make it pass the test */
@@ -54,23 +54,23 @@ static READ_HANDLER( rollerg_sound_r )
 	else return 0x00;
 }
 
-static WRITE_HANDLER( soundirq_w )
+static WRITE8_HANDLER( soundirq_w )
 {
-	cpu_set_irq_line_and_vector(1,0,HOLD_LINE,0xff);
+	cpunum_set_input_line_and_vector(1,0,HOLD_LINE,0xff);
 }
 
 static void nmi_callback(int param)
 {
-	cpu_set_nmi_line(1,ASSERT_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, ASSERT_LINE);
 }
 
-static WRITE_HANDLER( sound_arm_nmi_w )
+static WRITE8_HANDLER( sound_arm_nmi_w )
 {
-	cpu_set_nmi_line(1,CLEAR_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, CLEAR_LINE);
 	timer_set(TIME_IN_USEC(50),0,nmi_callback);	/* kludge until the K053260 is emulated correctly */
 }
 
-static READ_HANDLER( pip_r )
+static READ8_HANDLER( pip_r )
 {
 	return 0x7f;
 }
@@ -134,22 +134,22 @@ ADDRESS_MAP_END
 INPUT_PORTS_START( rollerg )
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
 
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
 	PORT_START

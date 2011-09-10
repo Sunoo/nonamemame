@@ -30,7 +30,7 @@ static INTERRUPT_GEN( k88games_interrupt )
 
 static int zoomreadroms;
 
-static READ_HANDLER( bankedram_r )
+static READ8_HANDLER( bankedram_r )
 {
 	if (videobank) return ram[offset];
 	else
@@ -42,13 +42,13 @@ static READ_HANDLER( bankedram_r )
 	}
 }
 
-static WRITE_HANDLER( bankedram_w )
+static WRITE8_HANDLER( bankedram_w )
 {
 	if (videobank) ram[offset] = data;
 	else K051316_0_w(offset,data);
 }
 
-static WRITE_HANDLER( k88games_5f84_w )
+static WRITE8_HANDLER( k88games_5f84_w )
 {
 	/* bits 0/1 coin counters */
 	coin_counter_w(0,data & 0x01);
@@ -62,13 +62,13 @@ static WRITE_HANDLER( k88games_5f84_w )
 		usrintf_showmessage("5f84 = %02x",data);
 }
 
-static WRITE_HANDLER( k88games_sh_irqtrigger_w )
+static WRITE8_HANDLER( k88games_sh_irqtrigger_w )
 {
-	cpu_set_irq_line_and_vector(1, 0, HOLD_LINE, 0xff);
+	cpunum_set_input_line_and_vector(1, 0, HOLD_LINE, 0xff);
 }
 
 /* handle fake button for speed cheat for players 1 and 2 */
-static READ_HANDLER( cheat1_r )
+static READ8_HANDLER( cheat1_r )
 {
 	int res;
 	static int cheat = 0;
@@ -86,7 +86,7 @@ static READ_HANDLER( cheat1_r )
 }
 
 /* handle fake button for speed cheat for players 3 and 4 */
-static READ_HANDLER( cheat2_r )
+static READ8_HANDLER( cheat2_r )
 {
 	int res;
 	static int cheat = 0;
@@ -104,14 +104,14 @@ static READ_HANDLER( cheat2_r )
 }
 
 static int speech_chip;
-static WRITE_HANDLER( speech_control_w )
+static WRITE8_HANDLER( speech_control_w )
 {
 	speech_chip = ( data & 4 ) ? 1 : 0;
 	UPD7759_reset_w( speech_chip, data & 2 );
 	UPD7759_start_w( speech_chip, data & 1 );
 }
 
-static WRITE_HANDLER( speech_msg_w )
+static WRITE8_HANDLER( speech_msg_w )
 {
 	UPD7759_port_w( speech_chip, data );
 }
@@ -177,7 +177,7 @@ INPUT_PORTS_START( 88games )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE1 )
 //	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	/* Fake button to press buttons 1 and 3 impossibly fast. Handle via cheat?_r */
-	PORT_BITX(0x08, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_CHEAT | IPF_PLAYER1, "Run Like Hell Cheat", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT(0x08, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("Run Like Hell Cheat") PORT_CHEAT PORT_PLAYER(1)
 	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Flip_Screen ) )
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
@@ -190,23 +190,23 @@ INPUT_PORTS_START( 88games )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER3 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER3 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER3 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(3)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(3)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(3)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START3 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER4 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER4 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER4 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(4)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(4)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(4)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START4 )
 
 	PORT_START

@@ -19,10 +19,10 @@ Notes:
 
 extern UINT8 *mystston_videoram2;
 
-extern WRITE_HANDLER( mystston_videoram_w );
-extern WRITE_HANDLER( mystston_videoram2_w );
-extern WRITE_HANDLER( mystston_scroll_w );
-extern WRITE_HANDLER( mystston_control_w );
+extern WRITE8_HANDLER( mystston_videoram_w );
+extern WRITE8_HANDLER( mystston_videoram2_w );
+extern WRITE8_HANDLER( mystston_scroll_w );
+extern WRITE8_HANDLER( mystston_control_w );
 
 extern PALETTE_INIT( mystston );
 extern VIDEO_START( mystston );
@@ -33,12 +33,12 @@ static int VBLK = 0x80;
 static int soundlatch;
 
 
-static WRITE_HANDLER( mystston_soundlatch_w )
+static WRITE8_HANDLER( mystston_soundlatch_w )
 {
 	soundlatch = data;
 }
 
-static WRITE_HANDLER( mystston_soundcontrol_w )
+static WRITE8_HANDLER( mystston_soundcontrol_w )
 {
 	static int last;
 
@@ -64,16 +64,16 @@ static WRITE_HANDLER( mystston_soundcontrol_w )
 	last = data;
 }
 
-static READ_HANDLER( port3_r )
+static READ8_HANDLER( port3_r )
 {
 	int port = readinputport(3);
 
 	return port | VBLK;
 }
 
-static WRITE_HANDLER( mystston_irq_reset_w )
+static WRITE8_HANDLER( mystston_irq_reset_w )
 {
-	cpu_set_irq_line(0, 0, CLEAR_LINE);
+	cpunum_set_input_line(0, 0, CLEAR_LINE);
 }
 
 
@@ -108,22 +108,22 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( mystston )
 	PORT_START	/* IN0 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_4WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_4WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_4WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
-	PORT_BIT_IMPULSE( 0x40, IP_ACTIVE_LOW, IPT_COIN1, 1 )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_LOW, IPT_COIN2, 1 )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(1)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(1)
 
 	PORT_START	/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
@@ -234,7 +234,7 @@ static INTERRUPT_GEN( mystston_interrupt )
 	/* IMS is triggered every time VLOC line 3 is raised,
 	   as VLOC counter starts at 16, effectively every 16 scanlines */
 	if ((scanline % 16) == 0)
-		cpu_set_irq_line(0, 0, HOLD_LINE);
+		cpunum_set_input_line(0, 0, HOLD_LINE);
 }
 
 

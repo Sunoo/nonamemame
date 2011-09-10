@@ -38,7 +38,7 @@ void triplhnt_hit_callback(int code)
 {
 	triplhnt_hit_code = code;
 
-	cpu_set_irq_line(0, 0, HOLD_LINE);
+	cpunum_set_input_line(0, 0, HOLD_LINE);
 }
 
 
@@ -83,25 +83,25 @@ static void triplhnt_update_misc(int offset)
 }
 
 
-WRITE_HANDLER( triplhnt_misc_w )
+WRITE8_HANDLER( triplhnt_misc_w )
 {
 	triplhnt_update_misc(offset);
 }
 
 
-WRITE_HANDLER( triplhnt_zeropage_w )
+WRITE8_HANDLER( triplhnt_zeropage_w )
 {
 	memory_region(REGION_CPU1)[offset & 0xff] = data;
 }
 
 
-READ_HANDLER( triplhnt_zeropage_r )
+READ8_HANDLER( triplhnt_zeropage_r )
 {
 	return memory_region(REGION_CPU1)[offset & 0xff];
 }
 
 
-READ_HANDLER( triplhnt_cmos_r )
+READ8_HANDLER( triplhnt_cmos_r )
 {
 	triplhnt_cmos_latch = offset;
 
@@ -109,7 +109,7 @@ READ_HANDLER( triplhnt_cmos_r )
 }
 
 
-READ_HANDLER( triplhnt_input_port_4_r )
+READ8_HANDLER( triplhnt_input_port_4_r )
 {
 	watchdog_reset_w(0, 0);
 
@@ -117,7 +117,7 @@ READ_HANDLER( triplhnt_input_port_4_r )
 }
 
 
-READ_HANDLER( triplhnt_misc_r )
+READ8_HANDLER( triplhnt_misc_r )
 {
 	triplhnt_update_misc(offset);
 
@@ -125,7 +125,7 @@ READ_HANDLER( triplhnt_misc_r )
 }
 
 
-READ_HANDLER( triplhnt_da_latch_r )
+READ8_HANDLER( triplhnt_da_latch_r )
 {
 	int cross_x = readinputport(8);
 	int cross_y = readinputport(9);
@@ -205,7 +205,7 @@ INPUT_PORTS_START( triplhnt )
 	PORT_START /* 0C48 */
 // default to service enabled to make users calibrate gun
 //	PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
-	PORT_BITX(    0x40, 0x00, IPT_DIPSWITCH_NAME | IPF_TOGGLE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(    0x40, 0x00, IPT_DIPSWITCH_NAME ) PORT_NAME( DEF_STR( Service_Mode )) PORT_TOGGLE PORT_CODE(KEYCODE_F2)
 	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 )
@@ -214,10 +214,10 @@ INPUT_PORTS_START( triplhnt )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
 
 	PORT_START
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 25, 15, 0x00, 0xff)
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0x00,0xff) PORT_SENSITIVITY(25) PORT_KEYDELTA(15)
 
 	PORT_START
-	PORT_ANALOG( 0xff, 0x78, IPT_LIGHTGUN_Y, 25, 15, 0x00, 0xef)
+	PORT_BIT( 0xff, 0x78, IPT_LIGHTGUN_Y ) PORT_MINMAX(0x00,0xef) PORT_SENSITIVITY(25) PORT_KEYDELTA(15)
 
 	PORT_START		/* 10 */
 	PORT_ADJUSTER( 50, "Bear Roar Frequency" )

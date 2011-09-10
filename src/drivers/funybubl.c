@@ -24,13 +24,13 @@ convert to tilemaps
 /* vidhrdw/funybubl.c */
 extern data8_t* funybubl_banked_videoram;
 extern data8_t *funybubl_paletteram;
-WRITE_HANDLER ( funybubl_paldatawrite );
+WRITE8_HANDLER ( funybubl_paldatawrite );
 VIDEO_START(funybubl);
 VIDEO_UPDATE(funybubl);
 
 
 
-static WRITE_HANDLER ( funybubl_vidram_bank_w )
+static WRITE8_HANDLER ( funybubl_vidram_bank_w )
 {
 	if ((data&1) == 0)
 		cpu_setbank(1,&funybubl_banked_videoram[0x000000]);
@@ -38,7 +38,7 @@ static WRITE_HANDLER ( funybubl_vidram_bank_w )
 		cpu_setbank(1,&funybubl_banked_videoram[0x001000]);
 }
 
-static WRITE_HANDLER ( funybubl_cpurombank_w )
+static WRITE8_HANDLER ( funybubl_cpurombank_w )
 {
 	unsigned char *rom = memory_region(REGION_CPU1);
 
@@ -47,13 +47,13 @@ static WRITE_HANDLER ( funybubl_cpurombank_w )
 
 
 
-WRITE_HANDLER( funybubl_soundcommand_w )
+WRITE8_HANDLER( funybubl_soundcommand_w )
 {
 	soundlatch_w(0,data);
-	cpu_set_irq_line(1,0, PULSE_LINE);
+	cpunum_set_input_line(1,0, PULSE_LINE);
 }
 
-WRITE_HANDLER( funybubl_oki_bank_sw )
+WRITE8_HANDLER( funybubl_oki_bank_sw )
 {
 	OKIM6295_set_bank_base(0, ((data & 1) * 0x40000));
 }
@@ -123,21 +123,21 @@ INPUT_PORTS_START( funybubl )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
 
 	PORT_START	/* Player 1 controls */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP     | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN   | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT   | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
 
 	PORT_START	/* Player 2 controls */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP     | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN   | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT   | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* Maybe unused */

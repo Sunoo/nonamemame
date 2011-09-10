@@ -99,13 +99,13 @@ static offs_t speedup_pc;
 
 static void irq5_gen(int param)
 {
-	cpu_set_irq_line(0, R3000_IRQ5, ASSERT_LINE);
+	cpunum_set_input_line(0, R3000_IRQ5, ASSERT_LINE);
 }
 
 
 static INTERRUPT_GEN( irq4_gen )
 {
-	cpu_set_irq_line(0, R3000_IRQ4, ASSERT_LINE);
+	cpunum_set_input_line(0, R3000_IRQ4, ASSERT_LINE);
 	timer_set(cpu_getscanlinetime(0), 0, irq5_gen);
 }
 
@@ -343,9 +343,9 @@ INPUT_PORTS_START( policetr )
 	PORT_SERVICE( 0x0020, IP_ACTIVE_LOW )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
+	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x2000, IP_ACTIVE_HIGH, IPT_SPECIAL )		// EEPROM read
@@ -380,16 +380,16 @@ INPUT_PORTS_START( policetr )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER2, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_PLAYER(2)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER2, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10) PORT_PLAYER(2)
 INPUT_PORTS_END
 
 
@@ -580,7 +580,7 @@ ROM_END
 
 static DRIVER_INIT( policetr )
 {
-	speedup_data = install_mem_write32_handler(0, 0x00000fc8, 0x00000fcb, speedup_w);
+	speedup_data = memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0x00000fc8, 0x00000fcb, 0, 0, speedup_w);
 	speedup_pc = 0x1fc028ac;
 
 	memcpy(rom_base, memory_region(REGION_USER1), memory_region_length(REGION_USER1));
@@ -589,7 +589,7 @@ static DRIVER_INIT( policetr )
 
 static DRIVER_INIT( sshooter )
 {
-	speedup_data = install_mem_write32_handler(0, 0x00018fd8, 0x00018fdb, speedup_w);
+	speedup_data = memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0x00018fd8, 0x00018fdb, 0, 0, speedup_w);
 	speedup_pc = 0x1fc03470;
 
 	memcpy(rom_base, memory_region(REGION_USER1), memory_region_length(REGION_USER1));

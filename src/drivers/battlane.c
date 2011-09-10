@@ -16,13 +16,13 @@
 extern UINT8 *battlane_spriteram;
 extern UINT8 *battlane_tileram;
 
-extern WRITE_HANDLER( battlane_palette_w );
-extern WRITE_HANDLER( battlane_scrollx_w );
-extern WRITE_HANDLER( battlane_scrolly_w );
-extern WRITE_HANDLER( battlane_tileram_w );
-extern WRITE_HANDLER( battlane_spriteram_w );
-extern WRITE_HANDLER( battlane_bitmap_w );
-extern WRITE_HANDLER( battlane_video_ctrl_w );
+extern WRITE8_HANDLER( battlane_palette_w );
+extern WRITE8_HANDLER( battlane_scrollx_w );
+extern WRITE8_HANDLER( battlane_scrolly_w );
+extern WRITE8_HANDLER( battlane_tileram_w );
+extern WRITE8_HANDLER( battlane_spriteram_w );
+extern WRITE8_HANDLER( battlane_bitmap_w );
+extern WRITE8_HANDLER( battlane_video_ctrl_w );
 
 extern PALETTE_INIT( battlane );
 extern VIDEO_START( battlane );
@@ -32,7 +32,7 @@ extern VIDEO_UPDATE( battlane );
 /* CPU interrupt control register */
 int battlane_cpu_control;
 
-WRITE_HANDLER( battlane_cpu_command_w )
+WRITE8_HANDLER( battlane_cpu_command_w )
 {
 	battlane_cpu_control = data;
 
@@ -59,8 +59,8 @@ WRITE_HANDLER( battlane_cpu_command_w )
     /*
     if (~battlane_cpu_control & 0x08)
     {
-        cpu_set_nmi_line(0, PULSE_LINE);
-        cpu_set_nmi_line(1, PULSE_LINE);
+        cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
+        cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
     }
     */
 
@@ -68,7 +68,7 @@ WRITE_HANDLER( battlane_cpu_command_w )
         CPU2's SWI will trigger an 6809 IRQ on the master by resetting 0x04
         Master will respond by setting the bit back again
 	*/
-    cpu_set_irq_line(0, M6809_IRQ_LINE,  data & 0x04 ? CLEAR_LINE : HOLD_LINE);
+    cpunum_set_input_line(0, M6809_IRQ_LINE,  data & 0x04 ? CLEAR_LINE : HOLD_LINE);
 
 	/*
 	Slave function call (e.g. ROM test):
@@ -86,7 +86,7 @@ WRITE_HANDLER( battlane_cpu_command_w )
 	FA96: 27 FA       BEQ   $FA92	; Wait for bit to be set
 	*/
 
-	cpu_set_irq_line(1, M6809_IRQ_LINE, data & 0x02 ? CLEAR_LINE : HOLD_LINE);
+	cpunum_set_input_line(1, M6809_IRQ_LINE, data & 0x02 ? CLEAR_LINE : HOLD_LINE);
 }
 
 static ADDRESS_MAP_START( battlane_map, ADDRESS_SPACE_PROGRAM, 8 )
@@ -111,8 +111,8 @@ INTERRUPT_GEN( battlane_cpu1_interrupt )
 
 	if (~battlane_cpu_control & 0x08)
 	{
-		cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
-		cpu_set_irq_line(1, IRQ_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 	}
 }
 
@@ -121,20 +121,20 @@ INPUT_PORTS_START( battlane )
 	PORT_START      /* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
     PORT_START      /* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
     PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
 
@@ -246,7 +246,7 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 
 static void irqhandler(int irq)
 {
-	cpu_set_irq_line(0, M6809_FIRQ_LINE, irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(0, M6809_FIRQ_LINE, irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM3526interface ym3526_interface =

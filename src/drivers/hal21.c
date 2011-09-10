@@ -63,7 +63,7 @@ static UINT8 *hal21_vreg, *hal21_sndfifo;
 /**************************************************************************/
 // Test Handlers
 
-static WRITE_HANDLER( aso_scroll_sync_w )
+static WRITE8_HANDLER( aso_scroll_sync_w )
 {
 	if (data == 0x7f && shared_auxram[0x04d2] & 1) data++;
 
@@ -115,24 +115,24 @@ static void hal21_sound_scheduler(int mode, int data)
 
 	snk_sound_busy_bit = 0x20;
 	soundlatch_w(0, data);
-	cpu_set_nmi_line(2, PULSE_LINE);
+	cpunum_set_input_line(2, INPUT_LINE_NMI, PULSE_LINE);
 }
 
 /**************************************************************************/
 
-static READ_HANDLER( hal21_videoram_r ){ return videoram[offset]; }
-static WRITE_HANDLER( hal21_videoram_w ){ videoram[offset] = data; }
-static READ_HANDLER( hal21_spriteram_r ){ return spriteram[offset]; }
-static WRITE_HANDLER( hal21_spriteram_w ){ spriteram[offset] = data; }
+static READ8_HANDLER( hal21_videoram_r ){ return videoram[offset]; }
+static WRITE8_HANDLER( hal21_videoram_w ){ videoram[offset] = data; }
+static READ8_HANDLER( hal21_spriteram_r ){ return spriteram[offset]; }
+static WRITE8_HANDLER( hal21_spriteram_w ){ spriteram[offset] = data; }
 
-static WRITE_HANDLER( hal21_vreg0_w ){ hal21_vreg[0] = data; }
-static WRITE_HANDLER( hal21_vreg1_w ){ hal21_vreg[1] = data; }
-static WRITE_HANDLER( hal21_vreg2_w ){ hal21_vreg[2] = data; }
-static WRITE_HANDLER( hal21_vreg3_w ){ hal21_vreg[3] = data; }
-static WRITE_HANDLER( hal21_vreg4_w ){ hal21_vreg[4] = data; }
-static WRITE_HANDLER( hal21_vreg5_w ){ hal21_vreg[5] = data; }
-static WRITE_HANDLER( hal21_vreg6_w ){ hal21_vreg[6] = data; }
-static WRITE_HANDLER( hal21_vreg7_w ){ hal21_vreg[7] = data; }
+static WRITE8_HANDLER( hal21_vreg0_w ){ hal21_vreg[0] = data; }
+static WRITE8_HANDLER( hal21_vreg1_w ){ hal21_vreg[1] = data; }
+static WRITE8_HANDLER( hal21_vreg2_w ){ hal21_vreg[2] = data; }
+static WRITE8_HANDLER( hal21_vreg3_w ){ hal21_vreg[3] = data; }
+static WRITE8_HANDLER( hal21_vreg4_w ){ hal21_vreg[4] = data; }
+static WRITE8_HANDLER( hal21_vreg5_w ){ hal21_vreg[5] = data; }
+static WRITE8_HANDLER( hal21_vreg6_w ){ hal21_vreg[6] = data; }
+static WRITE8_HANDLER( hal21_vreg7_w ){ hal21_vreg[7] = data; }
 
 
 PALETTE_INIT( aso )
@@ -366,21 +366,21 @@ INPUT_PORTS_START( hal21 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_START /* P1 controls */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START /* P2 controls */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START  /* DSW1 */
@@ -445,23 +445,23 @@ INPUT_PORTS_START( aso )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START
@@ -501,7 +501,7 @@ INPUT_PORTS_START( aso )
 	PORT_DIPNAME( 0x08, 0x00, DEF_STR( Demo_Sounds ) )
 	PORT_DIPSETTING(    0x08, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BITX( 0x10,    0x10, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Cheat of some kind", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0x10,    0x10, IPT_DIPSWITCH_NAME ) PORT_NAME("Cheat of some kind") PORT_CHEAT
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Flip_Screen ) )
@@ -564,31 +564,31 @@ static struct GfxDecodeInfo aso_gfxdecodeinfo[] =
 
 /**************************************************************************/
 
-static READ_HANDLER( shared_auxram_r ) { return shared_auxram[offset]; }
-static WRITE_HANDLER( shared_auxram_w ) { shared_auxram[offset] = data; }
+static READ8_HANDLER( shared_auxram_r ) { return shared_auxram[offset]; }
+static WRITE8_HANDLER( shared_auxram_w ) { shared_auxram[offset] = data; }
 
-static READ_HANDLER( shared_ram_r ) { return shared_ram[offset]; }
-static WRITE_HANDLER( shared_ram_w ) { shared_ram[offset] = data; }
+static READ8_HANDLER( shared_ram_r ) { return shared_ram[offset]; }
+static WRITE8_HANDLER( shared_ram_w ) { shared_ram[offset] = data; }
 
-static READ_HANDLER( CPUC_ready_r ) { snk_sound_busy_bit = 0; return 0; }
+static READ8_HANDLER( CPUC_ready_r ) { snk_sound_busy_bit = 0; return 0; }
 
-static READ_HANDLER( hal21_input_port_0_r ) { return input_port_0_r(0) | snk_sound_busy_bit; }
+static READ8_HANDLER( hal21_input_port_0_r ) { return input_port_0_r(0) | snk_sound_busy_bit; }
 
-static WRITE_HANDLER( hal21_soundcommand_w ) { hal21_sound_scheduler(1, data); }
-static WRITE_HANDLER( hal21_soundack_w ) { hal21_sound_scheduler(2, data); }
+static WRITE8_HANDLER( hal21_soundcommand_w ) { hal21_sound_scheduler(1, data); }
+static WRITE8_HANDLER( hal21_soundack_w ) { hal21_sound_scheduler(2, data); }
 
-static READ_HANDLER( hal21_soundcommand_r )
+static READ8_HANDLER( hal21_soundcommand_r )
 {
 	int data = soundlatch_r(0);
 	soundlatch_clear_w(0, 0);
 	return data;
 }
 
-static WRITE_HANDLER( aso_soundcommand_w )
+static WRITE8_HANDLER( aso_soundcommand_w )
 {
 	snk_sound_busy_bit = 0x20;
 	soundlatch_w(0, data);
-	cpu_set_irq_line( 2, 0, HOLD_LINE );
+	cpunum_set_input_line( 2, 0, HOLD_LINE );
 }
 
 static INTERRUPT_GEN( hal21_sound_interrupt )

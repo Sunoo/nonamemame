@@ -22,10 +22,10 @@ static unsigned char *ram;
 
 static INTERRUPT_GEN( parodius_interrupt )
 {
-	if (K052109_is_IRQ_enabled()) cpu_set_irq_line(0, 0, HOLD_LINE);
+	if (K052109_is_IRQ_enabled()) cpunum_set_input_line(0, 0, HOLD_LINE);
 }
 
-static READ_HANDLER( bankedram_r )
+static READ8_HANDLER( bankedram_r )
 {
 	if (videobank & 0x01)
 	{
@@ -38,7 +38,7 @@ static READ_HANDLER( bankedram_r )
 		return ram[offset];
 }
 
-static WRITE_HANDLER( bankedram_w )
+static WRITE8_HANDLER( bankedram_w )
 {
 	if (videobank & 0x01)
 	{
@@ -51,7 +51,7 @@ static WRITE_HANDLER( bankedram_w )
 		ram[offset] = data;
 }
 
-static READ_HANDLER( parodius_052109_053245_r )
+static READ8_HANDLER( parodius_052109_053245_r )
 {
 	if (videobank & 0x02)
 		return K053245_r(offset);
@@ -59,7 +59,7 @@ static READ_HANDLER( parodius_052109_053245_r )
 		return K052109_r(offset);
 }
 
-static WRITE_HANDLER( parodius_052109_053245_w )
+static WRITE8_HANDLER( parodius_052109_053245_w )
 {
 	if (videobank & 0x02)
 		K053245_w(offset,data);
@@ -67,7 +67,7 @@ static WRITE_HANDLER( parodius_052109_053245_w )
 		K052109_w(offset,data);
 }
 
-static WRITE_HANDLER( parodius_videobank_w )
+static WRITE8_HANDLER( parodius_videobank_w )
 {
 	if (videobank & 0xf8) logerror("%04x: videobank = %02x\n",activecpu_get_pc(),data);
 
@@ -77,7 +77,7 @@ static WRITE_HANDLER( parodius_videobank_w )
 	videobank = data;
 }
 
-static WRITE_HANDLER( parodius_3fc0_w )
+static WRITE8_HANDLER( parodius_3fc0_w )
 {
 	if ((data & 0xf4) != 0x10) logerror("%04x: 3fc0 = %02x\n",activecpu_get_pc(),data);
 
@@ -91,7 +91,7 @@ static WRITE_HANDLER( parodius_3fc0_w )
 	/* other bits unknown */
 }
 
-static READ_HANDLER( parodius_sound_r )
+static READ8_HANDLER( parodius_sound_r )
 {
 	/* If the sound CPU is running, read the status, otherwise
 	   just make it pass the test */
@@ -99,9 +99,9 @@ static READ_HANDLER( parodius_sound_r )
 	else return offset ? 0x00 : 0x80;
 }
 
-static WRITE_HANDLER( parodius_sh_irqtrigger_w )
+static WRITE8_HANDLER( parodius_sh_irqtrigger_w )
 {
-	cpu_set_irq_line_and_vector(1,0,HOLD_LINE,0xff);
+	cpunum_set_input_line_and_vector(1,0,HOLD_LINE,0xff);
 }
 
 #if 0
@@ -109,7 +109,7 @@ static int nmi_enabled;
 
 static void sound_nmi_callback( int param )
 {
-	cpu_set_nmi_line( 1, ( nmi_enabled ) ? CLEAR_LINE : ASSERT_LINE );
+	cpunum_set_input_line(1, INPUT_LINE_NMI, ( nmi_enabled ) ? CLEAR_LINE : ASSERT_LINE );
 
 	nmi_enabled = 0;
 }
@@ -117,17 +117,17 @@ static void sound_nmi_callback( int param )
 
 static void nmi_callback(int param)
 {
-	cpu_set_nmi_line(1,ASSERT_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, ASSERT_LINE);
 }
 
-static WRITE_HANDLER( sound_arm_nmi_w )
+static WRITE8_HANDLER( sound_arm_nmi_w )
 {
 //	sound_nmi_enabled = 1;
-	cpu_set_nmi_line(1,CLEAR_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, CLEAR_LINE);
 	timer_set(TIME_IN_USEC(50),0,nmi_callback);	/* kludge until the K053260 is emulated correctly */
 }
 
-static READ_HANDLER( speedup_r )
+static READ8_HANDLER( speedup_r )
 {
 	int data = memory_region(REGION_CPU1)[0x1837];
 
@@ -197,23 +197,23 @@ ADDRESS_MAP_END
 INPUT_PORTS_START( parodius )
 	PORT_START	/* PLAYER 1 INPUTS */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 
 	PORT_START	/* PLAYER 2 INPUTS */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
 
 	PORT_START	/* DSW #1 */
 	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )

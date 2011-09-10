@@ -22,24 +22,24 @@ static unsigned char *xain_sharedram;
 
 VIDEO_UPDATE( xain );
 VIDEO_START( xain );
-WRITE_HANDLER( xain_scrollxP0_w );
-WRITE_HANDLER( xain_scrollyP0_w );
-WRITE_HANDLER( xain_scrollxP1_w );
-WRITE_HANDLER( xain_scrollyP1_w );
-WRITE_HANDLER( xain_charram_w );
-WRITE_HANDLER( xain_bgram0_w );
-WRITE_HANDLER( xain_bgram1_w );
-WRITE_HANDLER( xain_flipscreen_w );
+WRITE8_HANDLER( xain_scrollxP0_w );
+WRITE8_HANDLER( xain_scrollyP0_w );
+WRITE8_HANDLER( xain_scrollxP1_w );
+WRITE8_HANDLER( xain_scrollyP1_w );
+WRITE8_HANDLER( xain_charram_w );
+WRITE8_HANDLER( xain_bgram0_w );
+WRITE8_HANDLER( xain_bgram1_w );
+WRITE8_HANDLER( xain_flipscreen_w );
 
 extern unsigned char *xain_charram, *xain_bgram0, *xain_bgram1;
 
 
-static READ_HANDLER( xain_sharedram_r )
+static READ8_HANDLER( xain_sharedram_r )
 {
 	return xain_sharedram[offset];
 }
 
-static WRITE_HANDLER( xain_sharedram_w )
+static WRITE8_HANDLER( xain_sharedram_w )
 {
 	/* locations 003d and 003e are used as a semaphores between CPU A and B, */
 	/* so let's resync every time they are changed to avoid deadlocks */
@@ -49,7 +49,7 @@ static WRITE_HANDLER( xain_sharedram_w )
 	xain_sharedram[offset] = data;
 }
 
-static WRITE_HANDLER( xainCPUA_bankswitch_w )
+static WRITE8_HANDLER( xainCPUA_bankswitch_w )
 {
 	unsigned char *RAM = memory_region(REGION_CPU1);
 
@@ -57,7 +57,7 @@ static WRITE_HANDLER( xainCPUA_bankswitch_w )
 	else {cpu_setbank(1,&RAM[0x4000]);}
 }
 
-static WRITE_HANDLER( xainCPUB_bankswitch_w )
+static WRITE8_HANDLER( xainCPUB_bankswitch_w )
 {
 	unsigned char *RAM = memory_region(REGION_CPU2);
 
@@ -65,44 +65,44 @@ static WRITE_HANDLER( xainCPUB_bankswitch_w )
 	else {cpu_setbank(2,&RAM[0x4000]);}
 }
 
-static WRITE_HANDLER( xain_sound_command_w )
+static WRITE8_HANDLER( xain_sound_command_w )
 {
 	soundlatch_w(offset,data);
-	cpu_set_irq_line(2,M6809_IRQ_LINE,HOLD_LINE);
+	cpunum_set_input_line(2,M6809_IRQ_LINE,HOLD_LINE);
 }
 
-static WRITE_HANDLER( xain_irqA_assert_w )
+static WRITE8_HANDLER( xain_irqA_assert_w )
 {
-	cpu_set_irq_line(0,M6809_IRQ_LINE,ASSERT_LINE);
+	cpunum_set_input_line(0,M6809_IRQ_LINE,ASSERT_LINE);
 }
 
-static WRITE_HANDLER( xain_irqA_clear_w )
+static WRITE8_HANDLER( xain_irqA_clear_w )
 {
-	cpu_set_irq_line(0,M6809_IRQ_LINE,CLEAR_LINE);
+	cpunum_set_input_line(0,M6809_IRQ_LINE,CLEAR_LINE);
 }
 
-static WRITE_HANDLER( xain_firqA_clear_w )
+static WRITE8_HANDLER( xain_firqA_clear_w )
 {
-	cpu_set_irq_line(0,M6809_FIRQ_LINE,CLEAR_LINE);
+	cpunum_set_input_line(0,M6809_FIRQ_LINE,CLEAR_LINE);
 }
 
-static WRITE_HANDLER( xain_irqB_assert_w )
+static WRITE8_HANDLER( xain_irqB_assert_w )
 {
-	cpu_set_irq_line(1,M6809_IRQ_LINE,ASSERT_LINE);
+	cpunum_set_input_line(1,M6809_IRQ_LINE,ASSERT_LINE);
 }
 
-static WRITE_HANDLER( xain_irqB_clear_w )
+static WRITE8_HANDLER( xain_irqB_clear_w )
 {
-	cpu_set_irq_line(1,M6809_IRQ_LINE,CLEAR_LINE);
+	cpunum_set_input_line(1,M6809_IRQ_LINE,CLEAR_LINE);
 }
 
-static READ_HANDLER( xain_68705_r )
+static READ8_HANDLER( xain_68705_r )
 {
 //	logerror("read 68705\n");
 	return 0x4d;	/* fake P5 checksum test pass */
 }
 
-static WRITE_HANDLER( xain_68705_w )
+static WRITE8_HANDLER( xain_68705_w )
 {
 //	logerror("write %02x to 68705\n",data);
 }
@@ -113,9 +113,9 @@ static INTERRUPT_GEN( xainA_interrupt )
 	/* waits for the vblank bit to be clear and there are other places in the code */
 	/* that wait for it to be set */
 	if (cpu_getiloops() == 2)
-		cpu_set_nmi_line(0,PULSE_LINE);
+		cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 	else
-		cpu_set_irq_line(0,M6809_FIRQ_LINE,ASSERT_LINE);
+		cpunum_set_input_line(0,M6809_FIRQ_LINE,ASSERT_LINE);
 }
 
 
@@ -190,22 +190,22 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( xsleena )
 	PORT_START	/* IN0 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2 )
 
 	PORT_START	/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
 
@@ -253,7 +253,7 @@ INPUT_PORTS_START( xsleena )
 	PORT_DIPSETTING(    0xc0, "3")
 	PORT_DIPSETTING(    0x80, "4")
 	PORT_DIPSETTING(    0x40, "6")
-	PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0,       0x00, IPT_DIPSWITCH_SETTING ) PORT_NAME("Infinite") PORT_CHEAT
 
 	PORT_START	/* IN2 */
 	PORT_BIT( 0x03, IP_ACTIVE_LOW,  IPT_UNUSED )
@@ -304,7 +304,7 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 /* handler called by the 2203 emulator when the internal timers cause an IRQ */
 static void irqhandler(int irq)
 {
-	cpu_set_irq_line(2,M6809_FIRQ_LINE,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(2,M6809_FIRQ_LINE,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM2203interface ym2203_interface =

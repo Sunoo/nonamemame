@@ -50,7 +50,7 @@ static UINT8 *safarir_ram;
 static struct tilemap *bg_tilemap, *fg_tilemap;
 
 
-WRITE_HANDLER( safarir_ram_w )
+WRITE8_HANDLER( safarir_ram_w )
 {
 	if (safarir_ram[offset] != data)
 	{
@@ -67,17 +67,17 @@ WRITE_HANDLER( safarir_ram_w )
 	}
 }
 
-READ_HANDLER( safarir_ram_r )
+READ8_HANDLER( safarir_ram_r )
 {
 	return safarir_ram[offset];
 }
 
-WRITE_HANDLER( safarir_scroll_w )
+WRITE8_HANDLER( safarir_scroll_w )
 {
 	tilemap_set_scrollx(bg_tilemap, 0, data);
 }
 
-WRITE_HANDLER( safarir_ram_bank_w )
+WRITE8_HANDLER( safarir_ram_bank_w )
 {
 	safarir_ram = data ? safarir_ram1 : safarir_ram2;
 	tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
@@ -172,8 +172,8 @@ INPUT_PORTS_START( safarir )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_2WAY )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	/* DSW0 */

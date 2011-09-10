@@ -17,18 +17,18 @@ extern unsigned char *circusc_spritebank;
 extern unsigned char *circusc_scroll;
 extern unsigned char *circusc_videoram,*circusc_colorram;
 
-WRITE_HANDLER( circusc_videoram_w );
-WRITE_HANDLER( circusc_colorram_w );
+WRITE8_HANDLER( circusc_videoram_w );
+WRITE8_HANDLER( circusc_colorram_w );
 
 VIDEO_START( circusc );
-WRITE_HANDLER( circusc_flipscreen_w );
+WRITE8_HANDLER( circusc_flipscreen_w );
 PALETTE_INIT( circusc );
-WRITE_HANDLER( circusc_sprite_bank_select_w );
+WRITE8_HANDLER( circusc_sprite_bank_select_w );
 VIDEO_UPDATE( circusc );
 
 
 
-static READ_HANDLER( circusc_sh_timer_r )
+static READ8_HANDLER( circusc_sh_timer_r )
 {
 	int clock;
 #define CIRCUSCHALIE_TIMER_RATE (14318180/6144)
@@ -38,17 +38,17 @@ static READ_HANDLER( circusc_sh_timer_r )
 	return clock & 0xF;
 }
 
-static WRITE_HANDLER( circusc_sh_irqtrigger_w )
+static WRITE8_HANDLER( circusc_sh_irqtrigger_w )
 {
-	cpu_set_irq_line_and_vector(1,0,HOLD_LINE,0xff);
+	cpunum_set_input_line_and_vector(1,0,HOLD_LINE,0xff);
 }
 
-static WRITE_HANDLER( circusc_dac_w )
+static WRITE8_HANDLER( circusc_dac_w )
 {
 	DAC_data_w(0,data);
 }
 
-static WRITE_HANDLER( circusc_coin_counter_w )
+static WRITE8_HANDLER( circusc_coin_counter_w )
 {
 	coin_counter_w(offset,data);
 }
@@ -123,8 +123,8 @@ INPUT_PORTS_START( circusc )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START      /* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_2WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
@@ -133,11 +133,11 @@ INPUT_PORTS_START( circusc )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START      /* IN2 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_2WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )

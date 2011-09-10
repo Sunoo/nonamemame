@@ -1939,14 +1939,14 @@ static void stv_SMPC_w8 (int offset, UINT8 data)
 		if(!(smpc_ram[0x77] & 0x10))
 		{
 			logerror("SMPC: M68k on\n");
-			cpu_set_reset_line(2, PULSE_LINE);
-			cpu_set_halt_line(2, CLEAR_LINE);
+			cpunum_set_input_line(2, INPUT_LINE_RESET, PULSE_LINE);
+			cpunum_set_input_line(2, INPUT_LINE_HALT, CLEAR_LINE);
 			en_68k = 1;
 		}
 		else
 		{
 			logerror("SMPC: M68k off\n");
-			cpu_set_halt_line(2, ASSERT_LINE);
+			cpunum_set_input_line(2, INPUT_LINE_HALT, ASSERT_LINE);
 			en_68k = 0;
 		}
 		PDR2 = (data & 0x60);
@@ -1985,21 +1985,21 @@ static void stv_SMPC_w8 (int offset, UINT8 data)
 				logerror ("SMPC: Slave ON\n");
 				smpc_ram[0x5f]=0x02;
 				#if USE_SLAVE
-				cpu_set_reset_line(1, PULSE_LINE);
-				cpu_set_halt_line(1,CLEAR_LINE);
+				cpunum_set_input_line(1, INPUT_LINE_RESET, PULSE_LINE);
+				cpunum_set_input_line(1, INPUT_LINE_HALT, CLEAR_LINE);
 				#endif
 				break;
 			case 0x03:
 				logerror ("SMPC: Slave OFF\n");
 				smpc_ram[0x5f]=0x03;
-				cpu_set_halt_line(1,ASSERT_LINE);
+				cpunum_set_input_line(1, INPUT_LINE_HALT, ASSERT_LINE);
 				break;
 			case 0x06:
 				logerror ("SMPC: Sound ON\n");
 				/* wrong? */
 				smpc_ram[0x5f]=0x06;
-				cpu_set_reset_line(2, PULSE_LINE);
-				cpu_set_halt_line(2, CLEAR_LINE);
+				cpunum_set_input_line(2, INPUT_LINE_RESET, PULSE_LINE);
+				cpunum_set_input_line(2, INPUT_LINE_HALT, CLEAR_LINE);
 				break;
 			case 0x07:
 				logerror ("SMPC: Sound OFF\n");
@@ -2011,18 +2011,18 @@ static void stv_SMPC_w8 (int offset, UINT8 data)
 			case 0x0d:
 				logerror ("SMPC: System Reset\n");
 				smpc_ram[0x5f]=0x0d;
-				cpu_set_reset_line(0, PULSE_LINE);
+				cpunum_set_input_line(0, INPUT_LINE_RESET, PULSE_LINE);
 				system_reset();
 				break;
 			case 0x0e:
 				logerror ("SMPC: Change Clock to 352\n");
 				smpc_ram[0x5f]=0x0e;
-				cpu_set_nmi_line(0,PULSE_LINE); // ff said this causes nmi, should we set a timer then nmi?
+				cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE); // ff said this causes nmi, should we set a timer then nmi?
 				break;
 			case 0x0f:
 				logerror ("SMPC: Change Clock to 320\n");
 				smpc_ram[0x5f]=0x0f;
-				cpu_set_nmi_line(0,PULSE_LINE); // ff said this causes nmi, should we set a timer then nmi?
+				cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE); // ff said this causes nmi, should we set a timer then nmi?
 				break;
 			/*"Interrupt Back"*/
 			case 0x10:
@@ -2068,7 +2068,7 @@ static void stv_SMPC_w8 (int offset, UINT8 data)
 			//	if(!(stv_scu[40] & 0x0080)) /*System Manager(SMPC) irq*/ /* we can't check this .. breaks controls .. probably issues elsewhere? */
 				{
 					logerror ("Interrupt: System Manager (SMPC) at scanline %04x, Vector 0x47 Level 0x08\n",scanline);
-					cpu_set_irq_line_and_vector(0, 8, HOLD_LINE , 0x47);
+					cpunum_set_input_line_and_vector(0, 8, HOLD_LINE , 0x47);
 				}
 			break;
 			/* RTC write*/
@@ -2092,7 +2092,7 @@ static void stv_SMPC_w8 (int offset, UINT8 data)
 				logerror ("SMPC: NMI request\n");
 				smpc_ram[0x5f]=0x18;
 				/*NMI is unconditionally requested for the Sound CPU?*/
-				cpu_set_nmi_line(2,PULSE_LINE);
+				cpunum_set_input_line(2, INPUT_LINE_NMI, PULSE_LINE);
 				break;
 			case 0x19:
 				logerror ("SMPC: NMI Enable\n");
@@ -2184,7 +2184,7 @@ static INTERRUPT_GEN( stv_interrupt )
 		if(!(stv_scu[40] & 2))/*VBLANK-OUT*/
 		{
 			logerror ("Interrupt: VBlank-OUT at scanline %04x, Vector 0x41 Level 0x0e\n",scanline);
-			cpu_set_irq_line_and_vector(0, 0xe, HOLD_LINE , 0x41);
+			cpunum_set_input_line_and_vector(0, 0xe, HOLD_LINE , 0x41);
 			stv_vblank = 0;
 			return;
 		}
@@ -2198,7 +2198,7 @@ static INTERRUPT_GEN( stv_interrupt )
 			if(!(stv_scu[40] & 8))/*Timer 0*/
 			{
 				logerror ("Interrupt: Timer 0 at scanline %04x, Vector 0x43 Level 0x0c\n",scanline);
-				cpu_set_irq_line_and_vector(0, 0xc, HOLD_LINE, 0x43 );
+				cpunum_set_input_line_and_vector(0, 0xc, HOLD_LINE, 0x43 );
 				return;
 			}
 		}
@@ -2207,7 +2207,7 @@ static INTERRUPT_GEN( stv_interrupt )
 		if(!(stv_scu[40] & 4))/*HBLANK-IN*/
 		{
 			logerror ("Interrupt: HBlank-In at scanline %04x, Vector 0x42 Level 0x0d\n",scanline);
-			cpu_set_irq_line_and_vector(0, 0xd, HOLD_LINE , 0x42);
+			cpunum_set_input_line_and_vector(0, 0xd, HOLD_LINE , 0x42);
 		}
 	}
 	else if(scanline == 224)
@@ -2217,7 +2217,7 @@ static INTERRUPT_GEN( stv_interrupt )
 		if(!(stv_scu[40] & 1))/*VBLANK-IN*/
 		{
 			logerror ("Interrupt: VBlank IN at scanline %04x, Vector 0x40 Level 0x0f\n",scanline);
-			cpu_set_irq_line_and_vector(0, 0xf, HOLD_LINE , 0x40);
+			cpunum_set_input_line_and_vector(0, 0xf, HOLD_LINE , 0x40);
 			stv_vblank = 1;
 			return;
 		}
@@ -2227,7 +2227,7 @@ static INTERRUPT_GEN( stv_interrupt )
 			if(!(stv_scu[40] & 8))/*Timer 0*/
 			{
 				logerror ("Interrupt: Timer 0 at scanline %04x, Vector 0x43 Level 0x0c\n",scanline);
-				cpu_set_irq_line_and_vector(0, 0xc, HOLD_LINE, 0x43 );
+				cpunum_set_input_line_and_vector(0, 0xc, HOLD_LINE, 0x43 );
 				return;
 			}
 		}
@@ -2756,7 +2756,7 @@ static void dma_direct_lv0()
 
 	logerror("DMA transfer END\n");
 	if(!(stv_scu[40] & 0x800))/*Lv 0 DMA end irq*/
-		cpu_set_irq_line_and_vector(0, 5, HOLD_LINE , 0x4b);
+		cpunum_set_input_line_and_vector(0, 5, HOLD_LINE , 0x4b);
 
 	SET_D0MV_FROM_1_TO_0;
 }
@@ -2794,7 +2794,7 @@ static void dma_direct_lv1()
 
 	logerror("DMA transfer END\n");
 	if(!(stv_scu[40] & 0x400))/*Lv 1 DMA end irq*/
-		cpu_set_irq_line_and_vector(0, 6, HOLD_LINE , 0x4a);
+		cpunum_set_input_line_and_vector(0, 6, HOLD_LINE , 0x4a);
 
 	SET_D1MV_FROM_1_TO_0;
 }
@@ -2832,7 +2832,7 @@ static void dma_direct_lv2()
 
 	logerror("DMA transfer END\n");
 	if(!(stv_scu[40] & 0x200))/*Lv 2 DMA end irq*/
-		cpu_set_irq_line_and_vector(0, 6, HOLD_LINE , 0x49);
+		cpunum_set_input_line_and_vector(0, 6, HOLD_LINE , 0x49);
 
 	SET_D2MV_FROM_1_TO_0;
 }
@@ -2893,7 +2893,7 @@ static void dma_indirect_lv0()
 	}while(job_done == 0);
 
 	if(!(stv_scu[40] & 0x800))/*Lv 0 DMA end irq*/
-		cpu_set_irq_line_and_vector(0, 5, HOLD_LINE , 0x4b);
+		cpunum_set_input_line_and_vector(0, 5, HOLD_LINE , 0x4b);
 
 	SET_D0MV_FROM_1_TO_0;
 }
@@ -2955,7 +2955,7 @@ static void dma_indirect_lv1()
 	}while(job_done == 0);
 
 	if(!(stv_scu[40] & 0x400))/*Lv 1 DMA end irq*/
-		cpu_set_irq_line_and_vector(0, 6, HOLD_LINE , 0x4a);
+		cpunum_set_input_line_and_vector(0, 6, HOLD_LINE , 0x4a);
 
 	SET_D1MV_FROM_1_TO_0;
 }
@@ -3016,7 +3016,7 @@ static void dma_indirect_lv2()
 	}while(job_done == 0);
 
 	if(!(stv_scu[40] & 0x200))/*Lv 2 DMA end irq*/
-		cpu_set_irq_line_and_vector(0, 6, HOLD_LINE , 0x49);
+		cpunum_set_input_line_and_vector(0, 6, HOLD_LINE , 0x49);
 
 	SET_D2MV_FROM_1_TO_0;
 }
@@ -3133,14 +3133,14 @@ static ADDRESS_MAP_START( sound_mem, ADDRESS_SPACE_PROGRAM, 16 )
 ADDRESS_MAP_END
 
 #define STV_PLAYER_INPUTS(_n_, _b1_, _b2_, _b3_, _b4_) \
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_##_b1_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_##_b2_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_##_b3_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_##_b4_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER##_n_ ) \
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER##_n_ ) \
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER##_n_ ) \
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER##_n_ )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_##_b1_         ) PORT_PLAYER(_n_) \
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_##_b2_         ) PORT_PLAYER(_n_) \
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_##_b3_         ) PORT_PLAYER(_n_) \
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_##_b4_         ) PORT_PLAYER(_n_) \
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  ) PORT_PLAYER(_n_) \
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    ) PORT_PLAYER(_n_) \
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(_n_) \
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_PLAYER(_n_)
 
 INPUT_PORTS_START( stv )
 	PORT_START
@@ -3211,12 +3211,12 @@ INPUT_PORTS_START( stv )
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-	PORT_BITX(0x04, IP_ACTIVE_LOW, IPT_SERVICE, "Test", KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Test") PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BITX(0x40, IP_ACTIVE_LOW, IPT_SERVICE, "1P Push Switch", KEYCODE_7, IP_JOY_NONE )
-	PORT_BITX(0x80, IP_ACTIVE_LOW, IPT_SERVICE, "2P Push Switch", KEYCODE_8, IP_JOY_NONE )
+	PORT_BIT(0x40, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("1P Push Switch") PORT_CODE(KEYCODE_7)
+	PORT_BIT(0x80, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("2P Push Switch") PORT_CODE(KEYCODE_8)
 
 	/*This *might* be unused...*/
 	PORT_START
@@ -3224,13 +3224,13 @@ INPUT_PORTS_START( stv )
 
 	/*Extra button layout,used by Power Instinct 3 & Suikoenbu*/
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON4  | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON5  | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON6  | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(1)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON4  | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON5  | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON6  | IPF_PLAYER2 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	/*We don't need these,AFAIK the country code doesn't work either...*/
@@ -3247,21 +3247,21 @@ INPUT_PORTS_START( stv )
 	PORT_DIPSETTING(    0x0d, "Sud America Pal" )
 
 	PORT_START	/* Pad data 1a */
-	PORT_BITX(0x01, IP_ACTIVE_HIGH, 0, "B",   KEYCODE_U, IP_JOY_NONE )
-	PORT_BITX(0x02, IP_ACTIVE_HIGH, 0, "C",   KEYCODE_Y, IP_JOY_NONE )
-	PORT_BITX(0x04, IP_ACTIVE_HIGH, 0, "A", KEYCODE_T, IP_JOY_NONE )
-	PORT_BITX(0x08, IP_ACTIVE_HIGH, 0, "Start", KEYCODE_O, IP_JOY_NONE )
-	PORT_BITX(0x10, IP_ACTIVE_HIGH, 0, "Up", KEYCODE_I, IP_JOY_NONE )
-	PORT_BITX(0x20, IP_ACTIVE_HIGH, 0, "Down",   KEYCODE_K, IP_JOY_NONE )
-	PORT_BITX(0x40, IP_ACTIVE_HIGH, 0, "Left", KEYCODE_J, IP_JOY_NONE )
-	PORT_BITX(0x80, IP_ACTIVE_HIGH, 0, "Right", KEYCODE_L, IP_JOY_NONE )
+	PORT_BIT(0x01, IP_ACTIVE_HIGH, 0 ) PORT_NAME("B") PORT_CODE(KEYCODE_U)
+	PORT_BIT(0x02, IP_ACTIVE_HIGH, 0 ) PORT_NAME("C") PORT_CODE(KEYCODE_Y)
+	PORT_BIT(0x04, IP_ACTIVE_HIGH, 0 ) PORT_NAME("A") PORT_CODE(KEYCODE_T)
+	PORT_BIT(0x08, IP_ACTIVE_HIGH, 0 ) PORT_NAME("Start") PORT_CODE(KEYCODE_O)
+	PORT_BIT(0x10, IP_ACTIVE_HIGH, 0 ) PORT_NAME("Up") PORT_CODE(KEYCODE_I)
+	PORT_BIT(0x20, IP_ACTIVE_HIGH, 0 ) PORT_NAME("Down") PORT_CODE(KEYCODE_K)
+	PORT_BIT(0x40, IP_ACTIVE_HIGH, 0 ) PORT_NAME("Left") PORT_CODE(KEYCODE_J)
+	PORT_BIT(0x80, IP_ACTIVE_HIGH, 0 ) PORT_NAME("Right") PORT_CODE(KEYCODE_L)
 
 	PORT_START	/* Pad data 1b */
-	PORT_BITX(0x08, IP_ACTIVE_HIGH, 0, "L trig", KEYCODE_A, IP_JOY_NONE )
-	PORT_BITX(0x10, IP_ACTIVE_HIGH, 0, "Z", KEYCODE_Q, IP_JOY_NONE )
-	PORT_BITX(0x20, IP_ACTIVE_HIGH, 0, "Y",   KEYCODE_W, IP_JOY_NONE )
-	PORT_BITX(0x40, IP_ACTIVE_HIGH, 0, "X", KEYCODE_E, IP_JOY_NONE )
-	PORT_BITX(0x80, IP_ACTIVE_HIGH, 0, "R trig", KEYCODE_S, IP_JOY_NONE )
+	PORT_BIT(0x08, IP_ACTIVE_HIGH, 0 ) PORT_NAME("L trig") PORT_CODE(KEYCODE_A)
+	PORT_BIT(0x10, IP_ACTIVE_HIGH, 0 ) PORT_NAME("Z") PORT_CODE(KEYCODE_Q)
+	PORT_BIT(0x20, IP_ACTIVE_HIGH, 0 ) PORT_NAME("Y") PORT_CODE(KEYCODE_W)
+	PORT_BIT(0x40, IP_ACTIVE_HIGH, 0 ) PORT_NAME("X") PORT_CODE(KEYCODE_E)
+	PORT_BIT(0x80, IP_ACTIVE_HIGH, 0 ) PORT_NAME("R trig") PORT_CODE(KEYCODE_S)
 	#endif
 INPUT_PORTS_END
 
@@ -3335,12 +3335,12 @@ INPUT_PORTS_START( stvmp )
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-	PORT_BITX(0x04, IP_ACTIVE_LOW, IPT_SERVICE, "Test", KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Test") PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BITX(0x40, IP_ACTIVE_LOW, IPT_SERVICE, "1P Push Switch", KEYCODE_7, IP_JOY_NONE )
-	PORT_BITX(0x80, IP_ACTIVE_LOW, IPT_SERVICE, "2P Push Switch", KEYCODE_8, IP_JOY_NONE )
+	PORT_BIT(0x40, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("1P Push Switch") PORT_CODE(KEYCODE_7)
+	PORT_BIT(0x80, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("2P Push Switch") PORT_CODE(KEYCODE_8)
 
 	/*This *might* be unused...*/
 	PORT_START
@@ -3348,55 +3348,55 @@ INPUT_PORTS_START( stvmp )
 
 	/*Extra button layout,used by Power Instinct 3*/
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON4  | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON5  | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON6  | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(1)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON4  | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON5  | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON6  | IPF_PLAYER2 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	/*Mahjong panel/player 1 side*/
 	PORT_START/*7*/
-	PORT_BITX( 0x01, IP_ACTIVE_LOW, 0, "P1 KAN",   	KEYCODE_LCONTROL, IP_JOY_NONE )
-	PORT_BITX( 0x02, IP_ACTIVE_LOW, 0, "P1 START",  KEYCODE_1,        IP_JOY_NONE )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 KAN") PORT_CODE(	KEYCODE_LCONTROL)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 START") PORT_CODE(KEYCODE_1)
 	PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX( 0x10, IP_ACTIVE_LOW, 0, "P1 E",   	KEYCODE_E,        IP_JOY_NONE )
-	PORT_BITX( 0x20, IP_ACTIVE_LOW, 0, "P1 A",   	KEYCODE_A,        IP_JOY_NONE )
-	PORT_BITX( 0x40, IP_ACTIVE_LOW, 0, "P1 M",   	KEYCODE_M,        IP_JOY_NONE )
-	PORT_BITX( 0x80, IP_ACTIVE_LOW, 0, "P1 I",   	KEYCODE_I,        IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 E") PORT_CODE(	KEYCODE_E)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 A") PORT_CODE(	KEYCODE_A)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 M") PORT_CODE(	KEYCODE_M)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 I") PORT_CODE(	KEYCODE_I)
 
 	PORT_START/*8*/
-	PORT_BITX( 0x01, IP_ACTIVE_LOW, 0, "P1 RON",    KEYCODE_Z,        IP_JOY_NONE )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 RON") PORT_CODE(KEYCODE_Z)
 	PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX( 0x10, IP_ACTIVE_LOW, 0, "P1 F",   	KEYCODE_F,        IP_JOY_NONE )
-	PORT_BITX( 0x20, IP_ACTIVE_LOW, 0, "P1 B",   	KEYCODE_B,        IP_JOY_NONE )
-	PORT_BITX( 0x40, IP_ACTIVE_LOW, 0, "P1 N",   	KEYCODE_N,        IP_JOY_NONE )
-	PORT_BITX( 0x80, IP_ACTIVE_LOW, 0, "P1 J",   	KEYCODE_J,        IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 F") PORT_CODE(	KEYCODE_F)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 B") PORT_CODE(	KEYCODE_B)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 N") PORT_CODE(	KEYCODE_N)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 J") PORT_CODE(	KEYCODE_J)
 
 	PORT_START/*9*/
-	PORT_BITX( 0x01, IP_ACTIVE_LOW, 0, "P1 REACH",  KEYCODE_LSHIFT,   IP_JOY_NONE )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 REACH") PORT_CODE(KEYCODE_LSHIFT)
 	PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX( 0x10, IP_ACTIVE_LOW, 0, "P1 G",   	KEYCODE_G,        IP_JOY_NONE )
-	PORT_BITX( 0x20, IP_ACTIVE_LOW, 0, "P1 C",   	KEYCODE_C,        IP_JOY_NONE )
-	PORT_BITX( 0x40, IP_ACTIVE_LOW, 0, "P1 CHI",    KEYCODE_SPACE,    IP_JOY_NONE )
-	PORT_BITX( 0x80, IP_ACTIVE_LOW, 0, "P1 K",   	KEYCODE_K,        IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 G") PORT_CODE(	KEYCODE_G)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 C") PORT_CODE(	KEYCODE_C)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 CHI") PORT_CODE(KEYCODE_SPACE)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 K") PORT_CODE(	KEYCODE_K)
 
 	PORT_START/*10*/
 	PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX( 0x10, IP_ACTIVE_LOW, 0, "P1 H",   	KEYCODE_H,        IP_JOY_NONE )
-	PORT_BITX( 0x20, IP_ACTIVE_LOW, 0, "P1 D",   	KEYCODE_D,        IP_JOY_NONE )
-	PORT_BITX( 0x40, IP_ACTIVE_LOW, 0, "P1 PON",    KEYCODE_LALT, 	  IP_JOY_NONE )
-	PORT_BITX( 0x80, IP_ACTIVE_LOW, 0, "P1 L",   	KEYCODE_L,        IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 H") PORT_CODE(	KEYCODE_H)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 D") PORT_CODE(	KEYCODE_D)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 PON") PORT_CODE(KEYCODE_LALT)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 L") PORT_CODE(	KEYCODE_L)
 
 	PORT_START/*11*/
 	PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -3405,49 +3405,49 @@ INPUT_PORTS_START( stvmp )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX( 0x40, IP_ACTIVE_LOW, 0,  "P1 FLIP",   KEYCODE_X,       IP_JOY_NONE )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, 0 ) PORT_NAME("P1 FLIP") PORT_CODE(KEYCODE_X)
 	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	/*Mahjong panel/player 2 side*/
 	PORT_START/*12*/
-	PORT_BITX( 0x01, IP_ACTIVE_LOW, 0, "P2 KAN",   	KEYCODE_NONE, IP_JOY_NONE )
-	PORT_BITX( 0x02, IP_ACTIVE_LOW, 0, "P2 START",  KEYCODE_2,        IP_JOY_NONE )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 KAN") PORT_CODE(	KEYCODE_NONE)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 START") PORT_CODE(KEYCODE_2)
 	PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX( 0x10, IP_ACTIVE_LOW, 0, "P2 E",   	KEYCODE_NONE,        IP_JOY_NONE )
-	PORT_BITX( 0x20, IP_ACTIVE_LOW, 0, "P2 A",   	KEYCODE_NONE,        IP_JOY_NONE )
-	PORT_BITX( 0x40, IP_ACTIVE_LOW, 0, "P2 M",   	KEYCODE_NONE,        IP_JOY_NONE )
-	PORT_BITX( 0x80, IP_ACTIVE_LOW, 0, "P2 I",   	KEYCODE_NONE,        IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 E") PORT_CODE(	KEYCODE_NONE)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 A") PORT_CODE(	KEYCODE_NONE)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 M") PORT_CODE(	KEYCODE_NONE)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 I") PORT_CODE(	KEYCODE_NONE)
 
 	PORT_START/*13*/
-	PORT_BITX( 0x01, IP_ACTIVE_LOW, 0, "P2 RON",    KEYCODE_NONE,        IP_JOY_NONE )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 RON") PORT_CODE(KEYCODE_NONE)
 	PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX( 0x10, IP_ACTIVE_LOW, 0, "P2 F",   	KEYCODE_NONE,        IP_JOY_NONE )
-	PORT_BITX( 0x20, IP_ACTIVE_LOW, 0, "P2 B",   	KEYCODE_NONE,        IP_JOY_NONE )
-	PORT_BITX( 0x40, IP_ACTIVE_LOW, 0, "P2 N",   	KEYCODE_NONE,        IP_JOY_NONE )
-	PORT_BITX( 0x80, IP_ACTIVE_LOW, 0, "P2 J",   	KEYCODE_NONE,        IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 F") PORT_CODE(	KEYCODE_NONE)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 B") PORT_CODE(	KEYCODE_NONE)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 N") PORT_CODE(	KEYCODE_NONE)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 J") PORT_CODE(	KEYCODE_NONE)
 
 	PORT_START/*14*/
-	PORT_BITX( 0x01, IP_ACTIVE_LOW, 0, "P2 REACH",  KEYCODE_NONE,   IP_JOY_NONE )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 REACH") PORT_CODE(KEYCODE_NONE)
 	PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX( 0x10, IP_ACTIVE_LOW, 0, "P2 G",   	KEYCODE_NONE,        IP_JOY_NONE )
-	PORT_BITX( 0x20, IP_ACTIVE_LOW, 0, "P2 C",   	KEYCODE_NONE,        IP_JOY_NONE )
-	PORT_BITX( 0x40, IP_ACTIVE_LOW, 0, "P2 CHI",    KEYCODE_NONE,    IP_JOY_NONE )
-	PORT_BITX( 0x80, IP_ACTIVE_LOW, 0, "P2 K",   	KEYCODE_NONE,        IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 G") PORT_CODE(	KEYCODE_NONE)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 C") PORT_CODE(	KEYCODE_NONE)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 CHI") PORT_CODE(KEYCODE_NONE)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 K") PORT_CODE(	KEYCODE_NONE)
 
 	PORT_START/*15*/
 	PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX( 0x10, IP_ACTIVE_LOW, 0, "P2 H",   	KEYCODE_NONE,        IP_JOY_NONE )
-	PORT_BITX( 0x20, IP_ACTIVE_LOW, 0, "P2 D",   	KEYCODE_NONE,        IP_JOY_NONE )
-	PORT_BITX( 0x40, IP_ACTIVE_LOW, 0, "P2 PON",    KEYCODE_NONE,     IP_JOY_NONE )
-	PORT_BITX( 0x80, IP_ACTIVE_LOW, 0, "P2 L",   	KEYCODE_NONE,        IP_JOY_NONE )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 H") PORT_CODE(	KEYCODE_NONE)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 D") PORT_CODE(	KEYCODE_NONE)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 PON") PORT_CODE(KEYCODE_NONE)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 L") PORT_CODE(	KEYCODE_NONE)
 
 	PORT_START/*16*/
 	PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -3456,7 +3456,7 @@ INPUT_PORTS_START( stvmp )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX( 0x40, IP_ACTIVE_LOW, 0,  "P2 FLIP",  KEYCODE_NONE,        IP_JOY_NONE )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, 0 ) PORT_NAME("P2 FLIP") PORT_CODE(KEYCODE_NONE)
 	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )
 INPUT_PORTS_END
 
@@ -3496,10 +3496,10 @@ DRIVER_INIT ( stv )
 	install_stvbios_speedups();
 
 	/* debug .. watch the command buffer rsgun, cottonbm etc. appear to use to communicate between cpus */
-	install_mem_write32_handler(0, 0x60ffc44, 0x60ffc47, w60ffc44_write );
-	install_mem_write32_handler(0, 0x60ffc48, 0x60ffc4b, w60ffc48_write );
-	install_mem_write32_handler(1, 0x60ffc44, 0x60ffc47, w60ffc44_write );
-	install_mem_write32_handler(1, 0x60ffc48, 0x60ffc4b, w60ffc48_write );
+	memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0x60ffc44, 0x60ffc47, 0, 0, w60ffc44_write );
+	memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0x60ffc48, 0x60ffc4b, 0, 0, w60ffc48_write );
+	memory_install_write32_handler(1, ADDRESS_SPACE_PROGRAM, 0x60ffc44, 0x60ffc47, 0, 0, w60ffc44_write );
+	memory_install_write32_handler(1, ADDRESS_SPACE_PROGRAM, 0x60ffc48, 0x60ffc4b, 0, 0, w60ffc48_write );
 
   	smpc_ram[0x23] = DectoBCD((today->tm_year + 1900)/100);
     smpc_ram[0x25] = DectoBCD((today->tm_year + 1900)%100);
@@ -3518,8 +3518,8 @@ MACHINE_INIT( stv )
 	cpu_setbank(1,memory_region(REGION_USER1));
 
 	// don't let the slave cpu and the 68k go anywhere
-	cpu_set_halt_line(1, ASSERT_LINE);
-	cpu_set_halt_line(2, ASSERT_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_HALT, ASSERT_LINE);
+	cpunum_set_input_line(2, INPUT_LINE_HALT, ASSERT_LINE);
 
 	timer_0 = 0;
 	en_68k = 0;
@@ -3632,11 +3632,11 @@ static void scsp_irq(int irq)
 	if (irq)
 	{
 		scsp_last_line = irq;
-		cpu_set_irq_line(2, irq, ASSERT_LINE);
+		cpunum_set_input_line(2, irq, ASSERT_LINE);
 	}
 	else
 	{
-		cpu_set_irq_line(2, scsp_last_line, CLEAR_LINE);
+		cpunum_set_input_line(2, scsp_last_line, CLEAR_LINE);
 	}
 }
 

@@ -34,12 +34,12 @@ static int sleepcountdown = 0;
 /*	Palette handling
  */
 
-WRITE_HANDLER( cpk_palette_w )
+WRITE8_HANDLER( cpk_palette_w )
 {
 	cpk_palette[offset] = data;
 }
 
-WRITE_HANDLER( cpk_palette2_w )
+WRITE8_HANDLER( cpk_palette2_w )
 {
 	int r,g,b,newword;
 
@@ -62,12 +62,12 @@ WRITE_HANDLER( cpk_palette2_w )
 /*	Video handling
  */
 
-READ_HANDLER( cpk_videoram_r )
+READ8_HANDLER( cpk_videoram_r )
 {
 	return cpk_videoram[offset];
 }
 
-WRITE_HANDLER( cpk_videoram_w )
+WRITE8_HANDLER( cpk_videoram_w )
 {
 	if (cpk_videoram[offset] != data)
 	{
@@ -76,12 +76,12 @@ WRITE_HANDLER( cpk_videoram_w )
 	}
 }
 
-READ_HANDLER( cpk_colorram_r )
+READ8_HANDLER( cpk_colorram_r )
 {
 	return cpk_colorram[offset];
 }
 
-WRITE_HANDLER( cpk_colorram_w )
+WRITE8_HANDLER( cpk_colorram_w )
 {
 	if (cpk_colorram[offset] != data)
 	{
@@ -90,14 +90,14 @@ WRITE_HANDLER( cpk_colorram_w )
 	}
 }
 
-READ_HANDLER( cpk_expansion_r )
+READ8_HANDLER( cpk_expansion_r )
 {
 	unsigned char * RAM = memory_region(REGION_GFX3);
 	return RAM[offset];
 }
 
 
-WRITE_HANDLER( cpk_expansion_w )
+WRITE8_HANDLER( cpk_expansion_w )
 {
 	if (cpk_expram[offset] != data)
 	{
@@ -199,9 +199,9 @@ INTERRUPT_GEN( cska_interrupt )
 	abilityflag = (oldstate == 5 || (RAM[ intstate1 ] == 1 && RAM[ intstate2 ] == 5)) ? 1 : 0;
 
 	if (cpu_getiloops() % 2)
-		cpu_set_irq_line(0, 0, HOLD_LINE);
+		cpunum_set_input_line(0, 0, HOLD_LINE);
 	else
-		cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 
 }
 

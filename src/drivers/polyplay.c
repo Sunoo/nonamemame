@@ -86,11 +86,11 @@ emulated now. ;)
 extern unsigned char *polyplay_characterram;
 PALETTE_INIT( polyplay );
 VIDEO_UPDATE( polyplay );
-READ_HANDLER( polyplay_characterram_r );
-WRITE_HANDLER( polyplay_characterram_w );
+READ8_HANDLER( polyplay_characterram_r );
+WRITE8_HANDLER( polyplay_characterram_w );
 
 /* I/O Port handling */
-static READ_HANDLER( polyplay_random_read );
+static READ8_HANDLER( polyplay_random_read );
 
 /* sound handling */
 void set_channel1(int active);
@@ -110,8 +110,8 @@ void polyplay_sh_update(void);
 /* timer handling */
 static void timer_callback(int param);
 static void* polyplay_timer;
-static WRITE_HANDLER( polyplay_start_timer2 );
-static WRITE_HANDLER( polyplay_sound_channel );
+static WRITE8_HANDLER( polyplay_start_timer2 );
+static WRITE8_HANDLER( polyplay_sound_channel );
 
 
 /* Polyplay Sound Interface */
@@ -141,7 +141,7 @@ static MACHINE_INIT( polyplay )
 
 static INTERRUPT_GEN( periodic_interrupt )
 {
-	cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, 0x4e);
+	cpunum_set_input_line_and_vector(0, 0, HOLD_LINE, 0x4e);
 }
 
 
@@ -157,7 +157,7 @@ static INTERRUPT_GEN( coin_interrupt )
 	{
 		if (last == 0)    /* coin inserted */
 		{
-			cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, 0x50);
+			cpunum_set_input_line_and_vector(0, 0, HOLD_LINE, 0x50);
 		}
 
 		last = 1;
@@ -199,17 +199,17 @@ ADDRESS_MAP_END
 INPUT_PORTS_START( polyplay )
 	PORT_START	/* IN0 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX(0x40, IP_ACTIVE_LOW, IPT_SERVICE, "Bookkeeping Info", KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x40, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Bookkeeping Info") PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
 INPUT_PORTS_END
 
 
-static WRITE_HANDLER( polyplay_sound_channel )
+static WRITE8_HANDLER( polyplay_sound_channel )
 {
 	switch(offset) {
 	case 0x00:
@@ -257,7 +257,7 @@ static WRITE_HANDLER( polyplay_sound_channel )
 	}
 }
 
-static WRITE_HANDLER( polyplay_start_timer2 )
+static WRITE8_HANDLER( polyplay_start_timer2 )
 {
 	if (data == 0x03)
 		timer_adjust(polyplay_timer, TIME_NEVER, 0, 0);
@@ -266,7 +266,7 @@ static WRITE_HANDLER( polyplay_start_timer2 )
 		timer_adjust(polyplay_timer, TIME_IN_HZ(40), 0, TIME_IN_HZ(40));
 }
 
-static READ_HANDLER( polyplay_random_read )
+static READ8_HANDLER( polyplay_random_read )
 {
 	return rand() & 0xff;
 }
@@ -377,7 +377,7 @@ ROM_END
 
 static void timer_callback(int param)
 {
-	cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, 0x4c);
+	cpunum_set_input_line_and_vector(0, 0, HOLD_LINE, 0x4c);
 }
 
 /* game driver */

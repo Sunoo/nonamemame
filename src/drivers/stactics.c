@@ -46,13 +46,13 @@ Verify Bar graph displays
 #include "vidhrdw/generic.h"
 
 /* Defined in machine/stactics.c */
-READ_HANDLER( stactics_port_0_r );
-READ_HANDLER( stactics_port_2_r );
-READ_HANDLER( stactics_port_3_r );
-READ_HANDLER( stactics_vert_pos_r );
-READ_HANDLER( stactics_horiz_pos_r );
+READ8_HANDLER( stactics_port_0_r );
+READ8_HANDLER( stactics_port_2_r );
+READ8_HANDLER( stactics_port_3_r );
+READ8_HANDLER( stactics_vert_pos_r );
+READ8_HANDLER( stactics_horiz_pos_r );
 INTERRUPT_GEN( stactics_interrupt );
-WRITE_HANDLER( stactics_coin_lockout_w );
+WRITE8_HANDLER( stactics_coin_lockout_w );
 extern unsigned char *stactics_motor_on;
 
 /* Defined in vidhrdw/stactics.c */
@@ -71,20 +71,20 @@ extern unsigned char *stactics_display_buffer;
 
 PALETTE_INIT( stactics );
 
-WRITE_HANDLER( stactics_palette_w );
-WRITE_HANDLER( stactics_scroll_ram_w );
-WRITE_HANDLER( stactics_speed_latch_w );
-WRITE_HANDLER( stactics_shot_trigger_w );
-WRITE_HANDLER( stactics_shot_flag_clear_w );
+WRITE8_HANDLER( stactics_palette_w );
+WRITE8_HANDLER( stactics_scroll_ram_w );
+WRITE8_HANDLER( stactics_speed_latch_w );
+WRITE8_HANDLER( stactics_shot_trigger_w );
+WRITE8_HANDLER( stactics_shot_flag_clear_w );
 
-WRITE_HANDLER( stactics_videoram_b_w );
-WRITE_HANDLER( stactics_chardata_b_w );
-WRITE_HANDLER( stactics_videoram_d_w );
-WRITE_HANDLER( stactics_chardata_d_w );
-WRITE_HANDLER( stactics_videoram_e_w );
-WRITE_HANDLER( stactics_chardata_e_w );
-WRITE_HANDLER( stactics_videoram_f_w );
-WRITE_HANDLER( stactics_chardata_f_w );
+WRITE8_HANDLER( stactics_videoram_b_w );
+WRITE8_HANDLER( stactics_chardata_b_w );
+WRITE8_HANDLER( stactics_videoram_d_w );
+WRITE8_HANDLER( stactics_chardata_d_w );
+WRITE8_HANDLER( stactics_videoram_e_w );
+WRITE8_HANDLER( stactics_chardata_e_w );
+WRITE8_HANDLER( stactics_videoram_f_w );
+WRITE8_HANDLER( stactics_chardata_f_w );
 
 static ADDRESS_MAP_START( readmem, ADDRESS_SPACE_PROGRAM, 8 )
     AM_RANGE(0x0000, 0x2fff) AM_READ(MRA8_ROM)
@@ -210,13 +210,13 @@ INPUT_PORTS_START( stactics )
     PORT_DIPNAME( 0x10, 0x00, "Extended Play" )
     PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
     PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-    PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY )
-    PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
+    PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+    PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
     /* PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED ) */
 
 	PORT_START	/* FAKE */
-    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY )
-    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY )
+    PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+    PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
 INPUT_PORTS_END
 
 /* For the character graphics */

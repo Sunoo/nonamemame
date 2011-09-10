@@ -86,7 +86,7 @@ static void update_irq_state(void)
 {
 	int irq = requested_int & ~*hypr_irq_enable;
 
-	cpu_set_irq_line(0, 3, (irq & 0x02) ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(0, 3, (irq & 0x02) ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static READ16_HANDLER( hyprduel_irq_cause_r )
@@ -117,24 +117,24 @@ static WRITE16_HANDLER( hypr_subcpu_control_w )
 		{
 			if (pc != 0x95f2)
 			{
-				cpu_set_reset_line(1, ASSERT_LINE);
+				cpunum_set_input_line(1, INPUT_LINE_RESET, ASSERT_LINE);
 				subcpu_resetline = 1;
 			} else {
-				cpu_set_halt_line(1, ASSERT_LINE);
+				cpunum_set_input_line(1, INPUT_LINE_HALT, ASSERT_LINE);
 				subcpu_resetline = -1;
 			}
 		}
 	} else {
 		if (subcpu_resetline == 1 && (data != 0x0c))
 		{
-			cpu_set_reset_line(1, CLEAR_LINE);
+			cpunum_set_input_line(1, INPUT_LINE_RESET, CLEAR_LINE);
 			subcpu_resetline = 0;
 			if (pc == 0xbb0 || pc == 0x9d30 || pc == 0xb19c)
 				cpu_spinuntil_time(TIME_IN_USEC(15000));		/* sync semaphore */
 		}
 		else if (subcpu_resetline == -1)
 		{
-			cpu_set_halt_line(1, CLEAR_LINE);
+			cpunum_set_input_line(1, INPUT_LINE_HALT, CLEAR_LINE);
 			subcpu_resetline = 0;
 		}
 	}
@@ -172,7 +172,7 @@ static WRITE16_HANDLER( hypr_scrollreg_init_w )
 static void vblank_end_callback(int param)
 {
 	requested_int &= ~param;
-	cpu_set_irq_line(1, 2, HOLD_LINE);
+	cpunum_set_input_line(1, 2, HOLD_LINE);
 }
 
 INTERRUPT_GEN( hyprduel_interrupt )
@@ -183,8 +183,8 @@ INTERRUPT_GEN( hyprduel_interrupt )
 	{
 		requested_int |= 0x01;		/* vblank */
 		requested_int |= 0x20;
-		cpu_set_irq_line(0, 2, HOLD_LINE);
-		cpu_set_irq_line(1, 1, HOLD_LINE);
+		cpunum_set_input_line(0, 2, HOLD_LINE);
+		cpunum_set_input_line(1, 1, HOLD_LINE);
 		timer_set(TIME_IN_USEC(DEFAULT_REAL_60HZ_VBLANK_DURATION), 0x20, vblank_end_callback);
 		rastersplit = 0;
 	} else {
@@ -198,7 +198,7 @@ INTERRUPT_GEN( hyprduel_interrupt )
 MACHINE_INIT( hyprduel )
 {
 	/* start with cpu2 halted */
-	cpu_set_reset_line(1, ASSERT_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_RESET, ASSERT_LINE);
 	subcpu_resetline = 1;
 }
 
@@ -508,29 +508,29 @@ ADDRESS_MAP_END
 ***************************************************************************/
 
 #define JOY_LSB(_n_, _b1_, _b2_, _b3_, _b4_) \
-	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	 | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_##_b1_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_##_b2_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_##_b3_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_##_b4_         | IPF_PLAYER##_n_ ) \
+	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	 ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_##_b1_         ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_##_b2_         ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_##_b3_         ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_##_b4_         ) PORT_PLAYER(_n_) \
 
 #define JOY_MSB(_n_, _b1_, _b2_, _b3_, _b4_) \
-	PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	 | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_##_b1_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_##_b2_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_##_b3_         | IPF_PLAYER##_n_ ) \
-	PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_##_b4_         | IPF_PLAYER##_n_ ) \
+	PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN	 ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_##_b1_         ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_##_b2_         ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_##_b3_         ) PORT_PLAYER(_n_) \
+	PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_##_b4_         ) PORT_PLAYER(_n_) \
 
 
 INPUT_PORTS_START( hyprduel )
 	PORT_START
-	PORT_BITX(    0x8000, IP_ACTIVE_LOW, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(    0x8000, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_DIPNAME( 0x4000, 0x0000, "Show Warning" )
 	PORT_DIPSETTING(      0x4000, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x0000, DEF_STR( On ) )
@@ -582,8 +582,8 @@ INPUT_PORTS_START( hyprduel )
 	JOY_MSB(2, BUTTON1, BUTTON2, BUTTON3, UNKNOWN)
 
 	PORT_START
-	PORT_BIT_IMPULSE(  0x0001, IP_ACTIVE_LOW,  IPT_COIN1, 2 )
-	PORT_BIT_IMPULSE(  0x0002, IP_ACTIVE_LOW,  IPT_COIN2, 2 )
+	PORT_BIT(  0x0001, IP_ACTIVE_LOW,  IPT_COIN1 ) PORT_IMPULSE(2)
+	PORT_BIT(  0x0002, IP_ACTIVE_LOW,  IPT_COIN2 ) PORT_IMPULSE(2)
 	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_SERVICE2 )
 	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_START1   )
@@ -632,7 +632,7 @@ static struct GfxDecodeInfo gfxdecodeinfo_14220[] =
 
 static void sound_irq(int state)
 {
-	cpu_set_irq_line(1, 1, HOLD_LINE);
+	cpunum_set_input_line(1, 1, HOLD_LINE);
 }
 
 static struct YM2151interface ym2151_interface =
@@ -709,12 +709,12 @@ static DRIVER_INIT( hyprduel )
 //	ROM[(0x174b9*0x20)+0x1f] |= 0x0e;		/* I */
 //	ROM[(0x174e9*0x20)+0x1f] |= 0x0e;
 
-	install_mem_write16_handler(0, 0xc00000, 0xc07fff, hypr_sharedram1_w);
-	install_mem_write16_handler(1, 0xc00000, 0xc07fff, hypr_sharedram1_w);
-	install_mem_write16_handler(1, 0x000000, 0x003fff, hypr_sharedram1_w);
+	memory_install_write16_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00000, 0xc07fff, 0, 0, hypr_sharedram1_w);
+	memory_install_write16_handler(1, ADDRESS_SPACE_PROGRAM, 0xc00000, 0xc07fff, 0, 0, hypr_sharedram1_w);
+	memory_install_write16_handler(1, ADDRESS_SPACE_PROGRAM, 0x000000, 0x003fff, 0, 0, hypr_sharedram1_w);
 
-	install_mem_write16_handler(0, 0xfe0000, 0xffffff, hypr_sharedram2_w);
-	install_mem_write16_handler(1, 0xfe0000, 0xffffff, hypr_sharedram2_w);
+	memory_install_write16_handler(0, ADDRESS_SPACE_PROGRAM, 0xfe0000, 0xffffff, 0, 0, hypr_sharedram2_w);
+	memory_install_write16_handler(1, ADDRESS_SPACE_PROGRAM, 0xfe0000, 0xffffff, 0, 0, hypr_sharedram2_w);
 
 	requested_int = 0x00;
 	blitter_bit = 2;

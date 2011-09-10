@@ -162,24 +162,24 @@ static UINT8 p2portrd_state;
 static void update_interrupts(void)
 {
 	if (atarigen_video_int_state)
-		cpu_set_irq_line(0, 3, ASSERT_LINE);
+		cpunum_set_input_line(0, 3, ASSERT_LINE);
 	else
-		cpu_set_irq_line(0, 3, CLEAR_LINE);
+		cpunum_set_input_line(0, 3, CLEAR_LINE);
 
 	if (atarigen_scanline_int_state)
-		cpu_set_irq_line(0, 2, ASSERT_LINE);
+		cpunum_set_input_line(0, 2, ASSERT_LINE);
 	else
-		cpu_set_irq_line(0, 2, CLEAR_LINE);
+		cpunum_set_input_line(0, 2, CLEAR_LINE);
 
 	if (p2portwr_state)
-		cpu_set_irq_line(0, 1, ASSERT_LINE);
+		cpunum_set_input_line(0, 1, ASSERT_LINE);
 	else
-		cpu_set_irq_line(0, 1, CLEAR_LINE);
+		cpunum_set_input_line(0, 1, CLEAR_LINE);
 
 	if (p2portrd_state)
-		cpu_set_irq_line(0, 0, ASSERT_LINE);
+		cpunum_set_input_line(0, 0, ASSERT_LINE);
 	else
-		cpu_set_irq_line(0, 0, CLEAR_LINE);
+		cpunum_set_input_line(0, 0, CLEAR_LINE);
 }
 
 
@@ -253,7 +253,7 @@ static WRITE16_HANDLER( int1_ack_w )
 {
 	/* reset sound CPU */
 	if (ACCESSING_LSB)
-		cpu_set_reset_line(1, (data & 1) ? ASSERT_LINE : CLEAR_LINE);
+		cpunum_set_input_line(1, INPUT_LINE_RESET, (data & 1) ? ASSERT_LINE : CLEAR_LINE);
 }
 
 
@@ -330,7 +330,7 @@ static READ16_HANDLER( switch_r )
 }
 
 
-static READ_HANDLER( switch_6502_r )
+static READ8_HANDLER( switch_6502_r )
 {
 	int result = input_port_0_r(offset);
 
@@ -343,7 +343,7 @@ static READ_HANDLER( switch_6502_r )
 }
 
 
-static WRITE_HANDLER( switch_6502_w )
+static WRITE8_HANDLER( switch_6502_w )
 {
 	(void)offset;
 
@@ -377,7 +377,7 @@ static READ16_HANDLER( adc_r )
 }
 
 
-static READ_HANDLER( leta_r )
+static READ8_HANDLER( leta_r )
 {
     if (pedal_count == -1)   /* 720 */
 	{
@@ -485,7 +485,7 @@ static READ_HANDLER( leta_r )
  *
  *************************************/
 
-static WRITE_HANDLER( mixer_w )
+static WRITE8_HANDLER( mixer_w )
 {
 	atarigen_set_ym2151_vol((data & 7) * 100 / 7);
 	atarigen_set_pokey_vol(((data >> 3) & 3) * 100 / 3);
@@ -493,7 +493,7 @@ static WRITE_HANDLER( mixer_w )
 }
 
 
-static WRITE_HANDLER( sound_enable_w )
+static WRITE8_HANDLER( sound_enable_w )
 {
 }
 
@@ -509,7 +509,7 @@ static READ16_HANDLER( sound_r )
 }
 
 
-static WRITE_HANDLER( sound_6502_w )
+static WRITE8_HANDLER( sound_6502_w )
 {
 	/* clock the state through */
 	p2portwr_state = (interrupt_enable & 2) != 0;
@@ -520,7 +520,7 @@ static WRITE_HANDLER( sound_6502_w )
 }
 
 
-static READ_HANDLER( sound_6502_r )
+static READ8_HANDLER( sound_6502_r )
 {
 	/* clock the state through */
 	p2portrd_state = (interrupt_enable & 1) != 0;
@@ -538,13 +538,13 @@ static READ_HANDLER( sound_6502_r )
  *
  *************************************/
 
-static WRITE_HANDLER( tms5220_w )
+static WRITE8_HANDLER( tms5220_w )
 {
 	tms5220_data = data;
 }
 
 
-static WRITE_HANDLER( tms5220_strobe_w )
+static WRITE8_HANDLER( tms5220_strobe_w )
 {
 	if (!(offset & 1) && tms5220_data_strobe)
 		if (has_tms5220)
@@ -560,7 +560,7 @@ static WRITE_HANDLER( tms5220_strobe_w )
  *
  *************************************/
 
-static WRITE_HANDLER( coincount_w )
+static WRITE8_HANDLER( coincount_w )
 {
 	coin_counter_w(0, (data >> 0) & 1);
 	coin_counter_w(1, (data >> 1) & 1);
@@ -661,10 +661,10 @@ INPUT_PORTS_START( paperboy )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
 	PORT_START	/* ADC0 */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X | IPF_PLAYER1, 100, 10, 0x10, 0xf0 )
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(1)
 
 	PORT_START	/* ADC1 */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_PLAYER1, 100, 10, 0x10, 0xf0 )
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_MINMAX(0x10,0xf0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(1)
 
 	PORT_START	/* ADC2 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -723,7 +723,7 @@ INPUT_PORTS_START( paperboy )
 	PORT_DIPSETTING(    0x20, "3" )
 	PORT_DIPSETTING(    0x00, "4" )
 	PORT_DIPSETTING(    0x30, "5" )
-	PORT_BITX( 0,       0x10, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0,       0x10, IPT_DIPSWITCH_SETTING ) PORT_NAME("Infinite") PORT_CHEAT
 	PORT_DIPNAME( 0x40, 0x00, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x40, DEF_STR( On ) )
@@ -775,11 +775,10 @@ INPUT_PORTS_START( 720 )
 /*start MAME:analog+*/
 	//PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED ) // Original line
 	PORT_START	/* LETA0 */
-	PORT_ANALOG( 0xff, 0x0000, IPT_DIAL | IPF_PLAYER1, 30, 10, 0, 0 )	// mask was 0xffff, but should be 0xff
-
+	PORT_BIT( 0xff, 0x0000, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(30) PORT_KEYDELTA(10) PORT_PLAYER(1)	// mask was 0xffff, but should be 0xff
 	PORT_START	/* LETA1 */
 	/* <Jake> */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL_V | IPF_PLAYER4, 1, 0, 0, 0 )		// increase sensitivity if you
+	PORT_BIT( 0xff, 0x0000, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(1) PORT_KEYDELTA(0) PORT_PLAYER(1)		// increase sensitivity if you
 	/* </Jake> */														// have original controller
 /*end MAME:analog+  */
 
@@ -839,18 +838,18 @@ INPUT_PORTS_START( 720 )
 	/* fake ports for analog stick control hack */
 	/* listed as player 2 so AD stick and dial inputs aren't mixed */
 	PORT_START
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X | IPF_PLAYER2, 100, 10, 0x00, 0xff)
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_MINMAX(0x00,0xff) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(2)
 
 	PORT_START
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_PLAYER2 | IPF_REVERSE, 100, 10, 0x00, 0xff)
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_MINMAX(0x00,0xff) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(2)
 
 	/* fake port for digital stick control hack */
 	/* listed as player 3 so AD stick and 8way stick inputs aren't mixed */
 	PORT_START
-	PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER3 )
-	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER3 )
-	PORT_BIT ( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER3 )
-	PORT_BIT ( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER3 )
+	PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(3)
+	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(3)
+	PORT_BIT ( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(3)
+	PORT_BIT ( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(3)
 /*end MAME:analog+  */
 INPUT_PORTS_END
 
@@ -881,25 +880,25 @@ INPUT_PORTS_START( ssprint )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
 	PORT_START	/* ADC0 */
-	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER1, 100, 4, 0x00, 0x3f )
+	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_MINMAX(0x00,0x3f) PORT_SENSITIVITY(100) PORT_KEYDELTA(4) PORT_PLAYER(1)
 
 	PORT_START	/* ADC1 */
-	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 4, 0x00, 0x3f )
+	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_MINMAX(0x00,0x3f) PORT_SENSITIVITY(100) PORT_KEYDELTA(4) PORT_PLAYER(2)
 
 	PORT_START	/* ADC2 */
-	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER3, 100, 4, 0x00, 0x3f )
+	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_MINMAX(0x00,0x3f) PORT_SENSITIVITY(100) PORT_KEYDELTA(4) PORT_PLAYER(3)
 
 	PORT_START	/* ADC3 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* LETA0 */
-	PORT_ANALOG( 0xff, 0x40, IPT_DIAL | IPF_PLAYER1, 25, 10, 0x00, 0x7f )
+	PORT_BIT( 0xff, 0x40, IPT_DIAL ) PORT_MINMAX(0x00,0x7f) PORT_SENSITIVITY(25) PORT_KEYDELTA(10) PORT_PLAYER(1)
 
 	PORT_START	/* LETA1 */
-	PORT_ANALOG( 0xff, 0x40, IPT_DIAL | IPF_PLAYER2, 25, 10, 0x00, 0x7f )
+	PORT_BIT( 0xff, 0x40, IPT_DIAL ) PORT_MINMAX(0x00,0x7f) PORT_SENSITIVITY(25) PORT_KEYDELTA(10) PORT_PLAYER(2)
 
 	PORT_START	/* LETA2 */
-	PORT_ANALOG( 0xff, 0x40, IPT_DIAL | IPF_PLAYER3, 25, 10, 0x00, 0x7f )
+	PORT_BIT( 0xff, 0x40, IPT_DIAL ) PORT_MINMAX(0x00,0x7f) PORT_SENSITIVITY(25) PORT_KEYDELTA(10) PORT_PLAYER(3)
 
 	PORT_START	/* LETA3 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -980,10 +979,10 @@ INPUT_PORTS_START( csprint )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
 	PORT_START	/* ADC0 */
-	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER1, 100, 4, 0x00, 0x3f )
+	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_MINMAX(0x00,0x3f) PORT_SENSITIVITY(100) PORT_KEYDELTA(4) PORT_PLAYER(1)
 
 	PORT_START	/* ADC1 */
-	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 4, 0x00, 0x3f )
+	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_MINMAX(0x00,0x3f) PORT_SENSITIVITY(100) PORT_KEYDELTA(4) PORT_PLAYER(2)
 
 	PORT_START	/* ADC2 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -992,10 +991,10 @@ INPUT_PORTS_START( csprint )
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* LETA0 */
-	PORT_ANALOG( 0xff, 0x40, IPT_DIAL | IPF_PLAYER1, 25, 10, 0x00, 0x7f )
+	PORT_BIT( 0xff, 0x40, IPT_DIAL ) PORT_MINMAX(0x00,0x7f) PORT_SENSITIVITY(25) PORT_KEYDELTA(10) PORT_PLAYER(1)
 
 	PORT_START	/* LETA1 */
-	PORT_ANALOG( 0xff, 0x40, IPT_DIAL | IPF_PLAYER2, 25, 10, 0x00, 0x7f )
+	PORT_BIT( 0xff, 0x40, IPT_DIAL ) PORT_MINMAX(0x00,0x7f) PORT_SENSITIVITY(25) PORT_KEYDELTA(10) PORT_PLAYER(2)
 
 	PORT_START	/* LETA2 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -1066,9 +1065,9 @@ INPUT_PORTS_START( apb )
 
 	PORT_START	/* 1800 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_UNUSED )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON2 | IPF_PLAYER1 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_UNUSED )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_BUTTON3 | IPF_PLAYER1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_PLAYER(1)
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_SPECIAL )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_SPECIAL )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW,  IPT_UNUSED )
@@ -1082,7 +1081,7 @@ INPUT_PORTS_START( apb )
 	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNUSED )
 
 	PORT_START	/* ADC1 */
-	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER1, 100, 4, 0x00, 0x3f )
+	PORT_BIT( 0xff, 0x00, IPT_PEDAL ) PORT_MINMAX(0x00,0x3f) PORT_SENSITIVITY(100) PORT_KEYDELTA(4) PORT_PLAYER(1)
 
 	PORT_START	/* ADC2 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -1091,7 +1090,7 @@ INPUT_PORTS_START( apb )
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START	/* LETA0 */
-	PORT_ANALOG( 0xff, 0x40, IPT_DIAL | IPF_PLAYER1, 25, 10, 0x00, 0x7f )
+	PORT_BIT( 0xff, 0x40, IPT_DIAL ) PORT_MINMAX(0x00,0x7f) PORT_SENSITIVITY(25) PORT_KEYDELTA(10) PORT_PLAYER(1)
 
 	PORT_START	/* LETA1 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )

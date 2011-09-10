@@ -25,25 +25,25 @@ VIDEO_UPDATE( bublbobl );
 
 /* machine/bublbobl.c */
 extern unsigned char *bublbobl_sharedram1,*bublbobl_sharedram2;
-READ_HANDLER( bublbobl_sharedram1_r );
-READ_HANDLER( bublbobl_sharedram2_r );
-WRITE_HANDLER( bublbobl_sharedram1_w );
-WRITE_HANDLER( bublbobl_sharedram2_w );
+READ8_HANDLER( bublbobl_sharedram1_r );
+READ8_HANDLER( bublbobl_sharedram2_r );
+WRITE8_HANDLER( bublbobl_sharedram1_w );
+WRITE8_HANDLER( bublbobl_sharedram2_w );
 INTERRUPT_GEN( bublbobl_m68705_interrupt );
-READ_HANDLER( bublbobl_68705_portA_r );
-WRITE_HANDLER( bublbobl_68705_portA_w );
-WRITE_HANDLER( bublbobl_68705_ddrA_w );
-READ_HANDLER( bublbobl_68705_portB_r );
-WRITE_HANDLER( bublbobl_68705_portB_w );
-WRITE_HANDLER( bublbobl_68705_ddrB_w );
-WRITE_HANDLER( bublbobl_bankswitch_w );
-WRITE_HANDLER( tokio_bankswitch_w );
-WRITE_HANDLER( tokio_videoctrl_w );
-WRITE_HANDLER( bublbobl_nmitrigger_w );
-READ_HANDLER( tokio_fake_r );
-WRITE_HANDLER( bublbobl_sound_command_w );
-WRITE_HANDLER( bublbobl_sh_nmi_disable_w );
-WRITE_HANDLER( bublbobl_sh_nmi_enable_w );
+READ8_HANDLER( bublbobl_68705_portA_r );
+WRITE8_HANDLER( bublbobl_68705_portA_w );
+WRITE8_HANDLER( bublbobl_68705_ddrA_w );
+READ8_HANDLER( bublbobl_68705_portB_r );
+WRITE8_HANDLER( bublbobl_68705_portB_w );
+WRITE8_HANDLER( bublbobl_68705_ddrB_w );
+WRITE8_HANDLER( bublbobl_bankswitch_w );
+WRITE8_HANDLER( tokio_bankswitch_w );
+WRITE8_HANDLER( tokio_videoctrl_w );
+WRITE8_HANDLER( bublbobl_nmitrigger_w );
+READ8_HANDLER( tokio_fake_r );
+WRITE8_HANDLER( bublbobl_sound_command_w );
+WRITE8_HANDLER( bublbobl_sh_nmi_disable_w );
+WRITE8_HANDLER( bublbobl_sh_nmi_enable_w );
 extern int bublbobl_video_enable;
 
 
@@ -157,13 +157,13 @@ INLINE void bg_changecolor_RRRRGGGGBBBBxxxx(pen_t color,int data)
 	palette_set_color(color+256,r,g,b);
 }
 
-WRITE_HANDLER( bg_paletteram_RRRRGGGGBBBBxxxx_swap_w )
+WRITE8_HANDLER( bg_paletteram_RRRRGGGGBBBBxxxx_swap_w )
 {
 	bg_paletteram[offset] = data;
 	bg_changecolor_RRRRGGGGBBBBxxxx(offset / 2,bg_paletteram[offset | 1] | (bg_paletteram[offset & ~1] << 8));
 }
 
-WRITE_HANDLER( bg_bank_w )
+WRITE8_HANDLER( bg_bank_w )
 {
 	int bankaddress;
 	unsigned char *RAM = memory_region(REGION_CPU2);
@@ -176,7 +176,7 @@ WRITE_HANDLER( bg_bank_w )
 
 static INTERRUPT_GEN( missb2_interrupt )
 {
-	cpu_set_irq_line(2,0,HOLD_LINE);
+	cpunum_set_input_line(2,0,HOLD_LINE);
 }
 
 
@@ -310,8 +310,8 @@ INPUT_PORTS_START( missb2 )
 	PORT_DIPSETTING(    0xc0, "Very High" )
 
 	PORT_START      /* IN0 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_2WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 )
@@ -320,12 +320,12 @@ INPUT_PORTS_START( missb2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START      /* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_2WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(2)
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_TILT ) /* ?????*/
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_SERVICE1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 INPUT_PORTS_END
@@ -405,7 +405,7 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 static void irqhandler(int irq)
 {
 	logerror("YM3526 firing an IRQ\n");
-//	cpu_set_irq_line(2,0,irq ? ASSERT_LINE : CLEAR_LINE);
+//	cpunum_set_input_line(2,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM3526interface ym3526_interface =

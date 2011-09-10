@@ -298,21 +298,21 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( deroon )
 	PORT_START
-	PORT_BIT_IMPULSE(  0x0001, IP_ACTIVE_LOW, IPT_COIN1,1)
+	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(1)
 	PORT_BIT(  0x0002, IP_ACTIVE_HIGH,IPT_UNKNOWN )
 
-	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
+	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
+	PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_START2 )
 INPUT_PORTS_END
@@ -351,7 +351,7 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 
 
 
-static WRITE_HANDLER( deroon_bankswitch_w )
+static WRITE8_HANDLER( deroon_bankswitch_w )
 {
 	cpu_setbank( 1, memory_region(REGION_CPU2) + ((data-2) & 0x0f) * 0x4000 + 0x10000 );
 }
@@ -417,11 +417,11 @@ VIDEO_UPDATE(deroon)
 	char buf[64];
 	static int command_data=0;
 
-	if (keyboard_pressed_memory(KEYCODE_Q))
+	if (code_pressed_memory(KEYCODE_Q))
 	{
 		command_data++;
 	}
-	if (keyboard_pressed_memory(KEYCODE_A))
+	if (code_pressed_memory(KEYCODE_A))
 	{
 		command_data--;
 	}
@@ -440,10 +440,10 @@ VIDEO_UPDATE(deroon)
 	Machine->orientation = trueorientation;
 
 
-	if (keyboard_pressed_memory(KEYCODE_C))
+	if (code_pressed_memory(KEYCODE_C))
 	{
 		soundlatch_w(0,command_data);
-		cpu_set_irq_line(1, IRQ_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 		usrintf_showmessage("command write=%2x",command_data);
 	}
 #endif
@@ -465,7 +465,7 @@ VIDEO_UPDATE(deroon)
 
 //hacks
 
-	if(keyboard_pressed_memory(KEYCODE_Z))
+	if(code_pressed_memory(KEYCODE_Z))
 	{
 		if(!gametype)
 			cpunum_set_reg(0, M68K_PC, 0x23ae8); /* deroon */
@@ -477,7 +477,7 @@ VIDEO_UPDATE(deroon)
 		}
 	}
 
-	if(keyboard_pressed_memory(KEYCODE_X))
+	if(code_pressed_memory(KEYCODE_X))
 	{
 		if(gametype)
 		{
@@ -526,7 +526,7 @@ VIDEO_UPDATE(deroon)
 static void sound_irq(int irq)
 {
 	/* IRQ */
-	cpu_set_irq_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YMF262interface ymf262_interface =
@@ -656,7 +656,7 @@ ROM_END
 
 static void reset_callback(int param)
 {
-	cpu_set_reset_line(0, PULSE_LINE);
+	cpunum_set_input_line(0, INPUT_LINE_RESET, PULSE_LINE);
 }
 
 

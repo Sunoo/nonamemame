@@ -53,10 +53,10 @@ write:
 #include "vidhrdw/generic.h"
 
 
-extern WRITE_HANDLER( crbaloon_videoram_w );
-extern WRITE_HANDLER( crbaloon_colorram_w );
-extern WRITE_HANDLER( crbaloon_spritectrl_w );
-extern WRITE_HANDLER( crbaloon_flipscreen_w );
+extern WRITE8_HANDLER( crbaloon_videoram_w );
+extern WRITE8_HANDLER( crbaloon_colorram_w );
+extern WRITE8_HANDLER( crbaloon_spritectrl_w );
+extern WRITE8_HANDLER( crbaloon_flipscreen_w );
 
 extern PALETTE_INIT( crbaloon );
 extern VIDEO_START( crbaloon );
@@ -77,7 +77,7 @@ static MACHINE_INIT( crbaloon )
     SN76477_enable_w(0, 0);
 }
 
-WRITE_HANDLER( crbaloon_06_w )
+WRITE8_HANDLER( crbaloon_06_w )
 {
 	val06 = data;
 
@@ -123,19 +123,19 @@ WRITE_HANDLER( crbaloon_06_w )
 	}
 }
 
-WRITE_HANDLER( crbaloon_08_w )
+WRITE8_HANDLER( crbaloon_08_w )
 {
 	val08 = data;
 
 	crbaloon_flipscreen_w(offset,data & 1);
 }
 
-WRITE_HANDLER( crbaloon_0a_w )
+WRITE8_HANDLER( crbaloon_0a_w )
 {
 	val0a = data;
 }
 
-READ_HANDLER( crbaloon_IN2_r )
+READ8_HANDLER( crbaloon_IN2_r )
 {
 	extern int crbaloon_collision;
 
@@ -157,7 +157,7 @@ logerror("PC %04x: %02x low\n",activecpu_get_pc(),offset);
 	}
 }
 
-READ_HANDLER( crbaloon_IN3_r )
+READ8_HANDLER( crbaloon_IN3_r )
 {
 	if (val08 & 0x02)
 		/* enable coin & start input? Wild guess!!! */
@@ -177,7 +177,7 @@ logerror("PC %04x: 03 low\n",activecpu_get_pc());
 }
 
 
-READ_HANDLER( crbaloon_IN_r )
+READ8_HANDLER( crbaloon_IN_r )
 {
 	switch (offset & 0x03)
 	{
@@ -253,18 +253,18 @@ INPUT_PORTS_START( crbaloon )
 	PORT_DIPSETTING(    0x00, "Disable" )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
 
 	PORT_START
 	PORT_BIT( 0x0f, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* from chip PC3259 */
-	PORT_BITX(    0x10, 0x10, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Invulnerability", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT(    0x10, 0x10, IPT_DIPSWITCH_NAME ) PORT_NAME("Invulnerability") PORT_CHEAT
 	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
@@ -281,7 +281,7 @@ INPUT_PORTS_START( crbaloon )
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
-	PORT_BITX(0x02, IP_ACTIVE_LOW, IPT_BUTTON1, "High Score Name Reset", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT(0x02, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("High Score Name Reset")
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN2 )	/* should be COIN2 */
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_TILT )
 	/* the following four bits come from chip PC3092 */

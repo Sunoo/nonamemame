@@ -41,7 +41,7 @@ static WRITE16_HANDLER( sound_command_w )
 	if (ACCESSING_LSB)
 	{
 		soundlatch_w(offset,data & 0xff);
-		cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
+		cpunum_set_input_line(1,INPUT_LINE_NMI,PULSE_LINE);
 	}
 }
 
@@ -62,7 +62,7 @@ static WRITE16_HANDLER( tail2nos_K051316_ctrl_0_w )
 		K051316_ctrl_0_w(offset,data & 0xff);
 }
 
-static WRITE_HANDLER( sound_bankswitch_w )
+static WRITE8_HANDLER( sound_bankswitch_w )
 {
 	cpu_setbank(3,memory_region(REGION_CPU2) + 0x10000 + (data & 0x01) * 0x8000);
 }
@@ -134,8 +134,8 @@ INPUT_PORTS_START( tail2nos )
 	PORT_START
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_2WAY )
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY )
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -144,7 +144,7 @@ INPUT_PORTS_START( tail2nos )
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BITX(0x1000, IP_ACTIVE_LOW, IPT_SERVICE, "Test Advance", KEYCODE_F1, IP_JOY_DEFAULT )
+	PORT_BIT(0x1000, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Test Advance") PORT_CODE(KEYCODE_F1)
 	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -246,7 +246,7 @@ static struct GfxDecodeInfo tail2nos_gfxdecodeinfo[] =
 
 static void irqhandler(int irq)
 {
-	cpu_set_irq_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM2608interface ym2608_interface =

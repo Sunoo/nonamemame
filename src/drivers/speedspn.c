@@ -55,22 +55,22 @@ TCH-SS9.u34     "     /               AB2Bh
 /* in vidhrdw */
 extern data8_t *speedspn_attram;
 
-WRITE_HANDLER( speedspn_vidram_w );
-WRITE_HANDLER( speedspn_attram_w );
-READ_HANDLER( speedspn_vidram_r );
+WRITE8_HANDLER( speedspn_vidram_w );
+WRITE8_HANDLER( speedspn_attram_w );
+READ8_HANDLER( speedspn_vidram_r );
 VIDEO_START(speedspn);
 VIDEO_UPDATE(speedspn);
-WRITE_HANDLER(speedspn_banked_vidram_change);
-WRITE_HANDLER(speedspn_global_display_w);
+WRITE8_HANDLER(speedspn_banked_vidram_change);
+WRITE8_HANDLER(speedspn_global_display_w);
 
-static READ_HANDLER(speedspn_irq_ack_r)
+static READ8_HANDLER(speedspn_irq_ack_r)
 {
 	// I think this simply acknowledges the IRQ #0, it's read within the handler and the
 	//  value is discarded
 	return 0;
 }
 
-static WRITE_HANDLER(speedspn_banked_rom_change)
+static WRITE8_HANDLER(speedspn_banked_rom_change)
 {
 	/* is this weird banking some form of protection? */
 
@@ -99,10 +99,10 @@ static WRITE_HANDLER(speedspn_banked_rom_change)
 
 /*** SOUND RELATED ***********************************************************/
 
-static WRITE_HANDLER(speedspn_sound_w)
+static WRITE8_HANDLER(speedspn_sound_w)
 {
 	soundlatch_w(1,data);
-	cpu_set_irq_line(1,0,HOLD_LINE);
+	cpunum_set_input_line(1,0,HOLD_LINE);
 }
 
 /*** MEMORY MAPS *************************************************************/
@@ -178,23 +178,23 @@ INPUT_PORTS_START( speedspn )
 
 	PORT_START /* Player 1 Inputs */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
 
 	PORT_START /* Player 2 Inputs */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
 
 	PORT_START /* Dips */
 	PORT_DIPNAME( 0x0f, 0x0f, DEF_STR( Coin_A ) )

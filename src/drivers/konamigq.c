@@ -58,12 +58,6 @@
 
 static data8_t sndto000[ 16 ];
 static data8_t sndtor3k[ 16 ];
-static data8_t sector_buffer[512];
-
-INLINE void psxwritebyte( UINT32 n_address, UINT8 n_data )
-{
-	*( (UINT8 *)g_p_n_psxram + BYTE_XOR_LE( n_address ) ) = n_data;
-}
 
 static WRITE32_HANDLER( soundr3k_w )
 {
@@ -72,7 +66,7 @@ static WRITE32_HANDLER( soundr3k_w )
 		sndto000[ ( offset << 1 ) + 1 ] = data >> 16;
 		if( offset == 3 )
 		{
-			cpu_set_irq_line( 1, 1, HOLD_LINE );
+			cpunum_set_input_line( 1, 1, HOLD_LINE );
 		}
 	}
 	if( ACCESSING_LSW32 )
@@ -191,7 +185,7 @@ static WRITE32_HANDLER( eeprom_w )
 	EEPROM_write_bit( ( data & 0x01 ) ? 1 : 0 );
 	EEPROM_set_clock_line( ( data & 0x04 ) ? ASSERT_LINE : CLEAR_LINE );
 	EEPROM_set_cs_line( ( data & 0x02 ) ? CLEAR_LINE : ASSERT_LINE );
-	cpu_set_reset_line( 1, ( data & 0x40 ) ? CLEAR_LINE : ASSERT_LINE );
+	cpunum_set_input_line(1, INPUT_LINE_RESET, ( data & 0x40 ) ? CLEAR_LINE : ASSERT_LINE );
 }
 
 static READ32_HANDLER( eeprom_r )
@@ -343,34 +337,39 @@ static struct K054539interface k054539_interface =
 	{ NULL }
 };
 
+/* SCSI */
+
+static data8_t sector_buffer[ 512 ];
+
 static void scsi_dma_read( UINT32 n_address, INT32 n_size )
 {
 	int i;
-	UINT32 dest = n_address;
+	int n_this;
 
-	/* dma size is in 32-bit words */
-	n_size <<= 2;
-
-	while (n_size > 0)
+	while( n_size > 0 )
 	{
-		if (n_size < 512)	/* non-READ commands */
+		if( n_size > sizeof( sector_buffer ) / 4 )
 		{
-			am53cf96_read_data(n_size, &sector_buffer[0]);
-			for (i = 0; i < n_size; i++)
-			{
-				psxwritebyte(dest+i, sector_buffer[i]);
-			}
-			n_size = 0;
+			n_this = sizeof( sector_buffer ) / 4;
 		}
 		else
 		{
-			am53cf96_read_data(512, &sector_buffer[0]);
-			for (i = 0; i < 512; i++)
-			{
-				psxwritebyte(dest+i, sector_buffer[i]);
-			}
-			dest += 512;
-			n_size -= 512;
+			n_this = n_size;
+		}
+		am53cf96_read_data( n_this * 4, sector_buffer );
+		n_size -= n_this;
+
+		i = 0;
+		while( n_this > 0 )
+		{
+			g_p_n_psxram[ n_address / 4 ] =
+				( sector_buffer[ i + 0 ] << 0 ) |
+				( sector_buffer[ i + 1 ] << 8 ) |
+				( sector_buffer[ i + 2 ] << 16 ) |
+				( sector_buffer[ i + 3 ] << 24 );
+			n_address += 4;
+			i += 4;
+			n_this--;
 		}
 	}
 }
@@ -454,7 +453,7 @@ INPUT_PORTS_START( konamigq )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX( 0x20, IP_ACTIVE_LOW, 0, "Test Switch", KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, 0 ) PORT_NAME("Test Switch") PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
@@ -463,8 +462,8 @@ INPUT_PORTS_START( konamigq )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 ) /* trigger */
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 ) /* reload */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1) /* trigger */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1) /* reload */
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -474,8 +473,8 @@ INPUT_PORTS_START( konamigq )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 ) /* trigger */
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 ) /* reload */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2) /* trigger */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2) /* reload */
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -485,8 +484,8 @@ INPUT_PORTS_START( konamigq )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START3 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER3 ) /* trigger */
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER3 ) /* reload */
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(3) /* trigger */
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(3) /* reload */
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_SERVICE3 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -516,27 +515,27 @@ INPUT_PORTS_START( konamigq )
 
 	/* IN 5 */
 	PORT_START /* mask default type                     sens delta min max */
-	PORT_ANALOG( 0xff, 0x00, IPT_LIGHTGUN_X | IPF_PLAYER1, 25, 15, 0, 0xff )
+	PORT_BIT( 0xff, 0x00, IPT_LIGHTGUN_X ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(25) PORT_KEYDELTA(15) PORT_PLAYER(1)
 
 	/* IN 6 */
 	PORT_START
-	PORT_ANALOG( 0xff, 0x00, IPT_LIGHTGUN_Y | IPF_PLAYER1, 25, 15, 0, 0xff )
+	PORT_BIT( 0xff, 0x00, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(25) PORT_KEYDELTA(15) PORT_PLAYER(1)
 
 	/* IN 7 */
 	PORT_START
-	PORT_ANALOG( 0xff, 0x00, IPT_LIGHTGUN_X | IPF_PLAYER2, 25, 15, 0, 0xff )
+	PORT_BIT( 0xff, 0x00, IPT_LIGHTGUN_X ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(25) PORT_KEYDELTA(15) PORT_PLAYER(2)
 
 	/* IN 8 */
 	PORT_START
-	PORT_ANALOG( 0xff, 0x00, IPT_LIGHTGUN_Y | IPF_PLAYER2, 25, 15, 0, 0xff )
+	PORT_BIT( 0xff, 0x00, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(25) PORT_KEYDELTA(15) PORT_PLAYER(2)
 
 	/* IN 9 */
 	PORT_START
-	PORT_ANALOG( 0xff, 0x00, IPT_LIGHTGUN_X | IPF_PLAYER3, 25, 15, 0, 0xff )
+	PORT_BIT( 0xff, 0x00, IPT_LIGHTGUN_X ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(25) PORT_KEYDELTA(15) PORT_PLAYER(3)
 
 	/* IN 10 */
 	PORT_START
-	PORT_ANALOG( 0xff, 0x00, IPT_LIGHTGUN_Y | IPF_PLAYER3, 25, 15, 0, 0xff )
+	PORT_BIT( 0xff, 0x00, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(25) PORT_KEYDELTA(15) PORT_PLAYER(3)
 INPUT_PORTS_END
 
 ROM_START( cryptklr )

@@ -44,14 +44,14 @@ extern unsigned char *tomahawk_protection;
 PALETTE_INIT( astrof );
 VIDEO_START( astrof );
 VIDEO_UPDATE( astrof );
-WRITE_HANDLER( astrof_videoram_w );
-WRITE_HANDLER( tomahawk_videoram_w );
-WRITE_HANDLER( astrof_video_control1_w );
-WRITE_HANDLER( astrof_video_control2_w );
-WRITE_HANDLER( tomahawk_video_control2_w );
-READ_HANDLER( tomahawk_protection_r );
-WRITE_HANDLER( astrof_sample1_w );
-WRITE_HANDLER( astrof_sample2_w );
+WRITE8_HANDLER( astrof_videoram_w );
+WRITE8_HANDLER( tomahawk_videoram_w );
+WRITE8_HANDLER( astrof_video_control1_w );
+WRITE8_HANDLER( astrof_video_control2_w );
+WRITE8_HANDLER( tomahawk_video_control2_w );
+READ8_HANDLER( tomahawk_protection_r );
+WRITE8_HANDLER( astrof_sample1_w );
+WRITE8_HANDLER( astrof_sample2_w );
 
 extern struct Samplesinterface astrof_samples_interface;
 extern struct Samplesinterface tomahawk_samples_interface;
@@ -97,7 +97,7 @@ ADDRESS_MAP_END
 static INTERRUPT_GEN( astrof_interrupt )
 {
 	if (readinputport(2) & 1)	/* Coin */
-		cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 }
 
 
@@ -106,13 +106,13 @@ INPUT_PORTS_START( astrof )
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
 /* Player 1 Controls */
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_2WAY )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 /* Player 2 Controls */
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_2WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_2WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_COCKTAIL
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_COCKTAIL
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 
 	PORT_START      /* DSW0 */
 	PORT_DIPNAME( 0x03, 0x00, DEF_STR( Lives ) )
@@ -147,7 +147,7 @@ INPUT_PORTS_START( astrof )
 	/* user releases the key. */
 	/* The cabinet selector is not memory mapped, but just disables the */
 	/* screen flip logic */
-	PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_HIGH, IPT_COIN1, 1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
 	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Cabinet ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( Cocktail ) )
@@ -156,10 +156,10 @@ INPUT_PORTS_END
 
 INPUT_PORTS_START( tomahawk )
 	PORT_START	/* IN0 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_4WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_4WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_4WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_START2 )
@@ -198,7 +198,7 @@ INPUT_PORTS_START( tomahawk )
 	/* user releases the key. */
 	/* The cabinet selector is not memory mapped, but just disables the */
 	/* screen flip logic */
-	PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_HIGH, IPT_COIN1, 1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
 	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Cabinet ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x02, DEF_STR( Cocktail ) )

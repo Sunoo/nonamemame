@@ -193,9 +193,9 @@ WRITE16_HANDLER( rastan_spriteflip_w );
 VIDEO_START( topspeed );
 VIDEO_UPDATE( topspeed );
 
-WRITE_HANDLER( rastan_adpcm_trigger_w );
-WRITE_HANDLER( rastan_c000_w );
-WRITE_HANDLER( rastan_d000_w );
+WRITE8_HANDLER( rastan_adpcm_trigger_w );
+WRITE8_HANDLER( rastan_c000_w );
+WRITE8_HANDLER( rastan_d000_w );
 
 static UINT16 cpua_ctrl = 0xff;
 static int ioc220_port = 0;
@@ -223,7 +223,7 @@ static void parse_control(void)	/* assumes Z80 sandwiched between 68Ks */
 	/* bit 0 enables cpu B */
 	/* however this fails when recovering from a save state
 	   if cpu B is disabled !! */
-	cpu_set_reset_line(2,(cpua_ctrl &0x1) ? CLEAR_LINE : ASSERT_LINE);
+	cpunum_set_input_line(2, INPUT_LINE_RESET, (cpua_ctrl &0x1) ? CLEAR_LINE : ASSERT_LINE);
 
 }
 
@@ -247,14 +247,14 @@ static WRITE16_HANDLER( cpua_ctrl_w )
 
 void topspeed_interrupt6(int x)
 {
-	cpu_set_irq_line(0,6,HOLD_LINE);
+	cpunum_set_input_line(0,6,HOLD_LINE);
 }
 
 /* 68000 B */
 
 void topspeed_cpub_interrupt6(int x)
 {
-	cpu_set_irq_line(2,6,HOLD_LINE);	/* assumes Z80 sandwiched between the 68Ks */
+	cpunum_set_input_line(2,6,HOLD_LINE);	/* assumes Z80 sandwiched between the 68Ks */
 }
 
 
@@ -262,14 +262,14 @@ static INTERRUPT_GEN( topspeed_interrupt )
 {
 	/* Unsure how many int6's per frame */
 	timer_set(TIME_IN_CYCLES(200000-500,0),0, topspeed_interrupt6);
-	cpu_set_irq_line(0, 5, HOLD_LINE);
+	cpunum_set_input_line(0, 5, HOLD_LINE);
 }
 
 static INTERRUPT_GEN( topspeed_cpub_interrupt )
 {
 	/* Unsure how many int6's per frame */
 	timer_set(TIME_IN_CYCLES(200000-500,0),0, topspeed_cpub_interrupt6);
-	cpu_set_irq_line(2, 5, HOLD_LINE);
+	cpunum_set_input_line(2, 5, HOLD_LINE);
 }
 
 
@@ -358,7 +358,7 @@ static void reset_sound_region(void)
 	cpu_setbank( 10, memory_region(REGION_CPU2) + (banknum * 0x4000) + 0x10000 );
 }
 
-static WRITE_HANDLER( sound_bankswitch_w )	/* assumes Z80 sandwiched between 68Ks */
+static WRITE8_HANDLER( sound_bankswitch_w )	/* assumes Z80 sandwiched between 68Ks */
 {
 	banknum = (data - 1) & 7;
 	reset_sound_region();
@@ -532,20 +532,20 @@ INPUT_PORTS_START( topspeed )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_SERVICE1 )
 	/* Next bit is brake key (active low) for non-cockpit */
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER1 )	/* 3 for brake [7 levels] */
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON8 | IPF_PLAYER1 )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1 )	/* main brake key */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON6 ) PORT_PLAYER(1)	/* 3 for brake [7 levels] */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON8 ) PORT_PLAYER(1)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(1)	/* main brake key */
 
 	PORT_START      /* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON3 | IPF_PLAYER1 )	/* nitro */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_PLAYER(1)	/* nitro */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_TILT )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_START1 )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1 )	/* gear shift lo/hi */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_PLAYER(1)	/* gear shift lo/hi */
 	/* Next bit is accel key (active low/high, depends on cab DSW) for non-cockpit */
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1 )	/* 3 for accel [7 levels] */
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER1 )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )	/* main accel key */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_PLAYER(1)	/* 3 for accel [7 levels] */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON7 ) PORT_PLAYER(1)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)	/* main accel key */
 
 	PORT_START      /* IN2, unused */
 
@@ -554,13 +554,13 @@ INPUT_PORTS_START( topspeed )
 	   an analogue wheel, the user will need to adjust this. */
 
 	PORT_START	/* continuous steer */
-	PORT_ANALOG( 0xffff, 0x00, IPT_AD_STICK_X | IPF_PLAYER1, 10, 2, 0xff7f, 0x80)
+	PORT_BIT( 0xffff, 0x00, IPT_AD_STICK_X ) PORT_MINMAX(0xff7f,0x80) PORT_SENSITIVITY(10) PORT_KEYDELTA(2) PORT_PLAYER(1)
 
 	PORT_START      /* fake, allowing digital steer */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
 	PORT_DIPNAME( 0x10, 0x10, "Steering type" )
 	PORT_DIPSETTING(    0x10, "Digital" )
 	PORT_DIPSETTING(    0x00, "Analogue" )
@@ -605,20 +605,20 @@ INPUT_PORTS_START( topspedu )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_SERVICE1 )
 	/* Next bit is brake key (active low) for non-cockpit */
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER1 )	/* 3 for brake [7 levels] */
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON8 | IPF_PLAYER1 )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1 )	/* main brake key */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON6 ) PORT_PLAYER(1)	/* 3 for brake [7 levels] */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON8 ) PORT_PLAYER(1)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(1)	/* main brake key */
 
 	PORT_START      /* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON3 | IPF_PLAYER1 )	/* nitro */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_PLAYER(1)	/* nitro */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_TILT )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_START1 )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1 )	/* gear shift lo/hi */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_PLAYER(1)	/* gear shift lo/hi */
 	/* Next bit is accel key (active low/high, depends on cab DSW) for non-cockpit */
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1 )	/* 3 for accel [7 levels] */
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER1 )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )	/* main accel key */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_PLAYER(1)	/* 3 for accel [7 levels] */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON7 ) PORT_PLAYER(1)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)	/* main accel key */
 
 	PORT_START      /* IN2, unused */
 
@@ -627,13 +627,13 @@ INPUT_PORTS_START( topspedu )
 	   an analogue wheel, the user will need to adjust this. */
 
 	PORT_START	/* continuous steer */
-	PORT_ANALOG( 0xffff, 0x00, IPT_AD_STICK_X | IPF_PLAYER1, 10, 2, 0xff7f, 0x80)
+	PORT_BIT( 0xffff, 0x00, IPT_AD_STICK_X ) PORT_MINMAX(0xff7f,0x80) PORT_SENSITIVITY(10) PORT_KEYDELTA(2) PORT_PLAYER(1)
 
 	PORT_START      /* fake, allowing digital steer */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
 	PORT_DIPNAME( 0x10, 0x10, "Steering type" )
 	PORT_DIPSETTING(    0x10, "Digital" )
 	PORT_DIPSETTING(    0x00, "Analogue" )
@@ -678,20 +678,20 @@ INPUT_PORTS_START( fullthrl )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,  IPT_SERVICE1 )
 	/* Next bit is brake key (active low) for non-cockpit */
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER1 )	/* 3 for brake [7 levels] */
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON8 | IPF_PLAYER1 )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER1 )	/* main brake key */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON6 ) PORT_PLAYER(1)	/* 3 for brake [7 levels] */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON8 ) PORT_PLAYER(1)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_PLAYER(1)	/* main brake key */
 
 	PORT_START      /* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON3 | IPF_PLAYER1 )	/* nitro */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_PLAYER(1)	/* nitro */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,  IPT_TILT )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,  IPT_START1 )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1 )	/* gear shift lo/hi */
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_PLAYER(1)	/* gear shift lo/hi */
 	/* Next bit is accel key (active low/high, depends on cab DSW) for non-cockpit */
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1 )	/* 3 for accel [7 levels] */
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER1 )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )	/* main accel key */
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON5 ) PORT_PLAYER(1)	/* 3 for accel [7 levels] */
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_BUTTON7 ) PORT_PLAYER(1)
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)	/* main accel key */
 
 	PORT_START      /* IN2, unused */
 
@@ -700,13 +700,13 @@ INPUT_PORTS_START( fullthrl )
 	   an analogue wheel, the user will need to adjust this. */
 
 	PORT_START	/* continuous steer */
-	PORT_ANALOG( 0xffff, 0x00, IPT_AD_STICK_X | IPF_PLAYER1, 10, 2, 0xff7f, 0x80)
+	PORT_BIT( 0xffff, 0x00, IPT_AD_STICK_X ) PORT_MINMAX(0xff7f,0x80) PORT_SENSITIVITY(10) PORT_KEYDELTA(2) PORT_PLAYER(1)
 
 	PORT_START      /* fake, allowing digital steer */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(1)
 	PORT_DIPNAME( 0x10, 0x10, "Steering type" )
 	PORT_DIPSETTING(    0x10, "Digital" )
 	PORT_DIPSETTING(    0x00, "Analogue" )
@@ -756,7 +756,7 @@ static struct GfxDecodeInfo topspeed_gfxdecodeinfo[] =
 
 static void irq_handler(int irq)	/* assumes Z80 sandwiched between 68Ks */
 {
-	cpu_set_irq_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM2151interface ym2151_interface =

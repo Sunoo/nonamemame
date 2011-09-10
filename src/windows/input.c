@@ -2026,6 +2026,7 @@ void osd_analogjoy_read(int player, int analog_axis[], InputCode analogjoy_input
 			continue;
 
 		joyindex = JOYINDEX( analogjoy_input[i] );
+
 		joynum = JOYNUM( analogjoy_input[i] );
 
 /*start MAME:analog+*/
@@ -2709,7 +2710,8 @@ void process_ctrlr_orient(struct rc_struct *iptrc, const char *ctype, const stru
 	}
 }
 
-void process_ctrlr_players(struct rc_struct *iptrc, const char *ctype, const struct GameDriver *drv)
+//FOLLOWING CODE REMOVED TO GET MAME 0.84 TO WORK AS drv->input_ports IS MISSING!!!
+/*void process_ctrlr_players(struct rc_struct *iptrc, const char *ctype, const struct GameDriver *drv)
 {
 	char buffer[128];
 	const struct InputPortTiny *input = drv->input_ports;
@@ -2779,7 +2781,7 @@ struct GameDriver *drv)
 
  sprintf(buffer, "button%d", no_buttons);
  process_ctrlr_file (iptrc, ctype, buffer);
-}
+}*/
 
 // nice hack: load source_file.ini (omit if referenced later any)
 void process_ctrlr_system(struct rc_struct *iptrc, const char *ctype, const struct GameDriver *drv)
@@ -2829,18 +2831,24 @@ static int ipdef_custom_rc_func(struct rc_option *option, const char *arg, int p
 			// for all definitions
 			while (idef->type != IPT_END)
 			{
-				int j;
-
-				// reassign all matching keystrokes to the given argument
-				for (j = 0; j < SEQ_MAX; j++)
+				int seq_count = (idef->type > IPT_ANALOG_START && idef->type < IPT_ANALOG_END) ? 2 : 1;
+				int j, k;
+				
+				// loop over all sequences
+				for (k = 0; k < seq_count; k++)
 				{
-					// if the keystroke matches
-					if (idef->seq[j] == pinput_keywords->val)
+					// reassign all matching keystrokes to the given argument
+					for (j = 0; j < SEQ_MAX; j++)
 					{
-						// re-assign
-						idef->seq[j] = is[0];
+						// if the keystroke matches
+						if (idef->seq[k][j] == pinput_keywords->val)
+						{
+							// re-assign
+							idef->seq[k][j] = is[0];
+						}
 					}
 				}
+				
 				// move to the next definition
 				idef++;
 			}
@@ -2854,11 +2862,12 @@ static int ipdef_custom_rc_func(struct rc_option *option, const char *arg, int p
 			while (idef->type != IPT_END)
 			{
 				// if the definition matches
-				if (idef->type == pinput_keywords->val)
+				if (idef->type == pinput_keywords->val && idef->player == pinput_keywords->player)
 				{
+					int seqnum = 0;
                     if (pinput_keywords->type == IKT_IPT_EXT)
-                        idef++;
-					seq_set_string(&idef->seq, arg);
+                        seqnum = 1;
+					seq_set_string(&idef->seq[seqnum], arg);
 					// and abort (there shouldn't be duplicate definitions)
 					break;
 				}
@@ -2893,7 +2902,7 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 				case IPT_OSD_1:
 					idef->type = next_reserved;
 					idef->name = "Toggle fullscreen";
-					seq_set_2 (&idef->seq, KEYCODE_LALT, KEYCODE_ENTER);
+					seq_set_2 (&idef->seq[0], KEYCODE_LALT, KEYCODE_ENTER);
 				break;
 
 #ifdef MESS
@@ -2902,7 +2911,7 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 					{
 						idef->type = next_reserved;
 						idef->name = "Toggle menubar";
-						seq_set_1 (&idef->seq, KEYCODE_SCRLOCK);
+						seq_set_1 (&idef->seq[0], KEYCODE_SCRLOCK);
 					}
 				break;
 #endif /* MESS */
@@ -2917,14 +2926,14 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 		// (allows ALT-TAB to switch between windows apps)
 		if (idef->type == IPT_UI_CONFIGURE)
 		{
-			seq_copy(&idef->seq, &no_alt_tab_seq);
+			seq_copy(&idef->seq[0], &no_alt_tab_seq);
 		}
 
 #ifdef MESS
 		if (idef->type == IPT_UI_THROTTLE)
 		{
 			static InputSeq empty_seq = SEQ_DEF_0;
-			seq_copy(&idef->seq, &empty_seq);
+			seq_copy(&idef->seq[0], &empty_seq);
 		}
 #endif /* MESS */
 
@@ -2935,14 +2944,14 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 			static InputSeq p2b1 = SEQ_DEF_5(KEYCODE_A, CODE_OR, JOYCODE_2_BUTTON1, CODE_OR, JOYCODE_MOUSE_1_BUTTON3);
 			static InputSeq p2b2 = SEQ_DEF_3(KEYCODE_S, CODE_OR, JOYCODE_2_BUTTON2);
 
-			if (idef->type == (IPT_BUTTON2 | IPF_PLAYER1))
-				seq_copy(&idef->seq, &p1b2);
-			if (idef->type == (IPT_BUTTON3 | IPF_PLAYER1))
-				seq_copy(&idef->seq, &p1b3);
-			if (idef->type == (IPT_BUTTON1 | IPF_PLAYER2))
-				seq_copy(&idef->seq, &p2b1);
-			if (idef->type == (IPT_BUTTON2 | IPF_PLAYER2))
-				seq_copy(&idef->seq, &p2b2);
+			if (idef->type == IPT_BUTTON2 && idef->player == 1)
+				seq_copy(&idef->seq[0], &p1b2);
+			if (idef->type == IPT_BUTTON3 && idef->player == 1)
+				seq_copy(&idef->seq[0], &p1b3);
+			if (idef->type == IPT_BUTTON1 && idef->player == 2)
+				seq_copy(&idef->seq[0], &p2b1);
+			if (idef->type == IPT_BUTTON2 && idef->player == 2)
+				seq_copy(&idef->seq[0], &p2b2);
 		}
 
 		// find the next one
@@ -3018,7 +3027,7 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 	// if a custom controller has been selected
 	if (ctrlrtype && *ctrlrtype != 0 && (stricmp(ctrlrtype,"Standard") != 0))
 	{
-		const struct InputPortTiny* input = Machine->gamedrv->input_ports;
+		const struct InputPort* input = Machine->input_ports;
 		int paddle = 0, dial = 0, trackball = 0, adstick = 0, pedal = 0, lightgun = 0;
 
 		// process the controller-specific default file
@@ -3032,16 +3041,16 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 
 		// process the orientation-specific files for this controller
 		process_ctrlr_orient (rc, ctrlrtype, Machine->gamedrv);
-
+//FOLLOWING CODE REMOVED TO GET MAME 0.84 TO WORK AS drv->input_ports IS MISSING!!!
 		// process the player-specific files for this controller
-		process_ctrlr_players (rc, ctrlrtype, Machine->gamedrv);
+//		process_ctrlr_players (rc, ctrlrtype, Machine->gamedrv);
 
 		// process the button-specific files for this controller
-		process_ctrlr_buttons (rc, ctrlrtype, Machine->gamedrv);
+//		process_ctrlr_buttons (rc, ctrlrtype, Machine->gamedrv);
 
-		while ((input->type & ~IPF_MASK) != IPT_END)
+		while (input->type != IPT_END)
 		{
-			switch (input->type & ~IPF_MASK)
+			switch (input->type)
 			{
 				case IPT_PADDLE:
 				case IPT_PADDLE_V:

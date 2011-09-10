@@ -138,7 +138,7 @@ WRITE32_HANDLER( psikyo_soundlatch_w )
 
 		ack_latch = 1;
 		soundlatch_w(0, data & 0xff);
-		cpu_set_nmi_line(1,PULSE_LINE);
+		cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 		cpu_spinuntil_time(TIME_IN_USEC(50));	// Allow the other cpu to reply
 	}
 }
@@ -155,7 +155,7 @@ WRITE32_HANDLER( s1945_soundlatch_w )
 
 		ack_latch = 1;
 		soundlatch_w(0, (data >> 16) & 0xff);
-		cpu_set_nmi_line(1,PULSE_LINE);
+		cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 		cpu_spinuntil_time(TIME_IN_USEC(50));	// Allow the other cpu to reply
 	}
 }
@@ -353,10 +353,10 @@ ADDRESS_MAP_END
 
 static void sound_irq( int irq )
 {
-	cpu_set_irq_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
-WRITE_HANDLER( psikyo_ack_latch_w )
+WRITE8_HANDLER( psikyo_ack_latch_w )
 {
 	ack_latch = 0;
 }
@@ -365,7 +365,7 @@ WRITE_HANDLER( psikyo_ack_latch_w )
 						Sengoku Ace / Samurai Aces
 ***************************************************************************/
 
-WRITE_HANDLER( sngkace_sound_bankswitch_w )
+WRITE8_HANDLER( sngkace_sound_bankswitch_w )
 {
 	unsigned char *RAM = memory_region(REGION_CPU2);
 	int bank = data & 3;
@@ -405,7 +405,7 @@ ADDRESS_MAP_END
 								Gun Bird
 ***************************************************************************/
 
-WRITE_HANDLER( gunbird_sound_bankswitch_w )
+WRITE8_HANDLER( gunbird_sound_bankswitch_w )
 {
 	unsigned char *RAM = memory_region(REGION_CPU2);
 	int bank = (data >> 4) & 3;
@@ -478,23 +478,23 @@ ADDRESS_MAP_END
 
 #define PSIKYO_PORT_PLAYER1 \
 	PORT_BIT(  0x0100, IP_ACTIVE_LOW, IPT_START1                       ) \
-	PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER1 ) \
-	PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER1 ) \
-	PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER1 ) \
-	PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER1 ) \
-	PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 ) \
-	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER1 ) \
-	PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER1 )
+	PORT_BIT(  0x0200, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1) \
+	PORT_BIT(  0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1) \
+	PORT_BIT(  0x0800, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1) \
+	PORT_BIT(  0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1) \
+	PORT_BIT(  0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1) \
+	PORT_BIT(  0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1) \
+	PORT_BIT(  0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 
 #define PSIKYO_PORT_PLAYER2 \
 	PORT_BIT(  0x0001, IP_ACTIVE_LOW, IPT_START2                       ) \
-	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_BUTTON3        | IPF_PLAYER2 ) \
-	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_BUTTON2        | IPF_PLAYER2 ) \
-	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_BUTTON1        | IPF_PLAYER2 ) \
-	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 ) \
-	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 ) \
-	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 ) \
-	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
+	PORT_BIT(  0x0002, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2) \
+	PORT_BIT(  0x0004, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2) \
+	PORT_BIT(  0x0008, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2) \
+	PORT_BIT(  0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2) \
+	PORT_BIT(  0x0020, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2) \
+	PORT_BIT(  0x0040, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2) \
+	PORT_BIT(  0x0080, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
 
 #define PSIKYO_PORT_COIN \
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW,  IPT_COIN1    ) \
@@ -502,7 +502,7 @@ ADDRESS_MAP_END
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW,  IPT_UNKNOWN  ) \
 	PORT_BIT( 0x0008, IP_ACTIVE_LOW,  IPT_UNKNOWN  ) \
 	PORT_BIT( 0x0010, IP_ACTIVE_LOW,  IPT_SERVICE1 ) \
-	PORT_BITX(0x0020, IP_ACTIVE_LOW,  IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE ) \
+	PORT_BIT(0x0020, IP_ACTIVE_LOW,  IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2) \
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW,  IPT_TILT     ) \
 	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_SPECIAL  )	// From Sound CPU
 
@@ -766,13 +766,13 @@ INPUT_PORTS_START( btlkroad )
 	PSIKYO_PORT_COIN
 
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_UNKNOWN               )
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER2 )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER2 )
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(2)
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(2)
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)
 	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_UNKNOWN               )
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER1 )
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER1 )
-	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 )
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(1)
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(1)
+	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)
 
 	PORT_START	// IN2 - c00004&5
 	PORT_DIPNAME( 0x0001, 0x0001, DEF_STR( Flip_Screen ) )
@@ -1635,9 +1635,9 @@ MACHINE_DRIVER_END
 static void irqhandler(int linestate)
 {
 	if (linestate)
-		cpu_set_irq_line(1, 0, ASSERT_LINE);
+		cpunum_set_input_line(1, 0, ASSERT_LINE);
 	else
-		cpu_set_irq_line(1, 0, CLEAR_LINE);
+		cpunum_set_input_line(1, 0, CLEAR_LINE);
 }
 
 static struct YMF278B_interface ymf278b_interface =
@@ -1778,10 +1778,10 @@ DRIVER_INIT( sngkace )
 	}
 
 	/* input ports */
-	install_mem_read32_handler(0, 0xc00000, 0xc0000b, sngkace_input_r);
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00000, 0xc0000b, 0, 0, sngkace_input_r);
 
 	/* sound latch */
-	install_mem_write32_handler(0, 0xc00010, 0xc00013, psikyo_soundlatch_w);
+	memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00010, 0xc00013, 0, 0, psikyo_soundlatch_w);
 
 	psikyo_ka302c_banking = 0; // SH201B doesn't have any gfx banking
 	psikyo_switch_banks(0, 0); // sngkace / samuraia don't use banking
@@ -1946,10 +1946,10 @@ ROM_END
 DRIVER_INIT( gunbird )
 {
 	/* input ports */
-	install_mem_read32_handler(0, 0xc00000, 0xc0000b, gunbird_input_r);
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00000, 0xc0000b, 0, 0, gunbird_input_r);
 
 	/* sound latch */
-	install_mem_write32_handler(0, 0xc00010, 0xc00013, psikyo_soundlatch_w);
+	memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00010, 0xc00013, 0, 0, psikyo_soundlatch_w);
 
 	psikyo_ka302c_banking = 1;
 }
@@ -2004,10 +2004,10 @@ ROM_END
 DRIVER_INIT( s1945jn )
 {
 	/* input ports */
-	install_mem_read32_handler(0, 0xc00000, 0xc0000b, gunbird_input_r);
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00000, 0xc0000b, 0, 0, gunbird_input_r);
 
 	/* sound latch */
-	install_mem_write32_handler(0, 0xc00010, 0xc00013, s1945_soundlatch_w);
+	memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00010, 0xc00013, 0, 0, s1945_soundlatch_w);
 
 	psikyo_ka302c_banking = 1;
 }
@@ -2129,13 +2129,13 @@ ROM_END
 DRIVER_INIT( s1945 )
 {
 	/* input ports */
-	install_mem_read32_handler(0, 0xc00000, 0xc0000b, s1945_input_r);
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00000, 0xc0000b, 0, 0, s1945_input_r);
 
 	/* sound latch */
-	install_mem_write32_handler(0, 0xc00010, 0xc00013, s1945_soundlatch_w);
+	memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00010, 0xc00013, 0, 0, s1945_soundlatch_w);
 
 	/* protection and tile bank switching */
-	install_mem_write32_handler(0, 0xc00004, 0xc0000b, s1945_mcu_w);
+	memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00004, 0xc0000b, 0, 0, s1945_mcu_w);
 	s1945_mcu_init(s1945_table);
 
 	psikyo_ka302c_banking = 0; // Banking is controlled by mcu
@@ -2144,13 +2144,13 @@ DRIVER_INIT( s1945 )
 DRIVER_INIT( s1945a )
 {
 	/* input ports */
-	install_mem_read32_handler(0, 0xc00000, 0xc0000b, s1945_input_r);
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00000, 0xc0000b, 0, 0, s1945_input_r);
 
 	/* sound latch */
-	install_mem_write32_handler(0, 0xc00010, 0xc00013, s1945_soundlatch_w);
+	memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00010, 0xc00013, 0, 0, s1945_soundlatch_w);
 
 	/* protection and tile bank switching */
-	install_mem_write32_handler(0, 0xc00004, 0xc0000b, s1945_mcu_w);
+	memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00004, 0xc0000b, 0, 0, s1945_mcu_w);
 	s1945_mcu_init(s1945a_table);
 
 	psikyo_ka302c_banking = 0; // Banking is controlled by mcu
@@ -2159,13 +2159,13 @@ DRIVER_INIT( s1945a )
 DRIVER_INIT( s1945j )
 {
 	/* input ports*/
-	install_mem_read32_handler(0, 0xc00000, 0xc0000b, s1945_input_r);
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00000, 0xc0000b, 0, 0, s1945_input_r);
 
 	/* sound latch */
-	install_mem_write32_handler(0, 0xc00010, 0xc00013, s1945_soundlatch_w);
+	memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00010, 0xc00013, 0, 0, s1945_soundlatch_w);
 
 	/* protection and tile bank switching */
-	install_mem_write32_handler(0, 0xc00004, 0xc0000b, s1945_mcu_w);
+	memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00004, 0xc0000b, 0, 0, s1945_mcu_w);
 	s1945_mcu_init(s1945j_table);
 
 	psikyo_ka302c_banking = 0; // Banking is controlled by mcu
@@ -2225,13 +2225,13 @@ ROM_END
 DRIVER_INIT( tengai )
 {
 	/* input ports */
-	install_mem_read32_handler(0, 0xc00000, 0xc0000b, s1945_input_r);
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00000, 0xc0000b, 0, 0, s1945_input_r);
 
 	/* sound latch */
-	install_mem_write32_handler(0, 0xc00010, 0xc00013, s1945_soundlatch_w);
+	memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00010, 0xc00013, 0, 0, s1945_soundlatch_w);
 
 	/* protection */
-	install_mem_write32_handler(0, 0xc00004, 0xc0000b, s1945_mcu_w);
+	memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xc00004, 0xc0000b, 0, 0, s1945_mcu_w);
 	s1945_mcu_init(0);
 
 	psikyo_ka302c_banking = 0; // Banking is controlled by mcu

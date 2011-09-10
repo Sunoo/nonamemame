@@ -52,8 +52,8 @@
 #include "vidhrdw/generic.h"
 
 
-extern WRITE_HANDLER( tunhunt_videoram_w );
-extern WRITE_HANDLER( tunhunt_mott_w );
+extern WRITE8_HANDLER( tunhunt_videoram_w );
+extern WRITE8_HANDLER( tunhunt_mott_w );
 
 extern PALETTE_INIT( tunhunt );
 extern VIDEO_START( tunhunt );
@@ -68,7 +68,7 @@ extern VIDEO_UPDATE( tunhunt );
 
 UINT8 tunhunt_control;
 
-WRITE_HANDLER( tunhunt_control_w )
+WRITE8_HANDLER( tunhunt_control_w )
 {
 	/*
 		0x01	coin counter#2	"right counter"
@@ -93,44 +93,44 @@ WRITE_HANDLER( tunhunt_control_w )
  *
  *************************************/
 
-static READ_HANDLER( tunhunt_button_r )
+static READ8_HANDLER( tunhunt_button_r )
 {
 	int data = readinputport( 0 );
 	return ((data>>offset)&1)?0x00:0x80;
 }
 
 
-static READ_HANDLER( dsw1_r )
+static READ8_HANDLER( dsw1_r )
 {
 	return readinputport(3)&0xff;
 }
 
 
-static READ_HANDLER( dsw2_0r )
+static READ8_HANDLER( dsw2_0r )
 {
 	return (readinputport(3)&0x0100)?0x80:0x00;
 }
 
 
-static READ_HANDLER( dsw2_1r )
+static READ8_HANDLER( dsw2_1r )
 {
 	return (readinputport(3)&0x0200)?0x80:0x00;
 }
 
 
-static READ_HANDLER( dsw2_2r )
+static READ8_HANDLER( dsw2_2r )
 {
 	return (readinputport(3)&0x0400)?0x80:0x00;
 }
 
 
-static READ_HANDLER( dsw2_3r )
+static READ8_HANDLER( dsw2_3r )
 {
 	return (readinputport(3)&0x0800)?0x80:0x00;
 }
 
 
-static READ_HANDLER( dsw2_4r )
+static READ8_HANDLER( dsw2_4r )
 {
 	return (readinputport(3)&0x1000)?0x80:0x00;
 }
@@ -194,10 +194,10 @@ INPUT_PORTS_START( tunhunt )
 	PORT_BIT ( 0x80, IP_ACTIVE_LOW, IPT_VBLANK )
 
 	PORT_START
-	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y, 100, 4, 0x00, 0xff )
+	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_Y ) PORT_MINMAX(0x00,0xff) PORT_SENSITIVITY(100) PORT_KEYDELTA(4)
 
 	PORT_START
-	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_X | IPF_REVERSE, 100, 4, 0x00, 0xff )
+	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_X ) PORT_MINMAX(0x00,0xff) PORT_SENSITIVITY(100) PORT_KEYDELTA(4) PORT_REVERSE
 
 	PORT_START /* dip switches */
 	PORT_DIPNAME (0x0003, 0x0002, DEF_STR( Coinage ) )

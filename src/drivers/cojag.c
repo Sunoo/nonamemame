@@ -692,29 +692,29 @@ INPUT_PORTS_START( area51 )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X | IPF_PLAYER2, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_PLAYER(2)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER2, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10) PORT_PLAYER(2)
 
 	PORT_START				/* gun triggers */
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_SPECIAL )	// gun data valid
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_SPECIAL )	// gun data valid
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0xfff0, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 /*start MAME:analog+*/
 	PORT_START /* fake reload triggers */
 	PORT_BIT( 0x0003, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0xfff0, IP_ACTIVE_LOW, IPT_UNKNOWN )
 /*end MAME:analog+  */
 INPUT_PORTS_END
@@ -722,32 +722,32 @@ INPUT_PORTS_END
 
 INPUT_PORTS_START( vcircle )
 	PORT_START
-	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
-	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER2 )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER2 )
+	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(2)
+	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(2)
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(2)
 	PORT_BIT( 0x00f8, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER2 )
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER2 )
-	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER2 )
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(2)
+	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(2)
 
 	PORT_START
-	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 )
-	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON5 | IPF_PLAYER1 )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON6 | IPF_PLAYER1 )
+	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_PLAYER(1)
+	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_PLAYER(1)
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_PLAYER(1)
 	PORT_BIT( 0x00f8, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0100, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER1 )
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER1 )
-	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER1 )
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
+	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
+	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 
 	PORT_START
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
@@ -1025,10 +1025,10 @@ static void common_init(UINT8 crosshair, UINT16 gpu_jump_offs, UINT16 spin_pc)
 
 	/* install synchronization hooks for GPU */
 	if (cojag_is_r3000)
-		install_mem_write32_handler(0, 0x04f0b000 + gpu_jump_offs, 0x04f0b003 + gpu_jump_offs, gpu_jump_w);
+		memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0x04f0b000 + gpu_jump_offs, 0x04f0b003 + gpu_jump_offs, 0, 0, gpu_jump_w);
 	else
-		install_mem_write32_handler(0, 0xf0b000 + gpu_jump_offs, 0xf0b003 + gpu_jump_offs, gpu_jump_w);
-	install_mem_read32_handler(1, 0xf03000 + gpu_jump_offs, 0xf03003 + gpu_jump_offs, gpu_jump_r);
+		memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xf0b000 + gpu_jump_offs, 0xf0b003 + gpu_jump_offs, 0, 0, gpu_jump_w);
+	memory_install_read32_handler(1, ADDRESS_SPACE_PROGRAM, 0xf03000 + gpu_jump_offs, 0xf03003 + gpu_jump_offs, 0, 0, gpu_jump_r);
 	gpu_jump_address = &jaguar_gpu_ram[gpu_jump_offs/4];
 	gpu_spin_pc = 0xf03000 + spin_pc;
 
@@ -1046,7 +1046,7 @@ static DRIVER_INIT( area51a )
 
 #if ENABLE_SPEEDUP_HACKS
 	/* install speedup for main CPU */
-	main_speedup = install_mem_write32_handler(0, 0xa02030, 0xa02033, area51_main_speedup_w);
+	main_speedup = memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xa02030, 0xa02033, 0, 0, area51_main_speedup_w);
 #endif
 }
 
@@ -1058,7 +1058,7 @@ static DRIVER_INIT( area51 )
 #if ENABLE_SPEEDUP_HACKS
 	/* install speedup for main CPU */
 	main_speedup_max_cycles = 120;
-	main_speedup = install_mem_read32_handler(0, 0x100062e8, 0x100062eb, cojagr3k_main_speedup_r);
+	main_speedup = memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x100062e8, 0x100062eb, 0, 0, cojagr3k_main_speedup_r);
 #endif
 }
 
@@ -1072,7 +1072,7 @@ static DRIVER_INIT( maxforce )
 #if ENABLE_SPEEDUP_HACKS
 	/* install speedup for main CPU */
 	main_speedup_max_cycles = 120;
-	main_speedup = install_mem_read32_handler(0, 0x1000865c, 0x1000865f, cojagr3k_main_speedup_r);
+	main_speedup = memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x1000865c, 0x1000865f, 0, 0, cojagr3k_main_speedup_r);
 #endif
 }
 
@@ -1086,7 +1086,7 @@ static DRIVER_INIT( area51mx )
 
 #if ENABLE_SPEEDUP_HACKS
 	/* install speedup for main CPU */
-	main_speedup = install_mem_write32_handler(0, 0xa19550, 0xa19557, area51mx_main_speedup_w);
+	main_speedup = memory_install_write32_handler(0, ADDRESS_SPACE_PROGRAM, 0xa19550, 0xa19557, 0, 0, area51mx_main_speedup_w);
 #endif
 }
 
@@ -1101,7 +1101,7 @@ static DRIVER_INIT( a51mxr3k )
 #if ENABLE_SPEEDUP_HACKS
 	/* install speedup for main CPU */
 	main_speedup_max_cycles = 120;
-	main_speedup = install_mem_read32_handler(0, 0x10006f0c, 0x10006f0f, cojagr3k_main_speedup_r);
+	main_speedup = memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x10006f0c, 0x10006f0f, 0, 0, cojagr3k_main_speedup_r);
 #endif
 }
 
@@ -1113,7 +1113,7 @@ static DRIVER_INIT( vcircle )
 #if ENABLE_SPEEDUP_HACKS
 	/* install speedup for main CPU */
 	main_speedup_max_cycles = 50;
-	main_speedup = install_mem_read32_handler(0, 0x12005b34, 0x12005b37, cojagr3k_main_speedup_r);
+	main_speedup = memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x12005b34, 0x12005b37, 0, 0, cojagr3k_main_speedup_r);
 #endif
 }
 

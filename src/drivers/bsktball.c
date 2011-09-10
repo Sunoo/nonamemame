@@ -26,21 +26,21 @@
 
 extern UINT8 *bsktball_motion;
 
-extern WRITE_HANDLER( bsktball_videoram_w );
+extern WRITE8_HANDLER( bsktball_videoram_w );
 
 extern VIDEO_START( bsktball );
 extern VIDEO_UPDATE( bsktball );
 
-extern WRITE_HANDLER( bsktball_nmion_w );
+extern WRITE8_HANDLER( bsktball_nmion_w );
 extern INTERRUPT_GEN( bsktball_interrupt );
-extern WRITE_HANDLER( bsktball_ld1_w );
-extern WRITE_HANDLER( bsktball_ld2_w );
-extern READ_HANDLER( bsktball_in0_r );
-extern WRITE_HANDLER( bsktball_led1_w );
-extern WRITE_HANDLER( bsktball_led2_w );
-extern WRITE_HANDLER( bsktball_bounce_w );
-extern WRITE_HANDLER( bsktball_note_w );
-extern WRITE_HANDLER( bsktball_noise_reset_w );
+extern WRITE8_HANDLER( bsktball_ld1_w );
+extern WRITE8_HANDLER( bsktball_ld2_w );
+extern READ8_HANDLER( bsktball_in0_r );
+extern WRITE8_HANDLER( bsktball_led1_w );
+extern WRITE8_HANDLER( bsktball_led2_w );
+extern WRITE8_HANDLER( bsktball_bounce_w );
+extern WRITE8_HANDLER( bsktball_note_w );
+extern WRITE8_HANDLER( bsktball_noise_reset_w );
 
 /*************************************
  *
@@ -185,22 +185,22 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( bsktball )
 	PORT_START	/* IN0 */
-	PORT_ANALOG( 0xFF, 0x00, IPT_TRACKBALL_X, 100, 10, 0, 0 ) /* Sensitivity, clip, min, max */
+	PORT_BIT( 0xFF, 0x00, IPT_TRACKBALL_X ) PORT_MINMAX(0,0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) /* Sensitivity, clip, min, max */
 
 	PORT_START	/* IN0 */
-	PORT_ANALOG( 0xFF, 0x00, IPT_TRACKBALL_Y, 100, 10, 0, 0 )
+	PORT_BIT( 0xFF, 0x00, IPT_TRACKBALL_Y ) PORT_MINMAX(0,0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10)
 
 	PORT_START	/* IN0 */
-	PORT_ANALOG( 0xFF, 0x00, IPT_TRACKBALL_X | IPF_PLAYER2, 100, 10, 0, 0 ) /* Sensitivity, clip, min, max */
+	PORT_BIT( 0xFF, 0x00, IPT_TRACKBALL_X ) PORT_MINMAX(0,0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(2) /* Sensitivity, clip, min, max */
 
 	PORT_START	/* IN0 */
-	PORT_ANALOG( 0xFF, 0x00, IPT_TRACKBALL_Y | IPF_PLAYER2, 100, 10, 0, 0 )
+	PORT_BIT( 0xFF, 0x00, IPT_TRACKBALL_Y ) PORT_MINMAX(0,0) PORT_SENSITIVITY(100) PORT_KEYDELTA(10) PORT_PLAYER(2)
 
 	PORT_START		/* IN0 */
 	PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT ( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) /* SPARE */
-	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 ) /* SPARE */
+	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2) /* SPARE */
 	/* 0x10 - DR0 = PL2 H DIR */
 	/* 0x20 - DR1 = PL2 V DIR */
 	/* 0x40 - DR2 = PL1 H DIR */

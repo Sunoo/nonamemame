@@ -111,16 +111,16 @@ TODO:
 extern unsigned char *naughtyb_videoram2;
 extern unsigned char *naughtyb_scrollreg;
 
-WRITE_HANDLER( naughtyb_videoram2_w );
-WRITE_HANDLER( naughtyb_scrollreg_w );
-WRITE_HANDLER( naughtyb_videoreg_w );
-WRITE_HANDLER( popflame_videoreg_w );
+WRITE8_HANDLER( naughtyb_videoram2_w );
+WRITE8_HANDLER( naughtyb_scrollreg_w );
+WRITE8_HANDLER( naughtyb_videoreg_w );
+WRITE8_HANDLER( popflame_videoreg_w );
 VIDEO_START( naughtyb );
 PALETTE_INIT( naughtyb );
 VIDEO_UPDATE( naughtyb );
 
-WRITE_HANDLER( pleiads_sound_control_a_w );
-WRITE_HANDLER( pleiads_sound_control_b_w );
+WRITE8_HANDLER( pleiads_sound_control_a_w );
+WRITE8_HANDLER( pleiads_sound_control_b_w );
 int naughtyb_sh_start(const struct MachineSound *msound);
 int popflame_sh_start(const struct MachineSound *msound);
 void pleiads_sh_stop(void);
@@ -136,7 +136,7 @@ void pleiads_sh_update(void);
 
 //static int popflame_prot_count = 0;
 
-READ_HANDLER( popflame_protection_r ) /* Not used by bootleg/hack */
+READ8_HANDLER( popflame_protection_r ) /* Not used by bootleg/hack */
 {
 	static int values[4] = { 0x78, 0x68, 0x48, 0x38|0x80 };
 	static int count;
@@ -213,7 +213,7 @@ ADDRESS_MAP_END
 INTERRUPT_GEN( naughtyb_interrupt )
 {
 	if (readinputport(2) & 1)
-		cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 }
 
 INPUT_PORTS_START( naughtyb )
@@ -222,10 +222,10 @@ INPUT_PORTS_START( naughtyb )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_4WAY )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_4WAY )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_4WAY )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY
 
 	PORT_START	/* DSW0 & VBLANK */
 	PORT_DIPNAME( 0x03, 0x01, DEF_STR( Lives ) )
@@ -256,7 +256,7 @@ INPUT_PORTS_START( naughtyb )
 	/* handler to be notified of coin insertions. We use IMPULSE to */
 	/* trigger exactly one interrupt, without having to check when the */
 	/* user releases the key. */
-		PORT_BIT_IMPULSE( 0x01, IP_ACTIVE_HIGH, IPT_COIN1, 1 )
+		PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
 INPUT_PORTS_END
 
 
@@ -528,7 +528,7 @@ ROM_END
 DRIVER_INIT( popflame )
 {
 	/* install a handler to catch protection checks */
-	install_mem_read_handler(0, 0x9000, 0x9000, popflame_protection_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x9000, 0x9000, 0, 0, popflame_protection_r);
 }
 
 

@@ -21,14 +21,14 @@ PALETTE_INIT(gomoku);
 VIDEO_START(gomoku);
 VIDEO_UPDATE(gomoku);
 
-WRITE_HANDLER( gomoku_videoram_w );
-WRITE_HANDLER( gomoku_colorram_w );
-WRITE_HANDLER( gomoku_bgram_w );
-WRITE_HANDLER( gomoku_flipscreen_w );
-WRITE_HANDLER( gomoku_bg_dispsw_w );
+WRITE8_HANDLER( gomoku_videoram_w );
+WRITE8_HANDLER( gomoku_colorram_w );
+WRITE8_HANDLER( gomoku_bgram_w );
+WRITE8_HANDLER( gomoku_flipscreen_w );
+WRITE8_HANDLER( gomoku_bg_dispsw_w );
 
 extern data8_t *gomoku_soundregs;
-WRITE_HANDLER( gomoku_sound_w );
+WRITE8_HANDLER( gomoku_sound_w );
 
 extern data8_t *gomoku_videoram;
 extern data8_t *gomoku_colorram;
@@ -38,7 +38,7 @@ int gomoku_sh_start(const struct MachineSound *msound);
 void gomoku_sh_stop(void);
 
 /* input ports are rotated 90 degrees */
-static READ_HANDLER( input_port_r )
+static READ8_HANDLER( input_port_r )
 {
 	int i, res;
 
@@ -81,14 +81,14 @@ INPUT_PORTS_START( gomoku )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN )
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN | IPF_COCKTAIL )
-	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
-	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_COCKTAIL
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
 
 	PORT_START	/* 1 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START2 )
 	PORT_DIPNAME (0x10, 0x10, DEF_STR( Cabinet ) )

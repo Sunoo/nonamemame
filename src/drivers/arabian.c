@@ -88,7 +88,7 @@ static UINT8 *custom_cpu_ram;
  *
  *************************************/
 
-static WRITE_HANDLER( ay8910_porta_w )
+static WRITE8_HANDLER( ay8910_porta_w )
 {
 	/*
 		bit 7 = ENA
@@ -101,7 +101,7 @@ static WRITE_HANDLER( ay8910_porta_w )
 }
 
 
-static WRITE_HANDLER( ay8910_portb_w )
+static WRITE8_HANDLER( ay8910_portb_w )
 {
 	/*
 		bit 5 = /IREQ to custom CPU
@@ -126,7 +126,7 @@ static WRITE_HANDLER( ay8910_portb_w )
  *
  *************************************/
 
-static READ_HANDLER( custom_cpu_r )
+static READ8_HANDLER( custom_cpu_r )
 {
 	/* since we don't have a simulator for the Fujitsu 8841 4-bit microprocessor */
 	/* we have to simulate its behavior; it looks like Arabian reads out of the  */
@@ -189,14 +189,14 @@ static void update_flip_state(void)
 }
 
 
-static WRITE_HANDLER( custom_flip_w )
+static WRITE8_HANDLER( custom_flip_w )
 {
 	custom_cpu_ram[0x34b + offset] = data;
 	update_flip_state();
 }
 
 
-static WRITE_HANDLER( custom_cocktail_w )
+static WRITE8_HANDLER( custom_cocktail_w )
 {
 	custom_cpu_ram[0x400 + offset] = data;
 	update_flip_state();
@@ -286,10 +286,10 @@ INPUT_PORTS_START( arabian )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_COIN3 )		/* IN3 */
 
 	PORT_START      /* COM1 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY
 
 	PORT_START      /* COM2 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 )
@@ -298,13 +298,13 @@ INPUT_PORTS_START( arabian )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* IN11 */
 
 	PORT_START      /* COM3 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
 
 	PORT_START      /* COM4 */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* IN17 */
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* IN18 */
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* IN19 */
@@ -424,8 +424,8 @@ ROM_END
 
 static DRIVER_INIT( arabian )
 {
-	install_mem_write_handler(0, 0xd34b, 0xd34b, custom_flip_w);
-	install_mem_write_handler(0, 0xd400, 0xd401, custom_cocktail_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_PROGRAM, 0xd34b, 0xd34b, 0, 0, custom_flip_w);
+	memory_install_write8_handler(0, ADDRESS_SPACE_PROGRAM, 0xd400, 0xd401, 0, 0, custom_cocktail_w);
 }
 
 

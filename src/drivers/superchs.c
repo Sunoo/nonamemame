@@ -98,8 +98,8 @@ static WRITE32_HANDLER( cpua_ctrl_w )
 
 	if (ACCESSING_MSB)
 	{
-		cpu_set_reset_line(2,(data &0x200) ? CLEAR_LINE : ASSERT_LINE);
-		if (data&0x8000) cpu_set_irq_line(0,3,HOLD_LINE); /* Guess */
+		cpunum_set_input_line(2, INPUT_LINE_RESET, (data &0x200) ? CLEAR_LINE : ASSERT_LINE);
+		if (data&0x8000) cpunum_set_input_line(0,3,HOLD_LINE); /* Guess */
 	}
 
 	if (ACCESSING_LSB32)
@@ -232,7 +232,7 @@ static WRITE32_HANDLER( superchs_stick_w )
 		different byte in this long word before the RTE.  I assume all but the last
 		(top) byte cause an IRQ with the final one being an ACK.  (Total guess but it works). */
 	if (mem_mask!=0x00ffffff)
-		cpu_set_irq_line(0,3,HOLD_LINE);
+		cpunum_set_input_line(0,3,HOLD_LINE);
 }
 
 /***********************************************************
@@ -312,8 +312,8 @@ INPUT_PORTS_START( superchs )
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x0004, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER1 )	/* Freeze input */
-	PORT_BITX(0x0010, IP_ACTIVE_LOW,  IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT( 0x0008, IP_ACTIVE_HIGH, IPT_BUTTON6 ) PORT_PLAYER(1)	/* Freeze input */
+	PORT_BIT(0x0010, IP_ACTIVE_LOW,  IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW,  IPT_SERVICE1 )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW,  IPT_COIN2 )
 	PORT_BIT( 0x0080, IP_ACTIVE_LOW,  IPT_COIN1 )
@@ -335,31 +335,31 @@ INPUT_PORTS_START( superchs )
 	PORT_BIT( 0x0020, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x0040, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x0080, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* reserved for EEROM */
-	PORT_BIT( 0x0100, IP_ACTIVE_LOW,  IPT_BUTTON5 | IPF_PLAYER1 )	/* seat center (cockpit only) */
+	PORT_BIT( 0x0100, IP_ACTIVE_LOW,  IPT_BUTTON5 ) PORT_PLAYER(1)	/* seat center (cockpit only) */
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x0400, IP_ACTIVE_LOW,  IPT_UNKNOWN )
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW,  IPT_UNKNOWN )
-	PORT_BITX(0x1000, IP_ACTIVE_LOW,  IPT_BUTTON3, "Nitro", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-	PORT_BITX(0x2000, IP_ACTIVE_LOW,  IPT_BUTTON4, "Gear Shift", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-	PORT_BITX(0x4000, IP_ACTIVE_LOW,  IPT_BUTTON2, "Brake", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT(0x1000, IP_ACTIVE_LOW,  IPT_BUTTON3 ) PORT_NAME("Nitro")
+	PORT_BIT(0x2000, IP_ACTIVE_LOW,  IPT_BUTTON4 ) PORT_NAME("Gear Shift")
+	PORT_BIT(0x4000, IP_ACTIVE_LOW,  IPT_BUTTON2 ) PORT_NAME("Brake")
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW,  IPT_START1 )
 
 	PORT_START	/* IN 2, steering wheel */
-	PORT_ANALOG( 0xff, 0x7f, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER1, 25, 15, 0, 0xff )
+	PORT_BIT( 0xff, 0x7f, IPT_AD_STICK_X ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(25) PORT_KEYDELTA(15) PORT_REVERSE PORT_PLAYER(1)
 
 	PORT_START	/* IN 3, accel [effectively also brake for the upright] */
-	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_PLAYER1, 20, 10, 0, 0xff)
+	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_PLAYER(1)
 
 	PORT_START	/* IN 4, sound volume */
-	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER2, 20, 10, 0, 0xff)
+	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_X ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(2)
 
 	PORT_START	/* IN 5, unknown */
-	PORT_ANALOG( 0xff, 0x00, IPT_AD_STICK_Y | IPF_PLAYER2, 20, 10, 0, 0xff)
+	PORT_BIT( 0xff, 0x00, IPT_AD_STICK_Y ) PORT_MINMAX(0,0xff) PORT_SENSITIVITY(20) PORT_KEYDELTA(10) PORT_PLAYER(2)
 
 	PORT_START	/* IN 6, inputs and DSW all fake */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_2WAY | IPF_PLAYER1 )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_2WAY | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_PLAYER(1)
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_PLAYER(1)
 	PORT_DIPNAME( 0x10, 0x00, "Steering type" )
 	PORT_DIPSETTING(    0x10, "Digital" )
 	PORT_DIPSETTING(    0x00, "Analogue" )
@@ -558,8 +558,8 @@ static READ16_HANDLER( sub_cycle_r )
 static DRIVER_INIT( superchs )
 {
 	/* Speedup handlers */
-	install_mem_read32_handler(0, 0x100000, 0x100003, main_cycle_r);
-	install_mem_read16_handler(2, 0x80000a, 0x80000b, sub_cycle_r);
+	memory_install_read32_handler(0, ADDRESS_SPACE_PROGRAM, 0x100000, 0x100003, 0, 0, main_cycle_r);
+	memory_install_read16_handler(2, ADDRESS_SPACE_PROGRAM, 0x80000a, 0x80000b, 0, 0, sub_cycle_r);
 }
 
 GAME( 1992, superchs, 0, superchs, superchs, superchs, ROT0, "Taito America Corporation", "Super Chase - Criminal Termination (US)" )

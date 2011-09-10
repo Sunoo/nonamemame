@@ -183,23 +183,23 @@ static data8_t *sharedram;
 
 extern data8_t *pacland_videoram,*pacland_videoram2,*pacland_spriteram;
 
-WRITE_HANDLER( pacland_videoram_w );
-WRITE_HANDLER( pacland_videoram2_w );
-WRITE_HANDLER( pacland_scroll0_w );
-WRITE_HANDLER( pacland_scroll1_w );
-WRITE_HANDLER( pacland_bankswitch_w );
+WRITE8_HANDLER( pacland_videoram_w );
+WRITE8_HANDLER( pacland_videoram2_w );
+WRITE8_HANDLER( pacland_scroll0_w );
+WRITE8_HANDLER( pacland_scroll1_w );
+WRITE8_HANDLER( pacland_bankswitch_w );
 
 PALETTE_INIT( pacland );
 VIDEO_START( pacland );
 VIDEO_UPDATE( pacland );
 
 
-static READ_HANDLER( sharedram_r )
+static READ8_HANDLER( sharedram_r )
 {
 	return sharedram[offset];
 }
 
-static WRITE_HANDLER( sharedram_w )
+static WRITE8_HANDLER( sharedram_w )
 {
 	sharedram[offset] = data;
 }
@@ -207,7 +207,7 @@ static WRITE_HANDLER( sharedram_w )
 static WRITE8_HANDLER( pacland_subreset_w )
 {
 	int bit = !BIT(offset,11);
-	cpu_set_reset_line(1, bit ? CLEAR_LINE : ASSERT_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_RESET, bit ? CLEAR_LINE : ASSERT_LINE);
 }
 
 static WRITE8_HANDLER( pacland_flipscreen_w )
@@ -219,7 +219,7 @@ static WRITE8_HANDLER( pacland_flipscreen_w )
 }
 
 
-static READ_HANDLER( pacland_input_r )
+static READ8_HANDLER( pacland_input_r )
 {
 	int shift = 4 * (offset & 1);
 	int port = offset & 2;
@@ -228,14 +228,14 @@ static READ_HANDLER( pacland_input_r )
 	return r;
 }
 
-static WRITE_HANDLER( pacland_coin_w )
+static WRITE8_HANDLER( pacland_coin_w )
 {
 	coin_lockout_global_w(data & 1);
 	coin_counter_w(0,~data & 2);
 	coin_counter_w(1,~data & 4);
 }
 
-static WRITE_HANDLER( pacland_led_w )
+static WRITE8_HANDLER( pacland_led_w )
 {
 	set_led_status(0,data & 0x08);
 	set_led_status(1,data & 0x10);
@@ -246,7 +246,7 @@ static WRITE8_HANDLER( pacland_irq_1_ctrl_w )
 	int bit = !BIT(offset,11);
 	cpu_interrupt_enable(0,bit);
 	if (!bit)
-		cpu_set_irq_line(0, 0, CLEAR_LINE);
+		cpunum_set_input_line(0, 0, CLEAR_LINE);
 }
 
 static WRITE8_HANDLER( pacland_irq_2_ctrl_w )
@@ -254,7 +254,7 @@ static WRITE8_HANDLER( pacland_irq_2_ctrl_w )
 	int bit = !BIT(offset,13);
 	cpu_interrupt_enable(1,bit);
 	if (!bit)
-		cpu_set_irq_line(1, 0, CLEAR_LINE);
+		cpunum_set_input_line(1, 0, CLEAR_LINE);
 }
 
 
@@ -295,7 +295,7 @@ static ADDRESS_MAP_START( mcu_map, ADDRESS_SPACE_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 
-static READ_HANDLER( readFF )
+static READ8_HANDLER( readFF )
 {
 	return 0xff;
 }
@@ -357,7 +357,7 @@ INPUT_PORTS_START( pacland )
 	PORT_DIPSETTING(    0x01, DEF_STR( On ) )
 
 	PORT_START	/* Memory Mapped Port */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SERVICE1 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN2 )
@@ -375,18 +375,18 @@ INPUT_PORTS_START( pacland )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )	// IPT_JOYSTICK_DOWN according to schematics
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNUSED )	// IPT_JOYSTICK_UP according to schematics
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )	// IPT_JOYSTICK_DOWN | IPF_COCKTAIL according to schematics
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED )	// IPT_JOYSTICK_UP | IPF_COCKTAIL according to schematics
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNUSED )	// IPT_JOYSTICK_DOWN according to schematics
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNUSED ) PORT_COCKTAIL	// IPT_JOYSTICK_UP according to schematics
 
 	PORT_START	/* MCU Input Port */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SPECIAL )	/* OUT:coin lockout */
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SPECIAL ) PORT_COCKTAIL	/* OUT:coin lockout */
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_SPECIAL )	/* OUT:coin counter 1 */
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SPECIAL )	/* OUT:coin counter 2 */
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
 INPUT_PORTS_END
 
 

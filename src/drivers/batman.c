@@ -50,9 +50,9 @@ static void update_interrupts(void)
 		newstate |= 6;
 
 	if (newstate)
-		cpu_set_irq_line(0, newstate, ASSERT_LINE);
+		cpunum_set_input_line(0, newstate, ASSERT_LINE);
 	else
-		cpu_set_irq_line(0, 7, CLEAR_LINE);
+		cpunum_set_input_line(0, 7, CLEAR_LINE);
 }
 
 
@@ -89,9 +89,9 @@ static WRITE16_HANDLER( latch_w )
 
 	/* bit 4 is connected to the /RESET pin on the 6502 */
 	if (latch_data & 0x0010)
-		cpu_set_reset_line(1, CLEAR_LINE);
+		cpunum_set_input_line(1, INPUT_LINE_RESET, CLEAR_LINE);
 	else
-		cpu_set_reset_line(1, ASSERT_LINE);
+		cpunum_set_input_line(1, INPUT_LINE_RESET, ASSERT_LINE);
 
 	/* alpha bank is selected by the upper 4 bits */
 	if ((oldword ^ latch_data) & 0x7000)
@@ -146,13 +146,13 @@ INPUT_PORTS_START( batman )
 	PORT_START		/* 26000 */
 	PORT_BIT( 0x01ff, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
-	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
+	PORT_BIT( 0x0200, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
+	PORT_BIT( 0x0400, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
 	PORT_BIT( 0x0800, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER1 )
-	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_PLAYER1 )
-	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_PLAYER1 )
-	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_PLAYER1 )
+	PORT_BIT( 0x1000, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(1)
+	PORT_BIT( 0x2000, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(1)
+	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(1)
+	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(1)
 
 	PORT_START		/* 26002 */
 	PORT_BIT( 0xffff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -321,7 +321,6 @@ static DRIVER_INIT( batman )
 	atarigen_eeprom_default = default_eeprom;
 	atarijsa_init(1, 3, 2, 0x0040);
 	atarijsa3_init_adpcm(REGION_SOUND1);
-	atarigen_init_6502_speedup(1, 0x4163, 0x417b);
 }
 
 

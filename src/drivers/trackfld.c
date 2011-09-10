@@ -28,20 +28,20 @@ extern void konami1_decode(void);
 extern UINT8 *trackfld_scroll;
 extern UINT8 *trackfld_scroll2;
 
-extern WRITE_HANDLER( trackfld_videoram_w );
-extern WRITE_HANDLER( trackfld_colorram_w );
-extern WRITE_HANDLER( trackfld_flipscreen_w );
+extern WRITE8_HANDLER( trackfld_videoram_w );
+extern WRITE8_HANDLER( trackfld_colorram_w );
+extern WRITE8_HANDLER( trackfld_flipscreen_w );
 
 extern PALETTE_INIT( trackfld );
 extern VIDEO_START( trackfld );
 extern VIDEO_UPDATE( trackfld );
 
-extern WRITE_HANDLER( konami_sh_irqtrigger_w );
-extern READ_HANDLER( trackfld_sh_timer_r );
-extern READ_HANDLER( trackfld_speech_r );
-extern WRITE_HANDLER( trackfld_sound_w );
-extern READ_HANDLER( hyprolyb_speech_r );
-extern WRITE_HANDLER( hyprolyb_ADPCM_data_w );
+extern WRITE8_HANDLER( konami_sh_irqtrigger_w );
+extern READ8_HANDLER( trackfld_sh_timer_r );
+extern READ8_HANDLER( trackfld_speech_r );
+extern WRITE8_HANDLER( trackfld_sound_w );
+extern READ8_HANDLER( hyprolyb_speech_r );
+extern WRITE8_HANDLER( hyprolyb_ADPCM_data_w );
 
 extern struct SN76496interface konami_sn76496_interface;
 extern struct DACinterface konami_dac_interface;
@@ -49,7 +49,7 @@ extern struct ADPCMinterface hyprolyb_adpcm_interface;
 
 
 /* handle fake button for speed cheat */
-static READ_HANDLER( konami_IN1_r )
+static READ8_HANDLER( konami_IN1_r )
 {
 	int res;
 	static int cheat = 0;
@@ -149,7 +149,7 @@ static NVRAM_HANDLER( mastkin )
 	}
 }
 
-static WRITE_HANDLER( coin_w )
+static WRITE8_HANDLER( coin_w )
 {
 	coin_counter_w(offset,data & 1);
 }
@@ -280,25 +280,25 @@ INPUT_PORTS_START( trackfld )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START      /* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER1 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(1)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START3 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 //	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	/* Fake button to press buttons 1 and 3 impossibly fast. Handle via konami_IN1_r */
-	PORT_BITX(0x80, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_CHEAT | IPF_PLAYER1, "Run Like Hell Cheat", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT(0x80, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("Run Like Hell Cheat") PORT_CHEAT PORT_PLAYER(1)
 
 	PORT_START      /* IN2 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER3 /*| IPF_COCKTAIL*/ )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER3 /*| IPF_COCKTAIL*/ )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER3 /*| IPF_COCKTAIL*/ )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 /**/ ) PORT_COCKTAIL PORT_PLAYER(3)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON2 /**/ ) PORT_COCKTAIL PORT_PLAYER(3)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 /**/ ) PORT_COCKTAIL PORT_PLAYER(3)
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_START4 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER4 /*| IPF_COCKTAIL*/ )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER4 /*| IPF_COCKTAIL*/ )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER4 /*| IPF_COCKTAIL*/ )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 /**/ ) PORT_COCKTAIL PORT_PLAYER(4)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 /**/ ) PORT_COCKTAIL PORT_PLAYER(4)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON1 /**/ ) PORT_COCKTAIL PORT_PLAYER(4)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START      /* DSW0 */

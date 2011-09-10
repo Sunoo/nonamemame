@@ -15,8 +15,8 @@
 
 extern UINT8* videopin_video_ram;
 
-extern WRITE_HANDLER( videopin_video_ram_w );
-extern WRITE_HANDLER( videopin_ball_w );
+extern WRITE8_HANDLER( videopin_video_ram_w );
+extern WRITE8_HANDLER( videopin_ball_w );
 
 extern VIDEO_START( videopin );
 extern VIDEO_UPDATE( videopin );
@@ -27,8 +27,8 @@ static double time_released;
 static UINT8 prev = 0;
 static UINT8 mask = 0;
 
-static WRITE_HANDLER(videopin_out1_w);
-static WRITE_HANDLER(videopin_out2_w);
+static WRITE8_HANDLER(videopin_out1_w);
+static WRITE8_HANDLER(videopin_out2_w);
 
 
 static void update_plunger(void)
@@ -43,7 +43,7 @@ static void update_plunger(void)
 
 			if (!mask)
 			{
-				cpu_set_nmi_line(0, ASSERT_LINE);
+				cpunum_set_input_line(0, INPUT_LINE_NMI, ASSERT_LINE);
 			}
 		}
 		else
@@ -60,7 +60,7 @@ static void interrupt_callback(int scanline)
 {
 	update_plunger();
 
-	cpu_set_irq_line(0, 0, ASSERT_LINE);
+	cpunum_set_input_line(0, 0, ASSERT_LINE);
 
 	scanline = scanline + 32;
 
@@ -90,7 +90,7 @@ static double calc_plunger_pos(void)
 }
 
 
-static READ_HANDLER( videopin_misc_r )
+static READ8_HANDLER( videopin_misc_r )
 {
 	double plunger = calc_plunger_pos();
 
@@ -118,7 +118,7 @@ static READ_HANDLER( videopin_misc_r )
 }
 
 
-static WRITE_HANDLER( videopin_led_w )
+static WRITE8_HANDLER( videopin_led_w )
 {
 	static const char* matrix[8][4] =
 	{
@@ -144,11 +144,11 @@ static WRITE_HANDLER( videopin_led_w )
 		set_led_status(0, data & 8);   /* start button */
 	}
 
-	cpu_set_irq_line(0, 0, CLEAR_LINE);
+	cpunum_set_input_line(0, 0, CLEAR_LINE);
 }
 
 
-static WRITE_HANDLER( videopin_out1_w )
+static WRITE8_HANDLER( videopin_out1_w )
 {
 	/* D0 => OCTAVE0  */
 	/* D1 => OCTACE1  */
@@ -163,7 +163,7 @@ static WRITE_HANDLER( videopin_out1_w )
 
 	if (mask)
 	{
-		cpu_set_nmi_line(0, CLEAR_LINE);
+		cpunum_set_input_line(0, INPUT_LINE_NMI, CLEAR_LINE);
 	}
 
 	coin_lockout_global_w(~data & 0x08);
@@ -173,7 +173,7 @@ static WRITE_HANDLER( videopin_out1_w )
 }
 
 
-static WRITE_HANDLER( videopin_out2_w )
+static WRITE8_HANDLER( videopin_out2_w )
 {
 	/* D0 => VOL0      */
 	/* D1 => VOL1      */
@@ -193,7 +193,7 @@ static WRITE_HANDLER( videopin_out2_w )
 }
 
 
-static WRITE_HANDLER( videopin_note_dvsr_w )
+static WRITE8_HANDLER( videopin_note_dvsr_w )
 {
 	/* note data */
 	discrete_sound_w(1, ~data &0xff);
@@ -240,8 +240,8 @@ INPUT_PORTS_START( videopin )
 	PORT_START		/* IN0 */
 	PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
-	PORT_BITX( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1, "Left Flipper", KEYCODE_LCONTROL, IP_JOY_DEFAULT )
-	PORT_BITX( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2, "Right Flipper", KEYCODE_RCONTROL, IP_JOY_DEFAULT )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_NAME("Left Flipper") PORT_CODE(KEYCODE_LCONTROL)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_NAME("Right Flipper") PORT_CODE(KEYCODE_RCONTROL)
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_TILT )
 	PORT_SERVICE( 0x40, IP_ACTIVE_LOW )
@@ -278,11 +278,11 @@ INPUT_PORTS_START( videopin )
 	PORT_BIT ( 0x08, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3, "Nudge", KEYCODE_SPACE, IP_JOY_DEFAULT )
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("Nudge") PORT_CODE(KEYCODE_SPACE)
 	PORT_BIT ( 0x80, IP_ACTIVE_HIGH, IPT_VBLANK )
 
 	PORT_START
-	PORT_BITX( 0xff, IP_ACTIVE_HIGH, IPT_BUTTON4, "Ball Shooter", KEYCODE_DOWN, IP_JOY_DEFAULT )
+	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_NAME("Ball Shooter") PORT_CODE(KEYCODE_DOWN)
 INPUT_PORTS_END
 
 

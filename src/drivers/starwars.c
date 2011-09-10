@@ -70,9 +70,9 @@ MACHINE_INIT( starwars )
  *
  *************************************/
 
-static WRITE_HANDLER( irq_ack_w )
+static WRITE8_HANDLER( irq_ack_w )
 {
-	cpu_set_irq_line(0, M6809_IRQ_LINE, CLEAR_LINE);
+	cpunum_set_input_line(0, M6809_IRQ_LINE, CLEAR_LINE);
 }
 
 
@@ -83,7 +83,7 @@ static WRITE_HANDLER( irq_ack_w )
  *
  *************************************/
 
-READ_HANDLER( esb_slapstic_r )
+READ8_HANDLER( esb_slapstic_r )
 {
 	int result = slapstic_base[offset];
 	int new_bank = slapstic_tweak(offset);
@@ -98,7 +98,7 @@ READ_HANDLER( esb_slapstic_r )
 }
 
 
-WRITE_HANDLER( esb_slapstic_w )
+WRITE8_HANDLER( esb_slapstic_w )
 {
 	int new_bank = slapstic_tweak(offset);
 
@@ -244,7 +244,7 @@ INPUT_PORTS_START( starwars )
 	PORT_START	/* IN1 */
 	PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_UNUSED )
 	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_UNUSED )
-	PORT_BITX( 0x04, IP_ACTIVE_LOW, IPT_SERVICE, "Diagnostic Step", KEYCODE_F1, IP_JOY_NONE )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Diagnostic Step") PORT_CODE(KEYCODE_F1)
 	PORT_BIT ( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 )
 	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
@@ -300,10 +300,10 @@ INPUT_PORTS_START( starwars )
 /* 0xc0 and 0xe0 None */
 
 	PORT_START	/* IN4 */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y, 70, 30, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(30)
 
 	PORT_START	/* IN5 */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X, 50, 30, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(30)
 INPUT_PORTS_END
 
 
@@ -321,7 +321,7 @@ INPUT_PORTS_START( esb )
 	PORT_START	/* IN1 */
 	PORT_BIT ( 0x01, IP_ACTIVE_HIGH, IPT_UNUSED )
 	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_UNUSED )
-	PORT_BITX( 0x04, IP_ACTIVE_LOW, IPT_SERVICE, "Diagnostic Step", KEYCODE_F1, IP_JOY_NONE )
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_SERVICE ) PORT_NAME("Diagnostic Step") PORT_CODE(KEYCODE_F1)
 	PORT_BIT ( 0x08, IP_ACTIVE_HIGH, IPT_UNUSED )
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_BUTTON3 )
 	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
@@ -377,10 +377,10 @@ INPUT_PORTS_START( esb )
 /* 0xc0 and 0x00 None */
 
 	PORT_START	/* IN4 */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y, 70, 30, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(30)
 
 	PORT_START	/* IN5 */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X, 50, 30, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(30)
 INPUT_PORTS_END
 
 
@@ -573,11 +573,11 @@ static DRIVER_INIT( esb )
 	memory_set_opbase_handler(0, esb_setopbase);
 
 	/* install read/write handlers for it */
-	install_mem_read_handler(0, 0x8000, 0x9fff, esb_slapstic_r);
-	install_mem_write_handler(0, 0x8000, 0x9fff, esb_slapstic_w);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x8000, 0x9fff, 0, 0, esb_slapstic_r);
+	memory_install_write8_handler(0, ADDRESS_SPACE_PROGRAM, 0x8000, 0x9fff, 0, 0, esb_slapstic_w);
 
 	/* install additional banking */
-	install_mem_read_handler(0, 0xa000, 0xffff, MRA8_BANK2);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0xa000, 0xffff, 0, 0, MRA8_BANK2);
 
 	/* prepare the mathbox */
 	starwars_is_esb = 1;

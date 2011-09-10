@@ -101,17 +101,17 @@ static void get_tile_info( int offset )
 			0)
 }
 
-WRITE_HANDLER( looping_flip_screen_x_w )
+WRITE8_HANDLER( looping_flip_screen_x_w )
 {
 	flip_screen_x_set(~data & 0x01);
 }
 
-WRITE_HANDLER( looping_flip_screen_y_w )
+WRITE8_HANDLER( looping_flip_screen_y_w )
 {
 	flip_screen_y_set(~data & 0x01);
 }
 
-WRITE_HANDLER( looping_colorram_w )
+WRITE8_HANDLER( looping_colorram_w )
 {
 	int i,offs;
 	if( colorram[offset]!=data )
@@ -147,7 +147,7 @@ VIDEO_START( looping )
 	return -1;
 }
 
-WRITE_HANDLER( looping_videoram_w )
+WRITE8_HANDLER( looping_videoram_w )
 {
 	if( videoram[offset]!=data )
 	{
@@ -205,46 +205,46 @@ VIDEO_UPDATE( looping )
 	draw_sprites( bitmap,cliprect );
 }
 
-WRITE_HANDLER( looping_intack )
+WRITE8_HANDLER( looping_intack )
 {
 	if (data==0)
 	{
-		cpu_irq_line_vector_w(0, 0, 4);
-		cpu_set_irq_line(0, 0, CLEAR_LINE);
+		cpunum_set_input_line_vector(0, 0, 4);
+		cpunum_set_input_line(0, 0, CLEAR_LINE);
 	}
 }
 
 INTERRUPT_GEN( looping_interrupt )
 {
-	cpu_irq_line_vector_w(0, 0, 4);
-	cpu_set_irq_line(0, 0, ASSERT_LINE);
+	cpunum_set_input_line_vector(0, 0, 4);
+	cpunum_set_input_line(0, 0, ASSERT_LINE);
 }
 
 /****** sound *******/
 
-WRITE_HANDLER( looping_soundlatch_w )
+WRITE8_HANDLER( looping_soundlatch_w )
 {
 	soundlatch_w(offset, data);
-	cpu_irq_line_vector_w(1, 0, 4);
-	cpu_set_irq_line(1, 0, ASSERT_LINE);
+	cpunum_set_input_line_vector(1, 0, 4);
+	cpunum_set_input_line(1, 0, ASSERT_LINE);
 }
 
-WRITE_HANDLER( looping_souint_clr )
+WRITE8_HANDLER( looping_souint_clr )
 {
 	if (data==0)
 	{
-		cpu_irq_line_vector_w(1, 0, 4);
-		cpu_set_irq_line(1, 0, CLEAR_LINE);
+		cpunum_set_input_line_vector(1, 0, 4);
+		cpunum_set_input_line(1, 0, CLEAR_LINE);
 	}
 }
 
 void looping_spcint(int state)
 {
-	cpu_irq_line_vector_w(1, 0, 6);
-	cpu_set_irq_line(1, 0, state);
+	cpunum_set_input_line_vector(1, 0, 6);
+	cpunum_set_input_line(1, 0, state);
 }
 
-WRITE_HANDLER( looping_sound_sw )
+WRITE8_HANDLER( looping_sound_sw )
 {
 	/* this can be improved by adding the missing
 	   signals for decay etc. (see schematics) */
@@ -405,11 +405,11 @@ INPUT_PORTS_START( looping )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
 
 	PORT_START /* cocktail? */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT( 0x18, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START
@@ -450,11 +450,11 @@ INPUT_PORTS_START( skybump )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
 
 	PORT_START /* cocktail? */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT( 0x18, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0xc0, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START
@@ -476,8 +476,8 @@ INPUT_PORTS_START( skybump )
 	PORT_DIPNAME( 0x60, 0x40, DEF_STR( Lives ) )
 	PORT_DIPSETTING(    0x40, "3" )
 	PORT_DIPSETTING(    0x60, "5" )
-	PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite", IP_KEY_NONE, IP_JOY_NONE )
-//	PORT_BITX( 0,       0x20, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0,       0x00, IPT_DIPSWITCH_SETTING ) PORT_NAME("Infinite") PORT_CHEAT
+//	PORT_BIT( 0,       0x20, IPT_DIPSWITCH_SETTING ) PORT_NAME("Infinite") PORT_CHEAT
 	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Cabinet ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( Upright ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Cocktail ) )

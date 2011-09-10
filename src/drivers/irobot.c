@@ -87,7 +87,7 @@
  *
  *************************************/
 
-WRITE_HANDLER( irobot_nvram_w )
+WRITE8_HANDLER( irobot_nvram_w )
 {
 	generic_nvram[offset] = data & 0x0f;
 }
@@ -100,15 +100,15 @@ WRITE_HANDLER( irobot_nvram_w )
  *
  *************************************/
 
-static WRITE_HANDLER( irobot_clearirq_w )
+static WRITE8_HANDLER( irobot_clearirq_w )
 {
-    cpu_set_irq_line(0, M6809_IRQ_LINE ,CLEAR_LINE);
+    cpunum_set_input_line(0, M6809_IRQ_LINE ,CLEAR_LINE);
 }
 
 
-static WRITE_HANDLER( irobot_clearfirq_w )
+static WRITE8_HANDLER( irobot_clearfirq_w )
 {
-    cpu_set_irq_line(0, M6809_FIRQ_LINE ,CLEAR_LINE);
+    cpunum_set_input_line(0, M6809_FIRQ_LINE ,CLEAR_LINE);
 }
 
 
@@ -241,10 +241,10 @@ INPUT_PORTS_START( irobot )
 	PORT_DIPSETTING( 0x00, DEF_STR( On ) )
 
 	PORT_START	/* IN4 */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_CENTER, 70, 50, 95, 159 )
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_MINMAX(95,159) PORT_SENSITIVITY(70) PORT_KEYDELTA(50) PORT_CENTER
 
 	PORT_START	/* IN5 */
-	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_X | IPF_REVERSE | IPF_CENTER, 50, 50, 95, 159 )
+	PORT_BIT( 0xff, 0x80, IPT_AD_STICK_X ) PORT_MINMAX(95,159) PORT_SENSITIVITY(50) PORT_KEYDELTA(50) PORT_CENTER PORT_REVERSE
 
 INPUT_PORTS_END
 

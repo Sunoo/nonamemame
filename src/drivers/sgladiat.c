@@ -69,56 +69,56 @@ static struct GfxDecodeInfo tnk3_gfxdecodeinfo[] =
 
 /************************************************************************/
 
-static READ_HANDLER( shared_ram_r )
+static READ8_HANDLER( shared_ram_r )
 {
 	return shared_ram[offset];
 }
-static WRITE_HANDLER( shared_ram_w )
+static WRITE8_HANDLER( shared_ram_w )
 {
 	shared_ram[offset] = data;
 }
 
-static READ_HANDLER( shared_ram2_r )
+static READ8_HANDLER( shared_ram2_r )
 {
 	return shared_ram2[offset];
 }
-static WRITE_HANDLER( shared_ram2_w )
+static WRITE8_HANDLER( shared_ram2_w )
 {
 	shared_ram2[offset] = data;
 }
 
 /************************************************************************/
 
-static WRITE_HANDLER( sgladiat_soundlatch_w )
+static WRITE8_HANDLER( sgladiat_soundlatch_w )
 {
 	snk_sound_busy_bit = 0x20;
 	soundlatch_w( offset, data );
 
 	/* trigger NMI on sound CPU */
-//	cpu_set_nmi_line(2, PULSE_LINE);
-	cpu_set_nmi_line(2, PULSE_LINE);	// safer because NMI can be lost in rare occations
+//	cpunum_set_input_line(2, INPUT_LINE_NMI, PULSE_LINE);
+	cpunum_set_input_line(2, INPUT_LINE_NMI, PULSE_LINE);	// safer because NMI can be lost in rare occations
 }
 
-static READ_HANDLER( sgladiat_soundlatch_r )
+static READ8_HANDLER( sgladiat_soundlatch_r )
 {
 	snk_sound_busy_bit = 0;
 	return(soundlatch_r(0));
 }
 
-static READ_HANDLER( sgladiat_sound_nmi_ack_r )
+static READ8_HANDLER( sgladiat_sound_nmi_ack_r )
 {
-//	cpu_set_nmi_line(2, CLEAR_LINE);
+//	cpunum_set_input_line(2, INPUT_LINE_NMI, CLEAR_LINE);
 	return 0;
 }
 
 /************************************************************************/
 
-static READ_HANDLER( sgladiat_inp0_r )
+static READ8_HANDLER( sgladiat_inp0_r )
 {
 	return(readinputport(0) | snk_sound_busy_bit);
 }
 
-static WRITE_HANDLER( sglatiat_flipscreen_w )
+static WRITE8_HANDLER( sglatiat_flipscreen_w )
 {
 	/* 0xa006 */
 	/* x-------	screen is flipped */
@@ -272,27 +272,27 @@ INPUT_PORTS_START( sgladiat )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START	/* DSW1 - copied from TNK3! */
-	PORT_BITX( 0x01,    0x01, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Walk everywhere", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0x01,    0x01, IPT_DIPSWITCH_NAME ) PORT_NAME("Walk everywhere") PORT_CHEAT
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x02, 0x00, DEF_STR( Cabinet ) )
@@ -327,7 +327,7 @@ INPUT_PORTS_START( sgladiat )
 	PORT_DIPSETTING(    0x18, "Demo Sounds Off" )
 	PORT_DIPSETTING(    0x10, "Demo Sounds On" )
 	PORT_DIPSETTING(    0x00, "Freeze" )
-	PORT_BITX( 0,       0x08, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite Lives", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0,       0x08, IPT_DIPSWITCH_SETTING ) PORT_NAME("Infinite Lives") PORT_CHEAT
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Flip_Screen ) )
 	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )

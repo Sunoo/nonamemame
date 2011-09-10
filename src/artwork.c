@@ -415,7 +415,9 @@ static int original_attributes;
 static UINT8 global_artwork_enable;
 
 static const struct overlay_piece *overlay_list;
+int rotation = 0;
 
+extern float		win_screen_aspect;
 
 
 /***************************************************************************
@@ -604,6 +606,8 @@ int artwork_create_display(struct osd_create_params *params, UINT32 *rgb_compone
 	double min_x, min_y, max_x, max_y;
 	UINT32 rgb32_components[3];
 	struct artwork_piece *piece;
+	double temp, delta;
+	int tempx;
 
 	/* reset UI */
 	uioverlay = NULL;
@@ -635,24 +639,43 @@ int artwork_create_display(struct osd_create_params *params, UINT32 *rgb_compone
 			if (piece->right > max_x) max_x = piece->right;
 			if (piece->top < min_y) min_y = piece->top;
 			if (piece->bottom > max_y) max_y = piece->bottom;
+			params->aspect_x = (int)((double)params->aspect_x * (max_x - min_x));
+			params->aspect_y = (int)((double)params->aspect_y * (max_y - min_y));
 		}
 	}
 	else
 	{
 		//Do we want leave artwork in edge space
 		if (options.artwork_fb)
+		{
 			for (piece = artwork_list; piece; piece = piece->next)
 			{
-				if (piece->top < min_y) min_y = piece->top;
-				if (piece->bottom > max_y) max_y = piece->bottom;
+				if((!rotation && (Machine->gamedrv->flags & ORIENTATION_SWAP_XY)) ||
+					(rotation && !(Machine->gamedrv->flags & ORIENTATION_SWAP_XY)))
+				{
+					temp = (win_screen_aspect) * original_width;
+					delta = (temp - original_height) / 2.0;
+					max_y = 1.0 + (delta / original_height);
+					min_y = 0.0 - (delta / original_height);
+
+					/* aspect ratio needs to be switched.  example of why,
+					   say you run pacman, it normally is a 3:4 displayed
+					   in 4:3 and you get the black edges.  Filling in the edges
+					   with artwork you are filling the entire screen, 
+					   need to then display 4:3 on a 4:3 */
+					tempx = params->aspect_x;
+					params->aspect_x = params->aspect_y;
+					params->aspect_y = tempx;
+				} 
 			}
+		}
 	}
 
 	/* now compute the altered width/height and the new aspect ratio */
 	params->width = (int)((max_x - min_x) * (double)(original_width * gamescale) + 0.5);
 	params->height = (int)((max_y - min_y) * (double)(original_height * gamescale) + 0.5);
-	params->aspect_x = (int)((double)params->aspect_x * 100. * (max_x - min_x));
-	params->aspect_y = (int)((double)params->aspect_y * 100. * (max_y - min_y));
+	params->aspect_x = (int)((double)params->aspect_x * 100);//. * (max_x - min_x));
+	params->aspect_y = (int)((double)params->aspect_y * 100);//. * (max_y - min_y));
 
 	/* vector games need to fit inside the original bounds, so scale back down */
 	if (params->video_attributes & VIDEO_TYPE_VECTOR)

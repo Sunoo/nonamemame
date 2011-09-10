@@ -24,34 +24,34 @@ Change Log:
 #include "cpu/z80/z80.h"
 #include "state.h"
 
-extern WRITE_HANDLER( ninjakid_bg_videoram_w );
-extern WRITE_HANDLER( ninjakid_fg_videoram_w );
-extern READ_HANDLER( ninjakid_bg_videoram_r );
+extern WRITE8_HANDLER( ninjakid_bg_videoram_w );
+extern WRITE8_HANDLER( ninjakid_fg_videoram_w );
+extern READ8_HANDLER( ninjakid_bg_videoram_r );
 
-extern READ_HANDLER( ninjakun_io_8000_r );
-extern WRITE_HANDLER( ninjakun_io_8000_w );
+extern READ8_HANDLER( ninjakun_io_8000_r );
+extern WRITE8_HANDLER( ninjakun_io_8000_w );
 
 extern VIDEO_START( ninjakid );
 extern VIDEO_UPDATE( ninjakid );
-extern WRITE_HANDLER( ninjakun_flipscreen_w );
+extern WRITE8_HANDLER( ninjakun_flipscreen_w );
 
-extern WRITE_HANDLER( ninjakun_paletteram_w );
+extern WRITE8_HANDLER( ninjakun_paletteram_w );
 
 /******************************************************************************/
 
 static UINT8 *ninjakid_gfx_rom;
 
-static READ_HANDLER( ninjakid_shared_rom_r ){
+static READ8_HANDLER( ninjakid_shared_rom_r ){
 	return ninjakid_gfx_rom[offset];
 }
 
 /* working RAM is shared, but an address line is inverted */
 static UINT8 *shareram;
 
-static WRITE_HANDLER( shareram_w ){
+static WRITE8_HANDLER( shareram_w ){
 	shareram[offset^0x400] = data;
 }
-static READ_HANDLER( shareram_r ){
+static READ8_HANDLER( shareram_r ){
 	return shareram[offset^0x400];
 }
 
@@ -61,16 +61,16 @@ static READ_HANDLER( shareram_r ){
 
 static UINT8 ninjakun_io_a002_ctrl;
 
-static READ_HANDLER( ninjakun_io_A002_r ){
+static READ8_HANDLER( ninjakun_io_A002_r ){
 	return ninjakun_io_a002_ctrl | readinputport(2); /* vblank */
 }
 
-static WRITE_HANDLER( cpu1_A002_w ){
+static WRITE8_HANDLER( cpu1_A002_w ){
 	if( data == 0x80 ) ninjakun_io_a002_ctrl |= 0x04;
 	if( data == 0x40 ) ninjakun_io_a002_ctrl &= ~0x08;
 }
 
-static WRITE_HANDLER( cpu2_A002_w ){
+static WRITE8_HANDLER( cpu2_A002_w ){
 	if( data == 0x40 ) ninjakun_io_a002_ctrl |= 0x08;
 	if( data == 0x80 ) ninjakun_io_a002_ctrl &= ~0x04;
 }
@@ -247,8 +247,8 @@ ROM_END
 
 INPUT_PORTS_START( ninjakid )
 	PORT_START	/* 0xa000 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,	IPT_JOYSTICK_LEFT | IPF_2WAY ) /* "XPOS1" */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,	IPT_JOYSTICK_RIGHT| IPF_2WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,	IPT_JOYSTICK_LEFT ) PORT_2WAY /* "XPOS1" */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,	IPT_JOYSTICK_RIGHT ) PORT_2WAY
 	PORT_BIT( 0x04, IP_ACTIVE_LOW,	IPT_BUTTON2 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW,	IPT_BUTTON1 )
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,	IPT_UNKNOWN )
@@ -257,10 +257,10 @@ INPUT_PORTS_START( ninjakid )
 	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
 	PORT_START	/* 0xa001 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW,	IPT_JOYSTICK_LEFT | IPF_2WAY | IPF_COCKTAIL) /* "YPOS1" */
-	PORT_BIT( 0x02, IP_ACTIVE_LOW,	IPT_JOYSTICK_RIGHT| IPF_2WAY | IPF_COCKTAIL)
-	PORT_BIT( 0x04, IP_ACTIVE_LOW,	IPT_BUTTON2 | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW,	IPT_BUTTON1 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW,	IPT_JOYSTICK_LEFT) PORT_2WAY PORT_COCKTAIL /* "YPOS1" */
+	PORT_BIT( 0x02, IP_ACTIVE_LOW,	IPT_JOYSTICK_RIGHT) PORT_2WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW,	IPT_BUTTON2 ) PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW,	IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_BIT( 0x10, IP_ACTIVE_LOW,	IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW,	IPT_START2  )
 	PORT_SERVICE( 0x40, IP_ACTIVE_HIGH ) \

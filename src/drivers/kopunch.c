@@ -3,11 +3,11 @@
 
 extern UINT8 *kopunch_videoram2;
 
-extern WRITE_HANDLER( kopunch_videoram_w );
-extern WRITE_HANDLER( kopunch_videoram2_w );
-extern WRITE_HANDLER( kopunch_scroll_x_w );
-extern WRITE_HANDLER( kopunch_scroll_y_w );
-extern WRITE_HANDLER( kopunch_gfxbank_w );
+extern WRITE8_HANDLER( kopunch_videoram_w );
+extern WRITE8_HANDLER( kopunch_videoram2_w );
+extern WRITE8_HANDLER( kopunch_scroll_x_w );
+extern WRITE8_HANDLER( kopunch_scroll_y_w );
+extern WRITE8_HANDLER( kopunch_gfxbank_w );
 
 extern PALETTE_INIT( kopunch );
 extern VIDEO_START( kopunch );
@@ -20,20 +20,20 @@ INTERRUPT_GEN( kopunch_interrupt )
 	{
 		if (~input_port_1_r(0) & 0x80)	/* coin 1 */
 		{
-			cpu_set_irq_line_and_vector(0,0,HOLD_LINE,0xf7);	/* RST 30h */
+			cpunum_set_input_line_and_vector(0,0,HOLD_LINE,0xf7);	/* RST 30h */
 			return;
 		}
 		else if (~input_port_1_r(0) & 0x08)	/* coin 2 */
 		{
-			cpu_set_irq_line_and_vector(0,0,HOLD_LINE,0xef);	/* RST 28h */
+			cpunum_set_input_line_and_vector(0,0,HOLD_LINE,0xef);	/* RST 28h */
 			return;
 		}
 	}
 
-	cpu_set_irq_line_and_vector(0,0,HOLD_LINE,0xff);	/* RST 38h */
+	cpunum_set_input_line_and_vector(0,0,HOLD_LINE,0xff);	/* RST 38h */
 }
 
-static READ_HANDLER( kopunch_in_r )
+static READ8_HANDLER( kopunch_in_r )
 {
 	/* port 31 + low 3 bits of port 32 contain the punch strength */
 	if (offset == 0)
@@ -42,7 +42,7 @@ static READ_HANDLER( kopunch_in_r )
 		return (rand() & 0x07) | input_port_1_r(0);
 }
 
-static WRITE_HANDLER( kopunch_lamp_w )
+static WRITE8_HANDLER( kopunch_lamp_w )
 {
 	set_led_status(0,~data & 0x80);
 
@@ -50,7 +50,7 @@ static WRITE_HANDLER( kopunch_lamp_w )
 //		usrintf_showmessage("port 38 = %02x",data);
 }
 
-static WRITE_HANDLER( kopunch_coin_w )
+static WRITE8_HANDLER( kopunch_coin_w )
 {
 	coin_counter_w(0,~data & 0x80);
 	coin_counter_w(1,~data & 0x40);
@@ -69,7 +69,7 @@ static ADDRESS_MAP_START( kopunch_map, ADDRESS_SPACE_PROGRAM, 8 )
 	AM_RANGE(0x7100, 0x7aff) AM_RAM	// ???
 ADDRESS_MAP_END
 
-static READ_HANDLER( pip_r )
+static READ8_HANDLER( pip_r )
 {
 	return rand();
 }
@@ -95,10 +95,10 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( kopunch )
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_4WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_4WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_4WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
@@ -106,11 +106,11 @@ INPUT_PORTS_START( kopunch )
 
 	PORT_START
 	PORT_BIT( 0x07, IP_ACTIVE_HIGH, IPT_SPECIAL )	/* punch strength (high 3 bits) */
-	PORT_BIT_IMPULSE( 0x08, IP_ACTIVE_LOW, IPT_COIN2, 1 )
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(1)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_LOW, IPT_COIN1, 1 )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(1)
 
 	PORT_START
 	PORT_DIPNAME( 0x01, 0x01, DEF_STR( Unknown ) )
@@ -139,13 +139,13 @@ INPUT_PORTS_START( kopunch )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_COCKTAIL
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_SERVICE1 )
 INPUT_PORTS_END
 

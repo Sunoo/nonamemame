@@ -67,13 +67,13 @@ static READ16_HANDLER( trackball_r )
 }
 
 
-static READ_HANDLER( input_1_r )
+static READ8_HANDLER( input_1_r )
 {
 	return (readinputport(1) << (7 - (offset - POT0_C))) & 0x80;
 }
 
 
-static READ_HANDLER( input_2_r )
+static READ8_HANDLER( input_2_r )
 {
 	return (readinputport(2) << (7 - (offset - POT0_C))) & 0x80;
 }
@@ -213,10 +213,10 @@ INPUT_PORTS_START( quantum )
 	PORT_BIT( 0xff, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 
 	PORT_START      /* IN2 */
-	PORT_ANALOG( 0x0f, 0, IPT_TRACKBALL_Y | IPF_REVERSE, 10, 10, 0,0)
+	PORT_BIT( 0x0f, 0, IPT_TRACKBALL_Y ) PORT_MINMAX(0,0) PORT_SENSITIVITY(10) PORT_KEYDELTA(10) PORT_REVERSE
 
 	PORT_START      /* IN3 */
-	PORT_ANALOG( 0x0f, 0, IPT_TRACKBALL_X, 10, 10, 0, 0 )
+	PORT_BIT( 0x0f, 0, IPT_TRACKBALL_X ) PORT_MINMAX(0,0) PORT_SENSITIVITY(10) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 

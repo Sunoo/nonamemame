@@ -21,14 +21,14 @@ Might be some priority glitches
 extern data8_t *tbowl_txvideoram, *tbowl_bgvideoram, *tbowl_bg2videoram;
 extern data8_t *tbowl_spriteram;
 
-WRITE_HANDLER (tbowl_bg2videoram_w);
-WRITE_HANDLER (tbowl_bgvideoram_w);
-WRITE_HANDLER (tbowl_txvideoram_w);
+WRITE8_HANDLER (tbowl_bg2videoram_w);
+WRITE8_HANDLER (tbowl_bgvideoram_w);
+WRITE8_HANDLER (tbowl_txvideoram_w);
 
-WRITE_HANDLER (tbowl_bg2xscroll_lo); WRITE_HANDLER (tbowl_bg2xscroll_hi);
-WRITE_HANDLER (tbowl_bg2yscroll_lo); WRITE_HANDLER (tbowl_bg2yscroll_hi);
-WRITE_HANDLER (tbowl_bgxscroll_lo);  WRITE_HANDLER (tbowl_bgxscroll_hi);
-WRITE_HANDLER (tbowl_bgyscroll_lo);  WRITE_HANDLER (tbowl_bgyscroll_hi);
+WRITE8_HANDLER (tbowl_bg2xscroll_lo); WRITE8_HANDLER (tbowl_bg2xscroll_hi);
+WRITE8_HANDLER (tbowl_bg2yscroll_lo); WRITE8_HANDLER (tbowl_bg2yscroll_hi);
+WRITE8_HANDLER (tbowl_bgxscroll_lo);  WRITE8_HANDLER (tbowl_bgxscroll_hi);
+WRITE8_HANDLER (tbowl_bgyscroll_lo);  WRITE8_HANDLER (tbowl_bgyscroll_hi);
 
 VIDEO_START( tbowl );
 VIDEO_UPDATE( tbowl );
@@ -39,7 +39,7 @@ note: check this, its borrowed from tecmo.c / wc90.c at the moment and could wel
 
 ***/
 
-static WRITE_HANDLER( tbowlb_bankswitch_w )
+static WRITE8_HANDLER( tbowlb_bankswitch_w )
 {
 	int bankaddress;
 	unsigned char *RAM = memory_region(REGION_CPU1);
@@ -49,7 +49,7 @@ static WRITE_HANDLER( tbowlb_bankswitch_w )
 	cpu_setbank(1,&RAM[bankaddress]);
 }
 
-static WRITE_HANDLER( tbowlc_bankswitch_w )
+static WRITE8_HANDLER( tbowlc_bankswitch_w )
 {
 	int bankaddress;
 	unsigned char *RAM = memory_region(REGION_CPU2);
@@ -67,20 +67,20 @@ static WRITE_HANDLER( tbowlc_bankswitch_w )
 
 static unsigned char *shared_ram;
 
-static READ_HANDLER( shared_r )
+static READ8_HANDLER( shared_r )
 {
 	return shared_ram[offset];
 }
 
-static WRITE_HANDLER( shared_w )
+static WRITE8_HANDLER( shared_w )
 {
 	shared_ram[offset] = data;
 }
 
-static WRITE_HANDLER( tbowl_sound_command_w )
+static WRITE8_HANDLER( tbowl_sound_command_w )
 {
 	soundlatch_w(offset,data);
-	cpu_set_irq_line(2,IRQ_LINE_NMI,PULSE_LINE);
+	cpunum_set_input_line(2,INPUT_LINE_NMI,PULSE_LINE);
 }
 
 
@@ -140,10 +140,10 @@ static ADDRESS_MAP_START( writemem_6206B, ADDRESS_SPACE_PROGRAM, 8 )
 ADDRESS_MAP_END
 
 /* Board C */
-static WRITE_HANDLER ( tbowl_trigger_nmi )
+static WRITE8_HANDLER ( tbowl_trigger_nmi )
 {
 	/* trigger NMI on 6206B's Cpu? (guess but seems to work..) */
-	cpu_set_nmi_line(0, PULSE_LINE);
+	cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 }
 
 static ADDRESS_MAP_START( readmem_6206C, ADDRESS_SPACE_PROGRAM, 8 )
@@ -242,12 +242,12 @@ bits 0 and 1 ? I'll try to have another look when the sprites stuff is finished.
 
 
 #define TBOWL_PLAYER_INPUT(_n_) \
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER##_n_ ) \
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER##_n_ ) \
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER##_n_ ) \
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER##_n_ ) \
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER##_n_ ) \
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER##_n_ ) \
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(_n_) PORT_8WAY \
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(_n_) PORT_8WAY \
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_PLAYER(_n_) PORT_8WAY \
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_PLAYER(_n_) PORT_8WAY \
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(_n_) \
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(_n_) \
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_SERVICE##_n_ ) \
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START##_n_ )
 
@@ -270,7 +270,7 @@ INPUT_PORTS_START( tbowl )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN4 )
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Service (General)", KEYCODE_F1, IP_JOY_NONE )
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("Service (General)") PORT_CODE(KEYCODE_F1)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -376,7 +376,7 @@ INPUT_PORTS_START( tbowlj )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_COIN3 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_COIN4 )
-	PORT_BITX(0x10, IP_ACTIVE_LOW, 0, "Service (General)", KEYCODE_F1, IP_JOY_NONE )
+	PORT_BIT(0x10, IP_ACTIVE_LOW, 0 ) PORT_NAME("Service (General)") PORT_CODE(KEYCODE_F1)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -519,7 +519,7 @@ There should also be something for playing the samples (roms 2+3)
 
 static void irqhandler(int linestate)
 {
-	cpu_set_irq_line(2,0,linestate);
+	cpunum_set_input_line(2,0,linestate);
 }
 
 static struct YM3526interface ym3812_interface =

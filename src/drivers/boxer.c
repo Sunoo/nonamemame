@@ -23,7 +23,7 @@ static void pot_interrupt(int mask)
 {
 	if (pot_latch & mask)
 	{
-		cpu_set_nmi_line(0, ASSERT_LINE);
+		cpunum_set_input_line(0, INPUT_LINE_NMI, ASSERT_LINE);
 	}
 
 	pot_state |= mask;
@@ -32,7 +32,7 @@ static void pot_interrupt(int mask)
 
 static void periodic_callback(int scanline)
 {
-	cpu_set_irq_line(0, 0, ASSERT_LINE);
+	cpunum_set_input_line(0, 0, ASSERT_LINE);
 
 	if (scanline == 0)
 	{
@@ -91,7 +91,7 @@ static MACHINE_INIT( boxer )
 }
 
 
-static READ_HANDLER( boxer_input_r )
+static READ8_HANDLER( boxer_input_r )
 {
 	UINT8 val = readinputport(0);
 
@@ -104,7 +104,7 @@ static READ_HANDLER( boxer_input_r )
 }
 
 
-static READ_HANDLER( boxer_misc_r )
+static READ8_HANDLER( boxer_misc_r )
 {
 	UINT8 val = 0;
 
@@ -131,25 +131,25 @@ static READ_HANDLER( boxer_misc_r )
 }
 
 
-static READ_HANDLER( boxer_bad_address_r )
+static READ8_HANDLER( boxer_bad_address_r )
 {
-	cpu_set_reset_line(0, PULSE_LINE);
+	cpunum_set_input_line(0, INPUT_LINE_RESET, PULSE_LINE);
 
 	return 0;
 }
 
 
-static WRITE_HANDLER( boxer_bell_w )
+static WRITE8_HANDLER( boxer_bell_w )
 {
 }
 
 
-static WRITE_HANDLER( boxer_sound_w )
+static WRITE8_HANDLER( boxer_sound_w )
 {
 }
 
 
-static WRITE_HANDLER( boxer_pot_w )
+static WRITE8_HANDLER( boxer_pot_w )
 {
 	/* BIT0 => HPOT1 */
 	/* BIT1 => VPOT1 */
@@ -160,17 +160,17 @@ static WRITE_HANDLER( boxer_pot_w )
 
 	pot_latch = data & 0x3f;
 
-	cpu_set_nmi_line(0, CLEAR_LINE);
+	cpunum_set_input_line(0, INPUT_LINE_NMI, CLEAR_LINE);
 }
 
 
-static WRITE_HANDLER( boxer_irq_reset_w )
+static WRITE8_HANDLER( boxer_irq_reset_w )
 {
-	cpu_set_irq_line(0, 0, CLEAR_LINE);
+	cpunum_set_input_line(0, 0, CLEAR_LINE);
 }
 
 
-static WRITE_HANDLER( boxer_crowd_w )
+static WRITE8_HANDLER( boxer_crowd_w )
 {
 	/* BIT0 => ATTRACT */
 	/* BIT1 => CROWD-1 */
@@ -181,16 +181,16 @@ static WRITE_HANDLER( boxer_crowd_w )
 }
 
 
-static WRITE_HANDLER( boxer_led_w )
+static WRITE8_HANDLER( boxer_led_w )
 {
 	set_led_status(1, !(data & 1));
 	set_led_status(0, !(data & 2));
 }
 
 
-static WRITE_HANDLER( boxer_bad_address_w )
+static WRITE8_HANDLER( boxer_bad_address_w )
 {
-	cpu_set_reset_line(0, PULSE_LINE);
+	cpunum_set_input_line(0, INPUT_LINE_RESET, PULSE_LINE);
 }
 
 
@@ -239,22 +239,22 @@ INPUT_PORTS_START( boxer )
 	PORT_DIPSETTING(    0x03, DEF_STR( Free_Play ) )
 
 	PORT_START
-	PORT_ANALOG ( 0xff, 0x80, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER1, 30, 16, 0x20, 0xe0)
+	PORT_BIT ( 0xff, 0x80, IPT_AD_STICK_X ) PORT_MINMAX(0x20,0xe0) PORT_SENSITIVITY(30) PORT_KEYDELTA(16) PORT_REVERSE PORT_PLAYER(1)
 
 	PORT_START
-	PORT_ANALOG ( 0xff, 0x80, IPT_AD_STICK_Y | IPF_REVERSE | IPF_PLAYER1, 30, 16, 0x20, 0xe0)
+	PORT_BIT ( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_MINMAX(0x20,0xe0) PORT_SENSITIVITY(30) PORT_KEYDELTA(16) PORT_REVERSE PORT_PLAYER(1)
 
 	PORT_START
-	PORT_ANALOGX( 0xff, 0x80, IPT_PADDLE | IPF_PLAYER1, 30, 16, 0x20, 0xe0, KEYCODE_Z, KEYCODE_X, IP_JOY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0xff, 0x80, IPT_PADDLE ) PORT_MINMAX(0x20,0xe0) PORT_SENSITIVITY(30) PORT_KEYDELTA(16) PORT_CODE_DEC(KEYCODE_Z) PORT_CODE_INC(KEYCODE_X) PORT_PLAYER(1)
 
 	PORT_START
-	PORT_ANALOG ( 0xff, 0x80, IPT_AD_STICK_X | IPF_REVERSE | IPF_PLAYER2, 30, 16, 0x20, 0xe0)
+	PORT_BIT ( 0xff, 0x80, IPT_AD_STICK_X ) PORT_MINMAX(0x20,0xe0) PORT_SENSITIVITY(30) PORT_KEYDELTA(16) PORT_REVERSE PORT_PLAYER(2)
 
 	PORT_START
-	PORT_ANALOG ( 0xff, 0x80, IPT_AD_STICK_Y | IPF_REVERSE | IPF_PLAYER2, 30, 16, 0x20, 0xe0)
+	PORT_BIT ( 0xff, 0x80, IPT_AD_STICK_Y ) PORT_MINMAX(0x20,0xe0) PORT_SENSITIVITY(30) PORT_KEYDELTA(16) PORT_REVERSE PORT_PLAYER(2)
 
 	PORT_START
-	PORT_ANALOGX( 0xff, 0x80, IPT_PADDLE | IPF_PLAYER2, 30, 16, 0x20, 0xe0, KEYCODE_Q, KEYCODE_W, IP_JOY_NONE, IP_JOY_NONE )
+	PORT_BIT( 0xff, 0x80, IPT_PADDLE ) PORT_MINMAX(0x20,0xe0) PORT_SENSITIVITY(30) PORT_KEYDELTA(16) PORT_CODE_DEC(KEYCODE_Q) PORT_CODE_INC(KEYCODE_W) PORT_PLAYER(2)
 
 	PORT_START
 	PORT_DIPNAME( 0xff, 0x5C, "Round Time" ) /* actually a potentiometer */

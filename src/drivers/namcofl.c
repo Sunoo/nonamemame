@@ -176,7 +176,7 @@ INPUT_PORTS_START( sysfl )
 	PORT_START
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BITX(0x04, IP_ACTIVE_HIGH, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_SERVICE ) PORT_NAME( DEF_STR( Service_Mode )) PORT_CODE(KEYCODE_F2)
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_SERVICE1 )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -274,13 +274,13 @@ static INTERRUPT_GEN(namcofl_interrupt)
 	switch (cpu_getiloops())
 	{
 		case 0:
-			cpu_set_irq_line(0, I960_IRQ2, ASSERT_LINE);
+			cpunum_set_input_line(0, I960_IRQ2, ASSERT_LINE);
 			break;
 		case 1:
-			cpu_set_irq_line(0, I960_IRQ1, ASSERT_LINE);
+			cpunum_set_input_line(0, I960_IRQ1, ASSERT_LINE);
 			break;
 		case 2:
-			cpu_set_irq_line(0, I960_IRQ0, ASSERT_LINE);
+			cpunum_set_input_line(0, I960_IRQ0, ASSERT_LINE);
 			break;
 	}
 }

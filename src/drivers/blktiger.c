@@ -20,16 +20,16 @@ Notes:
 
 extern unsigned char *blktiger_txvideoram;
 
-WRITE_HANDLER( blktiger_screen_layout_w );
+WRITE8_HANDLER( blktiger_screen_layout_w );
 
-READ_HANDLER( blktiger_bgvideoram_r );
-WRITE_HANDLER( blktiger_bgvideoram_w );
-WRITE_HANDLER( blktiger_txvideoram_w );
-WRITE_HANDLER( blktiger_video_control_w );
-WRITE_HANDLER( blktiger_video_enable_w );
-WRITE_HANDLER( blktiger_bgvideoram_bank_w );
-WRITE_HANDLER( blktiger_scrollx_w );
-WRITE_HANDLER( blktiger_scrolly_w );
+READ8_HANDLER( blktiger_bgvideoram_r );
+WRITE8_HANDLER( blktiger_bgvideoram_w );
+WRITE8_HANDLER( blktiger_txvideoram_w );
+WRITE8_HANDLER( blktiger_video_control_w );
+WRITE8_HANDLER( blktiger_video_enable_w );
+WRITE8_HANDLER( blktiger_bgvideoram_bank_w );
+WRITE8_HANDLER( blktiger_scrollx_w );
+WRITE8_HANDLER( blktiger_scrolly_w );
 
 VIDEO_START( blktiger );
 VIDEO_UPDATE( blktiger );
@@ -39,14 +39,14 @@ VIDEO_EOF( blktiger );
 
 /* this is a protection check. The game crashes (thru a jump to 0x8000) */
 /* if a read from this address doesn't return the value it expects. */
-static READ_HANDLER( blktiger_protection_r )
+static READ8_HANDLER( blktiger_protection_r )
 {
 	int data = activecpu_get_reg(Z80_DE) >> 8;
 	logerror("protection read, PC: %04x Result:%02x\n",activecpu_get_pc(),data);
 	return data;
 }
 
-static WRITE_HANDLER( blktiger_bankswitch_w )
+static WRITE8_HANDLER( blktiger_bankswitch_w )
 {
 	int bankaddress;
 	unsigned char *rom = memory_region(REGION_CPU1);
@@ -56,7 +56,7 @@ static WRITE_HANDLER( blktiger_bankswitch_w )
 	cpu_setbank(1,&rom[bankaddress]);
 }
 
-static WRITE_HANDLER( blktiger_coinlockout_w )
+static WRITE8_HANDLER( blktiger_coinlockout_w )
 {
 	coin_lockout_w(0,~data & 0x01);
 	coin_lockout_w(1,~data & 0x02);
@@ -139,22 +139,22 @@ INPUT_PORTS_START( blktiger )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 )
 
 	PORT_START	/* IN1 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* probably unused */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* probably unused */
 
 	PORT_START	/* IN2 */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* probably unused */
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* probably unused */
 
@@ -252,7 +252,7 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 /* handler called by the 2203 emulator when the internal timers cause an IRQ */
 static void irqhandler(int irq)
 {
-	cpu_set_irq_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM2203interface ym2203_interface =

@@ -32,18 +32,18 @@
 #include "artwork.h"
 #include "vidhrdw/generic.h"
 
-extern WRITE_HANDLER( sbrkout_serve_led_w );
-extern WRITE_HANDLER( sbrkout_start_1_led_w );
-extern WRITE_HANDLER( sbrkout_start_2_led_w );
-extern READ_HANDLER( sbrkout_read_DIPs_r );
+extern WRITE8_HANDLER( sbrkout_serve_led_w );
+extern WRITE8_HANDLER( sbrkout_start_1_led_w );
+extern WRITE8_HANDLER( sbrkout_start_2_led_w );
+extern READ8_HANDLER( sbrkout_read_DIPs_r );
 extern INTERRUPT_GEN( sbrkout_interrupt );
-extern READ_HANDLER( sbrkout_select1_r );
-extern READ_HANDLER( sbrkout_select2_r );
+extern READ8_HANDLER( sbrkout_select1_r );
+extern READ8_HANDLER( sbrkout_select2_r );
 
 extern UINT8 *sbrkout_horiz_ram;
 extern UINT8 *sbrkout_vert_ram;
 
-extern WRITE_HANDLER( sbrkout_videoram_w );
+extern WRITE8_HANDLER( sbrkout_videoram_w );
 
 extern VIDEO_START( sbrkout );
 extern VIDEO_UPDATE( sbrkout );
@@ -75,7 +75,7 @@ OVERLAY_END
 
 static UINT8 *sbrkout_sound;
 
-static WRITE_HANDLER( sbrkout_dac_w )
+static WRITE8_HANDLER( sbrkout_dac_w )
 {
 	sbrkout_sound[offset]=data;
 }
@@ -208,12 +208,12 @@ INPUT_PORTS_START( sbrkout )
 	PORT_BIT ( 0x80, IP_ACTIVE_HIGH, IPT_BUTTON1 )
 
 	PORT_START		/* IN5 */
-	PORT_ANALOG( 0xff, 0x00, IPT_PADDLE | IPF_REVERSE, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x00, IPT_PADDLE ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_REVERSE
 
 	PORT_START		/* IN6 - fake port, used to set the game select dial */
-	PORT_BITX(0x01, IP_ACTIVE_HIGH, IPT_BUTTON2, "Progressive", KEYCODE_E, IP_JOY_DEFAULT )
-	PORT_BITX(0x02, IP_ACTIVE_HIGH, IPT_BUTTON3, "Double",      KEYCODE_D, IP_JOY_DEFAULT )
-	PORT_BITX(0x04, IP_ACTIVE_HIGH, IPT_BUTTON4, "Cavity",      KEYCODE_C, IP_JOY_DEFAULT )
+	PORT_BIT(0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_NAME("Progressive") PORT_CODE(KEYCODE_E)
+	PORT_BIT(0x02, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_NAME("Double") PORT_CODE(KEYCODE_D)
+	PORT_BIT(0x04, IP_ACTIVE_HIGH, IPT_BUTTON4 ) PORT_NAME("Cavity") PORT_CODE(KEYCODE_C)
 INPUT_PORTS_END
 
 

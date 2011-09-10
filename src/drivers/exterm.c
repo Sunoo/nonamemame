@@ -82,12 +82,12 @@ void exterm_from_shiftreg_slave(unsigned int address, unsigned short* shiftreg);
 /* Functions in sndhrdw/gottlieb.c */
 void gottlieb_sound_init(void);
 WRITE16_HANDLER( gottlieb_sh_word_w );
-READ_HANDLER( gottlieb_cause_dac_nmi_r );
-WRITE_HANDLER( gottlieb_nmi_rate_w );
-WRITE_HANDLER( exterm_sound_control_w );
-WRITE_HANDLER( exterm_ym2151_w );
-WRITE_HANDLER( exterm_dac_vol_w );
-WRITE_HANDLER( exterm_dac_data_w );
+READ8_HANDLER( gottlieb_cause_dac_nmi_r );
+WRITE8_HANDLER( gottlieb_nmi_rate_w );
+WRITE8_HANDLER( exterm_sound_control_w );
+WRITE8_HANDLER( exterm_ym2151_w );
+WRITE8_HANDLER( exterm_dac_vol_w );
+WRITE8_HANDLER( exterm_dac_data_w );
 
 
 static MACHINE_INIT( exterm )
@@ -186,7 +186,7 @@ WRITE16_HANDLER( exterm_output_port_0_w )
 	{
 		/* Bit 13 = Resets the slave CPU */
 		if ((data & 0x2000) && !(last & 0x2000))
-			cpu_set_reset_line(1, PULSE_LINE);
+			cpunum_set_input_line(1, INPUT_LINE_RESET, PULSE_LINE);
 
 		/* Bits 14-15 = Coin counters */
 		coin_counter_w(0, data & 0x8000);
@@ -224,7 +224,7 @@ WRITE16_HANDLER( exterm_slave_speedup_w )
 	COMBINE_DATA(&exterm_slave_speedup[offset]);
 }
 
-READ_HANDLER( exterm_sound_dac_speedup_r )
+READ8_HANDLER( exterm_sound_dac_speedup_r )
 {
 	UINT8 *RAM = memory_region(REGION_CPU3);
 	int value = RAM[0x0007];
@@ -236,7 +236,7 @@ READ_HANDLER( exterm_sound_dac_speedup_r )
 	return value;
 }
 
-READ_HANDLER( exterm_sound_ym2151_speedup_r )
+READ8_HANDLER( exterm_sound_ym2151_speedup_r )
 {
 	/* Doing this won't flash the LED, but we're not emulating that anyhow, so
 	   it doesn't matter */
@@ -347,12 +347,12 @@ INPUT_PORTS_START( exterm )
 	PORT_START      /* IN0 */
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN1 )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER1)
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER1)
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER1)
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER1)
-	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER1 )
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER1 )
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_UP) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT) PORT_8WAY PORT_PLAYER(1)
+	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(1)
+	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(1)
 	PORT_BIT( 0x3f00, IP_ACTIVE_LOW, IPT_SPECIAL) /* trackball data */
 	PORT_BIT( 0x4000, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_SERVICE( 0x8000, IP_ACTIVE_LOW )
@@ -360,12 +360,12 @@ INPUT_PORTS_START( exterm )
 	PORT_START      /* IN1 */
 	PORT_BIT( 0x0001, IP_ACTIVE_LOW, IPT_COIN2 )
 	PORT_BIT( 0x0002, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2)
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2)
-	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2)
-	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2)
-	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
+	PORT_BIT( 0x0004, IP_ACTIVE_LOW, IPT_JOYSTICK_UP) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x0010, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x0020, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x0040, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
 	PORT_BIT( 0x3f00, IP_ACTIVE_LOW, IPT_SPECIAL) /* trackball data */
 	PORT_BIT( 0xc000, IP_ACTIVE_LOW, IPT_UNUSED )
 
@@ -399,10 +399,10 @@ INPUT_PORTS_START( exterm )
 	PORT_BIT( 0xff00, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START /* IN3, fake trackball input port */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER1, 50, 10, 0, 0)
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(1)
 
 	PORT_START /* IN4, fake trackball input port. */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 50, 10, 0, 0)
+	PORT_BIT( 0xff, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_REVERSE PORT_PLAYER(2)
 
 INPUT_PORTS_END
 
@@ -557,10 +557,10 @@ DRIVER_INIT( exterm )
 	memcpy(exterm_code_rom, memory_region(REGION_USER1), code_rom_size);
 
 	/* install speedups */
-	exterm_master_speedup = install_mem_read16_handler(0, 0x00c800e0, 0x00c800ef, exterm_master_speedup_r);
-	exterm_slave_speedup = install_mem_write16_handler(1, 0xfffffb90, 0xfffffb9f, exterm_slave_speedup_w);
-	install_mem_read_handler(2, 0x0007, 0x0007, exterm_sound_dac_speedup_r);
-	install_mem_read_handler(3, 0x02b6, 0x02b6, exterm_sound_ym2151_speedup_r);
+	exterm_master_speedup = memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x00c800e0, 0x00c800ef, 0, 0, exterm_master_speedup_r);
+	exterm_slave_speedup = memory_install_write16_handler(1, ADDRESS_SPACE_PROGRAM, 0xfffffb90, 0xfffffb9f, 0, 0, exterm_slave_speedup_w);
+	memory_install_read8_handler(2, ADDRESS_SPACE_PROGRAM, 0x0007, 0x0007, 0, 0, exterm_sound_dac_speedup_r);
+	memory_install_read8_handler(3, ADDRESS_SPACE_PROGRAM, 0x02b6, 0x02b6, 0, 0, exterm_sound_ym2151_speedup_r);
 
 	/* set up mirrored ROM access */
 	cpu_setbank(1, exterm_code_rom);

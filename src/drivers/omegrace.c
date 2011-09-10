@@ -242,14 +242,14 @@ static MACHINE_INIT( omegrace )
  *
  *************************************/
 
-static READ_HANDLER( omegrace_vg_go_r )
+static READ8_HANDLER( omegrace_vg_go_r )
 {
 	avgdvg_go_w(0,0);
 	return 0;
 }
 
 
-static READ_HANDLER( omegrace_vg_status_r )
+static READ8_HANDLER( omegrace_vg_status_r )
 {
 	return avgdvg_done() ? 0x00 : 0x80;
 }
@@ -287,7 +287,7 @@ static unsigned char spinnerTable[64] =
 };
 
 
-READ_HANDLER( omegrace_spinner1_r )
+READ8_HANDLER( omegrace_spinner1_r )
 {
 	return (spinnerTable[readinputport(4) & 0x3f]);
 }
@@ -300,7 +300,7 @@ READ_HANDLER( omegrace_spinner1_r )
  *
  *************************************/
 
-WRITE_HANDLER( omegrace_leds_w )
+WRITE8_HANDLER( omegrace_leds_w )
 {
 	/* bits 0 and 1 are coin counters */
 	coin_counter_w(0,data & 0x01);
@@ -316,10 +316,10 @@ WRITE_HANDLER( omegrace_leds_w )
 }
 
 
-WRITE_HANDLER( omegrace_soundlatch_w )
+WRITE8_HANDLER( omegrace_soundlatch_w )
 {
 	soundlatch_w (offset, data);
-	cpu_set_irq_line(1, 0, HOLD_LINE);
+	cpunum_set_input_line(1, 0, HOLD_LINE);
 }
 
 
@@ -480,20 +480,20 @@ INPUT_PORTS_START( omegrace )
 	PORT_SERVICE( 0x80, IP_ACTIVE_LOW )
 
 	PORT_START /* IN3 - port 0x12 */
-	PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_COCKTAIL )
-	PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BITX( 0x04, IP_ACTIVE_HIGH, IPT_START2, "2 Players Start (1 credit)", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-	PORT_BITX( 0x08, IP_ACTIVE_HIGH, IPT_START4, "2 Players Start (2 credits)", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT ( 0x01, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_COCKTAIL
+	PORT_BIT ( 0x02, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_START2 ) PORT_NAME("2 Players Start (1 credit)")
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_START4 ) PORT_NAME("2 Players Start (2 credits)")
 	PORT_BIT ( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT ( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX( 0x40, IP_ACTIVE_HIGH, IPT_START1, "1 Player Start (1 credit)", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-	PORT_BITX( 0x80, IP_ACTIVE_HIGH, IPT_START3, "1 Player Start (2 credits)", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_START1 ) PORT_NAME("1 Player Start (1 credit)")
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_START3 ) PORT_NAME("1 Player Start (2 credits)")
 
 	PORT_START /* IN4 - port 0x15 - spinner */
-	PORT_ANALOG(0x3f, 0x00, IPT_DIAL, 12, 10, 0, 0 )
+	PORT_BIT(0x3f, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(12) PORT_KEYDELTA(10)
 
 	PORT_START /* IN5 - port 0x16 - second spinner */
-	PORT_ANALOG(0x3f, 0x00, IPT_DIAL | IPF_COCKTAIL, 12, 10, 0, 0 )
+	PORT_BIT(0x3f, 0x00, IPT_DIAL ) PORT_MINMAX(0,0) PORT_SENSITIVITY(12) PORT_KEYDELTA(10) PORT_COCKTAIL
 INPUT_PORTS_END
 
 

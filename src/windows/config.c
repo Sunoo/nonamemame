@@ -92,6 +92,7 @@ static int video_ror = 0;
 static int video_rol = 0;
 static int video_autoror = 0;
 static int video_autorol = 0;
+extern int rotation;
 
 static char *win_basename(char *filename);
 static char *win_dirname(char *filename);
@@ -705,7 +706,10 @@ int cli_frontend_init (int argc, char **argv)
 
 	/* override if no rotation requested */
 	if (video_norotate)
+	{
 		orientation = options.ui_orientation = ROT0;
+		rotation = 0;
+	}
 
 	/* rotate right */
 	if (video_ror)
@@ -716,6 +720,7 @@ int cli_frontend_init (int argc, char **argv)
 			orientation ^= ROT180;
 
 		orientation ^= ROT90;
+		rotation = 1;
 	}
 
 	/* rotate left */
@@ -727,6 +732,7 @@ int cli_frontend_init (int argc, char **argv)
 			orientation ^= ROT180;
 
 		orientation ^= ROT270;
+		rotation = 1;
 	}
 
 	/* auto-rotate right (e.g. for rotating lcds), based on original orientation */
@@ -738,6 +744,7 @@ int cli_frontend_init (int argc, char **argv)
 			orientation ^= ROT180;
 
 		orientation ^= ROT90;
+		rotation = 1;
 	}
 
 	/* auto-rotate left (e.g. for rotating lcds), based on original orientation */
@@ -749,6 +756,7 @@ int cli_frontend_init (int argc, char **argv)
 			orientation ^= ROT180;
 
 		orientation ^= ROT270;
+		rotation = 1;
 	}
 
 	/* flip X/Y */

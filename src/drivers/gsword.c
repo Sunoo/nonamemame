@@ -140,10 +140,10 @@ reg: 0->1 (main->2nd) /     : (1->0) 2nd->main :
 #include "machine/tait8741.h"
 
 
-extern WRITE_HANDLER( gsword_charbank_w );
-extern WRITE_HANDLER( gsword_videoctrl_w );
-extern WRITE_HANDLER( gsword_videoram_w );
-extern WRITE_HANDLER( gsword_scroll_w );
+extern WRITE8_HANDLER( gsword_charbank_w );
+extern WRITE8_HANDLER( gsword_videoctrl_w );
+extern WRITE8_HANDLER( gsword_videoram_w );
+extern WRITE8_HANDLER( gsword_scroll_w );
 
 extern PALETTE_INIT( josvolly );
 extern PALETTE_INIT( gsword );
@@ -175,7 +175,7 @@ static int gsword_coins_in(void)
 }
 #endif
 
-static READ_HANDLER( gsword_8741_2_r )
+static READ8_HANDLER( gsword_8741_2_r )
 {
 	switch (offset)
 	{
@@ -192,7 +192,7 @@ static READ_HANDLER( gsword_8741_2_r )
 	return 0;
 }
 
-static READ_HANDLER( gsword_8741_3_r )
+static READ8_HANDLER( gsword_8741_3_r )
 {
 	switch (offset)
 	{
@@ -233,11 +233,11 @@ static INTERRUPT_GEN( gsword_snd_interrupt )
 	if( (gsword_nmi_count+=gsword_nmi_step) >= 4)
 	{
 		gsword_nmi_count = 0;
-		cpu_set_irq_line(1, IRQ_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 	}
 }
 
-static WRITE_HANDLER( gsword_nmi_set_w )
+static WRITE8_HANDLER( gsword_nmi_set_w )
 {
 	switch(data)
 	{
@@ -259,37 +259,37 @@ static WRITE_HANDLER( gsword_nmi_set_w )
 	logerror("NMI controll %02x\n",data);
 }
 
-static WRITE_HANDLER( gsword_AY8910_control_port_0_w )
+static WRITE8_HANDLER( gsword_AY8910_control_port_0_w )
 {
 	AY8910_control_port_0_w(offset,data);
 	fake8910_0 = data;
 }
-static WRITE_HANDLER( gsword_AY8910_control_port_1_w )
+static WRITE8_HANDLER( gsword_AY8910_control_port_1_w )
 {
 	AY8910_control_port_1_w(offset,data);
 	fake8910_1 = data;
 }
 
-static READ_HANDLER( gsword_fake_0_r )
+static READ8_HANDLER( gsword_fake_0_r )
 {
 	return fake8910_0+1;
 }
-static READ_HANDLER( gsword_fake_1_r )
+static READ8_HANDLER( gsword_fake_1_r )
 {
 	return fake8910_1+1;
 }
 
-WRITE_HANDLER( gsword_adpcm_data_w )
+WRITE8_HANDLER( gsword_adpcm_data_w )
 {
 	MSM5205_data_w (0,data & 0x0f); /* bit 0..3 */
 	MSM5205_reset_w(0,(data>>5)&1); /* bit 5    */
 	MSM5205_vclk_w(0,(data>>4)&1);  /* bit 4    */
 }
 
-WRITE_HANDLER( adpcm_soundcommand_w )
+WRITE8_HANDLER( adpcm_soundcommand_w )
 {
 	soundlatch_w(0,data);
-	cpu_set_nmi_line(2, PULSE_LINE);
+	cpunum_set_input_line(2, INPUT_LINE_NMI, PULSE_LINE);
 }
 
 static ADDRESS_MAP_START( gsword_readmem, ADDRESS_SPACE_PROGRAM, 8 )
@@ -409,16 +409,16 @@ INPUT_PORTS_START( gsword )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_HIGH, IPT_COIN1, 1 )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
 	PORT_START	/* IN1 (8741-2 port2?) */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_2WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_2WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON3 )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_HIGH, IPT_COIN1, 1 )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
 	PORT_START	/* IN2 (8741-3 port1?) */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_START1 )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_START2 )
@@ -426,16 +426,16 @@ INPUT_PORTS_START( gsword )
 	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_HIGH, IPT_COIN1, 1 )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
 	PORT_START	/* IN3  (8741-3 port2?) */
-	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_2WAY | IPF_COCKTAIL )
-	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT | IPF_2WAY | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT ) PORT_2WAY PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT ) PORT_2WAY PORT_COCKTAIL
 	PORT_BIT( 0x04, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_COCKTAIL )
-	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_COCKTAIL )
-	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_COCKTAIL )
+	PORT_BIT( 0x08, IP_ACTIVE_HIGH, IPT_BUTTON3 ) PORT_COCKTAIL
+	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_BUTTON1 ) PORT_COCKTAIL
+	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_BUTTON2 ) PORT_COCKTAIL
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_HIGH, IPT_COIN1, 1 )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
 	PORT_START	/* IN4 (coins) */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -444,7 +444,7 @@ INPUT_PORTS_START( gsword )
 	PORT_BIT( 0x10, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_HIGH, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_HIGH, IPT_UNKNOWN )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_HIGH, IPT_COIN1, 1 )
+	PORT_BIT( 0x80, IP_ACTIVE_HIGH, IPT_COIN1 ) PORT_IMPULSE(1)
 
 	PORT_START	/* DSW0 */
 	/* NOTE: Switches 0 & 1, 6,7,8 not used 	 */

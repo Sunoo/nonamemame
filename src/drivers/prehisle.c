@@ -28,7 +28,7 @@ static UINT16 *prehisle_ram16;
 static WRITE16_HANDLER( prehisle_sound16_w )
 {
 	soundlatch_w(0, data & 0xff);
-	cpu_set_nmi_line(1, PULSE_LINE);
+	cpunum_set_input_line(1, INPUT_LINE_NMI, PULSE_LINE);
 }
 
 /*******************************************************************************/
@@ -56,7 +56,7 @@ ADDRESS_MAP_END
 
 /******************************************************************************/
 
-static WRITE_HANDLER( D7759_write_port_0_w )
+static WRITE8_HANDLER( D7759_write_port_0_w )
 {
 	UPD7759_port_w(offset,data);
 	UPD7759_start_w (0,0);
@@ -90,23 +90,23 @@ ADDRESS_MAP_END
 
 INPUT_PORTS_START( prehisle )
 	PORT_START	/* Player 1 controls */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 )
 
 	PORT_START	/* Player 2 controls */
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )
-	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )
-	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_8WAY PORT_PLAYER(2)
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)
+	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_PLAYER(2)
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START2  )
 
 	PORT_START	/* coin */
@@ -215,7 +215,7 @@ static struct GfxDecodeInfo gfxdecodeinfo[] =
 
 static void irqhandler(int irq)
 {
-	cpu_set_irq_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
+	cpunum_set_input_line(1,0,irq ? ASSERT_LINE : CLEAR_LINE);
 }
 
 static struct YM3812interface ym3812_interface =
@@ -369,7 +369,7 @@ static READ16_HANDLER( world_cycle_r )
 
 static DRIVER_INIT( prehisle )
 {
-	install_mem_read16_handler(0, 0x70024, 0x70025, world_cycle_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x70024, 0x70025, 0, 0, world_cycle_r);
 }
 
 static READ16_HANDLER( usa_cycle_r )
@@ -386,7 +386,7 @@ static READ16_HANDLER( usa_cycle_r )
 
 static DRIVER_INIT( prehislu )
 {
-	install_mem_read16_handler(0, 0x70024, 0x70025, usa_cycle_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x70024, 0x70025, 0, 0, usa_cycle_r);
 }
 
 static READ16_HANDLER( jap_cycle_r )
@@ -403,7 +403,7 @@ static READ16_HANDLER( jap_cycle_r )
 
 static DRIVER_INIT( gensitou )
 {
-	install_mem_read16_handler(0, 0x70024, 0x70025, jap_cycle_r);
+	memory_install_read16_handler(0, ADDRESS_SPACE_PROGRAM, 0x70024, 0x70025, 0, 0, jap_cycle_r);
 }
 
 /******************************************************************************/

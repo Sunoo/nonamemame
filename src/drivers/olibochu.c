@@ -58,7 +58,7 @@ PALETTE_INIT( olibochu )
 		COLOR(1,i) = (*(color_prom++) & 0x0f);
 }
 
-WRITE_HANDLER( olibochu_videoram_w )
+WRITE8_HANDLER( olibochu_videoram_w )
 {
 	if (videoram[offset] != data)
 	{
@@ -67,7 +67,7 @@ WRITE_HANDLER( olibochu_videoram_w )
 	}
 }
 
-WRITE_HANDLER( olibochu_colorram_w )
+WRITE8_HANDLER( olibochu_colorram_w )
 {
 	if (colorram[offset] != data)
 	{
@@ -76,7 +76,7 @@ WRITE_HANDLER( olibochu_colorram_w )
 	}
 }
 
-WRITE_HANDLER( olibochu_flipscreen_w )
+WRITE8_HANDLER( olibochu_flipscreen_w )
 {
 	if (flip_screen != (data & 0x80))
 	{
@@ -176,7 +176,7 @@ VIDEO_UPDATE( olibochu )
 }
 
 
-static WRITE_HANDLER( sound_command_w )
+static WRITE8_HANDLER( sound_command_w )
 {
 	static int cmd;
 	int c;
@@ -242,20 +242,20 @@ INPUT_PORTS_START( olibochu )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_4WAY )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_4WAY )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_4WAY )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_4WAY | IPF_PLAYER2 )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_4WAY | IPF_PLAYER2 )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN ) PORT_4WAY PORT_PLAYER(2)
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_4WAY PORT_PLAYER(2)
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_UNKNOWN )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
@@ -314,7 +314,7 @@ INPUT_PORTS_START( olibochu )
 
 	PORT_START
 	/* In stop mode, press 2 to stop and 1 to restart */
-	PORT_BITX   ( 0x01, 0x01, IPT_DIPSWITCH_NAME | IPF_CHEAT, "Stop Mode", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_BIT   ( 0x01, 0x01, IPT_DIPSWITCH_NAME ) PORT_NAME("Stop Mode") PORT_CHEAT
 	PORT_DIPSETTING(    0x01, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPNAME( 0x0e, 0x0e, DEF_STR( Coin_A ) )
@@ -389,9 +389,9 @@ static struct AY8910interface ay8910_interface =
 static INTERRUPT_GEN( olibochu_interrupt )
 {
 	if (cpu_getiloops() == 0)
-		cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, 0xcf);	/* RST 08h */
+		cpunum_set_input_line_and_vector(0, 0, HOLD_LINE, 0xcf);	/* RST 08h */
 	else
-		cpu_set_irq_line_and_vector(0, 0, HOLD_LINE, 0xd7);	/* RST 10h */
+		cpunum_set_input_line_and_vector(0, 0, HOLD_LINE, 0xd7);	/* RST 10h */
 }
 
 static MACHINE_DRIVER_START( olibochu )

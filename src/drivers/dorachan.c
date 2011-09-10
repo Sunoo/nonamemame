@@ -13,9 +13,9 @@ Todo:
 #include "vidhrdw/generic.h"
 extern int dorachan_ctrl;
 
-WRITE_HANDLER( dorachan_videoram_w );
+WRITE8_HANDLER( dorachan_videoram_w );
 
-static READ_HANDLER( dorachan_protection_r )
+static READ8_HANDLER( dorachan_protection_r )
 {
 
 	switch (activecpu_get_previouspc())
@@ -28,13 +28,13 @@ static READ_HANDLER( dorachan_protection_r )
 	return 0xff;
 }
 
-static READ_HANDLER( dorachan_status_r )
+static READ8_HANDLER( dorachan_status_r )
 {
 /* to avoid resetting (when player 2 starts) bit 0 need to be reversed when screen is flipped */
 	return ((cpu_getscanline()>100)?1:0)^(dorachan_ctrl>>6);
 }
 
-static WRITE_HANDLER(dorachan_ctrl_w)
+static WRITE8_HANDLER(dorachan_ctrl_w)
 {
 	dorachan_ctrl=data;
 }
@@ -75,7 +75,7 @@ INPUT_PORTS_START( dorachan )
 	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_START1 )
 	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_START2 )
 	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON1 )
-	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 |IPF_COCKTAIL )
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_COCKTAIL
 	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
 	PORT_DIPSETTING(      0x20, DEF_STR( Off ) )
 	PORT_DIPSETTING(      0x00, DEF_STR( On ) )
@@ -88,10 +88,10 @@ INPUT_PORTS_START( dorachan )
 
 
 	PORT_START
-	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN | IPF_COCKTAIL)
-	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_UP | IPF_COCKTAIL )
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT | IPF_COCKTAIL )
-	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_COCKTAIL )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN) PORT_COCKTAIL
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_UP ) PORT_COCKTAIL
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_COCKTAIL
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_COCKTAIL
 	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN)
 	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_JOYSTICK_UP )
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT )

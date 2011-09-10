@@ -120,7 +120,7 @@ static PALETTE_INIT( skydiver )
  *
  *************************************/
 
-static WRITE_HANDLER( skydiver_nmion_w )
+static WRITE8_HANDLER( skydiver_nmion_w )
 {
 	skydiver_nmion = offset;
 }
@@ -136,7 +136,7 @@ static INTERRUPT_GEN( skydiver_interrupt )
 	discrete_sound_w(3,  skydiver_videoram[0x396] & 0x0f);	// NAM - Noise Amplitude
 
 	if (skydiver_nmion)
-		cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+		cpunum_set_input_line(0, INPUT_LINE_NMI, PULSE_LINE);
 }
 
 
@@ -147,22 +147,22 @@ static INTERRUPT_GEN( skydiver_interrupt )
  *
  *************************************/
 
-static WRITE_HANDLER( skydiver_sound_enable_w )
+static WRITE8_HANDLER( skydiver_sound_enable_w )
 {
 	discrete_sound_w(9, offset);
 }
 
-static WRITE_HANDLER( skydiver_whistle_w )
+static WRITE8_HANDLER( skydiver_whistle_w )
 {
 	discrete_sound_w(5 + (offset / 2), offset & 0x01);
 }
 
-static WRITE_HANDLER( skydiver_oct_w )
+static WRITE8_HANDLER( skydiver_oct_w )
 {
 	discrete_sound_w(7 + (offset / 2), offset & 0x01);
 }
 
-static WRITE_HANDLER( skydiver_noise_reset_w )
+static WRITE8_HANDLER( skydiver_noise_reset_w )
 {
 	discrete_sound_w(4, !offset);
 }
@@ -245,8 +245,8 @@ INPUT_PORTS_START( skydiver )
 
 	PORT_START /* IN1 */
 	PORT_BIT (0x3f, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT (0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT  | IPF_PLAYER2 )
-	PORT_BIT (0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT | IPF_PLAYER2 )
+	PORT_BIT (0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT ) PORT_PLAYER(2)
+	PORT_BIT (0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT ) PORT_PLAYER(2)
 
 	PORT_START /* IN2 */
 	PORT_BIT (0x3f, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -255,28 +255,28 @@ INPUT_PORTS_START( skydiver )
 
 	PORT_START /* IN3 */
 	PORT_BIT (0x3f, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BIT (0x40, IP_ACTIVE_LOW, IPT_BUTTON1 | IPF_PLAYER2 )	/* Jump 2 */
-	PORT_BIT (0x80, IP_ACTIVE_LOW, IPT_BUTTON2 | IPF_PLAYER2 )	/* Chute 2 */
+	PORT_BIT (0x40, IP_ACTIVE_LOW, IPT_BUTTON1 ) PORT_PLAYER(2)	/* Jump 2 */
+	PORT_BIT (0x80, IP_ACTIVE_LOW, IPT_BUTTON2 ) PORT_PLAYER(2)	/* Chute 2 */
 
 	PORT_START /* IN4 */
 	PORT_BIT (0x3f, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX(0x40, IP_ACTIVE_LOW, IPT_BUTTON3, "(D) OPT SW NEXT TEST", KEYCODE_D, IP_JOY_NONE )
-	PORT_BITX(0x80, IP_ACTIVE_LOW, IPT_BUTTON4, "(F) OPT SW", KEYCODE_F, IP_JOY_NONE )
+	PORT_BIT(0x40, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("(D) OPT SW NEXT TEST") PORT_CODE(KEYCODE_D)
+	PORT_BIT(0x80, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("(F) OPT SW") PORT_CODE(KEYCODE_F)
 
 	PORT_START /* IN5 */
 	PORT_BIT (0x3f, IP_ACTIVE_LOW, IPT_UNUSED )
-	PORT_BITX(0x40, IP_ACTIVE_LOW, IPT_BUTTON5, "(E) OPT SW", KEYCODE_E, IP_JOY_NONE )
-	PORT_BITX(0x80, IP_ACTIVE_LOW, IPT_BUTTON6, "(H) OPT SW DIAGNOSTICS", KEYCODE_H, IP_JOY_NONE )
+	PORT_BIT(0x40, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("(E) OPT SW") PORT_CODE(KEYCODE_E)
+	PORT_BIT(0x80, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("(H) OPT SW DIAGNOSTICS") PORT_CODE(KEYCODE_H)
 
 	PORT_START /* IN6 */
 	PORT_BIT (0x3f, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT (0x40, IP_ACTIVE_LOW, IPT_START1 )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_LOW, IPT_COIN1, 1 )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN1 ) PORT_IMPULSE(1)
 
 	PORT_START /* IN7 */
 	PORT_BIT (0x3f, IP_ACTIVE_LOW, IPT_UNUSED )
 	PORT_BIT (0x40, IP_ACTIVE_LOW, IPT_START2 )
-	PORT_BIT_IMPULSE( 0x80, IP_ACTIVE_LOW, IPT_COIN2, 1 )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_COIN2 ) PORT_IMPULSE(1)
 
 	PORT_START /* IN8 */
 	PORT_BIT (0x3f, IP_ACTIVE_LOW, IPT_UNUSED )

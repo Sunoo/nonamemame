@@ -273,12 +273,12 @@ static void handle_coins(void)
 	if (((coins ^ last_coins) & 0x01) && (coins & 0x01) == 0)
 	{
 		coin_state &= ~0x01;
-		cpu_set_irq_line(0, 0, ASSERT_LINE);
+		cpunum_set_input_line(0, 0, ASSERT_LINE);
 	}
 	if (((coins ^ last_coins) & 0x02) && (coins & 0x02) == 0)
 	{
 		coin_state &= ~0x02;
-		cpu_set_irq_line(0, 0, ASSERT_LINE);
+		cpunum_set_input_line(0, 0, ASSERT_LINE);
 	}
 	last_coins = coins;
 }
@@ -309,7 +309,7 @@ MACHINE_INIT( exidy440 )
  *
  *************************************/
 
-static READ_HANDLER( input_r )
+static READ8_HANDLER( input_r )
 {
 	int result = input_port_0_r(offset);
 
@@ -335,7 +335,7 @@ static READ_HANDLER( input_r )
  *
  *************************************/
 
-static WRITE_HANDLER( bankram_w )
+static WRITE8_HANDLER( bankram_w )
 {
 	/* EEROM lives in the upper 8k of bank 15 */
 	if (exidy440_bank == 15 && offset >= 0x2000)
@@ -355,7 +355,7 @@ static WRITE_HANDLER( bankram_w )
  *
  *************************************/
 
-static READ_HANDLER( io1_r )
+static READ8_HANDLER( io1_r )
 {
 	int result = 0xff;
 
@@ -374,7 +374,7 @@ static READ_HANDLER( io1_r )
 				result ^= 0x08;
 
 			/* I/O1 accesses clear the CIRQ flip/flop */
-			cpu_set_irq_line(0, 0, CLEAR_LINE);
+			cpunum_set_input_line(0, 0, CLEAR_LINE);
 			break;
 
 		case 0x40:										/* clear coin counters I/O2 */
@@ -431,11 +431,11 @@ static void delayed_sound_command_w(int param)
 	exidy440_sound_command_ack = 0;
 
 	/* cause an FIRQ on the sound CPU */
-	cpu_set_irq_line(1, 1, ASSERT_LINE);
+	cpunum_set_input_line(1, 1, ASSERT_LINE);
 }
 
 
-static WRITE_HANDLER( io1_w )
+static WRITE8_HANDLER( io1_w )
 {
 	logerror("W I/O1[%02X]=%02X\n", offset, data);
 
@@ -449,7 +449,7 @@ static WRITE_HANDLER( io1_w )
 		case 0x20:										/* coin bits I/O1 */
 
 			/* accesses here clear the CIRQ flip/flop */
-			cpu_set_irq_line(0, 0, CLEAR_LINE);
+			cpunum_set_input_line(0, 0, CLEAR_LINE);
 			break;
 
 		case 0x40:										/* clear coin counters I/O2 */
@@ -481,7 +481,7 @@ static WRITE_HANDLER( io1_w )
  *
  *************************************/
 
-READ_HANDLER( showdown_pld_trigger_r )
+READ8_HANDLER( showdown_pld_trigger_r )
 {
 	/* bank 0 is where the PLD lives - a read here will set the trigger */
 	if (exidy440_bank == 0)
@@ -492,7 +492,7 @@ READ_HANDLER( showdown_pld_trigger_r )
 }
 
 
-READ_HANDLER( showdown_pld_select1_r )
+READ8_HANDLER( showdown_pld_select1_r )
 {
 	/* bank 0 is where the PLD lives - a read here after a trigger will set bank "1" */
 	if (exidy440_bank == 0 && showdown_bank_triggered)
@@ -514,7 +514,7 @@ READ_HANDLER( showdown_pld_select1_r )
 }
 
 
-READ_HANDLER( showdown_pld_select2_r )
+READ8_HANDLER( showdown_pld_select2_r )
 {
 	/* bank 0 is where the PLD lives - a read here after a trigger will set bank "2" */
 	if (exidy440_bank == 0 && showdown_bank_triggered)
@@ -663,10 +663,10 @@ INPUT_PORTS_START( crossbow )
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 
@@ -703,10 +703,10 @@ INPUT_PORTS_START( cheyenne )
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 
@@ -743,10 +743,10 @@ INPUT_PORTS_START( combat )
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 
@@ -783,10 +783,10 @@ INPUT_PORTS_START( catch22 )
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 
@@ -823,10 +823,10 @@ INPUT_PORTS_START( cracksht )
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 
@@ -859,10 +859,10 @@ INPUT_PORTS_START( claypign )
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 
@@ -896,10 +896,10 @@ INPUT_PORTS_START( chiller )
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 
@@ -933,20 +933,20 @@ INPUT_PORTS_START( topsecex )
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x00, IPT_TRACKBALL_X | IPF_REVERSE, 50, 10, -127, 127 )
+	PORT_BIT( 0xff, 0x00, IPT_TRACKBALL_X ) PORT_MINMAX(-127,127) PORT_SENSITIVITY(50) PORT_KEYDELTA(10) PORT_REVERSE
 
 	PORT_START				/* fake analog Y */
 	PORT_BIT(  0xff, IP_ACTIVE_LOW, IPT_BUTTON1 )
 
 	PORT_START				/* start button */
-	PORT_BITX( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3, "Fireball", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-	PORT_BITX( 0x02, IP_ACTIVE_LOW, IPT_BUTTON4, "Laser", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-	PORT_BITX( 0x04, IP_ACTIVE_LOW, IPT_BUTTON5, "Missile", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-	PORT_BITX( 0x08, IP_ACTIVE_LOW, IPT_BUTTON6, "Oil", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-	PORT_BITX( 0x10, IP_ACTIVE_LOW, IPT_BUTTON7, "Turbo", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
-	PORT_BITX( 0x20, IP_ACTIVE_LOW, IPT_BUTTON8, "Shield", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_BUTTON3 ) PORT_NAME("Fireball")
+	PORT_BIT( 0x02, IP_ACTIVE_LOW, IPT_BUTTON4 ) PORT_NAME("Laser")
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON5 ) PORT_NAME("Missile")
+	PORT_BIT( 0x08, IP_ACTIVE_LOW, IPT_BUTTON6 ) PORT_NAME("Oil")
+	PORT_BIT( 0x10, IP_ACTIVE_LOW, IPT_BUTTON7 ) PORT_NAME("Turbo")
+	PORT_BIT( 0x20, IP_ACTIVE_LOW, IPT_BUTTON8 ) PORT_NAME("Shield")
 	PORT_BIT(  0x40, IP_ACTIVE_LOW, IPT_UNKNOWN )
-	PORT_BITX( 0x80, IP_ACTIVE_LOW, IPT_START1, "Top Secret", IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_START1 ) PORT_NAME("Top Secret")
 INPUT_PORTS_END
 
 
@@ -983,10 +983,10 @@ INPUT_PORTS_START( hitnmiss )
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 
@@ -1020,10 +1020,10 @@ INPUT_PORTS_START( whodunit )
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 
@@ -1057,10 +1057,10 @@ INPUT_PORTS_START( showdown )
 	PORT_BIT( 0xfc, IP_ACTIVE_LOW, IPT_UNKNOWN )
 
 	PORT_START				/* fake analog X */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_X, 50, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_X ) PORT_MINMAX(0,255) PORT_SENSITIVITY(50) PORT_KEYDELTA(10)
 
 	PORT_START				/* fake analog Y */
-	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y, 70, 10, 0, 255 )
+	PORT_BIT( 0xff, 0x80, IPT_LIGHTGUN_Y ) PORT_MINMAX(0,255) PORT_SENSITIVITY(70) PORT_KEYDELTA(10)
 INPUT_PORTS_END
 
 
@@ -1764,9 +1764,9 @@ static DRIVER_INIT( showdown )
 
 	/* set up the fake PLD */
 	showdown_bank_triggered = 0;
-	install_mem_read_handler(0, 0x4055, 0x4055, showdown_pld_trigger_r);
-	install_mem_read_handler(0, 0x40ed, 0x40ed, showdown_pld_select1_r);
-	install_mem_read_handler(0, 0x5243, 0x5243, showdown_pld_select2_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x4055, 0x4055, 0, 0, showdown_pld_trigger_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x40ed, 0x40ed, 0, 0, showdown_pld_select1_r);
+	memory_install_read8_handler(0, ADDRESS_SPACE_PROGRAM, 0x5243, 0x5243, 0, 0, showdown_pld_select2_r);
 
 	/* ensure that we're triggered to bank "1" to start */
 	exidy440_bank = 0;
