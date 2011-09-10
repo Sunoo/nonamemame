@@ -536,6 +536,24 @@ const struct GameDriver driver_##NAME =		\
 	(MONITOR)|(FLAGS)						\
 };
 
+#define GAMEH(YEAR,NAME,PARENT,MACHINE,INPUT,INIT,MONITOR,COMPANY,FULLNAME) \
+extern const struct GameDriver driver_##PARENT; \
+const struct GameDriver driver_##NAME =		\
+{											\
+	__FILE__,								\
+	&driver_##PARENT,						\
+	#NAME,									\
+	system_bios_0,							\
+	FULLNAME,								\
+	#YEAR,									\
+	COMPANY,								\
+	construct_##MACHINE,					\
+	input_ports_##INPUT,					\
+	init_##INIT,							\
+	rom_##PARENT,							\
+	MONITOR									\
+};
+
 /* monitor parameters to be used with the GAME() macro */
 #define	ROT0	0
 #define	ROT90	(ORIENTATION_SWAP_XY|ORIENTATION_FLIP_X)	/* rotate clockwise 90 degrees */

@@ -44,8 +44,10 @@ Hide Non-Working and show Working games
 Hide Original games and show Clones
 .topic HIDC_FILTER_RASTER
 Hide Raster games and show Vector games
+.topic HIDC_FILTER_AVAILABLE
+Hide Available games and show unavailable games
 .topic HIDC_FILTER_UNAVAILABLE
-Hide Available game
+Hide Unavailable games and show available games
 .topic HIDC_FILTER_VECTOR
 Hide Vector games and show Raster game
 .topic HIDC_FILTER_WORKING
@@ -183,4 +185,15 @@ De-select to allow horizontal scanlines & effects in vertical games.
 .topic HIDC_RELOAD
 Allows remapping of reload functionality in shooting games.
 .topic HIDC_DUAL_LIGHTGUN
-Allows use of a dual lightgun setup.
+Allows use of a dual lightgun setup..topic HIDC_HIDE_MOUSE
+Hide mouse cursor while game running
+.topic HIDC_CYCLE_SCREENSHOT
+Change diplayed picture every defined cycle
+.topic HIDC_STRETCH_SCREENSHOT_LARGER
+Adjust shown picture size to fit the picture area
+.topic HIDC_FILTER_INHERIT
+Extend filters to child folders
+.topic HIDC_RESET_PLAYTIME
+Clear playtime counter
+.topic HIDC_RESET_PLAYCOUNT
+Clear play count

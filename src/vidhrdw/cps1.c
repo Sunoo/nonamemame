@@ -759,6 +759,7 @@ DRIVER_INIT( cps2 )
 	data16_t *xor = (data16_t *)memory_region(REGION_USER1);
 	int i;
 
+	extern void init_cps2_driver(void);
 
 	for (i = 0;i < memory_region_length(REGION_CPU1)/2;i++)
 		xor[i] ^= rom[i];
@@ -771,6 +772,8 @@ DRIVER_INIT( cps2 )
 	scanline1 = 262;
 	scanline2 = 262;
 	scancalls = 0;
+	
+	init_cps2_driver();
 }
 
 

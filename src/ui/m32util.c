@@ -458,6 +458,84 @@ BOOL StringIsSuffixedBy(const char *s, const char *suffix)
 	return (strlen(s) > strlen(suffix)) && (strcmp(s + strlen(s) - strlen(suffix), suffix) == 0);
 }
 
+// Quick string comparison with a wildcard formated pattern
+// Original algorithm by Jack Handy
+BOOL CompareStringWithWildcards(char *string, char *wild)
+{
+	char *cp = NULL;
+	char *mp = NULL;
+	
+	char *s;
+	char *w;
+
+	// Replace parameters with lower case duplicates
+	s = (char *)malloc(strlen(string)+1);
+	strcpy(s, string);
+	string = _strlwr(s);
+
+	w = (char *)malloc(strlen(wild)+1);
+	strcpy(w, wild);
+	wild = _strlwr(w);
+
+	while ((*string) && (*wild != '*'))
+	{
+		if ((*wild != *string) && (*wild != '?'))
+		{
+			free(s);
+			free(w);
+			return FALSE;
+		}
+
+		wild++;
+		string++;
+	}
+
+	while (*string)
+	{
+		if (*wild == '*')
+		{
+			if (!*++wild)
+			{
+				free(s);
+				free(w);
+				return TRUE;
+			}
+
+			mp = wild;
+			cp = string+1;
+		}
+		else if ((*wild == *string) || (*wild == '?'))
+		{
+			wild++;
+			string++;
+		}
+		else
+		{
+			wild = mp;
+			string = cp++;
+		}
+	}
+		
+	while (*wild == '*')
+	{
+		wild++;
+	}
+
+	if (*wild)
+	{
+		free(s);
+		free(w);
+		return FALSE;
+	}
+	else
+	{
+		free(s);
+		free(w);
+		return TRUE;
+	}
+}
+
+
 /***************************************************************************
 	Internal functions
  ***************************************************************************/

@@ -25,11 +25,11 @@ typedef struct
 extern const MAMEHELPINFO g_helpInfo[];
 
 #if !defined(MAME32HELP)
-#define MAME32HELP "mame32.chm"
+#define MAME32HELP "MadeInMAME32.chm"
 #endif
 
 #if !defined(MAME32CONTEXTHELP)
-#define MAME32CONTEXTHELP "mame32.chm::/cntx_help.txt"
+#define MAME32CONTEXTHELP "MadeInMAME32.chm::/cntx_help.txt"
 #endif
 
 extern int HelpInit(void);

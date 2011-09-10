@@ -62,6 +62,14 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Audit all games",            ID_FILE_AUDIT
         MENUITEM SEPARATOR
+        MENUITEM "&View PCB Info",              ID_VIEW_PCBINFO
+        MENUITEM SEPARATOR
+        MENUITEM "&Lock this game",             ID_GAME_LOCK
+        MENUITEM "U&nlock this game",           ID_GAME_UNLOCK
+        MENUITEM SEPARATOR
+        MENUITEM "Save current &game list",     ID_FILE_GAMELIST
+        MENUITEM "&Find games",                 ID_FILE_FIND_GAME
+        MENUITEM SEPARATOR
         MENUITEM "E&xit",                       ID_FILE_EXIT
     END
     POPUP "&View"
@@ -112,6 +120,7 @@ BEGIN
         MENUITEM "Game List &Font...",          ID_OPTIONS_FONT
         MENUITEM "Game List &Clone Color...",   ID_OPTIONS_CLONE_COLOR
         MENUITEM "&Directories...",             ID_OPTIONS_DIR
+        MENUITEM "&Password...",                ID_OPTIONS_PASSWORD
         MENUITEM "Default Game &Options...",    ID_OPTIONS_DEFAULTS
         MENUITEM "&Reset to Default...",        ID_OPTIONS_RESET_DEFAULTS
         MENUITEM "&Interface Options...",       ID_OPTIONS_INTERFACE
@@ -147,6 +156,11 @@ BEGIN
         MENUITEM "Reset Pl&aycount",            ID_CONTEXT_RESET_PLAYCOUNT
         MENUITEM "Reset Pla&y Time",            ID_CONTEXT_RESET_PLAYTIME
         MENUITEM SEPARATOR
+        MENUITEM "&View PCB Info",              ID_VIEW_PCBINFO
+        MENUITEM SEPARATOR
+        MENUITEM "&Lock game",                  ID_GAME_LOCK
+        MENUITEM "U&nlock game",                ID_GAME_UNLOCK
+        MENUITEM SEPARATOR
         MENUITEM "A&udit",                      ID_GAME_AUDIT
         MENUITEM SEPARATOR
         MENUITEM "Pr&operties",                 ID_GAME_PROPERTIES
@@ -170,6 +184,7 @@ BEGIN
     BEGIN
         MENUITEM "&Rename",                     ID_CONTEXT_RENAME_CUSTOM
         MENUITEM "&Custom Filters...",          ID_CONTEXT_FILTERS
+        MENUITEM "S&ort tree folders",          ID_SORT_TREE
         MENUITEM SEPARATOR
         POPUP "&Show Folders"
         BEGIN
@@ -180,6 +195,11 @@ BEGIN
         MENUITEM "&Audit",                      ID_FOLDER_AUDIT
         MENUITEM SEPARATOR
         MENUITEM "&Properties",                 ID_FOLDER_PROPERTIES
+        MENUITEM SEPARATOR
+        MENUITEM "&Find games",                 ID_FILE_FIND_GAME
+        MENUITEM SEPARATOR
+        MENUITEM "&Lock folder games",          ID_FOLDER_LOCK
+        MENUITEM "&Unlock folder games",        ID_FOLDER_UNLOCK
     END
 END
 
@@ -208,6 +228,28 @@ BEGIN
         MENUITEM "&Title",                      ID_VIEW_TAB_TITLE
         MENUITEM "Control &Panel",              ID_VIEW_TAB_CONTROL_PANEL
         MENUITEM "&History",                    ID_VIEW_TAB_HISTORY
+    END
+END
+
+IDR_CONTEXT_SYSTEMTRAY MENU DISCARDABLE 
+BEGIN
+    POPUP "Context System Tray"
+    BEGIN
+        MENUITEM "&Play",                       ID_FILE_PLAY
+        MENUITEM SEPARATOR
+        MENUITEM "Select &previous",            ID_CONTEXT_SELECT_PREVIOUS
+        MENUITEM "Select &next",                ID_CONTEXT_SELECT_NEXT
+        MENUITEM "Select &random",              ID_CONTEXT_SELECT_RANDOM
+        POPUP "Select &choice"
+        BEGIN
+            MENUITEM "overridden by code",          ID_CONTEXT_SELECT_CHOICE_START
+
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "&Show main window",           ID_CONTEXT_SHOW_MAIN
+        MENUITEM "&Hide main window",           ID_CONTEXT_HIDE_MAIN
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_FILE_EXIT
     END
 END
 
@@ -247,8 +289,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,83,0,13
- PRODUCTVERSION 0,83,0,13
+ FILEVERSION 0,83,0,14
+ PRODUCTVERSION 0,83,0,14
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -267,13 +309,14 @@ BEGIN
             VALUE "Comments", "No Name M.A.M.E. for Win32\0"
             VALUE "CompanyName", "No Name Development\0"
             VALUE "FileDescription", "No Name M.A.M.E. for Win32\0"
-            VALUE "FileVersion", "0.83.13\0"
+            VALUE "FileVersion", "0.83.14\0"
             VALUE "InternalName", "No Name MAME32\0"
             VALUE "LegalCopyright", "MAME is Copyright 1997-2003 Nicola Salmoria and the MAME team\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "NONAME32.exe\0"
             VALUE "ProductName", "No Name MAME32\0"
-            VALUE "ProductVersion", "0.83.13\0"
+            VALUE "ProductVersion", "0.83.14\0"
+            VALUE "SpecialBuild", "MadeInMAME32 by LG (lg@neuf.fr)\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -292,12 +335,12 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_MAME32_ICON         ICON    DISCARDABLE     "res/mame32.ico"
-IDI_WIN_ROMS            ICON    DISCARDABLE     "res/win_roms.ico"
-IDI_WIN_NOROMS          ICON    DISCARDABLE     "res/win_noro.ico"
-IDI_WIN_UNKNOWN         ICON    DISCARDABLE     "res/win_unkn.ico"
-IDI_WIN_CLONE           ICON    DISCARDABLE     "res/win_clone.ico"
-IDI_WIN_REDX            ICON    DISCARDABLE     "res/win_redx.ico"
+IDI_MIM32_ICON          ICON    DISCARDABLE     "res\\mim32.ico"
+IDI_WIN_ROMS            ICON    DISCARDABLE     "res\\win_roms.ico"
+IDI_WIN_NOROMS          ICON    DISCARDABLE     "res\\win_noro.ico"
+IDI_WIN_UNKNOWN         ICON    DISCARDABLE     "res\\win_unkn.ico"
+IDI_WIN_CLONE           ICON    DISCARDABLE     "res\\win_clone.ico"
+IDI_WIN_REDX            ICON    DISCARDABLE     "res\\win_miss.ico"
 IDI_FOLDER_AVAILABLE    ICON    DISCARDABLE     "res\\foldavail.ico"
 IDI_FOLDER              ICON    DISCARDABLE     "res\\folder.ico"
 IDI_FOLDER_MANUFACTURER ICON    DISCARDABLE     "res\\foldmanu.ico"
@@ -305,20 +348,55 @@ IDI_FOLDER_OPEN         ICON    DISCARDABLE     "res\\foldopen.ico"
 IDI_FOLDER_UNAVAILABLE  ICON    DISCARDABLE     "res\\foldunav.ico"
 IDI_MANUFACTURER        ICON    DISCARDABLE     "res\\manufact.ico"
 IDI_FOLDER_YEAR         ICON    DISCARDABLE     "res\\foldyear.ico"
-IDI_FOLDER_SOURCE       ICON    DISCARDABLE     "Res\\foldsrc.ico"
-IDI_WORKING             ICON    DISCARDABLE     "res\\working.ico"
-IDI_NONWORKING          ICON    DISCARDABLE     "res\\nonwork.ico"
+IDI_FOLDER_SOURCE       ICON    DISCARDABLE     "res\\foldsrc.ico"
+IDI_FOLDER_WORKING      ICON    DISCARDABLE     "res\\foldwork.ico"
+IDI_FOLDER_NONWORKING   ICON    DISCARDABLE     "res\\foldnwrk.ico"
 IDI_YEAR                ICON    DISCARDABLE     "res\\year.ico"
-IDI_KEYBOARD            ICON    DISCARDABLE     "Res\\keyboard.ico"
-IDI_JOYSTICK            ICON    DISCARDABLE     "Res\\joystick.ico"
-IDI_CPU                 ICON    DISCARDABLE     "Res\\cpu.ico"
-IDI_SOUND               ICON    DISCARDABLE     "Res\\samples.ico"
+IDI_KEYBOARD            ICON    DISCARDABLE     "res\\keyboard.ico"
+IDI_JOYSTICK            ICON    DISCARDABLE     "res\\joystick.ico"
+IDI_CPU                 ICON    DISCARDABLE     "res\\cpu.ico"
+IDI_SND                 ICON    DISCARDABLE     "res\\snd.ico"
 IDI_SOURCE              ICON    DISCARDABLE     "res\\source.ico"
 IDI_HARDDISK            ICON    DISCARDABLE     "res\\harddisk.ico"
-IDI_DISPLAY             ICON    DISCARDABLE     "Res\\display.ico"
-IDI_CHECKMARK           ICON    DISCARDABLE     "Res\\checkmark.ico"
+IDI_MAME_ICON           ICON    DISCARDABLE     "res\\mame.ico"
+IDI_DISPLAY             ICON    DISCARDABLE     "res\\display.ico"
+IDI_CHECKMARK           ICON    DISCARDABLE     "res\\checkmark.ico"
 IDI_HEADER_UP           ICON    DISCARDABLE     "res\\header_up.ico"
 IDI_HEADER_DOWN         ICON    DISCARDABLE     "res\\header_down.ico"
+IDI_SOUND               ICON    DISCARDABLE     "res\\sound.ico"
+IDI_STEREO              ICON    DISCARDABLE     "res\\stereo.ico"
+IDI_SAMPLES             ICON    DISCARDABLE     "res\\samples.ico"
+IDI_CONTROLLER          ICON    DISCARDABLE     "res\\joystick.ico"
+IDI_ADVANCED            ICON    DISCARDABLE     "res\\advanced.ico"
+IDI_FOLDER_CPU          ICON    DISCARDABLE     "res\\foldcpu.ico"
+IDI_FOLDER_SOUND        ICON    DISCARDABLE     "res\\foldsnd.ico"
+IDI_FOLDER_ORIENTATION  ICON    DISCARDABLE     "res\\foldorie.ico"
+IDI_ORIGINALS           ICON    DISCARDABLE     "res\\original.ico"
+IDI_CLONES              ICON    DISCARDABLE     "res\\clones.ico"
+IDI_RASTER              ICON    DISCARDABLE     "res\\raster.ico"
+IDI_VECTOR              ICON    DISCARDABLE     "res\\vector.ico"
+IDI_TRACKBALL           ICON    DISCARDABLE     "res\\trackbal.ico"
+IDI_LIGHTGUN            ICON    DISCARDABLE     "res\\lightgun.ico"
+IDI_VERTICAL            ICON    DISCARDABLE     "res\\vertical.ico"
+IDI_HORIZONTAL          ICON    DISCARDABLE     "res\\horizont.ico"
+IDI_SYSTRAY             ICON    DISCARDABLE     "res\\systray.ico"
+IDI_FOLDER_CUSTOM       ICON    DISCARDABLE     "res\\foldcust.ico"
+IDI_FOLDER_BIOS         ICON    DISCARDABLE     "res\\foldbios.ico"
+IDI_BIOS                ICON    DISCARDABLE     "res\\bios.ico"
+IDI_FOLDER_SCREEN       ICON    DISCARDABLE     "res\\foldscr.ico"
+IDI_SCREEN              ICON    DISCARDABLE     "res\\screen.ico"
+IDI_FOLDER_COLORS       ICON    DISCARDABLE     "res\\foldclrs.ico"
+IDI_COLORS              ICON    DISCARDABLE     "res\\colours.ico"
+IDI_FOLDER_REFRESH      ICON    DISCARDABLE     "res\\foldrefr.ico"
+IDI_REFRESH             ICON    DISCARDABLE     "res\\refresh.ico"
+IDI_DIRECT3D            ICON    DISCARDABLE     "res\\direct3d.ico"
+IDI_MULTIMON            ICON    DISCARDABLE     "res\\multimon.ico"
+IDI_FOLDER_DEFICIENCY   ICON    DISCARDABLE     "res\\folddfcn.ico"
+IDI_DEFICIENCY          ICON    DISCARDABLE     "res\\deficien.ico"
+IDI_LOCK                ICON    DISCARDABLE     "res\\lock.ico"
+IDI_UNLOCK              ICON    DISCARDABLE     "res\\unlock.ico"
+IDI_KEY                 ICON    DISCARDABLE     "res\\key.ico"
+IDI_FINDGAME            ICON    DISCARDABLE     "res\\findgame.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -437,7 +515,7 @@ STYLE WS_CHILD | WS_CAPTION
 CAPTION "General"
 FONT 8, "MS Sans Serif"
 BEGIN
-    ICON            IDI_MAME32_ICON,IDC_GAME_ICON,20,10,20,20
+    ICON            IDI_MIM32_ICON,IDC_GAME_ICON,20,10,20,20
     LTEXT           "Title\nDirectory\nExtra",IDC_PROP_TITLE,52,9,161,25,
                     SS_NOPREFIX
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,20,38,178,1
@@ -481,6 +559,9 @@ BEGIN
     EDITTEXT        IDC_AUDIT_DETAILS_PROP,20,89,180,102,ES_MULTILINE | 
                     ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL | WS_HSCROLL | 
                     NOT WS_TABSTOP
+//    CONTROL         "List1",IDC_FIND_RESULT,"SysListView32",LVS_REPORT | 
+//                    LVS_SINGLESEL | WS_BORDER | WS_TABSTOP,13,118,265,122,
+//                    WS_EX_STATICEDGE
 END
 
 IDD_PROP_DISPLAY DIALOGEX 0, 0, 220, 205
@@ -488,7 +569,7 @@ STYLE WS_CHILD | WS_CAPTION
 CAPTION "Display"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    ICON            IDI_DISPLAY,IDC_STATIC,20,10,20,20
+    ICON            IDI_RASTER,IDC_STATIC,20,10,20,20
     LTEXT           "Title\nDirectory\nExtra",IDC_PROP_TITLE,52,9,161,25,
                     SS_NOPREFIX
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,20,38,178,1
@@ -546,7 +627,7 @@ STYLE WS_CHILD | WS_CAPTION
 CAPTION "Direct3D"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    ICON            IDI_DISPLAY,IDC_STATIC,20,10,20,20
+    ICON            IDI_DIRECT3D,IDC_STATIC,20,10,20,20
     LTEXT           "Title\nDirectory\nExtra",IDC_PROP_TITLE,52,9,161,25,
                     SS_NOPREFIX
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,20,38,178,1
@@ -628,7 +709,7 @@ STYLE WS_CHILD | WS_CAPTION
 CAPTION "Advanced"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    ICON            IDI_DISPLAY,IDC_STATIC,20,10,20,20
+    ICON            IDI_ADVANCED,IDC_STATIC,20,10,20,20
     LTEXT           "Title\nDirectory\nExtra",IDC_PROP_TITLE,52,9,161,25,
                     SS_NOPREFIX
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,20,38,178,1
@@ -729,9 +810,9 @@ END
 IDD_PROP_MISC DIALOGEX 0, 0, 220, 220
 STYLE WS_CHILD | WS_CAPTION
 CAPTION "Miscellaneous"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    ICON            IDI_MAME32_ICON,IDC_STATIC,19,10,20,20
+    ICON            IDI_MAME_ICON,IDC_STATIC,19,10,20,20
     LTEXT           "Title\nDirectory\nExtra",IDC_PROP_TITLE,52,9,161,25,
                     SS_NOPREFIX
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,20,38,178,1
@@ -776,7 +857,7 @@ STYLE WS_CHILD | WS_CAPTION
 CAPTION "Vector"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    ICON            IDI_MAME32_ICON,IDC_STATIC,20,10,20,20
+    ICON            IDI_VECTOR,IDC_STATIC,20,10,20,20
     LTEXT           "Title\nDirectory\nExtra",IDC_PROP_TITLE,52,9,161,25,
                     SS_NOPREFIX
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,20,38,178,1
@@ -860,6 +941,9 @@ BEGIN
                     HIDC_FILTER_ORIGINALS
     CONTROL         "&Working",IDC_FILTER_WORKING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,107,77,78,10,0,HIDC_FILTER_WORKING
+    CONTROL         "&Available",IDC_FILTER_AVAILABLE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,107,91,76,10,0,
+                    HIDC_FILTER_AVAILABLE
     GROUPBOX        "&Description filter",IDC_STATIC,13,123,179,33
     EDITTEXT        IDC_FILTER_EDIT,23,136,159,12,ES_AUTOHSCROLL,0,
                     HIDC_FILTER_EDIT
@@ -1004,6 +1088,94 @@ BEGIN
                     SS_CENTERIMAGE
 END
 
+IDD_PCBINFO DIALOG DISCARDABLE  0, 0, 506, 203
+STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "PCB Info"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "&Close",IDCLOSE,228,186,50,14,WS_GROUP
+    EDITTEXT        IDC_PCBINFO,3,3,500,180,ES_MULTILINE | ES_READONLY | NOT 
+                    WS_BORDER | WS_VSCROLL | WS_HSCROLL
+END
+
+IDD_PASSWORD DIALOG DISCARDABLE  0, 0, 181, 210
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Password"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,189,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,125,189,50,14
+    GROUPBOX        "Informations",IDC_STATIC,8,4,165,40
+    LTEXT           "Static",IDC_PWD_INFOS,15,15,151,24
+    GROUPBOX        "Password operation",IDC_STATIC,7,50,167,41
+    CONTROL         "Enable password",IDC_ENABLE_PWD,"Button",
+                    BS_AUTORADIOBUTTON,13,63,68,10
+    CONTROL         "Disable password",IDC_DISABLE_PWD,"Button",
+                    BS_AUTORADIOBUTTON,97,63,70,10
+    CONTROL         "Verify password",IDC_VERIFY_PWD,"Button",
+                    BS_AUTORADIOBUTTON,13,76,75,10
+    CONTROL         "Change password",IDC_CHANGE_PWD,"Button",
+                    BS_AUTORADIOBUTTON,97,76,70,10
+    GROUPBOX        "Password definition",IDC_STATIC,7,97,167,80
+    LTEXT           "Current password :",IDC_STATIC,15,113,59,8
+    EDITTEXT        IDC_PWD_CURRENT,115,108,51,14,ES_PASSWORD
+    LTEXT           "New password :",IDC_STATIC,15,135,58,8
+    EDITTEXT        IDC_PWD_NEW,115,132,51,14,ES_PASSWORD
+    LTEXT           "Re-type password :",IDC_STATIC,15,159,64,8
+    EDITTEXT        IDC_PWD_RETYPE,115,156,51,14,ES_PASSWORD
+END
+
+IDD_BACKGROUND DIALOG DISCARDABLE  0, 0, 300, 235
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Background image"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,61,214,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,189,214,50,14
+    GROUPBOX        "Internal images",IDC_STATIC,7,7,286,150
+    GROUPBOX        "Custom image",IDC_STATIC,7,165,286,40
+    CONTROL         "Image #1 :",IDC_IMAGE_1,"Button",BS_AUTORADIOBUTTON,15,
+                    42,49,10
+    CONTROL         "",IDC_BITMAP1,"Static",SS_BITMAP | SS_SUNKEN,71,30,58,
+                    48
+    CONTROL         "Image #2 :",IDC_IMAGE_2,"Button",BS_AUTORADIOBUTTON,155,
+                    42,51,10
+    CONTROL         "",IDC_BITMAP2,"Static",SS_BITMAP | SS_SUNKEN,210,30,58,
+                    48
+    CONTROL         "Image #3 :",IDC_IMAGE_3,"Button",BS_AUTORADIOBUTTON,15,
+                    114,49,10
+    CONTROL         "",IDC_BITMAP3,"Static",SS_BITMAP | SS_SUNKEN,71,102,58,
+                    48
+    CONTROL         "Image #4 :",IDC_IMAGE_4,"Button",BS_AUTORADIOBUTTON,155,
+                    114,51,10
+    CONTROL         "",IDC_BITMAP4,"Static",SS_BITMAP | SS_SUNKEN,210,102,58,
+                    48
+    CONTROL         "Select :",IDC_IMAGE_CUSTOM,"Button",BS_AUTORADIOBUTTON,
+                    15,182,40,10
+    EDITTEXT        IDC_BKG_EDIT,57,180,162,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Browse",IDC_BROWSE_BKG,233,180,50,14
+END
+
+IDD_FIND_GAME DIALOGEX 0, 0, 291, 171
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Find games"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Search",IDOK,47,150,50,14
+    PUSHBUTTON      "Close",IDCANCEL,194,150,50,14
+    GROUPBOX        "Pattern (accepted wildcards : ? and *)",IDC_STATIC,7,7,277,38
+    EDITTEXT        IDC_FIND_PATTERN,14,20,263,14,ES_AUTOHSCROLL
+    GROUPBOX        "Criteria",IDC_STATIC,7,56,277,35
+    CONTROL         "Game",IDC_FIND_NAME,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,26,71,35,10
+    CONTROL         "Directory",IDC_FIND_DRIVER,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,125,71,50,10
+    CONTROL         "Manufacturer",IDC_FIND_MANUFACTURER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,207,71,58,10
+    GROUPBOX        "Result",IDC_STATIC,7,103,277,35
+    LTEXT           "",IDC_FIND_RESULT,14,117,263,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1031,6 +1203,7 @@ BEGIN
     VK_F1,          ID_HELP_CONTENTS,       VIRTKEY, NOINVERT
     VK_F11,         ID_VIEW_FULLSCREEN,     VIRTKEY, NOINVERT
     VK_F5,          ID_UPDATE_GAMELIST,     VIRTKEY, NOINVERT
+    VK_F3,          ID_FILE_FIND_GAME,      VIRTKEY, NOINVERT
     VK_NEXT,        ID_UI_HISTORY_DOWN,     VIRTKEY, CONTROL, NOINVERT
     VK_PRIOR,       ID_UI_HISTORY_UP,       VIRTKEY, CONTROL, NOINVERT
     VK_RETURN,      ID_GAME_PROPERTIES,     VIRTKEY, ALT, NOINVERT
@@ -1200,13 +1373,26 @@ BEGIN
         BOTTOMMARGIN, 201
     END
 
-
     IDD_LANGUAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 179
         TOPMARGIN, 7
         BOTTOMMARGIN, 59
+    END
+
+    IDD_PASSWORD, DIALOG
+    BEGIN
+        RIGHTMARGIN, 178
+        BOTTOMMARGIN, 165
+    END
+
+    IDD_FIND_GAME, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 284
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 267
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -1219,6 +1405,15 @@ END
 
 IDB_ABOUT               BITMAP  DISCARDABLE     "res\\about.bmp"
 IDB_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar.bmp"
+IDB_SPLASH              BITMAP  DISCARDABLE     "res\\splash.bmp"
+IDB_BKGND_SAND          BITMAP  DISCARDABLE     "res\\sand.bmp"
+IDB_BKGND_GREY          BITMAP  DISCARDABLE     "res\\grey.bmp"
+IDB_BKGND_BKGND16       BITMAP  DISCARDABLE     "res\\bkgnd16.bmp"
+IDB_BKGND_BKGND256      BITMAP  DISCARDABLE     "res\\bkgnd256.bmp"
+IDB_THUMB1              BITMAP  DISCARDABLE     "res\\thumb1.bmp"
+IDB_THUMB2              BITMAP  DISCARDABLE     "res\\thumb2.bmp"
+IDB_THUMB3              BITMAP  DISCARDABLE     "res\\thumb3.bmp"
+IDB_THUMB4              BITMAP  DISCARDABLE     "res\\thumb4.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1269,18 +1464,34 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_FILE_EXIT            "Exit the application"
     ID_FILE_PLAY            "Play currently selected game"
-    ID_HELP_ABOUT           "Displays program and copyright information"
+    ID_HELP_ABOUT           "Display program and copyright information"
     ID_VIEW_LARGE_ICON      "Display items by using large icons."
     ID_VIEW_SMALL_ICON      "Display items by using small icons."
-    ID_VIEW_LIST_MENU       "Displays items in a list."
-    ID_VIEW_DETAIL          "Displays detailed information about each item in the window."
+    ID_VIEW_LIST_MENU       "Display items in a list."
+    ID_VIEW_DETAIL          "Display detailed information about each item in the window."
+    ID_VIEW_GROUPED         "Display clones grouped with their parent"
     ID_OPTIONS_FONT         "Set game list and folder list font"
+    ID_OPTIONS_CLONE_COLOR  "Select a font color for clones in grouped view mode"
     ID_OPTIONS_DIR          "Set directory configuration"
     ID_OPTIONS_DEFAULTS     "Set default game options"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    ID_SORT_TREE            "Sort tree folders by alphabetic order"
+    ID_FILE_GAMELIST        "Save the current displayed game list as text file"
+    ID_FILE_FIND_GAME       "Find games in current folder according to a pattern"
+    ID_GAME_LOCK            "Game won't be playable unless password successful verification"
+    ID_GAME_UNLOCK          "No need of password verification to play game"
+    ID_FOLDER_LOCK          "Lock all folder and sub-folders games"
+    ID_FOLDER_UNLOCK        "Unlock all folder and sub-folders games"
+    ID_OPTIONS_PASSWORD     "Set password to allow game(s) playing"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FOLDER_PROPERTIES    "Displays folder properties (Vector or Source)"
+    ID_FOLDER_AUDIT         "Audit all folder games"
     ID_FILE_LOADSTATE       "Play a game starting with the given savestate"
 END
 
@@ -1304,11 +1515,23 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_CUSTOMIZE_FIELDS     "Customize which columns are used in the game list"
     ID_GAME_PROPERTIES      "Display the properties of the selected items"
+    ID_VIEW_PAGETAB         "Show or hide the screen shot tabs"
     ID_VIEW_FOLDERS         "Show or hide the folder list"
     ID_VIEW_TOOLBARS        "Show or hide the toolbar"
     ID_VIEW_STATUS          "Show or hide the status bar"
     ID_CONTEXT_FILTERS      "Allows filtering out games from a folder"
+    ID_CONTEXT_RENAME_CUSTOM "Rename this folder"
+    ID_CONTEXT_ADD_CUSTOM   "Add this game to a custom folder"
+    ID_CONTEXT_REMOVE_CUSTOM "Remove this game from the current custom folder"
+    ID_GAME_AUDIT           "Audit ROM sets for this game"
     ID_CONTEXT_SELECT_RANDOM "Randomly select a game."
+    ID_OPTIONS_LANGUAGE     "Choose a langage file for MAME internal menu"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_OPTIONS_BG           "Choose a backgroung picture for the GUI"
+    ID_VIEW_FULLSCREEN      "Toggle normal / fullscreen view"
 END
 
 STRINGTABLE DISCARDABLE 

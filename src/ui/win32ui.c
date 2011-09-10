@@ -72,6 +72,8 @@
 #include "DirectInput.h"
 #include "DIJoystick.h"     /* For DIJoystick avalibility. */
 
+#include "password.h"
+
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
@@ -132,6 +134,9 @@ int MIN_HEIGHT = DBU_MIN_HEIGHT;
 /* Max number of bkground picture files */
 #define MAX_BGFILES 100
 
+/* Max car for a password */
+#define MAX_PWD_LEN 10
+
 #ifndef LVS_EX_LABELTIP
 #define LVS_EX_LABELTIP         0x00004000 // listview unfolds partly hidden labels if it does not have infotip text
 #endif
@@ -171,6 +176,7 @@ static void             KeyboardKeyDown(int syskey, int vk_code, int special);
 static void             KeyboardKeyUp(int syskey, int vk_code, int special);
 static void             KeyboardStateClear(void);
 
+static void             UpdateStatusBarIcons(int game);
 static void             UpdateStatusBar(void);
 static BOOL             PickerHitTest(HWND hWnd);
 static BOOL             MamePickerNotify(NMHDR *nm);
@@ -186,7 +192,6 @@ static BOOL             TabNotify(NMHDR *nm);
 static void             ResetBackground(char *szFile);
 static void				RandomSelectBackground(void);
 static void             LoadBackgroundBitmap(void);
-static void             PaintBackgroundImage(HWND hWnd, HRGN hRgn, int x, int y);
 
 static int CLIB_DECL DriverDataCompareFunc(const void *arg1,const void *arg2);
 static void             ResetTabControl(void);
@@ -210,6 +215,10 @@ static LRESULT CALLBACK HistoryWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 static LRESULT CALLBACK PictureFrameWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 static LRESULT CALLBACK PictureWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 static INT_PTR CALLBACK LanguageDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK PasswordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK BackgroundDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK FindGameDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
+static LRESULT CALLBACK BackMainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 static BOOL             SelectLanguageFile(HWND hWnd, TCHAR* filename);
 static void             MamePlayRecordGame(void);
@@ -244,11 +253,13 @@ static void             AddDriverIcon(int nItem,int default_icon_index);
 // Context Menu handlers
 static void             UpdateMenu(HMENU hMenu);
 static void InitTreeContextMenu(HMENU hTreeMenu);
+static void InitSystrayContextMenu(HMENU hSystrayMenu);
 static void ToggleShowFolder(int folder);
 static BOOL             HandleContextMenu( HWND hWnd, WPARAM wParam, LPARAM lParam);
 static BOOL             HeaderOnContextMenu(HWND hWnd, WPARAM wParam, LPARAM lParam);
 static BOOL             HandleTreeContextMenu( HWND hWnd, WPARAM wParam, LPARAM lParam);
 static BOOL             HandleScreenShotContextMenu( HWND hWnd, WPARAM wParam, LPARAM lParam);
+static BOOL             HandleSystemTrayContextMenu( HWND hWnd, WPARAM wParam, LPARAM lParam);
 
 static void             InitListView(void);
 /* Re/initialize the ListView header columns */
@@ -294,6 +305,19 @@ void SendMessageToProcess(LPPROCESS_INFORMATION lpProcessInformation,
 						  UINT Msg, WPARAM wParam, LPARAM lParam);
 static BOOL CALLBACK EnumWindowCallBack(HWND hwnd, LPARAM lParam);
 void SendIconToProcess(LPPROCESS_INFORMATION lpProcessInformation, int nGameIndex);
+
+static void SaveGameListToFile(char *szFile, int Formatted);
+
+static void SetGameLockUnlock(int game, BOOL locked);
+static void SetFolderLockUnlock(LPTREEFOLDER lpFolder, BOOL bLock);
+static void CreateDefaultLockUnlockList(void);
+static BOOL CreateAndLoadLockUnlockList(void);
+static void SaveAndDestroyLockUnlockList(void);
+static void CheckPassword(char *Exe, char *Pwd);
+static BOOL GetGameLockByDriverName(char *DriverName);
+
+static void CreateBackgroundMain(HINSTANCE hInstance, BOOL ForCreate );
+static int GetGamesFound(char *Pattern, int Criteria);
 
 /***************************************************************************
     External variables
@@ -428,6 +452,12 @@ static BOOL bShowStatusBar = 1;
 static BOOL bShowTabCtrl   = 1;
 static BOOL bProgressShown = FALSE;
 static BOOL bListReady     = FALSE;
+static BOOL bSortTree      = 1;
+
+/* Password / locks management */
+static BOOL bPwdEnabled    = TRUE;
+static BOOL bPwdVerified   = FALSE;
+static BOOL bUseLockGUI    = FALSE;
 
 /* use a joystick subsystem in the gui? */
 static struct OSDJoystick* g_pJoyGUI = NULL;
@@ -635,7 +665,9 @@ static HBITMAP hMissing_bitmap;
 static HIMAGELIST   hLarge = NULL;
 static HIMAGELIST   hSmall = NULL;
 static HIMAGELIST   hHeaderImages = NULL;
+static HIMAGELIST   hPwdIconList = NULL;
 static int          *icon_index = NULL; /* for custom per-game icons */
+       char			*games_found = NULL; /* list of games found */
 
 static TBBUTTON tbb[] =
 {
@@ -735,14 +767,26 @@ static char * g_pSaveStateName = NULL;
 static char * override_playback_directory = NULL;
 static char * override_savestate_directory = NULL;
 
+static char * tcLockUnlockList = NULL;
+
 /***************************************************************************
     Global variables
  ***************************************************************************/
+
+/* Icon displayed in system tray */
+static BOOL		bIsWindowsVisible = TRUE;
+static UINT		uShellIconMsg = 0;
+static NOTIFYICONDATA	MameIcon;
 
 /* Background Image handles also accessed from TreeView.c */
 static HPALETTE         hPALbg   = 0;
 static HBITMAP          hBackground  = 0;
 static MYBITMAPINFO     bmDesc;
+
+static HWND             hBackMain = NULL;
+static HBITMAP          hSplashBmp = 0;
+static HDC              hMemoryDC;
+
 
 /* List view Column text */
 const char* column_names[COLUMN_MAX] =
@@ -985,6 +1029,10 @@ static void CreateCommandLine(int nGameIndex, char* pCmdLine)
 
 	dprintf("Launching MAME32:");
 	dprintf("%s",pCmdLine);
+
+	// Add password
+	strcat(pCmdLine, " Pwd=");
+	GetPassword(&pCmdLine[strlen(pCmdLine)]);
 }
 
 static BOOL WaitWithMessageLoop(HANDLE hEvent)
@@ -1064,6 +1112,7 @@ static int RunMAME(int nGameIndex)
 			ListView_RedrawItems(hwndList, GetSelectedPick(), GetSelectedPick());
 		}
 
+		if ( bIsWindowsVisible )
 		ShowWindow(hMain, SW_SHOW);
 
 		// Close process and thread handles.
@@ -1089,6 +1138,25 @@ int Mame32Main(HINSTANCE    hInstance,
 	{
 		/* Rename main because gcc will use it instead of WinMain even with -mwindows */
 		extern int DECL_SPEC main_(int, char**);
+
+		// Get number of games
+		game_count = 0;
+		while (drivers[game_count] != 0)
+			game_count++;
+
+		// Last argument may contain password
+		if ( strncmp(__argv[__argc-1], "Pwd=", 4) == 0 )
+		{
+			CheckPassword(__argv[0], __argv[__argc-1]+4);
+
+			// Remove password from command line
+			__argc--;
+		}
+		else
+		{
+			CheckPassword(__argv[0], NULL);
+		}
+
 		exit(main_(__argc, __argv));
 	}
 	if (!Win32UI_init(hInstance, lpCmdLine, nCmdShow))
@@ -1760,6 +1828,8 @@ static BOOL Win32UI_init(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow)
 	extern const char *mameinfo_filename;
 	LONG common_control_version = GetCommonControlVersion();
 
+	CreateBackgroundMain(hInstance, TRUE);
+
 	srand((unsigned)time(NULL));
 
 	game_count = 0;
@@ -1769,6 +1839,10 @@ static BOOL Win32UI_init(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow)
 	/* custom per-game icons */
 	icon_index = malloc(sizeof(int) * game_count);
 	ZeroMemory(icon_index,sizeof(int) * game_count);
+
+	/* none of games are "found" */
+	games_found = malloc(sizeof(char) * game_count);
+	ZeroMemory(games_found,sizeof(char) * game_count);
 
 	/* sorted list of drivers by name */
 	sorted_drivers = (driver_data_type *)malloc(sizeof(driver_data_type) * game_count);
@@ -1784,7 +1858,7 @@ static BOOL Win32UI_init(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow)
 	wndclass.cbClsExtra    = 0;
 	wndclass.cbWndExtra    = DLGWINDOWEXTRA;
 	wndclass.hInstance	   = hInstance;
-	wndclass.hIcon		   = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MAME32_ICON));
+	wndclass.hIcon		   = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MIM32_ICON));
 	wndclass.hCursor	   = NULL;
 	wndclass.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
 	wndclass.lpszMenuName  = MAKEINTRESOURCE(IDR_UI_MENU);
@@ -1818,7 +1892,7 @@ static BOOL Win32UI_init(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow)
 		return FALSE;
 	dprintf("options loaded");
 
-	g_mame32_message = RegisterWindowMessage("MAME32");
+	g_mame32_message = RegisterWindowMessage(MAME32NAME);
 	g_bDoBroadcast = GetBroadcast();
 
 	HelpInit();
@@ -1953,6 +2027,23 @@ static BOOL Win32UI_init(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow)
 	CheckMenuItem(GetMenu(hMain), ID_VIEW_PAGETAB, (bShowTabCtrl) ? MF_CHECKED : MF_UNCHECKED);
 	ShowWindow(hTabCtrl, (bShowTabCtrl) ? SW_SHOW : SW_HIDE);
 
+	bSortTree      = GetSortTree();
+	bPwdEnabled    = GetPassword(NULL);
+  	bPwdVerified   = FALSE;
+  	bUseLockGUI    = TRUE;
+
+	if ( ! CreateAndLoadLockUnlockList() )
+	{
+		// Create a default list with locked games
+		CreateDefaultLockUnlockList();
+
+#if (ALL_GAMES_LOCKED == FALSE)
+		MessageBox(GetMainWindow(), "Locked games list is either missing or corrupt.\nAll games will be considered as unlocked." , MAME32NAME, MB_OK | MB_ICONWARNING);
+#else
+		MessageBox(GetMainWindow(), "Unlocked games list is either missing or corrupt.\nAll games will be considered as locked." , MAME32NAME, MB_OK | MB_ICONWARNING);
+#endif
+	}
+
 	if (oldControl)
 	{
 		EnableMenuItem(GetMenu(hMain), ID_CUSTOMIZE_FIELDS, MF_GRAYED);
@@ -2054,6 +2145,9 @@ static BOOL Win32UI_init(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow)
 		nCmdShow = SW_MAXIMIZE;
 	}
 
+	// Hide splash screen
+	ShowWindow(hBackMain, SW_HIDE);
+
 	ShowWindow(hMain, nCmdShow);
 
 	
@@ -2082,11 +2176,17 @@ static BOOL Win32UI_init(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow)
 		SetTimer(hMain, SCREENSHOT_TIMER, GetCycleScreenshot()*1000, NULL); //scale to Seconds
 	}
 
+	Shell_NotifyIcon( NIM_ADD, &MameIcon );
+
 	return TRUE;
 }
 
 static void Win32UI_exit()
 {
+    Shell_NotifyIcon( NIM_DELETE, &MameIcon );
+
+	CreateBackgroundMain(hInst, FALSE);
+
     if (g_bDoBroadcast == TRUE)
     {
         ATOM a = GlobalAddAtom("");
@@ -2133,8 +2233,16 @@ static void Win32UI_exit()
 		icon_index = NULL;
 	}
 
+	if (games_found != NULL)
+	{
+		free(games_found);
+		games_found = NULL;
+	}
+
 	DirectInputClose();
 	DirectDraw_Close();
+
+	SaveAndDestroyLockUnlockList();
 
 	SetSavedFolderID(GetCurrentFolderID());
 
@@ -2872,7 +2980,7 @@ static void CopyToolTipText(LPTOOLTIPTEXT lpttt)
 	}
 	else if ( iButton <= 2 )
 	{
-		//Statusbar
+		//Statusbar (part #0, #1 and #2)
 	    SendMessage(lpttt->hdr.hwndFrom, TTM_SETMAXTIPWIDTH, 0, 140);
 		if( iButton != 1)
 			SendMessage(hStatusBar, SB_GETTEXT, (WPARAM)iButton, (LPARAM)(LPSTR) &String );
@@ -2880,8 +2988,24 @@ static void CopyToolTipText(LPTOOLTIPTEXT lpttt)
 			//for first pane we get the Status directly, to get the line breaks
 			strcpy(String, GameInfoStatus(GetSelectedPickItem(), FALSE) );
 	}
+	else if ( iButton == 3 )
+	{
+		//Statusbar (part #3)
+		if ( bPwdEnabled )
+		{
+			if ( bPwdVerified )
+			{
+				strcpy(String, "Password is enabled and verified");
+			}
+			else
+			{
+			    strcpy(String, "Password is enabled but not verified");
+			}
+		}
+	}
 	else
 		strcpy(String,"Invalid Button Index");
+
 	//strcpy(pDest, (LPCTSTR)&String);
 	lpttt->lpszText = String;
 }
@@ -2986,11 +3110,60 @@ static void UpdateStatusBar()
 	i = GetSelectedPickItem();
 
 	if (games_shown == 0)
+	{
 		DisableSelection();
+	}
 	else
 	{
 		const char* pStatus = GameInfoStatus(i, FALSE);
 		SetStatusBarText(1, pStatus);
+
+		// Game state
+		if ( !GameIsLocked(i) && !bPwdEnabled )
+		{
+		    	SendMessage(hStatusBar, SB_SETICON, (WPARAM)1, (LPARAM)(HICON)NULL);
+		}
+		else
+		{
+			HICON PwdIcon = ImageList_GetIcon(hPwdIconList, (GameIsLocked(i)?(bPwdEnabled?0:2):1), ILD_TRANSPARENT);
+			SendMessage(hStatusBar, SB_SETICON, (WPARAM)1, (LPARAM)(HICON)PwdIcon);
+		}
+
+		UpdateStatusBarIcons(i);
+	}
+}
+
+static void UpdateStatusBarIcons(int game)
+{
+	HICON PwdIcon;
+	
+	// Game state
+	if (game == -1)
+	{
+    	SendMessage(hStatusBar, SB_SETICON, (WPARAM)1, (LPARAM)(HICON)NULL);
+	}
+	else
+	{
+		if ( !GameIsLocked(game) && !bPwdEnabled )
+		{
+	    	SendMessage(hStatusBar, SB_SETICON, (WPARAM)1, (LPARAM)(HICON)NULL);
+		}
+		else
+		{
+			PwdIcon = ImageList_GetIcon(hPwdIconList, (GameIsLocked(game)?(bPwdEnabled?0:2):1), ILD_TRANSPARENT);
+   	 	SendMessage(hStatusBar, SB_SETICON, (WPARAM)1, (LPARAM)(HICON)PwdIcon);
+		}
+	}
+
+	// Password state
+	if ( bPwdEnabled )
+	{
+		PwdIcon = ImageList_GetIcon(hPwdIconList, (bPwdVerified?1:0), ILD_TRANSPARENT);
+    	SendMessage(hStatusBar, SB_SETICON, (WPARAM)3, (LPARAM)(HICON)PwdIcon);
+	}
+	else
+	{
+    	SendMessage(hStatusBar, SB_SETICON, (WPARAM)3, (LPARAM)(HICON)NULL);
 	}
 }
 
@@ -3058,15 +3231,24 @@ static void DisableSelection()
 	EnableMenuItem(hMenu, ID_FILE_PLAY, 		   MF_GRAYED);
 	EnableMenuItem(hMenu, ID_FILE_PLAY_RECORD,	   MF_GRAYED);
 	EnableMenuItem(hMenu, ID_GAME_PROPERTIES,	   MF_GRAYED);
+	EnableMenuItem(hMenu, ID_GAME_LOCK, MF_GRAYED);
+	EnableMenuItem(hMenu, ID_GAME_UNLOCK, MF_GRAYED);
+	EnableMenuItem(hMenu, ID_VIEW_PCBINFO, MF_GRAYED);
 
 	SetStatusBarText(0, "No Selection");
 	SetStatusBarText(1, "");
 	SetStatusBarText(3, "");
+	SendMessage(hStatusBar, SB_SETICON, (WPARAM)1, (LPARAM)(HICON)NULL);
+
+	UpdateStatusBarIcons(-1);
 
 	have_selection = FALSE;
 
 	if (prev_have_selection != have_selection)
 		UpdateScreenShot();
+
+	sprintf(MameIcon.szTip, MAME32NAME);
+	Shell_NotifyIcon( NIM_MODIFY, &MameIcon );
 }
 
 static void EnableSelection(int nGame)
@@ -3091,10 +3273,15 @@ static void EnableSelection(int nGame)
 	SetStatusBarText(1, pText);
 	SetStatusBarText(3, "");
 
+	UpdateStatusBarIcons(nGame);
+
 	/* If doing updating game status and the game name is NOT pacman.... */
 
 	EnableMenuItem(hMenu, ID_FILE_PLAY, 		   MF_ENABLED);
 	EnableMenuItem(hMenu, ID_FILE_PLAY_RECORD,	   MF_ENABLED);
+	EnableMenuItem(hMenu, ID_GAME_LOCK, MF_ENABLED);
+	EnableMenuItem(hMenu, ID_GAME_UNLOCK, MF_ENABLED);
+	EnableMenuItem(hMenu, ID_VIEW_PCBINFO, MF_ENABLED);
 
 	if (!oldControl)
 		EnableMenuItem(hMenu, ID_GAME_PROPERTIES, MF_ENABLED);
@@ -3103,12 +3290,16 @@ static void EnableSelection(int nGame)
 	{
 		SetDefaultGame(ModifyThe(drivers[nGame]->name));
 	}
+
+	sprintf(MameIcon.szTip, "%s [%.50s]", MAME32NAME, ConvertAmpersandString(ModifyThe(drivers[nGame]->description)));
+	Shell_NotifyIcon( NIM_MODIFY, &MameIcon );
+
 	have_selection = TRUE;
 
 	UpdateScreenShot();
 }
 
-static void PaintBackgroundImage(HWND hWnd, HRGN hRgn, int x, int y)
+void PaintBackgroundImage(HWND hWnd, HRGN hRgn, int x, int y)
 {
 	RECT		rcClient;
 	HRGN		rgnBitmap;
@@ -3923,6 +4114,11 @@ static void SetView(int menu_id, int listview_style)
 
 	if (force_reset)
 		ResetListView();
+
+	if ( (GetViewMode() == VIEW_REPORT) || (GetViewMode() == VIEW_GROUPED) )
+		EnableMenuItem(GetMenu(hMain), ID_FILE_GAMELIST, MF_ENABLED);
+	else
+		EnableMenuItem(GetMenu(hMain), ID_FILE_GAMELIST, MF_GRAYED);
 }
 
 static void ResetListView()
@@ -4126,6 +4322,79 @@ static BOOL MameCommand(HWND hwnd,int id, HWND hwndCtl, UINT codeNotify)
 		SetFocus(hwndList);
 		return TRUE;
 
+	case ID_FILE_GAMELIST:
+	{
+	   	BOOL bIsTrue = FALSE;
+		OPENFILENAMEA OpenFileName;
+		char szFile[MAX_PATH] = "\0";
+		char szCurDir[MAX_PATH] = "\1";
+
+                // Save current directory (avoids mame file creation further failure)
+		if ( GetCurrentDirectory(MAX_PATH, szCurDir) > MAX_PATH )
+		{
+		   // Path too large
+		   szCurDir[0] = 0;
+		}
+
+		OpenFileName.lStructSize       = sizeof(OPENFILENAME);
+		OpenFileName.hwndOwner         = hMain;
+		OpenFileName.hInstance         = 0;
+		OpenFileName.lpstrFilter       = "Formatted text file (*.txt, *.*)\0*.txt;*.*\0Tabuled text file (*.txt, *.*)\0*.txt;*.*\0";
+		OpenFileName.lpstrCustomFilter = NULL;
+		OpenFileName.nMaxCustFilter    = 0;
+		OpenFileName.nFilterIndex      = 1;
+		OpenFileName.lpstrFile         = szFile;
+		OpenFileName.nMaxFile          = sizeof(szFile);
+		OpenFileName.lpstrFileTitle    = NULL;
+		OpenFileName.nMaxFileTitle     = 0;
+		OpenFileName.lpstrInitialDir   = NULL;
+		OpenFileName.lpstrTitle        = "Pick a file name to save the game list";
+		OpenFileName.nFileOffset       = 0;
+		OpenFileName.nFileExtension    = 0;
+		OpenFileName.lpstrDefExt       = NULL;
+		OpenFileName.lCustData         = 0;
+		OpenFileName.lpfnHook          = NULL;
+		OpenFileName.lpTemplateName    = NULL;
+		OpenFileName.Flags             = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_PATHMUSTEXIST;
+
+
+		while( ! bIsTrue )
+		{
+			if ( GetOpenFileNameA(&OpenFileName) )
+			{
+				if ( GetFileAttributes(szFile) != -1 )
+				{
+					if ( MessageBox(GetMainWindow(), "File already exists, overwrite ?" , MAME32NAME, MB_OKCANCEL | MB_ICONEXCLAMATION) != IDOK )
+						continue;
+					else
+						bIsTrue = TRUE;
+	
+					SetFileAttributes(szFile, FILE_ATTRIBUTE_NORMAL);
+				}
+	
+				SaveGameListToFile(szFile, (OpenFileName.nFilterIndex==2 ? 0 : 1));
+	    
+				bIsTrue = TRUE;
+			}
+			else
+				break;
+		}
+
+		// Restore current file path
+		if ( szCurDir[0] != 0 )
+			SetCurrentDirectory(szCurDir);
+		
+		if ( bIsTrue )
+			return TRUE;
+
+		break;
+	}
+
+	case ID_FILE_FIND_GAME:
+		DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_FIND_GAME), hMain, FindGameDialogProc);
+		SetFocus(hwndList);
+		return TRUE;
+
 	case ID_FILE_EXIT:
 		PostMessage(hMain, WM_CLOSE, 0, 0);
 		return TRUE;
@@ -4234,6 +4503,24 @@ static BOOL MameCommand(HWND hwnd,int id, HWND hwndCtl, UINT codeNotify)
 		SwitchFullScreenMode();
 		break;
 
+	case ID_SORT_TREE:
+	{
+		int current_id = GetCurrentFolderID();
+		
+		bSortTree = !bSortTree;
+		SetSortTree(bSortTree);
+//		CheckMenuItem(GetMenu(hMain), ID_SORT_TREE, (bSortTree) ? MF_CHECKED : MF_UNCHECKED);
+
+		SetWindowRedraw(hwndList,FALSE);
+
+		ResetTreeViewFolders();
+		SelectTreeViewFolder(current_id);
+
+		SetWindowRedraw(hwndList,TRUE);
+		
+		break;
+	}
+
 	case ID_GAME_AUDIT:
 		InitGameAudit(0);
 		if (!oldControl)
@@ -4244,6 +4531,46 @@ static BOOL MameCommand(HWND hwnd,int id, HWND hwndCtl, UINT codeNotify)
 		/* Just in case the toggle MMX on/off */
 		UpdateStatusBar();
 	   break;
+
+	case ID_GAME_LOCK:
+		SetGameLockUnlock(GetSelectedPickItem(), TRUE);
+		GameIsLocked(-1);
+		UpdateStatusBarIcons(GetSelectedPickItem());
+		ResetListView();
+		break;
+
+	case ID_GAME_UNLOCK:
+		if ( bPwdVerified || !bPwdEnabled )
+		{
+			SetGameLockUnlock(GetSelectedPickItem(), FALSE);
+			GameIsLocked(-1);
+			UpdateStatusBarIcons(GetSelectedPickItem());
+			ResetListView();
+		}
+		else
+		{
+			MessageBox(GetMainWindow(), "Password must be verified or disabled to unlock this game.", MAME32NAME, MB_OK | MB_ICONEXCLAMATION);
+		}
+		break;
+
+	case ID_FOLDER_LOCK:
+		SetFolderLockUnlock(GetCurrentFolder(), TRUE);
+		GameIsLocked(-1);
+		UpdateStatusBarIcons(GetSelectedPickItem());
+		break;
+
+	case ID_FOLDER_UNLOCK:
+		if ( bPwdVerified || !bPwdEnabled )
+		{
+			SetFolderLockUnlock(GetCurrentFolder(), FALSE);
+			GameIsLocked(-1);
+			UpdateStatusBarIcons(GetSelectedPickItem());
+		}
+		else
+		{
+			MessageBox(GetMainWindow(), "Password must be verified or disabled to unlock folder games.", MAME32NAME, MB_OK | MB_ICONEXCLAMATION);
+		}
+		break;
 
 	/* ListView Context Menu */
 	case ID_CONTEXT_ADD_CUSTOM:
@@ -4285,6 +4612,12 @@ static BOOL MameCommand(HWND hwnd,int id, HWND hwndCtl, UINT codeNotify)
 		SetCurrentTab(id - ID_VIEW_TAB_SCREENSHOT);
 		UpdateScreenShot();
 		TabCtrl_SetCurSel(hTabCtrl, CalculateCurrentTabIndex());
+		break;
+
+	case ID_VIEW_PCBINFO:
+		DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_PCBINFO), hMain, PCBInfoDialogProc);
+		SetFocus(hwndList);
+		return TRUE;
 		break;
 
 		// toggle tab's existence
@@ -4455,40 +4788,12 @@ static BOOL MameCommand(HWND hwnd,int id, HWND hwndCtl, UINT codeNotify)
 		return TRUE;
 
 	case ID_OPTIONS_BG:
-		{
-			OPENFILENAMEA OpenFileName;
-			static char szFile[MAX_PATH] = "\0";
-
-			OpenFileName.lStructSize       = sizeof(OPENFILENAME);
-			OpenFileName.hwndOwner         = hMain;
-			OpenFileName.hInstance         = 0;
-			OpenFileName.lpstrFilter       = "Image Files (*.png, *.bmp)\0*.PNG;*.BMP\0";
-			OpenFileName.lpstrCustomFilter = NULL;
-			OpenFileName.nMaxCustFilter    = 0;
-			OpenFileName.nFilterIndex      = 1;
-			OpenFileName.lpstrFile         = szFile;
-			OpenFileName.nMaxFile          = sizeof(szFile);
-			OpenFileName.lpstrFileTitle    = NULL;
-			OpenFileName.nMaxFileTitle     = 0;
-			OpenFileName.lpstrInitialDir   = GetBgDir();
-			OpenFileName.lpstrTitle        = "Select a Background Image";
-			OpenFileName.nFileOffset       = 0;
-			OpenFileName.nFileExtension    = 0;
-			OpenFileName.lpstrDefExt       = NULL;
-			OpenFileName.lCustData         = 0;                                                 
-			OpenFileName.lpfnHook 		   = NULL;
-			OpenFileName.lpTemplateName    = NULL;                                    
-			OpenFileName.Flags             = OFN_NOCHANGEDIR | OFN_SHOWHELP | OFN_EXPLORER;
-
-			if (GetOpenFileNameA(&OpenFileName))
-			{
-				ResetBackground(szFile);
-				LoadBackgroundBitmap();
-				InvalidateRect(hMain, NULL, TRUE);
-				return TRUE;
-			}
-		}
-		break;
+		DialogBox(GetModuleHandle(NULL),
+				  MAKEINTRESOURCE(IDD_BACKGROUND),
+				  hMain,
+				  BackgroundDialogProc);
+		SetFocus(hwndList);
+		return TRUE;
 
 	case ID_OPTIONS_LANGUAGE:
 		DialogBox(GetModuleHandle(NULL),
@@ -4496,6 +4801,28 @@ static BOOL MameCommand(HWND hwnd,int id, HWND hwndCtl, UINT codeNotify)
 				  hMain,
 				  LanguageDialogProc);
 		return TRUE;
+
+	case ID_OPTIONS_PASSWORD:
+		{
+			char szPassword[MAX_PWD_LEN+1];
+
+			GetPassword(szPassword);
+
+			if ( szPassword[0] == '\0' )
+			{
+				MessageBox(GetMainWindow(), "Password is corrupt.\nDefault password value restored.", MAME32NAME, MB_OK | MB_ICONWARNING);
+				bPwdVerified = FALSE;
+			}
+			else
+			{
+				DialogBox(GetModuleHandle(NULL),
+						  MAKEINTRESOURCE(IDD_PASSWORD),
+						  hMain,
+						  PasswordDialogProc);
+		}
+
+		return TRUE;
+		}
 
 	case ID_HELP_ABOUT:
 		DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUT),
@@ -4635,7 +4962,6 @@ static BOOL MameCommand(HWND hwnd,int id, HWND hwndCtl, UINT codeNotify)
 static void LoadBackgroundBitmap()
 {
 	HGLOBAL hDIBbg;
-	char*	pFileName = 0;
 
 	if (hBackground)
 	{
@@ -4649,23 +4975,94 @@ static void LoadBackgroundBitmap()
 		hPALbg = 0;
 	}
 
-	/* Pick images based on number of colors avaliable. */
-	if (GetDepth(hwndList) <= 8)
+	if ( GetBackground() == 0 )
 	{
-		pFileName = (char *)"bkgnd16";
-		/*nResource = IDB_BKGROUND16;*/
+		if (LoadDIB("bkground", &hDIBbg, &hPALbg, BACKGROUND))
+		{
+			HDC hDC = GetDC(hwndList);
+			hBackground = DIBToDDB(hDC, hDIBbg, &bmDesc);
+			GlobalFree(hDIBbg);
+			ReleaseDC(hwndList, hDC);
+		}
+		else
+		{
+			MessageBox(GetMainWindow(), "Unable to load background image file.", MAME32NAME, MB_OK | MB_ICONEXCLAMATION );
+		}
 	}
 	else
 	{
-		pFileName = (char *)"bkground";
-		/*nResource = IDB_BKGROUND;*/
+		// No background available, get default internal background
+		HDC hDC = GetDC(hwndList);
+		HBITMAP hBMP = (HBITMAP)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(GetBackground()), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION|LR_SHARED);
+		BITMAPINFO *pbmi;
+		BITMAPINFOHEADER *pbmih;
+		BITMAP bmp;
+		WORD cClrBits;
+
+		// Retreive the bitmap infos
+		GetObject(hBMP, sizeof(BITMAP), (LPSTR)&bmp);
+		
+		// Compute the bits per colors
+		cClrBits = bmp.bmPlanes * bmp.bmBitsPixel;
+		
+		// Adjust to the upper common size
+		if (cClrBits == 1) 
+			cClrBits = 1; 
+		else if (cClrBits <= 4) 
+			cClrBits = 4; 
+		else if (cClrBits <= 8) 
+			cClrBits = 8; 
+		else if (cClrBits <= 16) 
+			cClrBits = 16; 
+		else if (cClrBits <= 24) 
+			cClrBits = 24; 
+		else
+			cClrBits = 32; 
+		
+		// Alocate a buffer to store the bitmap infos
+		if ( cClrBits == 24 )
+		{
+			// There is no palette with 24 bits per pixel (1 byte = 1 color)
+			pbmi = (PBITMAPINFO)LocalAlloc( LMEM_FIXED, sizeof(BITMAPINFOHEADER) );
+	}
+	else
+	{
+			pbmi = (PBITMAPINFO)LocalAlloc( LMEM_FIXED, sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * (1<< cClrBits)) );
 	}
 
-	if (LoadDIB(pFileName, &hDIBbg, &hPALbg, BACKGROUND))
+		if ( pbmi != NULL )
 	{
-		HDC hDC = GetDC(hwndList);
-		hBackground = DIBToDDB(hDC, hDIBbg, &bmDesc);
-		GlobalFree(hDIBbg);
+			// Gain some code source size
+			pbmih = (BITMAPINFOHEADER *)&pbmi->bmiHeader;
+			
+			// Fill the structure with the appropriate data
+			pbmih->biSize = sizeof(BITMAPINFOHEADER);
+			pbmih->biWidth = bmp.bmWidth;
+			pbmih->biHeight = bmp.bmHeight;
+			pbmih->biPlanes = bmp.bmPlanes;
+			pbmih->biBitCount = bmp.bmBitsPixel;
+			pbmih->biCompression = BI_RGB;
+			pbmih->biSizeImage = (pbmih->biWidth * cClrBits) * pbmih->biHeight;
+			pbmih->biXPelsPerMeter = 0;
+			pbmih->biYPelsPerMeter = 0;
+			pbmih->biClrUsed = ( (cClrBits < 24) ? (1 << cClrBits) : 0);
+			pbmih->biClrImportant = 0;
+			
+			// For future use
+			bmDesc.bmWidth  = bmp.bmWidth;
+			bmDesc.bmHeight = bmp.bmHeight;
+			bmDesc.bmColors = (bmp.bmBitsPixel < 24) ? 1 << bmp.bmBitsPixel : 0;
+			
+			// Get the bitmap color palette
+			GetDIBits(hDC, hBMP, 0, bmp.bmHeight, NULL, pbmi, DIB_RGB_COLORS);
+			
+			// Draw the bitmap
+			hBackground = CreateDIBitmap( hDC, pbmih, (LONG)CBM_INIT, bmp.bmBits, pbmi, DIB_RGB_COLORS );
+			
+			LocalFree(pbmih);
+		}
+		
+		DeleteObject(hBMP);
 		ReleaseDC(hwndList, hDC);
 	}
 }
@@ -4862,6 +5259,12 @@ static void DestroyIcons(void)
 		hHeaderImages = NULL;
 	}
 
+	if (hPwdIconList != NULL)
+	{
+		ImageList_Destroy(hPwdIconList);
+		hPwdIconList = NULL;
+	}
+
 }
 
 static void ReloadIcons(void)
@@ -4976,6 +5379,15 @@ static void CreateIcons(void)
 
 	header = ListView_GetHeader(hwndList);
 	Header_SetImageList(header,hHeaderImages);
+
+	// Icons for password state
+	hPwdIconList = ImageList_Create(GetShellSmallIconSize(),GetShellSmallIconSize(), ILC_COLORDDB | ILC_MASK, 2, 2);
+	hIcon = LoadIcon(hInst,MAKEINTRESOURCE(IDI_LOCK));
+	ImageList_AddIcon(hPwdIconList, hIcon);
+	hIcon = LoadIcon(hInst,MAKEINTRESOURCE(IDI_UNLOCK));
+	ImageList_AddIcon(hPwdIconList, hIcon);
+	hIcon = LoadIcon(hInst,MAKEINTRESOURCE(IDI_KEY));
+	ImageList_AddIcon(hPwdIconList, hIcon);
 
 }
 
@@ -5449,6 +5861,459 @@ static INT_PTR CALLBACK LanguageDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, L
 	return 0;
 }
 
+static INT_PTR CALLBACK PasswordDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (Msg)
+	{
+	case WM_INITDIALOG:
+		{
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_CURRENT),   FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_NEW), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_RETYPE), FALSE);
+
+			Edit_LimitText(GetDlgItem(hDlg, IDC_PWD_CURRENT), MAX_PWD_LEN);
+			Edit_LimitText(GetDlgItem(hDlg, IDC_PWD_NEW), MAX_PWD_LEN);
+			Edit_LimitText(GetDlgItem(hDlg, IDC_PWD_RETYPE), MAX_PWD_LEN);
+
+			if ( bPwdEnabled )
+			{
+				Static_SetText(GetDlgItem(hDlg, IDC_PWD_INFOS), "Password is enabled. If you are running " MAME32NAME " for the first time, you should replace the default password with a new one.");
+			}
+			else
+			{
+				Static_SetText(GetDlgItem(hDlg, IDC_PWD_INFOS), "Password is disabled." );
+			}
+
+			return TRUE;
+		}
+
+	case WM_COMMAND:
+		switch (GET_WM_COMMAND_ID(wParam, lParam))
+		{
+		case IDOK:
+		{
+			HICON PwdIcon;
+
+			char szPassword[MAX_PWD_LEN+1];
+			char EditPwd[MAX_PWD_LEN+1];
+			char NewPwd[MAX_PWD_LEN+1];
+
+			GetPassword(szPassword);
+
+			// Enable password
+			if ( Button_GetCheck(GetDlgItem(hDlg, IDC_ENABLE_PWD)) )
+			{
+				bPwdEnabled = TRUE;
+				SetPassword(NULL, TRUE);
+				UpdateStatusBarIcons(GetSelectedPickItem());
+				MessageBox(GetMainWindow(), "Password enabled.", MAME32NAME, MB_OK | MB_ICONINFORMATION);
+			}
+			// Disable password
+			else if ( Button_GetCheck(GetDlgItem(hDlg, IDC_DISABLE_PWD)) )
+			{
+				Edit_GetText(GetDlgItem(hDlg, IDC_PWD_CURRENT), EditPwd, MAX_PWD_LEN);
+				
+				if ( !bPwdVerified && strcmp(szPassword, EditPwd) )
+				{
+					if ( strlen(EditPwd) != 0 )
+					{
+						MessageBox(GetMainWindow(), "Wrong password.\nPassword must be verified before disabled.", MAME32NAME, MB_OK | MB_ICONERROR);
+					}
+					else
+					{
+						MessageBox(GetMainWindow(), "Password must be verifed before disabled.", MAME32NAME, MB_OK | MB_ICONWARNING);
+					}
+
+					SetFocus(GetDlgItem(hDlg,IDC_PWD_CURRENT));
+					return 0;
+				}
+				else
+				{
+					bPwdEnabled = FALSE;
+					SetPassword(NULL, FALSE);
+					UpdateStatusBarIcons(GetSelectedPickItem());
+					MessageBox(GetMainWindow(), "Password disabled.", MAME32NAME, MB_OK | MB_ICONINFORMATION);
+				}
+			}
+			// Verify password
+			else if ( Button_GetCheck(GetDlgItem(hDlg, IDC_VERIFY_PWD)) )
+			{
+				Edit_GetText(GetDlgItem(hDlg, IDC_PWD_CURRENT), EditPwd, MAX_PWD_LEN);
+				
+				if ( (strlen(szPassword) == 0) || strcmp(szPassword, EditPwd) )
+				{
+					bPwdVerified = FALSE;
+					PwdIcon = ImageList_GetIcon(hPwdIconList, 0, ILD_TRANSPARENT);
+					MessageBox(GetMainWindow(), "Wrong password.", MAME32NAME, MB_OK | MB_ICONEXCLAMATION);
+					SendMessage(hStatusBar, SB_SETICON, (WPARAM)3, (LPARAM)(HICON)PwdIcon);
+				}
+				else
+				{
+					bPwdVerified = TRUE;
+					PwdIcon = ImageList_GetIcon(hPwdIconList, 1, ILD_TRANSPARENT);
+					SendMessage(hStatusBar, SB_SETICON, (WPARAM)3, (LPARAM)(HICON)PwdIcon);
+					MessageBox(GetMainWindow(), "Password successful verifed.", MAME32NAME, MB_OK | MB_ICONINFORMATION);
+				}
+			}
+			// Change password
+			else if ( Button_GetCheck(GetDlgItem(hDlg, IDC_CHANGE_PWD)) )
+			{
+				Edit_GetText(GetDlgItem(hDlg, IDC_PWD_CURRENT), EditPwd, MAX_PWD_LEN);
+				
+				if ( !bPwdVerified && ((strlen(szPassword) == 0) || strcmp(szPassword, EditPwd)) )
+				{
+					if ( strlen(EditPwd) != 0 )
+					{
+						MessageBox(GetMainWindow(), "Wrong password.\nPassword must be verified before changed.", MAME32NAME, MB_OK | MB_ICONERROR);
+					}
+					else
+					{
+						MessageBox(GetMainWindow(), "Password must be verifed before changed.", MAME32NAME, MB_OK | MB_ICONWARNING);
+					}
+					SetFocus(GetDlgItem(hDlg,IDC_PWD_CURRENT));
+					return 0;
+				}
+				else
+				{
+					bPwdVerified = TRUE;
+					
+					Edit_GetText(GetDlgItem(hDlg, IDC_PWD_NEW), EditPwd, MAX_PWD_LEN);
+					Edit_GetText(GetDlgItem(hDlg, IDC_PWD_RETYPE), NewPwd, MAX_PWD_LEN);
+					
+					if ( (strlen(EditPwd) < 3) || (strlen(NewPwd) < 3) )
+					{
+						MessageBox(GetMainWindow(), "Password must be at least 3 characters.", MAME32NAME, MB_OK | MB_ICONEXCLAMATION);
+						SetFocus(GetDlgItem(hDlg,IDC_PWD_NEW));
+						return 0;
+					}
+					else if ( strcmp(EditPwd, NewPwd) )
+					{
+						MessageBox(GetMainWindow(), "New password doesn't match with re-type.", MAME32NAME, MB_OK | MB_ICONEXCLAMATION);
+						SetFocus(GetDlgItem(hDlg,IDC_PWD_RETYPE));
+						return 0;
+					}
+					
+					SetPassword(NewPwd, GetPassword(NULL));
+					if ( bPwdEnabled )
+					{
+						PwdIcon = ImageList_GetIcon(hPwdIconList, 1, ILD_TRANSPARENT);
+						SendMessage(hStatusBar, SB_SETICON, (WPARAM)3, (LPARAM)(HICON)PwdIcon);
+					}
+					MessageBox(GetMainWindow(), "Password successful changed.", MAME32NAME, MB_OK | MB_ICONINFORMATION);
+				}
+			}
+		}
+
+		case IDCANCEL:
+			EndDialog(hDlg, 0);
+			return TRUE;
+
+		case IDC_ENABLE_PWD:
+		{
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_CURRENT),   FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_NEW), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_RETYPE), FALSE);
+			
+			break;
+		}
+
+		case IDC_DISABLE_PWD:
+		{
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_CURRENT),   (bPwdVerified?FALSE:TRUE));
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_NEW), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_RETYPE), FALSE);
+
+			if ( ! bPwdVerified )
+			{
+				SetFocus(GetDlgItem(hDlg,IDC_PWD_CURRENT));
+			}
+
+			break;
+		}
+
+		case IDC_VERIFY_PWD:
+		{
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_CURRENT),   TRUE);
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_NEW), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_RETYPE), FALSE);
+			
+			SetFocus(GetDlgItem(hDlg,IDC_PWD_CURRENT));
+			break;
+		}
+
+		case IDC_CHANGE_PWD:
+		{
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_CURRENT),   (bPwdVerified?FALSE:TRUE));
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_NEW), TRUE);
+			EnableWindow(GetDlgItem(hDlg, IDC_PWD_RETYPE), TRUE);
+			
+			if ( ! bPwdVerified )
+			{
+				SetFocus(GetDlgItem(hDlg,IDC_PWD_CURRENT));
+			}
+			else
+			{
+				SetFocus(GetDlgItem(hDlg,IDC_PWD_NEW));
+			}
+
+			break;
+		}
+		}			
+		break;
+	}
+	return 0;
+}
+
+static INT_PTR CALLBACK BackgroundDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	static char szFile[MAX_PATH] = "\0";
+
+	switch (Msg)
+	{
+	case WM_INITDIALOG:
+		{
+			HBITMAP hBmp;
+			
+			hBmp = (HBITMAP)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_THUMB1), IMAGE_BITMAP, 0, 0, LR_SHARED);
+			SendMessage(GetDlgItem(hDlg, IDC_BITMAP1), STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hBmp);
+			hBmp = (HBITMAP)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_THUMB2), IMAGE_BITMAP, 0, 0, LR_SHARED);
+			SendMessage(GetDlgItem(hDlg, IDC_BITMAP2), STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hBmp);
+			hBmp = (HBITMAP)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_THUMB3), IMAGE_BITMAP, 0, 0, LR_SHARED);
+			SendMessage(GetDlgItem(hDlg, IDC_BITMAP3), STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hBmp);
+			hBmp = (HBITMAP)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_THUMB4), IMAGE_BITMAP, 0, 0, LR_SHARED);
+			SendMessage(GetDlgItem(hDlg, IDC_BITMAP4), STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hBmp);
+						
+			EnableWindow(GetDlgItem(hDlg, IDC_BKG_EDIT),   FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_BROWSE_BKG), FALSE);
+
+			Edit_LimitText(GetDlgItem(hDlg, IDC_BKG_EDIT), MAX_PATH-1);
+			Edit_SetText(GetDlgItem(hDlg, IDC_BKG_EDIT), "");
+
+			switch(GetBackground())
+			{
+				case 0:
+					Button_SetCheck(GetDlgItem(hDlg, IDC_IMAGE_CUSTOM), TRUE);
+					EnableWindow(GetDlgItem(hDlg, IDC_BKG_EDIT),   TRUE);
+					strcpy(szFile, GetBgDir());
+					strcat(szFile, "\\bkground.png");
+					Edit_SetText(GetDlgItem(hDlg, IDC_BKG_EDIT), szFile);
+					break;
+				case IDB_BKGND_SAND:
+					Button_SetCheck(GetDlgItem(hDlg, IDC_IMAGE_1), TRUE);
+					break;
+				case IDB_BKGND_GREY:
+					Button_SetCheck(GetDlgItem(hDlg, IDC_IMAGE_2), TRUE);
+					break;
+				case IDB_BKGND_BKGND16:
+					Button_SetCheck(GetDlgItem(hDlg, IDC_IMAGE_3), TRUE);
+					break;
+				case IDB_BKGND_BKGND256:
+					Button_SetCheck(GetDlgItem(hDlg, IDC_IMAGE_4), TRUE);
+					break;
+			}
+
+			return TRUE;
+		}
+
+	case WM_COMMAND:
+	
+		if ( Button_GetCheck(GetDlgItem(hDlg, IDC_IMAGE_CUSTOM)) )
+		{
+			EnableWindow(GetDlgItem(hDlg, IDC_BKG_EDIT),   TRUE);
+			EnableWindow(GetDlgItem(hDlg, IDC_BROWSE_BKG), TRUE);
+		}
+		else
+		{
+			EnableWindow(GetDlgItem(hDlg, IDC_BKG_EDIT),   FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_BROWSE_BKG), FALSE);
+		}
+
+		switch (GET_WM_COMMAND_ID(wParam, lParam))
+		{
+		case IDOK:
+			// Internal image #1
+			if ( Button_GetCheck(GetDlgItem(hDlg, IDC_IMAGE_1)) )
+			{
+				SetBackground(IDB_BKGND_SAND);
+			}
+			// Internal image #2
+			if ( Button_GetCheck(GetDlgItem(hDlg, IDC_IMAGE_2)) )
+			{
+				SetBackground(IDB_BKGND_GREY);
+			}
+			// Internal image #3
+			if ( Button_GetCheck(GetDlgItem(hDlg, IDC_IMAGE_3)) )
+			{
+				SetBackground(IDB_BKGND_BKGND16);
+			}
+			// Internal image #4
+			if ( Button_GetCheck(GetDlgItem(hDlg, IDC_IMAGE_4)) )
+			{
+				SetBackground(IDB_BKGND_BKGND256);
+			}
+			else if ( Button_GetCheck(GetDlgItem(hDlg, IDC_IMAGE_CUSTOM)) )
+			{
+				Edit_GetText(GetDlgItem(hDlg, IDC_BKG_EDIT), szFile, MAX_PATH);
+
+				if ( *szFile != '\0' );
+				{
+					ResetBackground(szFile);
+					SetBackground(0);
+				}
+			}
+
+			// Set new background image			
+			LoadBackgroundBitmap();
+			InvalidateRect(hMain, NULL, TRUE);
+
+		case IDCANCEL:
+			EndDialog(hDlg, 0);
+			return TRUE;
+
+		case IDC_BROWSE_BKG:
+		{
+			OPENFILENAMEA OpenFileName;
+
+			OpenFileName.lStructSize       = sizeof(OPENFILENAME);
+			OpenFileName.hwndOwner         = hMain;
+			OpenFileName.hInstance         = 0;
+			OpenFileName.lpstrFilter       = "Image Files (*.png, *.bmp)\0*.PNG;*.BMP\0";
+			OpenFileName.lpstrCustomFilter = NULL;
+			OpenFileName.nMaxCustFilter    = 0;
+			OpenFileName.nFilterIndex      = 1;
+			OpenFileName.lpstrFile         = szFile;
+			OpenFileName.nMaxFile          = sizeof(szFile);
+			OpenFileName.lpstrFileTitle    = NULL;
+			OpenFileName.nMaxFileTitle     = 0;
+			OpenFileName.lpstrInitialDir   = GetBgDir();
+			OpenFileName.lpstrTitle        = "Select a Background Image";
+			OpenFileName.nFileOffset       = 0;
+			OpenFileName.nFileExtension    = 0;
+			OpenFileName.lpstrDefExt       = NULL;
+			OpenFileName.lCustData         = 0;                                                 
+			OpenFileName.lpfnHook 		   = NULL;
+			OpenFileName.lpTemplateName    = NULL;                                    
+			OpenFileName.Flags             = OFN_NOCHANGEDIR | OFN_SHOWHELP | OFN_EXPLORER;
+
+			if (GetOpenFileNameA(&OpenFileName))
+			{
+				Edit_SetText(GetDlgItem(hDlg, IDC_BKG_EDIT), szFile);
+			}
+
+			break;
+		}
+		}			
+		break;
+	}
+	return 0;
+}
+
+
+static INT_PTR CALLBACK FindGameDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	static char szPattern[50] = "\0";
+	static int iCriteria = 1;
+	
+	char Tmp[50];
+
+	switch (Msg)
+	{
+	case WM_INITDIALOG:
+		{
+			Edit_LimitText(GetDlgItem(hDlg, IDC_FIND_PATTERN), 50-1);
+			Edit_SetText(GetDlgItem(hDlg, IDC_FIND_PATTERN), szPattern);
+
+			if (iCriteria & 1)
+			{
+				Button_SetCheck(GetDlgItem(hDlg, IDC_FIND_NAME), TRUE);
+			}
+			
+			if (iCriteria & 2)
+			{
+				Button_SetCheck(GetDlgItem(hDlg, IDC_FIND_DRIVER), TRUE);
+			}
+
+			if (iCriteria & 4)
+			{
+				Button_SetCheck(GetDlgItem(hDlg, IDC_FIND_MANUFACTURER), TRUE);
+			}
+
+			return TRUE;
+		}
+
+	case WM_COMMAND:
+		switch (GET_WM_COMMAND_ID(wParam, lParam))
+		{
+		case IDOK:
+
+			iCriteria = 0;
+
+			if (Button_GetCheck(GetDlgItem(hDlg, IDC_FIND_NAME)) == TRUE)
+			{
+				iCriteria |= 1;
+			}
+			
+			if (Button_GetCheck(GetDlgItem(hDlg, IDC_FIND_DRIVER)) == TRUE)
+			{
+				iCriteria |= 2;
+			}
+			
+			if (Button_GetCheck(GetDlgItem(hDlg, IDC_FIND_MANUFACTURER)) == TRUE)
+			{
+				iCriteria |= 4;
+			}
+			
+			if (iCriteria == 0)
+			{
+				MessageBox(GetMainWindow(), "At least one criteria must be checked.", MAME32NAME, MB_OK | MB_ICONWARNING);
+				iCriteria = 1;
+				SetFocus(hDlg);
+				return TRUE;
+			}
+
+			Edit_GetText(GetDlgItem(hDlg, IDC_FIND_PATTERN), szPattern, 50-1);
+			
+			if (strlen(szPattern) == 0)
+			{
+				MessageBox(GetMainWindow(), "Pattern must contain at least one car.", MAME32NAME, MB_OK | MB_ICONWARNING);
+				SetFocus(hDlg);
+				return TRUE;
+			}
+
+			// Go !
+			sprintf(Tmp, "Search result : %d game(s) found.", GetGamesFound(szPattern, iCriteria));
+
+			Static_SetText(GetDlgItem(hDlg, IDC_FIND_RESULT), Tmp);
+
+			// Update folder
+			{
+				LPTREEFOLDER FolderFindGame = GetFolderByID(FOLDER_FINDGAME);
+				int i;
+				
+				for (i=0; i<game_count; i++)
+				{
+					if ( games_found[i] )
+					{
+						AddGame(FolderFindGame, i);
+					}
+					else
+					{
+						RemoveGame(FolderFindGame, i);
+					}
+				}
+			}
+
+			return TRUE;
+
+		case IDCANCEL:
+			EndDialog(hDlg, 0);
+			return TRUE;
+		}
+	}
+	return 0;
+}
+
+
 void SetStatusBarText(int part_index, const char *message)
 {
 	SendMessage(hStatusBar, SB_SETTEXT, (WPARAM) part_index, (LPARAM) message);
@@ -5475,6 +6340,100 @@ static void MameMessageBox(const char *fmt, ...)
 	vsprintf(buf, fmt, va);
 	MessageBox(GetMainWindow(), buf, MAME32NAME, MB_OK | MB_ICONERROR);
 	va_end(va);
+}
+
+static LRESULT CALLBACK BackMainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	// Handle system tray icon messages
+	if ( uMsg == uShellIconMsg )
+	{
+		if ( ! in_emulation )
+		{
+			switch( (UINT)lParam )
+			{
+				case WM_RBUTTONUP:
+					SetForegroundWindow(hWnd);
+					if ( HandleSystemTrayContextMenu(hWnd, wParam, TRUE) )
+					{
+						return FALSE;
+					}
+					break;
+
+				case WM_LBUTTONDBLCLK:
+					if ( have_selection )
+					{
+						MamePlayGame();
+					}
+					break;
+			}
+		}
+
+		return TRUE;
+	}
+
+	switch (uMsg)
+	{
+		case WM_ACTIVATE:
+			if ( LOWORD(wParam) == WA_INACTIVE )
+			{
+				HandleSystemTrayContextMenu(hWnd, wParam, FALSE);
+				return FALSE;
+			}
+		break;
+
+		case WM_ERASEBKGND:
+		{
+			BITMAP Bitmap;
+			GetObject(hSplashBmp, sizeof(BITMAP), &Bitmap);
+			BitBlt((HDC)wParam, 0, 0, Bitmap.bmWidth, Bitmap.bmHeight, hMemoryDC, 0, 0, SRCCOPY);
+			break;
+		}
+
+		case WM_COMMAND:
+			switch( GET_WM_COMMAND_ID(wParam, lParam) )
+			{
+				case ID_FILE_EXIT:
+					SetWindowState(SW_HIDE);
+
+				case ID_FILE_PLAY:
+				case ID_CONTEXT_SELECT_RANDOM:
+					return MameCommand(hMain,(int)(LOWORD(wParam)),(HWND)(lParam),(UINT)HIWORD(wParam));
+
+				case ID_CONTEXT_SELECT_PREVIOUS:
+					SetSelectedPick(GetSelectedPick() - 1);
+			 		break;
+
+				case ID_CONTEXT_SELECT_NEXT:
+					SetSelectedPick(GetSelectedPick() + 1);
+			 		break;
+
+				case ID_CONTEXT_SHOW_MAIN:
+					bIsWindowsVisible = TRUE;
+					SetWindowState(SW_SHOW);
+					ShowWindow(hMain, SW_SHOW);
+//					SetForegroundWindow(hMain);
+					SetFocus(hwndList);
+			 		break;
+				
+				case ID_CONTEXT_HIDE_MAIN:
+					bIsWindowsVisible = FALSE;
+					SetWindowState(SW_HIDE);
+					ShowWindow(hMain, SW_HIDE);
+			 		break;
+
+				default:
+					if (GET_WM_COMMAND_ID(wParam, lParam) >= ID_CONTEXT_SELECT_CHOICE_START && GET_WM_COMMAND_ID(wParam, lParam) < ID_CONTEXT_SELECT_CHOICE_END)
+					{
+						SetSelectedPick(GET_WM_COMMAND_ID(wParam, lParam) - ID_CONTEXT_SELECT_CHOICE_START);
+					}
+			 		break;
+			}
+
+		default:
+			return (DefWindowProc(hWnd, uMsg, wParam, lParam));
+    }
+
+    return FALSE;
 }
 
 static void MamePlayBackGame()
@@ -5673,9 +6632,49 @@ static void MamePlayRecordGame()
 
 static void MamePlayGame()
 {
-	int nGame;
+	int i, nGame;
+
+	const char *TestDrivers[13] =
+	{
+		"cthd2003",
+		"kof2001",
+		"kof2002",
+		"kof2003",
+		"matri",
+		"mslug4",
+		"mslug5",
+		"pnyaa",
+		"rotd",
+		"samsho5",
+		"sengoku3",
+		"svcchaos",
+		"zupapa"
+	};
 
 	nGame = GetSelectedPickItem();
+
+	if ( ! GetShowRecent() )
+	{
+		for ( i=0; i<13; i++ )
+		{
+			if ( stricmp(TestDrivers[i], drivers[nGame]->name) == 0 )
+			{
+				MessageBox(GetMainWindow(), "This game is too recent to be emulated.\nIt is listed only for debug purpose.", "Game is locked", MB_OK | MB_ICONEXCLAMATION);
+				
+				return;
+			}
+		}
+	}
+
+	if ( bPwdEnabled )
+	{
+		if ( !bPwdVerified && GameIsLocked(nGame) )
+		{
+			MessageBox(GetMainWindow(), "Please verify password to play this game.", "Game is locked", MB_OK | MB_ICONEXCLAMATION);
+			
+			return;
+		}
+	}
 
 	g_pPlayBkName = NULL;
 	g_pRecordName = NULL;
@@ -5697,6 +6696,9 @@ static void MamePlayGameWithOptions(int nGame)
 
 	g_bAbortLoading = FALSE;
 
+	sprintf( MameIcon.szTip, "%s game running ...", MAME32NAME );
+	Shell_NotifyIcon( NIM_MODIFY, &MameIcon );
+
 	in_emulation = TRUE;
 
 	if (RunMAME(nGame) == 0)
@@ -5717,8 +6719,14 @@ static void MamePlayGameWithOptions(int nGame)
 
 	UpdateStatusBar();
 
+	sprintf(MameIcon.szTip, "%s [%.50s]", MAME32NAME, ConvertAmpersandString(ModifyThe(drivers[nGame]->description)));
+	Shell_NotifyIcon( NIM_MODIFY, &MameIcon );
+
+	if ( bIsWindowsVisible )
+	{
 	ShowWindow(hMain, SW_SHOW);
 	SetFocus(hwndList);
+	}
 
 	if (g_pJoyGUI != NULL)
 		SetTimer(hMain, JOYGUI_TIMER, JOYGUI_MS, NULL);
@@ -5949,6 +6957,34 @@ static BOOL HandleScreenShotContextMenu(HWND hWnd, WPARAM wParam, LPARAM lParam)
 	return TRUE;
 }
 
+static BOOL HandleSystemTrayContextMenu( HWND hWnd, WPARAM wParam, LPARAM lParam)
+{
+	static HMENU hMenuLoad = NULL;
+	HMENU hMenu;
+	POINT pt;
+
+	if ( lParam )
+	{
+		GetCursorPos(&pt);
+
+		hMenuLoad = LoadMenu(hInst, MAKEINTRESOURCE(IDR_CONTEXT_SYSTEMTRAY));
+		InitSystrayContextMenu(hMenuLoad);
+		hMenu = GetSubMenu(hMenuLoad, 0);
+
+		UpdateMenu(hMenu);
+		TrackPopupMenu(hMenu,TPM_LEFTALIGN | TPM_RIGHTBUTTON,pt.x,pt.y,0,hWnd,NULL);
+		DestroyMenu(hMenuLoad);
+		hMenuLoad = NULL;
+	}
+	else if ( hMenuLoad != NULL )
+	{
+		DestroyMenu(hMenuLoad);
+		hMenuLoad = NULL;
+	}
+
+	return TRUE;
+}
+
 static void UpdateMenu(HMENU hMenu)
 {
 	char			buf[200];
@@ -5972,6 +7008,15 @@ static void UpdateMenu(HMENU hMenu)
 		SetMenuItemInfo(hMenu, ID_FILE_PLAY, FALSE, &mItem);
 
 		EnableMenuItem(hMenu, ID_CONTEXT_SELECT_RANDOM, MF_ENABLED);
+		
+		if ( GetSelectedPick() == 0 )
+		{
+			EnableMenuItem(hMenu, ID_CONTEXT_SELECT_PREVIOUS, MF_GRAYED);
+		}
+		else if ( GetSelectedPick() == (ListView_GetItemCount(hwndList)-1) )
+		{
+			EnableMenuItem(hMenu, ID_CONTEXT_SELECT_NEXT, MF_GRAYED);
+		}
 	}
 	else
 	{
@@ -5979,6 +7024,8 @@ static void UpdateMenu(HMENU hMenu)
 		EnableMenuItem(hMenu, ID_FILE_PLAY_RECORD,		MF_GRAYED);
 		EnableMenuItem(hMenu, ID_GAME_PROPERTIES,		MF_GRAYED);
 		EnableMenuItem(hMenu, ID_CONTEXT_SELECT_RANDOM, MF_GRAYED);
+		EnableMenuItem(hMenu, ID_CONTEXT_SELECT_PREVIOUS,MF_GRAYED);
+		EnableMenuItem(hMenu, ID_CONTEXT_SELECT_NEXT,	MF_GRAYED);
 	}
 
 	if (oldControl)
@@ -6015,6 +7062,11 @@ static void UpdateMenu(HMENU hMenu)
 	else
 		CheckMenuItem(hMenu,ID_VIEW_PAGETAB,MF_BYCOMMAND | MF_UNCHECKED);
 
+	// set whether the tree folder is sorted by alphabetic order
+	if (bSortTree)
+		CheckMenuItem(hMenu,ID_SORT_TREE,MF_BYCOMMAND | MF_CHECKED);
+	else
+		CheckMenuItem(hMenu,ID_SORT_TREE,MF_BYCOMMAND | MF_UNCHECKED);
 
 	for (i=0;i<MAX_TAB_TYPES;i++)
 	{
@@ -6033,6 +7085,10 @@ static void UpdateMenu(HMENU hMenu)
 
 	for (i=0;i<MAX_FOLDERS;i++)
 	{
+		// Hide Unavailable folder option if not allowed (Mame licence requirement)
+		if ((i == FOLDER_UNAVAILABLE) && (!GetShowUnavailableFolder()))
+			EnableMenuItem(hMenu,ID_CONTEXT_SHOW_FOLDER_START + i,MF_BYCOMMAND | MF_GRAYED);
+		
 		if (GetShowFolder(i))
 			CheckMenuItem(hMenu,ID_CONTEXT_SHOW_FOLDER_START + i,MF_BYCOMMAND | MF_CHECKED);
 		else
@@ -6056,7 +7112,7 @@ void InitTreeContextMenu(HMENU hTreeMenu)
 
 	hMenu = GetSubMenu(hTreeMenu, 0);
 
-	if (GetMenuItemInfo(hMenu,3,TRUE,&mii) == FALSE)
+	if (GetMenuItemInfo(hMenu,4,TRUE,&mii) == FALSE)
 	{
 		dprintf("can't find show folders context menu");
 		return;
@@ -6087,6 +7143,63 @@ void InitTreeContextMenu(HMENU hTreeMenu)
 			InsertMenuItem(hMenu,i,FALSE,&mii);
 	}
 
+}
+
+void InitSystrayContextMenu(HMENU hSystrayMenu)
+{
+	MENUITEMINFO mii;
+	HMENU hMenu;
+	int iItem = 0;
+    LV_ITEM lvi;
+
+	ZeroMemory(&mii,sizeof(mii));
+	mii.cbSize = sizeof(mii);
+
+	mii.wID = -1;
+	mii.fMask = MIIM_SUBMENU | MIIM_ID;
+
+	hMenu = GetSubMenu(hSystrayMenu, 0);
+
+	if (GetMenuItemInfo(hMenu,5,TRUE,&mii) == FALSE)
+	{
+		dprintf("can't find select choice context menu");
+		return;
+	}
+
+	if (mii.hSubMenu == NULL)
+	{
+		dprintf("can't find submenu for select choice context menu");
+		return;
+	}
+
+	hMenu = mii.hSubMenu;
+	
+    lvi.iItem = ListView_GetNextItem(hwndList, -1, LVNI_ALL);
+    while( lvi.iItem != -1 )
+	{
+        lvi.iSubItem = 0;
+        lvi.mask = LVIF_PARAM;
+
+        if ( ListView_GetItem(hwndList, &lvi) )
+        {
+			mii.fMask = MIIM_TYPE | MIIM_ID;
+			mii.fType = MFT_STRING;
+			mii.dwTypeData = ModifyThe(drivers[lvi.lParam]->description);
+			mii.cch = strlen(mii.dwTypeData);
+			mii.wID = ID_CONTEXT_SELECT_CHOICE_START + lvi.iItem;
+
+			// menu in resources has one empty item (needed for the submenu to setup properly)
+			// so overwrite this one, append after
+			if (iItem == 0)
+				SetMenuItemInfo(hMenu,ID_CONTEXT_SELECT_CHOICE_START,FALSE,&mii);
+			else
+				InsertMenuItem(hMenu,iItem,FALSE,&mii);
+				
+			iItem++;
+		}
+
+        lvi.iItem = ListView_GetNextItem(hwndList, lvi.iItem, LVNI_BELOW);
+	}
 }
 
 void ToggleShowFolder(int folder)
@@ -6188,6 +7301,7 @@ static LRESULT CALLBACK PictureFrameWndProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 		// check if they clicked on the picture area (leave 6 pixel no man's land
 		// by the history window to reduce mistaken clicks)
 		// no more no man's land, the Cursor changes when Edit control is left, should be enough feedback
+
 		if (have_history &&        
 			( ( (GetCurrentTab() == TAB_HISTORY) || 
 			 (GetCurrentTab() == GetHistoryTab() && GetShowTab(TAB_HISTORY) == FALSE) ||
@@ -7020,6 +8134,18 @@ int UpdateLoadProgress(const char* name, const struct rom_load_data *romdata)
 	int current = romdata->romsloaded;
 	int total = romdata->romstotal;
 
+	// Check lock if command line
+	if ( (! bUseLockGUI) && bPwdEnabled )
+	{
+		if ( !bPwdVerified && GetGameLockByDriverName((char *)Machine->gamedrv->name) )
+		{
+			char Tmp[200];
+			sprintf(Tmp, "%s [%s]\nPlease verify password to play this game.", Machine->gamedrv->description, Machine->gamedrv->name);
+			MessageBox(NULL, Tmp, "Game is locked", MB_OK | MB_ICONEXCLAMATION);
+			exit(1);
+		}
+	}
+
 	if (hWndLoad == NULL)
 	{
 		hWndLoad = CreateDialog(GetModuleHandle(NULL),
@@ -7565,12 +8691,12 @@ void SendIconToProcess(LPPROCESS_INFORMATION pi, int nGameIndex)
 			hIcon = LoadIconFromFile(drivers[nGameIndex]->clone_of->name); 
 			if( hIcon == NULL) 
 			{ 
-				hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MAME32_ICON)); 
+				hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MIM32_ICON)); 
 			} 
 		} 
 		else 
 		{ 
-			hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MAME32_ICON)); 
+			hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MIM32_ICON)); 
 		} 
 	} 
 	WaitForInputIdle( pi->hProcess, INFINITE ); 
@@ -7620,6 +8746,931 @@ BOOL CALLBACK EnumWindowCallBack(HWND hwnd, LPARAM lParam)
 		// Keep enumerating 
 		return TRUE; 
 	} 
+}
+
+static void SaveGameListToFile(char *szFile, int Formatted)
+{
+    int Order[COLUMN_MAX];
+    int Size[COLUMN_MAX] = {70, 4, 8, 9, 6, 9, 6, 30, 4, 70, 12, 9};
+    int nColumnMax = GetNumColumns(hwndList);
+    int i, j = 0;
+
+    const char *Filters[8] = { "Clones", "Non-Working", "Unavailable", "Vector", "Raster", "Originals", "Working", "Available" };
+    char *CrLf;
+    char Buf[300];
+
+    LPTREEFOLDER lpFolder = GetCurrentFolder();
+    LV_ITEM lvi;
+
+    FILE *fp = fopen(szFile, "wt");
+
+    // No interline with tabuled format
+    if ( Formatted )
+        CrLf = (char *)"\r\n\r\n";
+    else
+        CrLf = (char *)"\r\n";
+    
+    if (fp == NULL)
+    {
+        MessageBox(GetMainWindow(), "Error : unable to access file", MAME32NAME, MB_OK | MB_ICONERROR);
+        return;
+    }
+
+    GetRealColumnOrder(Order);
+
+    // Title
+    sprintf( Buf, "%s %s.%s", MAME32NAME, GetVersionString(), CrLf );
+    fwrite( Buf, strlen(Buf), 1, fp);
+    sprintf( Buf, "This is the current list of games, as displayed in the GUI (%s view mode).%s", ((GetViewMode() == VIEW_GROUPED)?"grouped":"detail"), CrLf );
+    fwrite( Buf, strlen(Buf), 1, fp);
+
+    // Current folder
+    sprintf( Buf, "Current folder : <" );
+    if ( lpFolder->m_nParent != -1 )
+    {
+        // Shows only 2 levels (last and previous)
+        LPTREEFOLDER lpF = GetFolder( lpFolder->m_nParent );
+
+        if ( lpF->m_nParent == -1 )
+        {
+            strcat( Buf, "\\" );
+        }
+        strcat( Buf, lpF->m_lpTitle );
+        strcat( Buf, "\\" );
+    }
+    else
+    {
+        strcat( Buf, "\\" );
+    }
+    sprintf( &Buf[strlen(Buf)], "%s>%s.%s", lpFolder->m_lpTitle, (lpFolder->m_dwFlags&F_CUSTOM?" (custom folder)":""), CrLf );
+    fwrite( Buf, strlen(Buf), 1, fp);
+
+    // Filters
+    sprintf(Buf, "Additional excluding filter(s) : ");
+    for (i=0,j=0; i<8; i++ )
+    {
+        if ( lpFolder->m_dwFlags & (1<<i) )
+        {
+            if ( j > 0)
+            {
+                strcat( Buf, ", ");
+            }
+
+            strcat(Buf, Filters[i]);
+
+            j++;
+        }
+    }
+    if ( j == 0)
+    {
+        strcat(Buf, "none");
+    }
+    strcat(Buf, ".");
+    strcat(Buf, CrLf);
+    fwrite( Buf, strlen(Buf), 1, fp);
+
+    // Sorting
+    if ( GetSortColumn() > 0 )
+    {
+        sprintf( Buf, "Sorted by <%s> descending order", column_names[GetSortColumn()] );
+    }
+    else
+    {
+        sprintf( Buf, "Sorted by <%s> ascending order", column_names[-GetSortColumn()] );
+    }
+    sprintf( &Buf[strlen(Buf)], ", %d game(s) found.%s", ListView_GetItemCount(hwndList), CrLf );
+    fwrite( Buf, strlen(Buf), 1, fp);
+
+    if ( Formatted )
+    {
+        // Separator
+        memset( Buf, '-', sizeof(Buf) );
+        Buf[0] = '+';
+        for (i=0,j=0; i<nColumnMax; i++ )
+        {
+            j += Size[Order[i]]+3;
+            Buf[j] = '+';
+        }
+        Buf[j+1] = '\0';
+        strcat( Buf, "\r\n");
+        fwrite( Buf, strlen(Buf), 1, fp);
+
+        // Left side of columns title
+        Buf[0] = '|';
+        Buf[1] = '\0';
+    }
+    else
+        Buf[0] = '\0';
+
+    // Title of columns
+    for (i=0; i<nColumnMax; i++ )
+    {
+        if ( Formatted )
+            sprintf( &Buf[strlen(Buf)], " %-*.*s |", Size[Order[i]], Size[Order[i]], column_names[Order[i]] );
+        else
+        {
+            if ( i )
+                sprintf( &Buf[strlen(Buf)], "\t%s", column_names[Order[i]] );
+            else
+                sprintf( &Buf[strlen(Buf)], "%s", column_names[Order[i]] );
+        }
+    }
+    strcat( Buf, "\r\n");
+    fwrite( Buf, strlen(Buf), 1, fp);
+
+    // Separator
+    if ( Formatted )
+    {
+        memset( Buf, '-', sizeof(Buf) );
+        Buf[0] = '+';
+        for (i=0,j=0; i<nColumnMax; i++ )
+        {
+            j += Size[Order[i]]+3;
+            Buf[j] = '+';
+        }
+        Buf[j+1] = '\0';
+        strcat( Buf, "\r\n");
+        fwrite( Buf, strlen(Buf), 1, fp);
+    }
+
+    // Games
+    lvi.iItem = ListView_GetNextItem(hwndList, -1, LVNI_ALL);
+    while( lvi.iItem != -1 )
+    {
+        lvi.iSubItem = 0;
+        lvi.mask = LVIF_PARAM;
+
+        if ( ListView_GetItem(hwndList, &lvi) )
+        {
+            if ( Formatted )
+            {
+                Buf[0] = '|';
+                Buf[1] = '\0';
+            }
+            else
+                Buf[0] = '\0';
+
+            // lvi.lParam contains the absolute game index
+            for (i=0; i<nColumnMax; i++ )
+            {
+                if ((i > 1) && (! Formatted))
+                    strcat(&Buf[strlen(Buf)], "\t");
+
+                switch( Order[i] )
+                {
+                    case  0: // Name
+                        if ( Formatted )
+                        {
+                            if ( DriverIsClone(lvi.lParam) && (GetViewMode() == VIEW_GROUPED) )
+                            {
+                                sprintf( &Buf[strlen(Buf)], "    %-*.*s |", Size[Order[i]]-3, Size[Order[i]]-3, ModifyThe(drivers[lvi.lParam]->description) );
+                            }
+                            else
+                            {
+                                sprintf( &Buf[strlen(Buf)], " %-*.*s |", Size[Order[i]], Size[Order[i]], ModifyThe(drivers[lvi.lParam]->description) );
+                            }
+                        }
+                        else
+                            sprintf( &Buf[strlen(Buf)], "%s", ModifyThe(drivers[lvi.lParam]->description) );
+                        break;
+
+                    case  1: // ROMs
+                        if ( Formatted )
+                            sprintf( &Buf[strlen(Buf)], " %-*.*s |", Size[Order[i]], Size[Order[i]], (GetRomAuditResults(lvi.lParam)==TRUE?"no":"yes") );
+                        else
+                            sprintf( &Buf[strlen(Buf)], "%s", (GetRomAuditResults(lvi.lParam)==TRUE?"no":"yes") );
+                        break;
+
+                    case  2: // Samples
+                        if (DriverUsesSamples(lvi.lParam))
+                        {
+                            if ( Formatted )
+                                sprintf( &Buf[strlen(Buf)], " %-*.*s |", Size[Order[i]], Size[Order[i]], (GetSampleAuditResults(lvi.lParam)?"no":"yes") );
+                            else
+                                sprintf( &Buf[strlen(Buf)], "%s", (GetSampleAuditResults(lvi.lParam)?"no":"yes") );
+                        }
+                        else
+                        {
+                            if ( Formatted )
+                                sprintf( &Buf[strlen(Buf)], " %-*.*s |", Size[Order[i]], Size[Order[i]], "" );
+                        }
+                        break;
+
+                    case  3: // Directory
+                        if ( Formatted )
+                            sprintf( &Buf[strlen(Buf)], " %-*.*s |", Size[Order[i]], Size[Order[i]], drivers[lvi.lParam]->name );
+                        else
+                            sprintf( &Buf[strlen(Buf)], "%s", drivers[lvi.lParam]->name );
+                        break;
+
+                    case  4: // Type
+                        if ( Formatted )
+                            sprintf( &Buf[strlen(Buf)], " %-*.*s |", Size[Order[i]], Size[Order[i]], (DriverIsVector(lvi.lParam)?"Vector":"Raster") );
+                        else
+                            sprintf( &Buf[strlen(Buf)], "%s", (DriverIsVector(lvi.lParam)?"Vector":"Raster") );
+                        break;
+
+                    case  5: // Trackball
+                        if ( Formatted )
+                            sprintf( &Buf[strlen(Buf)], " %-*.*s |", Size[Order[i]], Size[Order[i]], (DriverUsesTrackball(lvi.lParam)?"yes":"no") );
+                        else
+                            sprintf( &Buf[strlen(Buf)], "%s", (DriverUsesTrackball(lvi.lParam)?"yes":"no") );
+                        break;
+
+                    case  6: // Played
+                        if ( Formatted )
+                            sprintf( &Buf[strlen(Buf)], " %-*d |", Size[Order[i]], GetPlayCount(lvi.lParam) );
+                        else
+                            sprintf( &Buf[strlen(Buf)], "%d", GetPlayCount(lvi.lParam) );
+                        break;
+
+                    case  7: // Manufacturer
+                        if ( Formatted )
+                            sprintf( &Buf[strlen(Buf)], " %-*.*s |", Size[Order[i]], Size[Order[i]], drivers[lvi.lParam]->manufacturer );
+                        else
+                            sprintf( &Buf[strlen(Buf)], "%s", drivers[lvi.lParam]->manufacturer );
+                        break;
+
+                    case  8: // Year
+                        if ( Formatted )
+                            sprintf( &Buf[strlen(Buf)], " %-*.*s |", Size[Order[i]], Size[Order[i]], drivers[lvi.lParam]->year );
+                        else
+                            sprintf( &Buf[strlen(Buf)], "%s", drivers[lvi.lParam]->year );
+                        break;
+
+                    case  9: // Clone of
+                        if ( Formatted )
+                            sprintf( &Buf[strlen(Buf)], " %-*.*s |", Size[Order[i]], Size[Order[i]], GetCloneParentName(lvi.lParam) );
+                        else
+                            sprintf( &Buf[strlen(Buf)], "%s", GetCloneParentName(lvi.lParam) );
+                        break;
+
+                    case 10: // Source
+                        if ( Formatted )
+                            sprintf( &Buf[strlen(Buf)], " %-*.*s |", Size[Order[i]], Size[Order[i]], GetDriverFilename(lvi.lParam) );
+                        else
+                            sprintf( &Buf[strlen(Buf)], "%s", GetDriverFilename(lvi.lParam) );
+                        break;
+
+                    case 11: // Play time
+                    {
+                        char Tmp[20];
+                        
+                        GetTextPlayTime(lvi.lParam, Tmp);
+
+                        if ( Formatted )
+                            sprintf( &Buf[strlen(Buf)], " %-*.*s |", Size[Order[i]], Size[Order[i]], Tmp );
+                        else
+                            sprintf( &Buf[strlen(Buf)], "%s", Tmp );
+
+                        break;
+                    }
+                }
+            }
+            strcat( Buf, "\r\n");
+            fwrite( Buf, strlen(Buf), 1, fp);
+        }
+
+        lvi.iItem = ListView_GetNextItem(hwndList, lvi.iItem, LVNI_BELOW);
+    }
+
+    // Last separator
+    if ( Formatted && (ListView_GetItemCount(hwndList) > 0) )
+    {
+        memset( Buf, '-', sizeof(Buf) );
+        Buf[0] = '+';
+        for (i=0,j=0; i<nColumnMax; i++ )
+        {
+            j += Size[Order[i]]+3;
+            Buf[j] = '+';
+        }
+        Buf[j+1] = '\0';
+        strcat( Buf, "\r\n");
+        fwrite( Buf, strlen(Buf), 1, fp);
+    }
+
+    fclose(fp);
+    
+    SendMessage(hStatusBar, SB_SETTEXT, (WPARAM)0, (LPARAM)"File created");
+}
+
+BOOL GameIsLocked(int game)
+{
+	static int iGame = -1;
+	static BOOL bLock = FALSE;
+	char *p = tcLockUnlockList;
+	char szGame[10];
+
+	// Reinitialise memory
+	if ( game == -1 )
+	{
+		iGame = -1;
+		bLock = FALSE;
+		return FALSE;
+	}
+
+	// Game hasn't changed since last call
+	if ( game == iGame )
+	{
+		return bLock;
+	}
+	
+	iGame = game;
+
+	while( *p != 0 )
+	{
+		memcpy(szGame, &p[2], p[1]-'0');
+		szGame[(int)p[1] - '0'] = '\0';
+
+		if ( strcmp(drivers[game]->name, szGame) == 0 )
+		{
+			bLock = (p[0] == '*' ? TRUE : FALSE);
+			
+			// Locked game
+			return bLock;
+		}
+
+		// Next game in list
+		p += 2 + p[1] - '0';
+	}
+
+#if (NEW_GAMES_LOCKED == FALSE)
+	// Game is not found, consider it as unlocked
+	bLock = FALSE;
+#else
+	// Game is not found, consider it as locked
+	bLock = TRUE;
+#endif
+
+	return bLock;
+}
+
+static void SetGameLockUnlock(int game, BOOL locked)
+{
+	char *p = tcLockUnlockList;
+	char szGame[10];
+	int num_folders = 0;
+
+	while( *p != 0 )
+	{
+		memcpy(szGame, &p[2], p[1]-'0');
+		szGame[(int)p[1] - '0'] = '\0';
+
+		if ( strcmp(drivers[game]->name, szGame) == 0 )
+		{
+			// If game state changes, update folders
+			if ( ((p[0] == '*') && !locked) || ((p[0] != '*') && locked) )
+			{
+				num_folders = 1;
+			}
+			
+			p[0] = (locked ? '*' : ' ');
+			
+			break;
+		}
+
+		// Next game in list
+		p += 2 + p[1] - '0';
+	}
+
+	// Game is not found, add it to list
+	if ( *p == '\0' )
+	{
+		// By default, new games are unlocked -> update folder
+		if ( locked )
+		{
+			num_folders = 1;
+		}
+
+		p[0] = (locked ? '*' : ' ');
+		p[1] = '0' + strlen(drivers[game]->name);
+		memcpy(&p[2], drivers[game]->name, strlen(drivers[game]->name) );
+		p[2+(int)p[1]-'0'] = '\0';
+	}
+
+	// Update lock/unlock folders
+	if ( num_folders )
+	{
+		LPTREEFOLDER FolderLocked = GetFolderByID(FOLDER_LOCKED);
+		LPTREEFOLDER FolderUnlocked = GetFolderByID(FOLDER_UNLOCKED);
+
+		if ( locked )
+		{
+			AddGame(FolderLocked, game);
+			RemoveGame(FolderUnlocked, game);
+		}
+		else
+		{
+			RemoveGame(FolderLocked, game);
+			AddGame(FolderUnlocked, game);
+		}
+	}
+}
+
+static void SetFolderLockUnlock(LPTREEFOLDER lpFolder, BOOL bLock)
+{
+	int i, j;
+	int NbGames = 0;
+	char *pGameList = (char *)malloc(game_count);
+	TREEFOLDER **folders;
+	int num_folders;
+
+	GetFolders(&folders, &num_folders);
+
+	ZeroMemory(pGameList, game_count);
+
+	// Scan current folder
+	i = -1;
+	while( (i = FindGame(lpFolder, i+1)) != -1 )
+	{
+		if ( GameFiltered(i, lpFolder->m_dwFlags) )
+		{
+			continue;
+		}
+
+		pGameList[i] = 1;
+		NbGames++;
+	}
+
+	// Scan child folder(s)
+	for ( j=0; j<num_folders; j++ )
+	{
+		if ( GetFolder(folders[j]->m_nParent) == lpFolder )
+		{
+			i = -1;
+			while( (i = FindGame(folders[j], i+1)) != -1 )
+			{
+				if ( GameFiltered(i, folders[j]->m_dwFlags) )
+				{
+					continue;
+				}
+		
+				pGameList[i] = 1;
+				NbGames++;
+			}
+		}
+	}
+
+	// Lock/unlock games found
+	for (i=0; i<game_count; i++ )
+	{
+		if ( pGameList[i] )
+		{
+			SetGameLockUnlock(i, bLock );
+		}
+	}
+
+	ResetListView();
+	
+	sprintf( pGameList, "Done, %d game(s) %s.", NbGames, (bLock?"locked":"unlocked"));
+
+	SendMessage(hStatusBar, SB_SETTEXT, (WPARAM)0, (LPARAM)pGameList);
+
+	free(pGameList);
+}
+
+static void CreateDefaultLockUnlockList(void)
+{
+	char *p = tcLockUnlockList;
+	int i;
+
+	// Create a default list with locked games
+	for ( i=0; i<game_count; i++ )
+	{
+#if (ALL_GAMES_LOCKED == FALSE)
+			p[0] = ' ';
+#else
+			p[0] = '*';
+#endif
+			p[1] = '0' + strlen(drivers[i]->name);
+			memcpy(&p[2], drivers[i]->name, strlen(drivers[i]->name));
+			
+			p += 2 + p[1] - '0';
+	}
+	
+	*p = '\0';
+}
+
+static BOOL CreateAndLoadLockUnlockList(void)
+{
+	long filelen;
+	long ListLen;
+	FILE *fList;
+	char *pList;
+	char *p = (char *)&filelen;
+	int i;
+	
+	// Allocate for the largest list (10 = 1+1+8)
+	tcLockUnlockList = (char *)malloc(10*game_count+1);
+
+	fList = fopen(LIST_FILENAME, "rb");
+
+	if ( fList == NULL )
+	{
+		return FALSE;
+	}
+
+	fseek(fList, 0, SEEK_END);
+	ListLen = ftell(fList);
+	fseek(fList, 0, SEEK_SET);
+	
+	if ( ListLen < sizeof(filelen) )
+	{
+		fclose(fList);
+		return FALSE;
+	}
+
+	fread(&filelen, sizeof(filelen), 1, fList);
+	ListLen -= sizeof(filelen);
+
+	pList = (char *)malloc(ListLen);
+
+	if ( fread(pList, ListLen, 1, fList) != 1 )
+	{
+		free(pList);
+		fclose(fList);
+		return FALSE;
+	}
+
+	fclose(fList);
+
+	// Decode length
+	for ( i=0; i<sizeof(filelen)-1; i++ )
+	{
+		p[i] ^= p[i+1];
+	}
+	p[i] ^= pList[0];
+
+	// Decode list
+	for ( i=0; i<(int)ListLen-1; i++ )
+	{
+		pList[i] ^= pList[i+1];
+	}
+	pList[i] ^= 0xA5;
+
+	filelen ^= (ListLen+sizeof(filelen)) ^ 0x21041971;
+
+	// File is corrupt
+	if ( filelen != 0 )
+	{
+		free(pList);
+		return FALSE;
+	}
+
+	// If a list is found, it replaces the default list
+	ZeroMemory(tcLockUnlockList, 10*game_count+1);
+	memcpy(tcLockUnlockList, pList, ListLen);
+	tcLockUnlockList[ListLen] = '\0';
+
+	free(pList);
+
+	return TRUE;
+}
+
+// This function is only used with command line
+static BOOL GetGameLockByDriverName(char *DriverName)
+{
+	BOOL bLock;
+	char *p;
+	char szGame[10];
+
+#if (NEW_GAMES_LOCKED == FALSE)
+	bLock = FALSE;
+#else
+	bLock = TRUE;
+#endif
+	
+	if ( ! CreateAndLoadLockUnlockList() )
+	{
+		// Unable to get game lock state -> game is locked
+		free(tcLockUnlockList);
+#if (ALL_GAMES_LOCKED == FALSE)
+		return FALSE;
+#else
+		return TRUE;
+#endif
+	}
+
+	// List is now in memory, search for selected driver
+	p = tcLockUnlockList;
+	while( *p != 0 )
+	{
+		memcpy(szGame, &p[2], p[1]-'0');
+		szGame[(int)p[1] - '0'] = '\0';
+
+		// Game found
+		if ( strcmp(DriverName, szGame) == 0 )
+		{
+			bLock = (p[0] == '*' ? TRUE : FALSE);
+			break;
+		}
+
+		// Next game in list
+		p += 2 + p[1] - '0';
+	}
+
+	// Don't need the list anymore	
+	free(tcLockUnlockList);
+	return bLock;
+}
+
+static void SaveAndDestroyLockUnlockList(void)
+{
+	char chk = 0xA5;
+	long filelen;
+	FILE *fList;
+	char *p = (char *)&filelen;
+	int ListLen = strlen(tcLockUnlockList);
+	int i = strlen(tcLockUnlockList);
+
+	// Encode list
+	while( i-- )
+	{
+		tcLockUnlockList[i] ^= chk;
+		chk = tcLockUnlockList[i];
+	}
+
+	filelen = (sizeof(filelen) + ListLen) ^ 0x21041971;
+
+	// Encode length
+	i = sizeof(filelen);
+	while( i-- )
+	{
+		p[i] ^= chk;
+		chk = p[i];
+	}
+
+	fList = fopen(LIST_FILENAME, "wb");
+
+	if ( fList != NULL )
+	{
+		fwrite(p, sizeof(filelen), 1, fList);
+		fwrite(tcLockUnlockList, ListLen, 1, fList);
+		fclose(fList);
+	}
+	
+	free(tcLockUnlockList);
+}
+
+static void CheckPassword(char *Exe, char *Pwd)
+{
+	char buffer[512];
+	FILE *fptr;
+	char *p;
+	BOOL bFound = FALSE;
+
+	strcpy(buffer, Exe);
+	p = buffer+strlen(Exe);
+	
+	while( (*p != '\\') && (*p != ':') )
+	{
+		*p = '\0';
+
+		if ( p == buffer )
+		{
+			break;
+		}
+
+		p--;
+	}
+
+	// Warning : the ini filename is defined in options.c too
+	strcat(p, MAME32NAME "ui.ini");
+
+	fptr = fopen(buffer,"rt");
+
+	if (fptr != NULL)
+	{
+		// Quick parsing of ini file
+		while ( fgets(buffer, sizeof(buffer), fptr) != NULL )
+		{
+			char *key, *value_str;
+
+			if (buffer[0] == '\0' || buffer[0] == '#')
+				continue;
+
+			// we're guaranteed that strlen(buffer) >= 1 now
+			buffer[strlen(buffer)-1] = '\0';
+
+			ParseKeyValueStrings(buffer, &key, &value_str);
+
+			if (key == NULL || value_str == NULL)
+				continue;
+
+			if ( strcmp(key, "password") == 0 )
+			{
+				PasswordDecodeString(value_str, &p);
+
+				if ( *p != '*' )
+				{
+					bPwdVerified = TRUE;
+				}
+				else
+				{
+					if ( Pwd != NULL )
+					{
+						if ( strcmp(p+1, Pwd) == 0 )
+						{
+							bPwdVerified = TRUE;
+						}
+					}
+				}
+				
+				bFound = TRUE;
+				free(p);
+				break;
+			}
+		}
+		
+#if (DEFAULT_PWD_ENABLED == FALSE)
+		if ( !bFound )
+		{
+			// No password entry in ini file
+			bPwdEnabled = TRUE;
+		}
+#endif
+		
+		fclose(fptr);
+	}
+#if (DEFAULT_PWD_ENABLED == FALSE)
+	else
+	{
+		// No ini file
+		bPwdEnabled = FALSE;
+	}
+#endif
+}
+
+BOOL GameIsFound(int game)
+{
+	return (games_found[game]==0 ? FALSE : TRUE);
+}
+
+static void CreateBackgroundMain(HINSTANCE hInstance, BOOL ForCreate )
+{
+	static HDC  hSplashDC = 0;
+
+	if ( ForCreate )
+	{
+		WNDCLASSEX BackMainClass;
+	
+		BackMainClass.cbSize           = sizeof(WNDCLASSEX);
+		BackMainClass.style            = 0;
+		BackMainClass.lpfnWndProc      = (WNDPROC)BackMainWndProc;
+		BackMainClass.cbClsExtra       = 0;
+		BackMainClass.cbWndExtra       = 0;
+		BackMainClass.hInstance        = hInstance;
+		BackMainClass.hIcon            = NULL;
+		BackMainClass.hIconSm          = NULL;
+		BackMainClass.hCursor          = NULL;
+		BackMainClass.hbrBackground    = NULL;
+		BackMainClass.lpszMenuName     = NULL;
+		BackMainClass.lpszClassName    = "BackMainWindowClass";
+
+		if ( RegisterClassEx(&BackMainClass) )
+		{
+			BITMAP Bitmap;
+			RECT DesktopRect;
+			GetWindowRect(GetDesktopWindow(), &DesktopRect);
+
+			hSplashBmp = LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_SPLASH));
+			GetObject(hSplashBmp, sizeof(BITMAP), &Bitmap);
+
+			hBackMain = CreateWindowEx(
+			WS_EX_TOOLWINDOW,
+			"BackMainWindowClass",
+			"Main Backgound windows",
+			WS_POPUP,
+			(DesktopRect.right - Bitmap.bmWidth) / 2,
+			(DesktopRect.bottom - Bitmap.bmHeight) / 2,
+			Bitmap.bmWidth,
+			Bitmap.bmHeight,
+			NULL,
+			NULL,
+			hInstance,
+			NULL);
+
+			hSplashDC = GetDC(hBackMain);
+			hMemoryDC = CreateCompatibleDC(hSplashDC);
+			SelectObject(hMemoryDC, (HGDIOBJ)hSplashBmp);
+
+			ShowWindow(hBackMain, SW_SHOW);
+			UpdateWindow(hBackMain);
+
+			uShellIconMsg = RegisterWindowMessage( "Mame32 Shell Icon" );
+			MameIcon.cbSize = sizeof(NOTIFYICONDATA);
+			MameIcon.hWnd = hBackMain;
+			MameIcon.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SYSTRAY));
+			MameIcon.uID = 1;
+			MameIcon.uCallbackMessage = uShellIconMsg;
+			MameIcon.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
+		}
+	}
+	else
+	{
+		if ( hBackMain )
+		{
+			DeleteObject(hSplashBmp);
+			ReleaseDC(hBackMain, hSplashDC);
+			ReleaseDC(hBackMain, hMemoryDC);
+			DestroyWindow(hBackMain);
+		}
+	}
+}
+
+static int GetGamesFound(char *Pattern, int Criteria)
+{
+	char *pDescription = NULL;
+	int nGameIndex = 0;
+	int i=0;
+	int iStep = 0;
+	LV_FINDINFO lvfi;
+	int nCount = ListView_GetItemCount(hwndList);
+	BOOL changed = FALSE;
+
+	MSG msg;
+	
+	BOOL bFound;
+	int iFound = 0;
+
+	ZeroMemory(games_found,sizeof(char) * game_count);
+
+	if( nCount > 0)
+		ProgressBarShow();
+	else
+		return 0;
+
+	if( nCount < 100 )
+		iStep = 100 / nCount;
+	else
+		iStep = nCount/100;
+
+	UpdateListView();
+	UpdateWindow(hMain);
+	for(i=0; i<nCount;i++)
+	{
+		LV_ITEM lvi;
+
+		lvi.iItem = i;
+		lvi.iSubItem = 0;
+		lvi.mask	 = LVIF_PARAM;
+		ListView_GetItem(hwndList, &lvi);
+		nGameIndex  = lvi.lParam;
+		
+		bFound = FALSE;
+
+		if (Criteria & 1)
+		{
+			if (CompareStringWithWildcards((char *)drivers[nGameIndex]->description, Pattern))
+			{
+				bFound = TRUE;
+			}
+		}
+
+		if (Criteria & 2)
+		{
+			if (CompareStringWithWildcards((char *)drivers[nGameIndex]->name, Pattern))
+			{
+				bFound = TRUE;
+			}
+		}
+
+		if (Criteria & 4)
+		{
+			if (CompareStringWithWildcards((char *)drivers[nGameIndex]->manufacturer, Pattern))
+			{
+				bFound = TRUE;
+			}
+		}
+
+		if (bFound)
+		{
+	 		games_found[nGameIndex] = 1;
+	 		iFound++;
+	 	}
+
+		lvfi.flags	= LVFI_PARAM;
+		lvfi.lParam = nGameIndex;
+
+		i = ListView_FindItem(hwndList, -1, &lvfi);
+		if (changed && i != -1);
+		{
+			ListView_RedrawItems(hwndList, i, i);
+			while( PeekMessage( &msg, hwndList, 0, 0, PM_REMOVE ) != 0)
+			{
+				TranslateMessage(&msg); 
+				DispatchMessage(&msg); 
+			}
+		}
+		changed = FALSE;
+		if ((i % iStep) == 0)
+			ProgressBarStepParam(i, nCount);
+	}
+	ProgressBarHide();
+	pDescription = ModifyThe(drivers[GetSelectedPickItem()]->description);
+	SetStatusBarText(0, pDescription);
+	UpdateStatusBar();
+	return iFound;
 }
 
 /* End of source file */

@@ -11,6 +11,7 @@ TODO:	remove the 1 analog device per port limitation
 ***************************************************************************/
 
 #include <math.h>
+#include <ctype.h>
 #include "driver.h"
 #include "config.h"
 
@@ -77,10 +78,19 @@ static int analog_previous_axis[OSD_MAX_JOY_ANALOG][MAX_ANALOG_AXES];
 
 #if 0
 static int mouse_delta_x[OSD_MAX_JOY_ANALOG], mouse_delta_y[OSD_MAX_JOY_ANALOG];			/* replaced by mouse_delta_axis[][] */
-static int lightgun_delta_x[OSD_MAX_JOY_ANALOG], lightgun_delta_y[OSD_MAX_JOY_ANALOG];			/* replaced by lightgun_delta_axis[][] */
+static int lightgun_delta_x[OSD_MAX_JOY_ANALOG], lightgun_delta_y[OSD_MAX_JOY_ANALOG];		/* replaced by lightgun_delta_axis[][] */
 static int analog_current_x[OSD_MAX_JOY_ANALOG], analog_current_y[OSD_MAX_JOY_ANALOG];		/* replaced by analog_current_axis[][] */
 static int analog_previous_x[OSD_MAX_JOY_ANALOG], analog_previous_y[OSD_MAX_JOY_ANALOG];	/* replaced by analog_previous_axis[][] */
 #endif
+
+/***************************************************************************
+
+	Local functions
+
+***************************************************************************/
+
+int ana_config_write(mame_file *anafile);
+void ana_config_read(const char *name);
 
 /***************************************************************************
 
@@ -1638,6 +1648,10 @@ static void load_default_keys(void)
 		config_read_default_ports(cfg, inputport_defaults);
 		config_close(cfg);
 	}
+
+/*start MAME:analog+*/
+	ana_config_read(NULL);
+/*end MAME:analog+  */
 }
 
 static void save_default_keys(void)
@@ -1649,7 +1663,7 @@ static void save_default_keys(void)
 	{
 		config_write_default_ports(cfg, inputport_defaults_backup, inputport_defaults);
 		config_close(cfg);
-			}
+	}
 
 	memcpy(inputport_defaults,inputport_defaults_backup,sizeof(inputport_defaults_backup));
 }
@@ -1670,14 +1684,14 @@ int load_input_port_settings(void)
 
 	cfg = config_open(Machine->gamedrv->name);
 	if (cfg)
-		{
+	{
 		err = config_read_ports(cfg, Machine->input_ports_default, Machine->input_ports);
 		if (err)
-				goto getout;
+			goto getout;
 
 		err = config_read_coin_and_ticket_counters(cfg, coins, lastcoin, coinlockedout, &dispensed_tickets);
 		if (err)
-				goto getout;
+			goto getout;
 
 		err = config_read_mixer_config(cfg, &mixercfg);
 		if (err)
@@ -1817,6 +1831,10 @@ getout:
 #endif /* MAME_NET */
 
 	init_analog_seq();
+
+/*start MAME:analog+*/
+	ana_config_read(Machine->gamedrv->name);
+/*end MAME:analog+  */
 
 	update_input_ports();
 
@@ -1966,8 +1984,90 @@ void save_input_port_settings(void)
 		config_write_mixer_config(cfg, &mixercfg);
 		config_close(cfg);
 	}
+
+/*start MAME:analog+*/
+	{
+		mame_file *anafile;
+
+		anafile = mame_fopen(Machine->gamedrv->name, NULL, FILETYPE_CONFIG_ANALOGPLUS, 1);
+		if (anafile)
+		{
+			ana_config_write(anafile);
+
+			mame_fclose(anafile);
+		}
+	}
+/*end MAME:analog+  */
 }
 
+/*start MAME:analog+*/
+#define MAMEANACFGSTRING	"MAMEANA1"
+void ana_config_read(const char *name)
+{
+	mame_file *anafile;
+
+	anafile = mame_fopen(name ? name : "default", NULL, FILETYPE_CONFIG_ANALOGPLUS, 0);
+	if (anafile)
+	{
+		char buffer[9];
+
+		mame_fread(anafile, &buffer, sizeof(MAMEANACFGSTRING)-1);
+		if (!memcmp(&buffer[0],MAMEANACFGSTRING,sizeof(MAMEANACFGSTRING)-1))
+		{
+			while ( (buffer[0] = mame_fgetc(anafile)) != EOF )
+			{
+				if (isspace(buffer[0]))
+					continue;
+
+				if (!memcmp(&buffer[0], &"P", 1))
+				{
+					int p, pa, m, ma;
+					mame_fread(anafile, &buffer, 8);
+
+					p  = buffer[0]-'1';			// player 1-8 --> 0-7
+					pa = (buffer[1] == 'Y');	// 'X' or 'Y'; mame has no mouse Z axis
+
+					m  = buffer[4]-'0';			// mouse 0-8, '/' for none
+					ma = buffer[6]-'0';			// axis 0-2 (X, Y, Z)
+
+					osd_setplayer_mouseaxis(p,pa,m,ma);
+				}
+			}
+		}
+
+		mame_fclose(anafile);
+	}
+}
+
+int ana_config_write(mame_file *anaf) //, struct InputPort *input_ports)
+{
+	int p, a, i;
+	char buffer[9]= {"Ppa MmAa\n"};
+
+	/* write header */
+	mame_fwrite(anaf,MAMEANACFGSTRING,sizeof(MAMEANACFGSTRING)-1);
+	mame_fwrite(anaf, "\n", 1);
+
+	for (p=0; p<MAX_PLAYERS; p++)
+	{
+		mame_fwrite(anaf, "\n", 1);
+		for (a=0; a<2; a++)			// max of two analog axes, for now
+		{
+			i=0;
+			buffer[1+(2*i++)]= p + '1';									// player p
+			buffer[  (2*i++)]= a ? 'Y' : 'X';							// game axis a
+			buffer[1+(2*i++)]= osd_getplayer_mousesplit(p,a)+'0';		// player p's mouse for game axis a
+			buffer[1+(2*i++)]= osd_getplayer_mouseaxis(p,a)+'0';		// player p's mouse axis for game axis a
+
+			mame_fwrite(anaf, buffer, 9);
+		}
+	}
+
+	mame_fclose(anaf);
+
+	return 0;
+}
+/*end MAME:analog+  */
 
 
 /* Note that the following 3 routines have slightly different meanings with analog ports */

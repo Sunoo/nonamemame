@@ -670,4 +670,4 @@ GAME( 1983, gyruss,   0,      gyruss, gyruss,   gyruss, ROT90, "Konami", "Gyruss
 GAME( 1983, gyrussce, gyruss, gyruss, gyrussce, gyruss, ROT90, "Konami (Centuri license)", "Gyruss (Centuri)" )
 GAME( 1983, venus,    gyruss, gyruss, gyrussce, gyruss, ROT90, "bootleg", "Venus" )
 
-GAME( 2004, smgyruss, gyruss, gyruss, gyruss,   gyruss, ROT90, "MegaDriver", "Speed Metal Gyruss" )
+GAMEH( 2004, smgyruss, gyruss, gyruss, gyruss,   gyruss, ROT90, "MegaDriver", "Speed Metal Gyruss" )

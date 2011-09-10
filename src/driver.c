@@ -14,10 +14,9 @@
 
 #include "driver.h"
 
-
 #ifndef DRIVER_RECURSIVE
 
-/* NINO FMOD IMPLEMENTATION */
+/* BEGIN NINO FMOD IMPLEMENTATION */
 #include "fmod.h"
 #include "fmoddyn.h"
 #include "fmod_errors.h"
@@ -95,7 +94,6 @@ return FSOUND_SetVolume(channel,vol);
 int FMODGetVolume(int channel){
 return FSOUND_GetVolume(channel);
 }
-
 /* END NINO FMOD IMPLEMENTATION */
 
 /* The "root" driver, defined so we can have &driver_##NAME in macros. */
@@ -6294,11 +6292,16 @@ DRIVER( svcchaos )              /* 0268 (c) 1999 SNK */
 DRIVER( pim )                   /* 0269 (c) 1999 SNK */
 DRIVER( samsho5 )               /* 0270 (c) 1999 SNK */
 DRIVER( digerman )              /* 0273 (c) 1999 SNK */
+DRIVER( neopong )       /* ???? (c) 2002 NeoDev */
 DRIVER( neonopn1 )              /* 0275 (c) 1999 SNK */
 DRIVER( neonopn2 )              /* 0276 (c) 1999 SNK */
 DRIVER( neonopn3 )              /* 0277 (c) 1999 SNK */
 DRIVER( kof2003 )               /* 0278 (c) 1999 SNK manipulated by GizM */
 DRIVER( pwrinst4 )              /* 0263 (c) 2002 Playmore */
+DRIVER( gnbarich )	/* (c) 2001 */
+DRIVER( snowbro3 )	/* (c) 2002 Syrmex (hack) */
+DRIVER( vasara2 )	/* (c) 2001 Visco */
+DRIVER( vasara2a )	/* (c) 2001 Visco */
 #endif
 
 DRIVER( horizpac )
@@ -6314,6 +6317,15 @@ DRIVER( pacsnoop )
 DRIVER( ramsnoop )
 DRIVER( shtron )
 
+/* region changed version */
+DRIVER ( 19xxregion )
+DRIVER ( batcirjregion )
+DRIVER ( cybotsjregion )
+DRIVER ( ecofghtrregion )
+DRIVER ( xmvsfregion )
+DRIVER ( spf2xjregion )
+
+/* MegaDriver Drivers */
 DRIVER( metalaxe )
 DRIVER( metbeast )
 DRIVER( metbeans )

@@ -45,29 +45,34 @@ static BOOL FilterAvailable(int driver_index);
 FOLDERDATA g_folderData[] =
 {
 	{"All Games",       "allgames",          FOLDER_ALLGAMES,     IDI_FOLDER,				0,             0,            NULL,                       NULL,              TRUE },
-	{"Available",       "available",         FOLDER_AVAILABLE,    IDI_FOLDER_AVAILABLE,     F_AVAILABLE,   0,            NULL,                       FilterAvailable,              TRUE },
-#ifdef SHOW_UNAVAILABLE_FOLDER
-	{"Unavailable",     "unavailable",       FOLDER_UNAVAILABLE,  IDI_FOLDER_UNAVAILABLE,	0,             F_AVAILABLE,  NULL,                       FilterAvailable,              FALSE },
-#endif
+	{"Available",       "available",         FOLDER_AVAILABLE,    IDI_FOLDER_AVAILABLE,     F_AVAILABLE,   F_UNAVAILABLE,NULL,                       FilterAvailable,              TRUE },
+	{"Unavailable",     "unavailable",       FOLDER_UNAVAILABLE,  IDI_FOLDER_UNAVAILABLE,	F_UNAVAILABLE, F_AVAILABLE,  NULL,                       FilterAvailable,              FALSE },
+	{"Working",         "working",           FOLDER_WORKING,      IDI_FOLDER_WORKING,       F_WORKING,     F_NONWORKING, NULL,                       DriverIsBroken,    FALSE },
+	{"Non-Working",     "nonworking",        FOLDER_NONWORKING,   IDI_FOLDER_NONWORKING,    F_NONWORKING,  F_WORKING,    NULL,                       DriverIsBroken,    TRUE },
+	{"Imperfect",       "imperfect",         FOLDER_DEFICIENCY,   IDI_FOLDER_DEFICIENCY,    0,             0,            CreateDeficiencyFolders },
 	{"Manufacturer",    "manufacturer",      FOLDER_MANUFACTURER, IDI_FOLDER_MANUFACTURER,  0,             0,            CreateManufacturerFolders },
 	{"Year",            "year",              FOLDER_YEAR,         IDI_FOLDER_YEAR,          0,             0,            CreateYearFolders },
 	{"Source",          "source",            FOLDER_SOURCE,       IDI_FOLDER_SOURCE,        0,             0,            CreateSourceFolders },
-	{"CPU",             "cpu",               FOLDER_CPU,          IDI_FOLDER,               0,             0,            CreateCPUFolders },
-	{"Sound",           "sound",             FOLDER_SND,          IDI_FOLDER,               0,             0,            CreateSoundFolders },
-	{"Orientation",     "orientation",       FOLDER_ORIENTATION,  IDI_FOLDER,               0,             0,            CreateOrientationFolders },
-	{"Imperfect",       "imperfect",         FOLDER_DEFICIENCY,   IDI_FOLDER,               0,             0,            CreateDeficiencyFolders },
-	{"Working",         "working",           FOLDER_WORKING,      IDI_WORKING,              F_WORKING,     F_NONWORKING, NULL,                       DriverIsBroken,    FALSE },
-	{"Not Working",     "nonworking",        FOLDER_NONWORKING,   IDI_NONWORKING,           F_NONWORKING,  F_WORKING,    NULL,                       DriverIsBroken,    TRUE },
-	{"Originals",       "originals",         FOLDER_ORIGINAL,     IDI_FOLDER,               F_ORIGINALS,   F_CLONES,     NULL,                       DriverIsClone,     FALSE },
-	{"Clones",          "clones",            FOLDER_CLONES,       IDI_FOLDER,               F_CLONES,      F_ORIGINALS,  NULL,                       DriverIsClone,     TRUE },
-	{"Raster",          "raster",            FOLDER_RASTER,       IDI_FOLDER,               F_RASTER,      F_VECTOR,     NULL,                       DriverIsVector,    FALSE },
-	{"Vector",          "vector",            FOLDER_VECTOR,       IDI_FOLDER,               F_VECTOR,      F_RASTER,     NULL,                       DriverIsVector,    TRUE },
-	{"Trackball",       "trackball",         FOLDER_TRACKBALL,    IDI_FOLDER,               0,             0,            NULL,                       DriverUsesTrackball,	TRUE },
-	{"Lightgun",        "Lightgun",          FOLDER_LIGHTGUN,     IDI_FOLDER,               0,             0,            NULL,                       DriverUsesLightGun,TRUE },
-	{"Stereo",          "stereo",            FOLDER_STEREO,       IDI_SOUND,                0,             0,            NULL,                       DriverIsStereo,    TRUE },
- 	{"Multi-Monitor",   "multimon",          FOLDER_MULTIMON,     IDI_FOLDER,               0,             0,            NULL,                       DriverIsMultiMon,  TRUE },
+	{"Processor",       "cpu",               FOLDER_CPU,          IDI_FOLDER_CPU,           0,             0,            CreateCPUFolders },
+	{"Sound",           "sound",             FOLDER_SND,          IDI_FOLDER_SOUND,         0,             0,            CreateSoundFolders },
+	{"Orientation",     "orientation",       FOLDER_ORIENTATION,  IDI_FOLDER_ORIENTATION,   0,             0,            CreateOrientationFolders },
+	{"Bios",            "bios",              FOLDER_BIOS,         IDI_FOLDER_BIOS,          0,             0,            CreateBiosFolders },
+	{"Screen",          "screen",            FOLDER_SCREEN,       IDI_FOLDER_SCREEN,        0,             0,            CreateScreenFolders },
+	{"Colors",          "colors",            FOLDER_COLORS,       IDI_FOLDER_COLORS,        0,             0,            CreateColorsFolders },
+	{"Refresh",         "refresh",           FOLDER_REFRESH,      IDI_FOLDER_REFRESH,       0,             0,            CreateRefreshFolders },
+	{"Originals",       "originals",         FOLDER_ORIGINAL,     IDI_ORIGINALS,            F_ORIGINALS,   F_CLONES,     NULL,                       DriverIsClone,     FALSE },
+	{"Clones",          "clones",            FOLDER_CLONES,       IDI_CLONES,               F_CLONES,      F_ORIGINALS,  NULL,                       DriverIsClone,     TRUE },
+	{"Locked",          "locked",            FOLDER_LOCKED,       IDI_LOCK,                 0,             0,            NULL,                       GameIsLocked,      TRUE },
+	{"Unlocked",        "unlocked",          FOLDER_UNLOCKED,     IDI_UNLOCK,               0,             0,            NULL,                       GameIsLocked,      FALSE },
+	{"Raster",          "raster",            FOLDER_RASTER,       IDI_RASTER,               F_RASTER,      F_VECTOR,     NULL,                       DriverIsVector,    FALSE },
+	{"Vector",          "vector",            FOLDER_VECTOR,       IDI_VECTOR,               F_VECTOR,      F_RASTER,     NULL,                       DriverIsVector,    TRUE },
+ 	{"Multi-Monitor",   "multimon",          FOLDER_MULTIMON,     IDI_MULTIMON,             0,             0,            NULL,                       DriverIsMultiMon,  TRUE },
+	{"Trackball",       "trackball",         FOLDER_TRACKBALL,    IDI_TRACKBALL,            0,             0,            NULL,                       DriverUsesTrackball,	TRUE },
+	{"Lightgun",        "lightgun",          FOLDER_LIGHTGUN,     IDI_LIGHTGUN,             0,             0,            NULL,                       DriverUsesLightGun,	TRUE },
+	{"Stereo",          "stereo",            FOLDER_STEREO,       IDI_STEREO,               0,             0,            NULL,                       DriverIsStereo,    TRUE },
+	{"Samples",         "samples",           FOLDER_SAMPLES,      IDI_SAMPLES,              0,             0,            NULL,                       DriverUsesSamples,    TRUE },
 	{"CHD",             "harddisk",          FOLDER_HARDDISK,     IDI_HARDDISK,             0,             0,            NULL,                       DriverIsHarddisk,  TRUE },
-  	{"Samples",    	    "samples",           FOLDER_SAMPLES,      IDI_FOLDER,               0,             0,            NULL,                       DriverUsesSamples,  TRUE },
+	{"Search result",   "findgame",          FOLDER_FINDGAME,     IDI_FINDGAME,             0,             0,            NULL,                       GameIsFound,  TRUE },
 	{ NULL }
 };
 
@@ -107,6 +112,7 @@ DIRECTORYINFO g_directoryInfo[] =
 	{ "Hard Drive Difference", GetDiffDir,      SetDiffDir,      FALSE, 0 },
 	{ "Icons",                 GetIconsDir,     SetIconsDir,     FALSE, 0 },
 	{ "Background Images",     GetBgDir,        SetBgDir,        FALSE, 0 },
+	{ "PCB Infos",             GetPcbInfosDir,  SetPcbInfosDir,  FALSE, 0 },
 	{ NULL }
 };
 

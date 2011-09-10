@@ -558,4 +558,4 @@ GAME( 1987, contraj,  contra, contra, contra, 0, ROT90, "Konami", "Contra (Japan
 GAME( 1987, contrajb, contra, contra, contra, 0, ROT90, "bootleg", "Contra (Japan bootleg)" )
 GAME( 1987, gryzor,   contra, contra, contra, 0, ROT90, "Konami", "Gryzor" )
 
-GAME( 2004, metlcnta, contra, contra, contra, 0, ROT90, "MegaDriver", "Metal Contra" )
+GAMEH( 2004, metlcnta, contra, contra, contra, 0, ROT90, "MegaDriver", "Metal Contra" )

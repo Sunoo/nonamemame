@@ -11,6 +11,20 @@
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Made in Mame32">
+		<param name="Local" value="html\mim32_mim32.htm">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="What's new">
+			<param name="Local" value="html\mim32_whatsnew.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Features">
+			<param name="Local" value="html\mim32_features.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Mame32 Overview &amp; History">
 		<param name="Local" value="html\mame32_overview.htm">
 		</OBJECT>

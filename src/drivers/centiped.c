@@ -1739,7 +1739,6 @@ ROM_LOAD( "centiped.212", 0x0800, 0x0800, CRC(72616fcb ))
 ROM_END
 
 
-
 /*************************************
  *
  *	Driver initialization

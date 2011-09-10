@@ -1,3 +1,10 @@
+0.83.14:
+ - Updated to MameAnalog+ 0.83.2 source (u_rebelscum)
+ - Switched back to MadeInMame 0.83 (LG)
+ - Updated to new Hardware folder (Bz)
+ - Removed the need for dummy ROMs
+ - Added region hacked CPS2 games
+
 0.83.13:
  - Updated to MAME 0.83 source
  - Updated to MAME32 0.83 source

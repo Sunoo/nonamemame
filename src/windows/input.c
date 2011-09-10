@@ -6,15 +6,17 @@
 
 // standard windows headers
 #define WIN32_LEAN_AND_MEAN
+
 /*start MAME:analog+*/
 #ifdef WINXPANANLOG
-#ifndef WINUI
+#ifndef _WIN32_WINNT
 /* <jake> */
 #define _WIN32_WINNT 0x501
 /* </jake> */
-#endif /* WINUI */
+#endif /* _WIN32_WINNT */
 #endif /* WINXPANANLOG */
 /*end MAME:analog+  */
+
 #include <windows.h>
 #include <conio.h>
 #include <winioctl.h>
@@ -797,7 +799,7 @@ static BOOL CALLBACK enum_mouse_callback(LPCDIDEVICEINSTANCE instance, LPVOID re
 		lightgun_count++;
 	mouse_count++;
 /*start MAME:analog+*/
-	if (!multimouse)		// Assuming the first mouse enum'ed always is the sysmouse:
+	if (!multimouse && !use_lightgun2a && !use_lightgun2b)		// Assuming the first mouse enum'ed always is the sysmouse:
 		return DIENUM_STOP;	// why continue looking for more mice if you only want one?
 	else
 /*end MAME:analog+  */

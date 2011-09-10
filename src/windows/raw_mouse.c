@@ -3,15 +3,17 @@
 //
 //     raw_mouse.c - Win XP access to multiple mice via raw input
 //
+//       by Jake
+//
 //     To do:
 //
 //     - Improve the method for weeding out the RDP Mouse.  Find "status bits" (see below).
 //
 //================================================================
 
-#ifndef WINUI
+#ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x501	// This specifies WinXP or later - it is needed to access rawmouse from the user32.dll
-#endif /* WINUI */
+#endif /* _WIN32_WINNT */
 
 #include <windows.h>
 #include <stdio.h>

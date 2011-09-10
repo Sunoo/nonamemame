@@ -7398,7 +7398,7 @@ GAMEX(1988, wb3a,     wb3,      wb3,      wb3,      wb3,      ROT0,   "Sega / We
 GAME( 1988, wb3bl,    wb3,      wb3bl,    wb3,      wb3bl,    ROT0,   "bootleg", "Wonder Boy III - Monster Lair (bootleg)" )
 GAME( 1989, wrestwar, 0,        wrestwar, wrestwar, wrestwar, ROT270, "Sega",    "Wrestle War" )
 
-GAME( 2004, metalaxe, goldnaxe, goldnaxe, goldnaxe, goldnaxe, ROT0,   "MegaDriver",    "Metal Axe" )
-GAME( 2004, metbeast, altbeast, altbeast, altbeast, altbeast, ROT0,   "MegaDriver",    "Metal Beast" )
-GAME( 2004, metbeans, altbeast, altbeast, altbeast, altbeast, ROT0,   "MegaDriver",    "Metal Beast (New Sounds)" )
-GAME( 2004, metbeapt, altbeast, altbeast, altbeast, altbeast, ROT0,   "MegaDriver",    "Metal Beast (Portuguese)" )
+GAMEH( 2004, metalaxe, goldnaxe, goldnaxe, goldnaxe, goldnaxe, ROT0,   "MegaDriver",    "Metal Axe" )
+GAMEH( 2004, metbeast, altbeast, altbeast, altbeast, altbeast, ROT0,   "MegaDriver",    "Metal Beast" )
+GAMEH( 2004, metbeans, altbeast, altbeast, altbeast, altbeast, ROT0,   "MegaDriver",    "Metal Beast (New Sounds)" )
+GAMEH( 2004, metbeapt, altbeast, altbeast, altbeast, altbeast, ROT0,   "MegaDriver",    "Metal Beast (Portuguese)" )

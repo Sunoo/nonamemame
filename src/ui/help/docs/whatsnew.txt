@@ -45,7 +45,7 @@ PSX updates [smf]
 	pasted in taito fx1a readme
 	pal support for mess.
 	horizontal start/end
-
+	
 
 New Games supported or promoted from GAME_NOT_WORKING status:
 -------------------------------------------------------------
@@ -53,13 +53,13 @@ New Games supported or promoted from GAME_NOT_WORKING status:
 Cannonball (Atari, prototype) [Stefan Jokisch]
 	one ROM is missing from the only known PCB causing
 	some GFX problems
-
+	
 VS. Gumshoe [Pierpaolo Prazzoli]
 	banking fixed, game now works properly
-	
+
 Miss Puzzle [David Haywood]
 	bad rom causes some gfx glitches
-
+	
 Greyhound Trivia (various sets) [Pierpaolo Prazzoli, Chris Hardy]
 
 Heaven's Gate
@@ -70,7 +70,7 @@ New Non-Working games / clones supported
 GP500 [R.Belmont]
 	preliminary driver 'Hopeless Hardware' doesn't do anything yet
 	
-	
+
 0.82u3
 ------
 
@@ -94,14 +94,14 @@ Various changes [Nathan Woods]
 	src/drivers/seibuspi.c:
 	    - Fixed i386 interrupt call to use PULSE_LINE instead of always 
 	ASSERT_LINE
-
+	
 	src/inptport.h:
 	    - Added more MESS specific stuff within #ifdef MESS
-
+	
 	src/memory.c:
 	    - Added memory_install_*_handler_mirror() calls that I thought that 
 	I submitted earlier
-
+	
 	src/vidhrdw/tia.c:
 	    - Minor fix from the MESS side
 	
@@ -114,12 +114,12 @@ Various changes [Nathan Woods]
 	gta, gti, dgt fixed
 	working reg opcodes fixed
 	sio input fixed
-	
+
 	* metro.c
 	added sound support
 	
 Fixed dariusg (broken by 68008 changes) [Curt Coder]
-
+	
 
 New Games supported or promoted from GAME_NOT_WORKING status:
 -------------------------------------------------------------
@@ -148,7 +148,7 @@ General Source Changes
 
 onetwo: Fixed glitch on Title screen [Pierpaolo Prazzoli]
 	- colours could do with being checked on this
-
+	
 goal92: Fixed clock, visible area and found it's missing the adpcm emulation.
 I tried to add it, but i had no luck, so if anyone want to have a look,
 please do it ;-) [Pierpaolo Prazzoli]
@@ -160,7 +160,7 @@ I386 and Mame Debugger Enhancements [Nathan Woods]
 	raise a warning in the MAME debugger
 	    - Implemented mame_debug_trace_write() call, an API to allow 
 	injecting text into the trace files of the MAME debugger.
-
+	
 	src/cpu/i386/i386ops.c:
 	src/cpu/i386/i386op16.c:
 	    - CALL16 opcode will now only adjust IP instead of EIP when in 
@@ -199,7 +199,7 @@ ST-V updates [Mariusz Wojcieszek]
 	- added color offset for RGB sprites
 	- fixed horizontal scrolling for bitmaps (corrects mausuke ingame
 	background)
-
+	
 Change to EEPROM_interface eeprom_interface_93C46 [Tomasz Slanina]
 	please check games using this ...
 
@@ -244,11 +244,11 @@ Seattle Update [Aaron Giles]
 	* got rid of ugly red/blue swap hack
 	* fixed missing truncation on vertex coordinates (fixes vaportrx graphics)
 	* added support for alternate LFB write modes
-	
+
 horshoes: fixed DIPS [Brian Troha]
-	
+
 PreGX Cleanups [R.Belmont]
-	
+
 6532 RIOT patch (fixes some things in MESS) [Judge]
 
 New Games supported or promoted from GAME_NOT_WORKING status:
@@ -310,7 +310,7 @@ STV VDP-1 update [Mariusz Wojcieszek]
 	- added framebuffer interlace (fixes elandore character selection screen)
 	- added color offset for bitmaps
 	- added vertical scrolling for bitmaps (corrects shanhigw ingame)
-
+	
 	The main result (visible to user) of these changes is that shanhigw is now
 	playable without problems (apart from gfx glitches on title screen).
 
@@ -340,10 +340,10 @@ FireHawk [Pierpaolo Prazzoli]
 
 Shanghai - The Great Wall [Mariusz Wojcieszek]
 	some glitches on the title screen
-
+	
 Head On (Irem M15 Hardware) [David Haywood]
 	no sound
-
+	
 New Clones supported or promoted from GAME_NOT_WORKING status:
 --------------------------------------------------------------
 

@@ -1040,20 +1040,18 @@ INPUT_PORTS_START( neogeo )
 
 	/* Fake  IN 5 */
 	PORT_START
-#if 0
 	PORT_DIPNAME( 0x03, 0x02,"Territory" )
 	PORT_DIPSETTING(	0x00,"Japan" )
 	PORT_DIPSETTING(	0x01,"USA" )
 	PORT_DIPSETTING(	0x02,"Europe" )
-//	PORT_DIPNAME( 0x04, 0x04,"Machine Mode" )
-//	PORT_DIPSETTING(	0x00,"Home" )
-//	PORT_DIPSETTING(	0x04,"Arcade" )
+	PORT_DIPNAME( 0x04, 0x04,"Machine Mode" )
+	PORT_DIPSETTING(	0x00,"Home" )
+	PORT_DIPSETTING(	0x04,"Arcade" )
 	PORT_DIPNAME( 0x60, 0x60,"Game Slots" )		// Stored at 0x47 of NVRAM
 	PORT_DIPSETTING(	0x60,"2" )
 //	PORT_DIPSETTING(	0x40,"2" )
 	PORT_DIPSETTING(	0x20,"4" )
 	PORT_DIPSETTING(	0x00,"6" )
-#endif
 
 	PORT_START		/* Test switch */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -1131,20 +1129,18 @@ INPUT_PORTS_START( mjneogeo )
 
 	/* Fake  IN 5 */
 	PORT_START
-#if 0
 	PORT_DIPNAME( 0x03, 0x02,"Territory" )
 	PORT_DIPSETTING(	0x00,"Japan" )
 	PORT_DIPSETTING(	0x01,"USA" )
 	PORT_DIPSETTING(	0x02,"Europe" )
-//	PORT_DIPNAME( 0x04, 0x04,"Machine Mode" )
-//	PORT_DIPSETTING(	0x00,"Home" )
-//	PORT_DIPSETTING(	0x04,"Arcade" )
+	PORT_DIPNAME( 0x04, 0x04,"Machine Mode" )
+	PORT_DIPSETTING(	0x00,"Home" )
+	PORT_DIPSETTING(	0x04,"Arcade" )
 	PORT_DIPNAME( 0x60, 0x60,"Game Slots" )		// Stored at 0x47 of NVRAM
 	PORT_DIPSETTING(	0x60,"2" )
 //	PORT_DIPSETTING(	0x40,"2" )
 	PORT_DIPSETTING(	0x20,"4" )
 	PORT_DIPSETTING(	0x00,"6" )
-#endif
 
 	PORT_START		/* Test switch */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -1336,15 +1332,13 @@ INPUT_PORTS_START( irrmaze )
 
 	/* Fake  IN 5 */
 	PORT_START
-#if 0
 	PORT_DIPNAME( 0x03, 0x02,"Territory" )
 	PORT_DIPSETTING(	0x00,"Japan" )
 	PORT_DIPSETTING(	0x01,"USA" )
 	PORT_DIPSETTING(	0x02,"Europe" )
-//	PORT_DIPNAME( 0x04, 0x04,"Machine Mode" )
-//	PORT_DIPSETTING(	0x00,"Home" )
-//	PORT_DIPSETTING(	0x04,"Arcade" )
-#endif
+	PORT_DIPNAME( 0x04, 0x04,"Machine Mode" )
+	PORT_DIPSETTING(	0x00,"Home" )
+	PORT_DIPSETTING(	0x04,"Arcade" )
 
 	PORT_START		/* Test switch */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -1423,20 +1417,18 @@ INPUT_PORTS_START( popbounc )
 
 	/* Fake  IN 5 */
 	PORT_START
-#if 0
 	PORT_DIPNAME( 0x03, 0x02,"Territory" )
 	PORT_DIPSETTING(	0x00,"Japan" )
 	PORT_DIPSETTING(	0x01,"USA" )
 	PORT_DIPSETTING(	0x02,"Europe" )
-//	PORT_DIPNAME( 0x04, 0x04,"Machine Mode" )
-//	PORT_DIPSETTING(	0x00,"Home" )
-//	PORT_DIPSETTING(	0x04,"Arcade" )
+	PORT_DIPNAME( 0x04, 0x04,"Machine Mode" )
+	PORT_DIPSETTING(	0x00,"Home" )
+	PORT_DIPSETTING(	0x04,"Arcade" )
 	PORT_DIPNAME( 0x60, 0x60,"Game Slots" )		// Stored at 0x47 of NVRAM
 	PORT_DIPSETTING(	0x60,"2" )
 //	PORT_DIPSETTING(	0x40,"2" )
 	PORT_DIPSETTING(	0x20,"4" )
 	PORT_DIPSETTING(	0x00,"6" )
-#endif
 
 	PORT_START		/* Test switch */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN )
@@ -6454,6 +6446,24 @@ ROM_START( pwrinst4 )
    ROM_LOAD16_BYTE( "266-c7d.bin", 0x3000000, 0x800000, CRC(3C1FB02A) )
    ROM_LOAD16_BYTE( "266-c8d.bin", 0x3000001, 0x800000, CRC(5EE31F80) )
 ROM_END
+
+ROM_START( neopong )
+             ROM_REGION( 0x100000, REGION_CPU1, 0 )
+             ROM_LOAD16_WORD_SWAP( "pong_p1.rom", 0x000000, 0x020000, CRC(9f35e29d) SHA1(261ce9305950debbc2fe088a45ab0fa83d6cf10d) )
+
+             NEO_SFIX_128K( "pong_s1.rom", CRC(cd19264f) SHA1(531be2305cd56d332fb7a53ab924214ade34a9e8) )
+
+             NEO_BIOS_SOUND_128K( "pong_m1.rom", CRC(78c851cb) SHA1(a9923c002e4e2171a564af45cff0958c5d57b275) )
+
+             ROM_REGION( 0x200000, REGION_SOUND1, ROMREGION_SOUNDONLY )
+             ROM_LOAD( "pong_v1.rom", 0x000000, 0x200000, CRC(6c31223c) SHA1(ede3a2806d7d872a0f737626a23ecce200b534e6) )
+
+             NO_DELTAT_REGION
+
+             ROM_REGION( 0x200000, REGION_GFX3, 0 )
+             ROM_LOAD16_BYTE( "pong_c1.rom", 0x000000, 0x100000, CRC(f5a57d1a) SHA1(781170ae439f48fcbcee6af4cb3a1367dbb70498) ) /* Plane 0,1 */
+             ROM_LOAD16_BYTE( "pong_c2.rom", 0x000001, 0x100000, CRC(affde64e) SHA1(25ba8b4f6f961027d97d35f13cebeaee2dbb6f5a) ) /* Plane 2,3 */
+ROM_END
 #endif
 /******************************************************************************/
 
@@ -7394,11 +7404,12 @@ GAMEB( 2002, kof2002,  neogeo,	 neogeo, neogeo, neogeo,  kof2002,  ROT0, "Eolith
 GAMEB( 2003, svcplus,  neogeo,    neogeo, neogeo, neogeo,  svcplus,   ROT0, "Playmore / Capcom", "SVC CHAOS SNK versus CAPCOM PLUS" )
 GAMEB( 2003, svcchaos,  neogeo,    neogeo, neogeo, neogeo,  svcchaos,   ROT0, "Playmore / Capcom", "SVC CHAOS SNK versus CAPCOM" )
 GAMEB( 2003, samsho5,   neogeo,   neogeo, neogeo, neogeo,  samsho5,   ROT0, "Yuki Enterprise / SNK Playmore", "Samurai Showdown 5" )
-GAMEB( 2003, neonopn1,  neonopon,   neogeo, neogeo, neogeo,  neogeo,   ROT0, "blaster@gmx.net / Playmore Corporation", "Neo no Panepon (set 2)" )
-GAMEB( 2003, neonopn2,  neonopon,   neogeo, neogeo, neogeo,  neogeo,   ROT0, "blaster@gmx.net / Playmore Corporation", "Neo no Panepon (set 3)" )
-GAMEB( 2003, neonopn3,  neonopon,   neogeo, neogeo, neogeo,  neogeo,   ROT0, "blaster@gmx.net / Playmore Corporation", "Neo no Panepon (set 4)" )
+GAME( 2001, neopong,  neogeo, neogeo, neogeo, neogeo, neogeo, ROT0, "NeoDev",  "Neo-Pong!" )
+GAMEB( 2003, neonopn1,  neonopon,   neogeo, neogeo, neogeo,  neogeo,   ROT0, "Playmore Corporation", "Neo no Panepon (set 2)" )
+GAMEB( 2003, neonopn2,  neonopon,   neogeo, neogeo, neogeo,  neogeo,   ROT0, "Playmore Corporation", "Neo no Panepon (set 3)" )
+GAMEB( 2003, neonopn3,  neonopon,   neogeo, neogeo, neogeo,  neogeo,   ROT0, "Playmore Corporation", "Neo no Panepon (set 4)" )
 GAMEB( 2003, kof2003,  neogeo,	 neogeo, neogeo, neogeo,  kof2002,  ROT0, "Eolith / Playmore Corporation", "The King of Fighters 2003" )
-GAMEB( 2003, digerman,   neogeo,   neogeo, neogeo, neogeo,  neogeo,   ROT0, "Mystery developer", "Digger Man" )
+GAMEB( 2003, digerman,   neogeo,   neogeo, neogeo, neogeo,  neogeo,   ROT0, "Unknown", "Digger Man" )
 GAMEB( 2002, pim,  neogeo,    neogeo, neogeo, neogeo,  neogeo,   ROT0, "Playmore / Atlus / Noise Factory", "Power Instinct Matrimelee. Lets hope its better than the other ones." )
 GAMEB( 2002, pwrinst4, neogeo,   neogeo,neogeo, neogeo,  pwrinst4, ROT0, "Noise Factory / Atlus Corporation","Power Instinct Matrimelee / Shin Gouketsuji-Ichizoku Tokon Matrimelee" )
 #endif

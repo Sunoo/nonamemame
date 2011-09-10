@@ -6,15 +6,17 @@
 
 // standard windows headers
 #define WIN32_LEAN_AND_MEAN
+
 /*start MAME:analog+*/
 #ifdef WINXPANANLOG
-#ifndef WINUI
+#ifndef _WIN32_WINNT
 /* <jake> */
-#define _WIN32_WINNT 0x501   // for needed for WM_INPUT
+#define _WIN32_WINNT 0x501		// for needed for WM_INPUT
 /* </jake> */
-#endif /* WINUI */
+#endif /* _WIN32_WINNT */
 #endif /* WINXPANANLOG */
 /*end MAME:analog+  */
+
 #include <windows.h>
 #include <windowsx.h>
 

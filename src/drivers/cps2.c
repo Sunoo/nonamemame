@@ -120,6 +120,89 @@ extern data16_t *cps2_output;
 extern size_t cps2_output_size;
 extern VIDEO_START( cps2 );
 
+static data16_t *cps2_ram;
+
+static int region_switch_offset;
+static int region_switch_data;
+static int region_switch_mask;
+static int region_switch_count;
+static int region_switch_counter;
+
+static int region_switch_offset2;
+static int region_switch_data2;
+static int region_switch_mask2;
+static int region_switch_count2;
+static int region_switch_counter2;
+
+READ16_HANDLER( cps2_region_16_r )
+{
+data16_t mem = cps2_ram[region_switch_offset >> 1];
+
+if (region_switch_counter < region_switch_count)
+{
+region_switch_counter++;
+return mem;
+}
+return (mem & region_switch_mask) | region_switch_data;
+}
+
+READ16_HANDLER( cps2_region_16_r2 )
+{
+data16_t mem = cps2_ram[region_switch_offset2 >> 1];
+
+if (region_switch_counter2 < region_switch_count2)
+{
+region_switch_counter2++;
+return mem;
+}
+return (mem & region_switch_mask2) | region_switch_data2;
+}
+
+#define MASK_HIGH 0xff00
+#define MASK_LOW 0x00ff
+#define MASK_NONE 0x0000
+
+#define CPS2_REGION_16_R(NAME, OFFSET, DATA, COUNT, MASK) \
+if (!strcmp(Machine->gamedrv->name, NAME)) \
+{ \
+region_switch_offset = OFFSET & 0xffff; \
+region_switch_data = DATA; \
+region_switch_mask = MASK; \
+region_switch_count = COUNT; \
+if (region_switch_mask == MASK_LOW) \
+region_switch_data <<= 8; \
+install_mem_read16_handler(0, OFFSET, OFFSET+1, cps2_region_16_r); \
+}
+
+#define CPS2_REGION_16_R2(NAME, OFFSET, DATA, COUNT, MASK) \
+if (!strcmp(Machine->gamedrv->name, NAME)) \
+{ \
+region_switch_offset2 = OFFSET & 0xffff; \
+region_switch_data2 = DATA; \
+region_switch_mask2 = MASK; \
+region_switch_count2 = COUNT; \
+if (region_switch_mask2 == MASK_LOW) \
+region_switch_data2 <<= 8; \
+install_mem_read16_handler(0, OFFSET, OFFSET+1, cps2_region_16_r2); \
+}
+
+void init_cps2_driver(void)
+{
+
+region_switch_counter = 0;
+region_switch_counter2 = 0;
+
+CPS2_REGION_16_R("19xxregion", 0xff4d6e, 0, 4, MASK_LOW)
+CPS2_REGION_16_R("batcirjregion", 0xff58c4, 1, 4, MASK_LOW)
+CPS2_REGION_16_R("cybotsjregion", 0xff80a0, 2, 4, MASK_LOW)
+CPS2_REGION_16_R("ecofghtrregion", 0xff03e8, 0, 4, MASK_HIGH)
+CPS2_REGION_16_R("spf2xjregion", 0xff8090, 2, 4, MASK_HIGH)
+// CPS2_REGION_16_R("vsavregion", 0xff8090, 2, 4, MASK_HIGH)
+CPS2_REGION_16_R("xmvsfregion", 0xff5478, 0, 4, MASK_HIGH)
+// CPS2_REGION_16_R("vampjregion", 0xff8204, 2, 4, MASK_HIGH)
+// CPS2_REGION_16_R2("vampjregion", 0xff8214, 1, 4, MASK_LOW)
+}
+
 extern int scanline1;
 extern int scanline2;
 extern int scancalls;
@@ -352,7 +435,11 @@ static ADDRESS_MAP_START( cps2_writemem, ADDRESS_SPACE_PROGRAM, 16 )
 	AM_RANGE(0x8040e0, 0x8040e1) AM_WRITE(cps2_objram_bank_w)		/* bit 0 = Object ram bank swap */
 	AM_RANGE(0x804100, 0x8041ff) AM_WRITE(cps1_output_w) AM_BASE(&cps1_output) AM_SIZE(&cps1_output_size)  /* Output ports */
 	AM_RANGE(0x900000, 0x92ffff) AM_WRITE(cps1_gfxram_w) AM_BASE(&cps1_gfxram) AM_SIZE(&cps1_gfxram_size)
-	AM_RANGE(0xff0000, 0xffffff) AM_WRITE(MWA16_RAM)				/* RAM */
+//#ifdef OUTLAW
+	AM_RANGE(0xff0000, 0xffffff) AM_WRITE(MWA16_RAM) AM_BASE(&cps2_ram)				/* RAM */
+//#else
+//	AM_RANGE(0xff0000, 0xffffff) AM_WRITE(MWA16_RAM)				/* RAM */
+//#endif
 ADDRESS_MAP_END
 
 
@@ -6441,3 +6528,10 @@ GAME( 2000, gmahou,   dimahoo, cps2, sgemf,   cps2, ROT270, "Eighting/Raizing, d
 GAME( 2000, 1944,     0,       cps2, 19xx,    cps2, ROT0,   "Capcom, supported by Eighting/Raizing", "1944: The Loop Master (US 000620)" )
 GAMEX(2000, 1944j,    1944,    cps2, 19xx,    cps2, ROT0,   "Capcom, supported by Eighting/Raizing", "1944: The Loop Master (Japan 000620)", GAME_NOT_WORKING )
 
+/* region changed version */
+GAMEH(1996, 19xxregion, 19xx, cps2, 19xx, cps2, ROT270, "Capcom", "19XX: The War Against Destiny (region changed to Japan)" )
+GAMEH(1997, batcirjregion, batcirj, cps2, batcir, cps2, ROT0, "Capcom", "Battle Circuit (region changed to USA)" )
+GAMEH(1995, cybotsjregion, cybotsj, cps2, cybots, cps2, ROT0, "Capcom", "Cyberbots: Fullmetal Madness (region changed to USA)" )
+GAMEH(1993, ecofghtrregion, ecofghtr, cps2, cps2, cps2, ROT0, "Capcom", "Ultimate Ecology (region changed to Japan)" )
+GAMEH(1996, xmvsfregion, xmvsf, cps2, ssf2, cps2, ROT0, "Capcom", "X-Men Vs. Street Fighter (region changed to Japan)" )
+GAMEH(1996, spf2xjregion, spf2xj, cps2, 19xx, cps2, ROT0, "Capcom", "Super Puzzle Fighter 2 Turbo (region changed to USA)" )

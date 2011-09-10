@@ -66,6 +66,9 @@ example, the protection data for that game was extracted from the bootleg.
 WRITE16_HANDLER( snowbros_flipscreen_w );
 VIDEO_UPDATE( snowbros );
 VIDEO_UPDATE( wintbob );
+#ifdef OUTLAW
+VIDEO_UPDATE( snowbro3 );
+#endif
 
 static data16_t *hyperpac_ram;
 
@@ -675,6 +678,31 @@ static MACHINE_DRIVER_START( semiprot )
 	MDRV_MACHINE_INIT ( semiprot )
 MACHINE_DRIVER_END
 
+#ifdef OUTLAW
+static MACHINE_DRIVER_START( snowbro3 )
+
+	/* basic machine hardware */
+	MDRV_CPU_ADD(M68000, 16000000) /* 16mhz or 12mhz ? */
+	MDRV_CPU_MEMORY(readmem3,writemem3)
+	MDRV_CPU_VBLANK_INT(snowbros_interrupt,3)
+
+	MDRV_FRAMES_PER_SECOND(60)
+	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+
+	/* video hardware */
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER)
+	MDRV_SCREEN_SIZE(32*8, 32*8)
+	MDRV_VISIBLE_AREA(0*8, 32*8-1, 2*8, 30*8-1)
+	MDRV_GFXDECODE(sb3_gfxdecodeinfo)
+	MDRV_PALETTE_LENGTH(512)
+
+	MDRV_VIDEO_UPDATE(snowbro3)
+
+	/* sound hardware */
+	/* oki for sound */
+MACHINE_DRIVER_END
+#endif
+
 
 /***************************************************************************
 
@@ -874,6 +902,26 @@ ROM_START( cookbib2 )
 	ROM_LOAD( "cookbib2.04", 0x080000, 0x80000, CRC(f240111f) SHA1(b2c3b6e3d916fc68e1fd258b1279b6c39e1f0108) )
 	ROM_LOAD( "cookbib2.03", 0x100000, 0x40000, CRC(e1604821) SHA1(bede6bdd8331128b9f2b229d718133470bf407c9) )
 ROM_END
+
+#ifdef OUTLAW
+ROM_START( snowbro3 )
+	ROM_REGION( 0x40000, REGION_CPU1, 0 )	/* 68000 code */
+	ROM_LOAD16_BYTE( "ur4",  0x00000, 0x20000, CRC(19c13ffd) SHA1(4f9db70354bd410b7bcafa96be4591de8dc33d90) )
+	ROM_LOAD16_BYTE( "ur3",  0x00001, 0x20000, CRC(3f32fa15) SHA1(1402c173c1df142ff9dd7b859689c075813a50e5) )
+
+	/* is sound cpu code missing or is it driven by the main cpu? */
+
+	ROM_REGION( 0x80000, REGION_GFX1, ROMREGION_DISPOSE )
+	ROM_LOAD( "ua5",		0x000000, 0x80000, CRC(0604e385) SHA1(96acbc65a8db89a7be100f852dc07ba9a0313167) )	/* 16x16 tiles */
+
+	ROM_REGION( 0x400000, REGION_GFX2, ROMREGION_DISPOSE ) /* 16x16 BG Tiles */
+	ROM_LOAD( "un7",		0x000000, 0x200000, CRC(4a79da4c) SHA1(59207d116d39b9ee25c51affe520f5fdff34e536) )
+	ROM_LOAD( "un8",		0x200000, 0x200000, CRC(7a4561a4) SHA1(1dd823369c09368d1f0ec8e1cb85d700f10ff448) )
+
+	ROM_REGION( 0x080000, REGION_SOUND1, 0 )	/* OKIM6295 samples */
+	ROM_LOAD( "us5",     0x00000, 0x80000, CRC(7c6368ef) SHA1(53393c570c605f7582b61c630980041e2ed32e2d) )
+ROM_END
+#endif
 
 READ16_HANDLER ( moremorp_0a_read )
 {
@@ -1250,6 +1298,25 @@ static DRIVER_INIT( hyperpac )
 	hyperpac_ram[0xe086/2] = 0x3210;
 }
 
+#ifdef OUTLAW
+static DRIVER_INIT(snowbro3)
+{
+	unsigned char *buffer;
+	data8_t *src = memory_region(REGION_CPU1);
+	int len = memory_region_length(REGION_CPU1);
+
+	/* strange order */
+	if ((buffer = malloc(len)))
+	{
+		int i;
+		for (i = 0;i < len; i++)
+			buffer[i] = src[BITSWAP24(i,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,3,4,1,2,0)];
+		memcpy(src,buffer,len);
+		free(buffer);
+	}
+}
+#endif
+
 GAME( 1990, snowbros, 0,        snowbros, snowbros, 0, ROT0, "Toaplan", "Snow Bros. - Nick & Tom (set 1)" )
 GAME( 1990, snowbroa, snowbros, snowbros, snowbros, 0, ROT0, "Toaplan", "Snow Bros. - Nick & Tom (set 2)" )
 GAME( 1990, snowbrob, snowbros, snowbros, snowbros, 0, ROT0, "Toaplan", "Snow Bros. - Nick & Tom (set 3)" )
@@ -1265,3 +1332,7 @@ GAME( 1999, moremorp, 0,        semiprot, hyperpac, moremorp, ROT0, "SemiCom / E
 /* the following don't work, they either point the interrupts at an area of ram probably shared by
    some kind of mcu which puts 68k code there, or jump to the area in the interrupts */
 GAMEX(1997, 3in1semi, 0,        semicom, hyperpac, 0,        ROT0, "SemiCom", "3-in-1 (SemiCom)", GAME_UNEMULATED_PROTECTION | GAME_NOT_WORKING )
+
+#ifdef OUTLAW
+GAMEX(2002, snowbro3, 0,        snowbro3, snowbroj, snowbro3, ROT0, "Syrmex / hack?", "Snow Brothers 3 - Magical Adventure", GAME_NO_SOUND ) // its basically snowbros code?...
+#endif
