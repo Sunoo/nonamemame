@@ -85,19 +85,52 @@ DEBUG = d
 endif
 
 # Processor
+ifeq ($(OPT),mp)
+ARCH = -march=athlon-mp
+else
+ifeq ($(OPT),ax)
+ARCH = -march=athlon-xp
+else
+ifeq ($(OPT),k7)
+ARCH = -march=athlon-tbird
+else
 ifeq ($(OPT),at)
 ARCH = -march=athlon
+else
+ifeq ($(OPT),k63)
+ARCH = -march=k6-3
+else
+ifeq ($(OPT),k62)
+ARCH = -march=k6-2
 else
 ifeq ($(OPT),k6)
 ARCH = -march=k6
 else
-ifeq ($(OPT),pp)
-ARCH = -march=pentiumpro
-else
 ifeq ($(OPT),p4)
 ARCH = -march=pentium4
 else
+ifeq ($(OPT),p3)
+ARCH = -march=pentium3
+else
+ifeq ($(OPT),p2)
+ARCH = -march=pentium2
+else
+ifeq ($(OPT),pp)
+ARCH = -march=pentiumpro
+else
+ifeq ($(OPT),pm)
+ARCH = -march=pentium-mmx
+else
+OPT = 
 ARCH = -march=pentium
+endif
+endif
+endif
+endif
+endif
+endif
+endif
+endif
 endif
 endif
 endif
@@ -133,15 +166,15 @@ CFLAGS = -std=gnu99 -Isrc -Isrc/includes -Isrc/$(MAMEOS) -I$(OBJ)/cpu/m68000 -Is
 
 ifdef SYMBOLS
 CFLAGS += -O0 -g
-#CFLAGS += --Werror -Wall -Wno-unused O0 -g
+CFLAGS += --Werror -Wall -Wno-unused O0 -g
 else
 CFLAGS += -DNDEBUG \
-#	$(ARCH) -O3 -fomit-frame-pointer -fstrict-aliasing \
+	$(ARCH) -O3 -fomit-frame-pointer -fstrict-aliasing \
 #	-Werror -Wall -Wno-sign-compare -Wunused \
-#	-Wpointer-arith -Wbad-function-cast -Wcast-align \
-#	-Wstrict-prototypes -Wundef \
-#	-Wformat-security -Wwrite-strings \
-#	-Wdisabled-optimization \
+	-Wpointer-arith -Wbad-function-cast -Wcast-align \
+	-Wstrict-prototypes -Wundef \
+	-Wformat-security -Wwrite-strings \
+	-Wdisabled-optimization \
 #	-Wredundant-decls
 #	-Wfloat-equal
 #	-Wunreachable-code -Wpadded

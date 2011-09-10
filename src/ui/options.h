@@ -279,14 +279,11 @@ typedef struct
     INT      folder_id;
     BOOL     view;
     BOOL     show_folderlist;
-    int      show_unavailable;
-    int      show_recent;
 	LPBITS   show_folder_flags;
     BOOL     show_toolbar;
     BOOL     show_statusbar;
     BOOL     show_screenshot;
     BOOL     show_tabctrl;
-    BOOL     sort_folders;
 	int      show_tab_flags;
 	int      history_tab;
     int      current_tab;
@@ -299,8 +296,6 @@ typedef struct
 	BOOL     stretch_screenshot_larger;
 	BOOL     inherit_filter;
 	BOOL     offset_clones;
-	char     *password;
-	int		background;
 
     char     *default_game;
     int      column_width[COLUMN_MAX];
@@ -401,7 +396,6 @@ typedef struct
     char*    mameinfo_filename;
     char*    ctrlrdir;
     char*    folderdir;
-    char*    pcbinfosdir;
 
 #ifdef MESS
     struct mess_specific_settings mess;
@@ -428,7 +422,6 @@ BOOL GetGameUsesDefaults(int driver_index);
 void SetGameUsesDefaults(int driver_index,BOOL use_defaults);
 void LoadGameOptions(int driver_index);
 void LoadFolderOptions(int folder_index);
-void ParseKeyValueStrings(char *buffer,char **key,char **value);
 
 const char* GetFolderNameByID(UINT nID);
 
@@ -495,9 +488,6 @@ BOOL GetHighPriority(void);
 void SetRandomBackground(BOOL random_bg);
 BOOL GetRandomBackground(void);
 
-void SetBackground(int bkgnd);
-int  GetBackground(void);
-
 void SetSavedFolderID(UINT val);
 UINT GetSavedFolderID(void);
 
@@ -506,9 +496,6 @@ BOOL GetShowScreenShot(void);
 
 void SetShowFolderList(BOOL val);
 BOOL GetShowFolderList(void);
-
-BOOL GetShowUnavailableFolder(void);
-BOOL GetShowRecent(void);
 
 BOOL GetShowFolder(int folder);
 void SetShowFolder(int folder,BOOL show);
@@ -522,9 +509,6 @@ BOOL GetShowToolBar(void);
 
 void SetShowTabCtrl(BOOL val);
 BOOL GetShowTabCtrl(void);
-
-void SetSortTree(BOOL val);
-BOOL GetSortTree(void);
 
 void SetCurrentTab(int val);
 int  GetCurrentTab(void);
@@ -639,9 +623,6 @@ void SetCtrlrDir(const char* path);
 
 const char* GetFolderDir(void);
 void SetFolderDir(const char* path);
-
-const char* GetPcbInfosDir(void);
-void SetPcbInfosDir(const char* path);
 
 const char* GetCheatFileName(void);
 void SetCheatFileName(const char* path);
@@ -762,9 +743,5 @@ void SetHideMouseOnStartup(BOOL hide);
 
 BOOL GetRunFullScreen(void);
 void SetRunFullScreen(BOOL fullScreen);
-
-BOOL GetPassword(char *pwd);
-void SetPassword(char *pwd, BOOL enabled);
-void PasswordDecodeString(const char *str,void *data);
 
 #endif

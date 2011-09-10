@@ -21,9 +21,6 @@
 #define HIDC_CLEAN_STRETCH              0x809a04a7    // IDD_PROP_DISPLAY
 #define HIDC_CYCLETIMESEC               0x80ad04bb    // IDD_INTERFACE_OPTIONS
 #define HIDC_CYCLE_SCREENSHOT           0x80ad04b9    // IDD_INTERFACE_OPTIONS
-#define HIDC_FILTER_INHERIT             0x80ad04ba    // IDD_INTERFACE_OPTIONS
-#define HIDC_RESET_PLAYTIME             0x80ad04b7    // IDD_INTERFACE_OPTIONS
-#define HIDC_RESET_PLAYCOUNT            0x80ad04b8    // IDD_INTERFACE_OPTIONS
 #define HIDC_D3D                        0x80b8049f    // IDD_PROP_DIRECT3D
 #define HIDC_D3D_EFFECT                 0x80b804a3    // IDD_PROP_DIRECT3D
 #define HIDC_D3D_FEEDBACK               0x80b804b0    // IDD_PROP_DIRECT3D
@@ -43,7 +40,6 @@
 #define HIDC_FILTER_NONWORKING          0x80a90499    // IDD_FILTERS
 #define HIDC_FILTER_ORIGINALS           0x80a904a3    // IDD_FILTERS
 #define HIDC_FILTER_RASTER              0x80a90496    // IDD_FILTERS
-#define HIDC_FILTER_AVAILABLE           0x80a90497    // IDD_FILTERS
 #define HIDC_FILTER_UNAVAILABLE         0x80a90498    // IDD_FILTERS
 #define HIDC_FILTER_VECTOR              0x80a90495    // IDD_FILTERS
 #define HIDC_FILTER_WORKING             0x80a904a4    // IDD_FILTERS

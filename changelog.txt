@@ -1,3 +1,10 @@
+0.82u3.12 "OMG FURRIES!":
+ - Updated to MAME 0.82u3 source
+ - Reverted / updated to MadeInMame32 0.82 source
+ - Now working again
+ - Added a bunch more CPU optimization options
+ - Changed back to MAME32 0.82 source (0.82u3.12a)
+
 0.82u2.12:
  - Updated to MAME 0.82u2 source
  - Changed default password to "noname"

@@ -214,7 +214,6 @@ static DWORD dwHelpIDs[] =
 	IDC_FILTER_NONWORKING,  HIDC_FILTER_NONWORKING,
 	IDC_FILTER_ORIGINALS,   HIDC_FILTER_ORIGINALS,
 	IDC_FILTER_RASTER,      HIDC_FILTER_RASTER,
-	IDC_FILTER_AVAILABLE,   HIDC_FILTER_AVAILABLE,
 	IDC_FILTER_UNAVAILABLE, HIDC_FILTER_UNAVAILABLE,
 	IDC_FILTER_VECTOR,      HIDC_FILTER_VECTOR,
 	IDC_FILTER_WORKING,     HIDC_FILTER_WORKING,
@@ -738,43 +737,43 @@ const char *GameInfoStatus(int driver_index, BOOL bRomStatus)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Unemulated Protection");
+					strcat(buffer, "Game protection isn't fully emulated");
 				}
 				if (drivers[driver_index]->flags & GAME_WRONG_COLORS)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Colors are totally wrong");
+					strcat(buffer, "Colors are completely wrong");
 				}
 				if (drivers[driver_index]->flags & GAME_IMPERFECT_COLORS)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Imperfect Colors");
+					strcat(buffer, "Colors aren't 100% accurate");
 				}
 				if (drivers[driver_index]->flags & GAME_IMPERFECT_GRAPHICS)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Imperfect Graphics");
+					strcat(buffer, "Video emulation isn't 100% accurate");
 				}
 				if (drivers[driver_index]->flags & GAME_NO_SOUND)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Sound is missing");
+					strcat(buffer, "Game lacks sound");
 				}
 				if (drivers[driver_index]->flags & GAME_IMPERFECT_SOUND)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Imperfect Sound");
+					strcat(buffer, "Sound emulation isn't 100% accurate");
 				}
 				if (drivers[driver_index]->flags & GAME_NO_COCKTAIL)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Screen flip support is missing");
+					strcat(buffer, "Screen flipping is not supported");
 				}
  			}
 			else
@@ -785,43 +784,43 @@ const char *GameInfoStatus(int driver_index, BOOL bRomStatus)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Unemulated Protection");
+					strcat(buffer, "Game protection isn't fully emulated");
 				}
 				if (drivers[driver_index]->flags & GAME_WRONG_COLORS)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Colors are totally wrong");
+					strcat(buffer, "Colors are completely wrong");
 				}
 				if (drivers[driver_index]->flags & GAME_IMPERFECT_COLORS)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Imperfect Colors");
+					strcat(buffer, "Colors aren't 100% accurate");
 				}
 				if (drivers[driver_index]->flags & GAME_IMPERFECT_GRAPHICS)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Imperfect Graphics");
+					strcat(buffer, "Video emulation isn't 100% accurate");
 				}
 				if (drivers[driver_index]->flags & GAME_NO_SOUND)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Sound is missing");
+					strcat(buffer, "Game lacks sound");
 				}
 				if (drivers[driver_index]->flags & GAME_IMPERFECT_SOUND)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Imperfect Sound");
+					strcat(buffer, "Sound emulation isn't 100% accurate");
 				}
 				if (drivers[driver_index]->flags & GAME_NO_COCKTAIL)
 				{
 					if (*buffer != '\0')
 						strcat(buffer, "\r\n");
-					strcat(buffer, "Screen flip support is missing");
+					strcat(buffer, "Screen flipping is not supported");
 				}
 			}
 		}
@@ -850,43 +849,43 @@ const char *GameInfoStatus(int driver_index, BOOL bRomStatus)
 		{
 			if (*buffer != '\0')
 				strcat(buffer, "\r\n");
-			strcat(buffer, "Unemulated Protection");
+			strcat(buffer, "Game protection isn't fully emulated");
 		}
 		if (drivers[driver_index]->flags & GAME_WRONG_COLORS)
 		{
 		if (*buffer != '\0')
 				strcat(buffer, "\r\n");
-			strcat(buffer, "Colors are totally wrong");
+			strcat(buffer, "Colors are completely wrong");
 		}
 		if (drivers[driver_index]->flags & GAME_IMPERFECT_COLORS)
 		{
 			if (*buffer != '\0')
 				strcat(buffer, "\r\n");
-			strcat(buffer, "Imperfect Colors");
+			strcat(buffer, "Colors aren't 100% accurate");
 		}
 		if (drivers[driver_index]->flags & GAME_IMPERFECT_GRAPHICS)
 		{
 			if (*buffer != '\0')
 				strcat(buffer, "\r\n");
-			strcat(buffer, "Imperfect Graphics");
+			strcat(buffer, "Video emulation isn't 100% accurate");
 		}
 		if (drivers[driver_index]->flags & GAME_NO_SOUND)
 		{
 			if (*buffer != '\0')
 				strcat(buffer, "\r\n");
-			strcat(buffer, "Sound is missing");
+			strcat(buffer, "Game lacks sound");
 		}
 		if (drivers[driver_index]->flags & GAME_IMPERFECT_SOUND)
 		{
 			if (*buffer != '\0')
 				strcat(buffer, "\r\n");
-			strcat(buffer, "Imperfect Sound");
+			strcat(buffer, "Sound emulation isn't 100% accurate");
 		}
 		if (drivers[driver_index]->flags & GAME_NO_COCKTAIL)
 		{
 			if (*buffer != '\0')
 				strcat(buffer, "\r\n");
-			strcat(buffer, "Screen flip support is missing");
+			strcat(buffer, "Screen flipping is not supported");
 		}
 	}
 	return buffer;
@@ -1956,9 +1955,8 @@ static void AssignSampleRate(HWND hWnd)
 	{
 		case 0:  pGameOpts->samplerate = 11025; break;
 		case 1:  pGameOpts->samplerate = 22050; break;
-		case 2: pGameOpts->samplerate = 24000; break;
-		case 3: pGameOpts->samplerate = 44100; break;
-		case 4: pGameOpts->samplerate = 48000; break;
+		case 2:  pGameOpts->samplerate = 44100; break;
+		case 3:  pGameOpts->samplerate = 48000; break;
 		default: pGameOpts->samplerate = 44100; break;
 	}
 }
@@ -2109,10 +2107,9 @@ static void ResetDataMap(void)
 	{
 		case 11025:  g_nSampleRateIndex = 0; break;
 		case 22050:  g_nSampleRateIndex = 1; break;
-		case 24000:  g_nSampleRateIndex = 2; break;
-		case 48000:  g_nSampleRateIndex = 4; break;
+		case 48000:  g_nSampleRateIndex = 3; break;
 		default:
-		case 44100:  g_nSampleRateIndex = 3; break;
+		case 44100:  g_nSampleRateIndex = 2; break;
 	}
 
 	g_nEffectIndex = 0;
@@ -2951,10 +2948,9 @@ static void InitializeSoundUI(HWND hwnd)
 	{
 		ComboBox_AddString(hCtrl, "11025");
 		ComboBox_AddString(hCtrl, "22050");
-		ComboBox_AddString(hCtrl, "24000");
 		ComboBox_AddString(hCtrl, "44100");
 		ComboBox_AddString(hCtrl, "48000");
-		ComboBox_SetCurSel(hCtrl, 3);
+		ComboBox_SetCurSel(hCtrl, 1);
 	}
 }
 
@@ -3227,19 +3223,14 @@ static void InitializeBIOSUI(HWND hwnd)
 
 		if (g_nGame == -1)
 		{
-			ComboBox_AddString(hCtrl," 0 - Europa MVS (Ver. 2)");
-			ComboBox_AddString(hCtrl," 1 - Europa MVS (Ver. 1)");
-			ComboBox_AddString(hCtrl," 2 - Stati Uniti MVS (Ver. 2?)");
-			ComboBox_AddString(hCtrl," 3 - Stati Uniti MVS (Ver. 1)");
-			ComboBox_AddString(hCtrl," 4 - Asia MVS (Ver. 3)");
-			ComboBox_AddString(hCtrl," 5 - Giappone MVS (Ver. 3)");
-			ComboBox_AddString(hCtrl," 6 - Giappone MVS (Ver. 2)");
-			ComboBox_AddString(hCtrl," 7 - Unibios MVS (Hack, Ver. 1.2)");
-			ComboBox_AddString(hCtrl," 8 - Unibios MVS(Hack,Ver.1.1)"); 
-			ComboBox_AddString(hCtrl," 9 - Unibios MVS(Hack,Ver.1.0)"); 
-			ComboBox_AddString(hCtrl,"10 - Debug MVS (Hack?)"); 
-			ComboBox_AddString(hCtrl,"11 - Asia AES");
-			ComboBox_AddString(hCtrl,"None");
+/*			ComboBox_AddString(hCtrl,"0");
+			ComboBox_AddString(hCtrl,"1");
+			ComboBox_AddString(hCtrl,"2");
+			ComboBox_AddString(hCtrl,"3");
+			ComboBox_AddString(hCtrl,"4");
+			ComboBox_AddString(hCtrl,"5");
+			ComboBox_AddString(hCtrl,"6");
+*/			ComboBox_AddString(hCtrl,"None");
 
 			return;
 		}

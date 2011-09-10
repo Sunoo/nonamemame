@@ -1150,6 +1150,7 @@ $(OBJ)/other.a: \
 	$(OBJ)/drivers/macs.o \
 	$(OBJ)/drivers/onetwo.o \
 	$(OBJ)/drivers/1945kiii.o \
+	$(OBJ)/drivers/pbchmp95.o \
 
 
 COREOBJS += $(OBJ)/driver.o $(OBJ)/cheat.o

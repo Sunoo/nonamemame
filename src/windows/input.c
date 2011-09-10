@@ -78,6 +78,7 @@ extern int win_window_mode;
 //============================================================
 
 UINT8						win_trying_to_quit;
+int							win_use_mouse;
 
 
 
@@ -97,7 +98,6 @@ static cycles_t				last_poll;
 //static int					hotrod;
 //static int					hotrodse;
 static float				a2d_deadzone;
-static int					use_mouse;
 static int					use_joystick;
 static int					use_lightgun;
 static int					use_lightgun_dual;
@@ -229,7 +229,7 @@ struct rc_option input_opts[] =
 	{ "Input device options", NULL, rc_seperator, NULL, NULL, 0, 0, NULL, NULL },
 //	{ "hotrod", NULL, rc_bool, &hotrod, "0", 0, 0, NULL, "preconfigure for hotrod" },
 //	{ "hotrodse", NULL, rc_bool, &hotrodse, "0", 0, 0, NULL, "preconfigure for hotrod se" },
-	{ "mouse", NULL, rc_bool, &use_mouse, "0", 0, 0, NULL, "enable mouse input" },
+	{ "mouse", NULL, rc_bool, &win_use_mouse, "0", 0, 0, NULL, "enable mouse input" },
 	{ "joystick", "joy", rc_bool, &use_joystick, "0", 0, 0, NULL, "enable joystick input" },
 	{ "lightgun", "gun", rc_bool, &use_lightgun, "0", 0, 0, NULL, "enable lightgun input" },
 	{ "dual_lightgun", "dual", rc_bool, &use_lightgun_dual, "0", 0, 0, NULL, "enable dual lightgun input" },
@@ -1155,7 +1155,7 @@ void win_pause_input(int paused)
 		if (mouse_active && !win_has_menu())
 		{
 /*start MAME:analog+*/
-			for (i = 0; i < mouse_count && (use_mouse||use_lightgun||use_lightgun2a||use_lightgun2b); i++)
+			for (i = 0; i < mouse_count && (win_use_mouse||use_lightgun||use_lightgun2a||use_lightgun2b); i++)
 			{
 				if (use_lightgun2b)		// set abs mode not working in enum location
 				{						// placement here is a hack, but seems to work
@@ -1294,7 +1294,7 @@ void win_poll_input(void)
 
 #endif /* WINXPANANLOG */
 	// poll all our mice if active
-	if (mouse_active && !win_has_menu() && (use_mouse||use_lightgun||use_lightgun2a||use_lightgun2b))
+	if (mouse_active && !win_has_menu() && (win_use_mouse||use_lightgun||use_lightgun2a||use_lightgun2b))
 		for (i = 0; i < mouse_count; i++)
 		{
 			// first poll the device
@@ -1327,7 +1327,7 @@ void win_poll_input(void)
 
 int win_is_mouse_captured(void)
 {
-	return (!input_paused && mouse_active && (mouse_count > 0) && (use_mouse||use_lightgun||use_lightgun2a||use_lightgun2b) && !win_has_menu());
+	return (!input_paused && mouse_active && (mouse_count > 0) && (win_use_mouse||use_lightgun||use_lightgun2a||use_lightgun2b) && !win_has_menu());
 }
 
 
@@ -1630,7 +1630,7 @@ static void init_joylist(void)
 	int joycount = 0;
 
 	// first of all, map mouse buttons
-//	for (mouse = 0; (mouse < mouse_count) && (use_mouse || use_lightgun||use_lightgun2a||use_lightgun2b); mouse++)
+//	for (mouse = 0; (mouse < mouse_count) && (win_use_mouse || use_lightgun||use_lightgun2a||use_lightgun2b); mouse++)
 	for (mouse = 0; mouse < mouse_count; mouse++)
 		for (button = 0; button < 4; button++)
 		{
@@ -1947,7 +1947,7 @@ void osd_analogjoy_read(int player, int analog_axis[], InputCode analogjoy_input
 	int i;
 
 	// if the mouse isn't yet active, make it so
-	if (!mouse_active && use_mouse && !win_has_menu())
+	if (!mouse_active && win_use_mouse && !win_has_menu())
 	{
 		mouse_active = 1;
 		win_pause_input(0);
@@ -2044,7 +2044,7 @@ void osd_lightgun_read(int player,int *deltax,int *deltay)
 	}
 
 	// if the mouse isn't yet active, make it so
-	if (!mouse_active && (use_mouse||use_lightgun) && !win_has_menu())
+	if (!mouse_active && (win_use_mouse||use_lightgun) && !win_has_menu())
 	{
 		mouse_active = 1;
 		win_pause_input(0);
@@ -2360,7 +2360,7 @@ void osd_raw_mouse_lightgun_read(int player,int *deltax,int *deltay) {
 	int axisx, axisy;
 
 	// if the mouse isn't yet active, make it so
-	if (!mouse_active && (use_mouse||use_lightgun) && !win_has_menu())
+	if (!mouse_active && (win_use_mouse||use_lightgun) && !win_has_menu())
 	{
 		mouse_active = 1;
 		win_pause_input(0);
@@ -2434,7 +2434,7 @@ void osd_trak_read(int player, int *deltax, int *deltay)
 	*deltax = 0;
 	*deltay = 0;
 
-	if (!use_mouse)
+	if (!win_use_mouse)
 		return ;
 
 	// if the mouse isn't yet active, make it so
@@ -3032,11 +3032,11 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 		if (ctrlrname)
 			fprintf (stderr,"\"%s\" controller support enabled\n",ctrlrname);
 
-		fprintf(stderr, "Mouse support %sabled\n",use_mouse ? "en" : "dis");
+		fprintf(stderr, "Mouse support %sabled\n",win_use_mouse ? "en" : "dis");
 		fprintf(stderr, "Joystick support %sabled\n",use_joystick ? "en" : "dis");
 		fprintf(stderr, "Keyboards=%d  Mice=%d  Joysticks=%d Lightguns=%d(%d,%d)\n",
 			keyboard_count,
-			use_mouse ? mouse_count : 0,
+			win_use_mouse ? mouse_count : 0,
 			use_joystick ? joystick_count : 0,
 			use_lightgun ? lightgun_count : 0,
 			use_lightgun2a ? lightgun_count : 0,
@@ -3309,7 +3309,7 @@ static void init_mouse_arrays(const int playermousedefault[])
 /* trackballs / mice */
 int osd_numbermice(void)	// return # of mice connected
 {
-	if (!use_mouse && !use_lightgun && !use_lightgun2a && !use_lightgun2b)
+	if (!win_use_mouse && !use_lightgun && !use_lightgun2a && !use_lightgun2b)
 		return 0;			// if all mouse type inputs are disabled, return zero
 	return mouse_count;		// mouse[0] is sysmouse
 }

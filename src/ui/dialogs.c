@@ -38,7 +38,6 @@
 #include "mame32.h"
 #include "properties.h"
 #include "dialogs.h"
-#include "file.h"
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
@@ -63,10 +62,6 @@ static void DisableFilterControls(HWND hWnd, LPFOLDERDATA lpFilterRecord,
 								  LPFILTER_ITEM lpFilterItem, DWORD dwFlags);
 static void EnableFilterExclusions(HWND hWnd, DWORD dwCtrlID);
 static DWORD ValidateFilters(LPFOLDERDATA lpFilterRecord, DWORD dwFlags);
-
-static HWND hPcbInfo = NULL;
-static WNDPROC g_lpPcbInfoWndProc = NULL;
-static LRESULT CALLBACK PcbInfoWndProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 /***************************************************************************/
 
@@ -435,12 +430,6 @@ INT_PTR CALLBACK FilterDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 			{
 				DisableFilterControls(hDlg, lpFilterRecord, &g_lpFilterList[i], dwFilters);
 			}
-			
-			// hide "available filter"
-			if (! GetShowUnavailableFolder())
-			{
-				EnableWindow(GetDlgItem(hDlg, IDC_FILTER_AVAILABLE), FALSE);
-			}
 		}
 		SetFocus(GetDlgItem(hDlg, IDC_FILTER_EDIT));
 		return FALSE;
@@ -678,184 +667,6 @@ INT_PTR CALLBACK DirectXDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lP
 		return 1;
 	}
 	return 0;
-}
-
-INT_PTR CALLBACK PCBInfoDialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-	switch (Msg)
-	{
-	case WM_INITDIALOG:
-	{
-		int  nGame;
-		char filename[1024];
-		mame_file *mfile;
-		long filelen;
-		char *PcbData;
-		LV_ITEM lvi;
-		HWND hWndList = GetDlgItem(GetMainWindow(), IDC_LIST);
-		LOGFONT font;
-		HFONT hPcbFont;
-		HDC hDC;
-		RECT rect;
-		TEXTMETRIC tm ;
-		int nLines, nLineHeight;
-		SCROLLINFO ScrollBar;
-
-		hPcbInfo = hDlg;
-		
-		g_lpPcbInfoWndProc = (WNDPROC)(LONG)(int)GetWindowLong(GetDlgItem(hDlg, IDC_PCBINFO), GWL_WNDPROC);
-		SetWindowLong(GetDlgItem(hDlg, IDC_PCBINFO), GWL_WNDPROC, (LONG)PcbInfoWndProc);
-		
-		memset((void *)&font, 0, sizeof(font));
-		font.lfCharSet = ANSI_CHARSET;
-		font.lfOutPrecision = OUT_DEFAULT_PRECIS;
-		font.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-		font.lfQuality = DEFAULT_QUALITY;
-		font.lfPitchAndFamily = FIXED_PITCH;
-		strcpy(font.lfFaceName, "FixedSys");
-
-		hPcbFont = CreateFontIndirect(&font);
-
-		lvi.iItem = ListView_GetNextItem(hWndList, -1, LVIS_SELECTED | LVIS_FOCUSED);
-		if (lvi.iItem == -1)
-			return 1;
-
-		lvi.iSubItem = 0;
-		lvi.mask	 = LVIF_PARAM;
-		ListView_GetItem(hWndList, &lvi);
-
-		nGame = lvi.lParam;
-
-		if (drivers[nGame]->clone_of && !(drivers[nGame]->clone_of->flags & NOT_A_DRIVER))
-			strcpy(filename, drivers[nGame]->clone_of->name);
-		else
-			strcpy(filename, drivers[nGame]->name);
-			
-		strcat(filename, ".txt");
-
-		set_pathlist(FILETYPE_ARTWORK, GetPcbInfosDir());
-		
-		mfile = mame_fopen(NULL, filename, FILETYPE_ARTWORK, 0);
-
-		if (mfile == NULL)
-		{
-			mfile = mame_fopen("pcb", filename, FILETYPE_ARTWORK, 0);
-		}
-
-		if ( mfile != NULL )
-		{
-			filelen = (long)mame_fsize(mfile);
-			
-			PcbData = (char *)malloc(filelen+1);
-			
-			if ( PcbData != NULL )
-			{
-				mame_fread(mfile, PcbData, filelen);
-				
-				PcbData[filelen] = '\0';
-
-				sprintf(filename, MAME32NAME " PCB Info: %s [%s]", ConvertAmpersandString(ModifyThe(drivers[nGame]->description)), drivers[nGame]->name);
-				SetWindowText(hDlg, filename);
-				SetWindowFont(GetDlgItem(hDlg, IDC_PCBINFO), hPcbFont, FALSE);
-				Edit_SetText(GetDlgItem(hDlg, IDC_PCBINFO), PcbData);
-
-				Edit_GetRect(GetDlgItem(hDlg, IDC_PCBINFO),&rect);
-				nLines = Edit_GetLineCount(GetDlgItem(hDlg, IDC_PCBINFO) );
-				GetListFont( &font);
-				hDC = GetDC(GetDlgItem(hDlg, IDC_PCBINFO));
-				GetTextMetrics (hDC, &tm);
-				nLineHeight = tm.tmHeight - tm.tmInternalLeading;
-				if( ( (rect.bottom - rect.top) / nLineHeight) < (nLines) )
-				{
-					//more than one Page, so show Scrollbar
-					SetScrollRange(GetDlgItem(hDlg, IDC_PCBINFO), SB_VERT, 0, nLines, TRUE); 
-				}
-				else
-				{
-					//hide Scrollbar
-					SetScrollRange(GetDlgItem(hDlg, IDC_PCBINFO),SB_VERT, 0, 0, TRUE);
-				}
-
-				ScrollBar.cbSize = sizeof(SCROLLINFO);
-				ScrollBar.fMask = SIF_RANGE;
-				GetScrollInfo(GetDlgItem(hDlg, IDC_PCBINFO), SB_HORZ, &ScrollBar);
-				if( (ScrollBar.nMax - ScrollBar.nMin) < (rect.right - rect.left) )
-				{
-					//hide Scrollbar
-					SetScrollRange(GetDlgItem(hDlg, IDC_PCBINFO),SB_HORZ, 0, 0, TRUE);
-				}
-
-//		 		ShowWindow(GetDlgItem(hDlg, IDC_PCBINFO), SW_SHOW);
-
-				free(PcbData);
-			}
-			
-			mame_fclose(mfile);
-		}
-		else
-		{
-			MessageBox(GetMainWindow(), "No PCB info available for this game.", MAME32NAME, MB_OK | MB_ICONEXCLAMATION);
-			EndDialog(hDlg, 0);
-		}
-		
-		return 1;
-	}
-
-	case WM_CTLCOLORSTATIC:
-		if (GetBackgroundBitmap() && (HWND)lParam == GetDlgItem(hDlg, IDC_PCBINFO))
-		{
-			static HBRUSH hBrush=0;
-			HDC hDC=(HDC)wParam;
-			LOGBRUSH lb;
-
-			if (hBrush)
-				DeleteObject(hBrush);
-			lb.lbStyle  = BS_HOLLOW;
-			hBrush = CreateBrushIndirect(&lb);
-			SetBkMode(hDC, TRANSPARENT);
-//			SetTextColor(hDC, GetListFontColor());
-			return (LRESULT) hBrush;
-		}
-		break;
-
-	case WM_PAINT:
-	{
-		PaintBackgroundImage(hDlg, NULL, 0, 0);
-		InvalidateRect(hDlg, NULL, FALSE);
-		break;
-	}
-
-	case WM_COMMAND:
-		switch (GET_WM_COMMAND_ID(wParam, lParam))
-		{
-		case IDCANCEL:
-		case IDCLOSE:
-			EndDialog(hDlg, 0);
-			return 1;
-		}
-	}
-	return 0;
-}
-
-static LRESULT CALLBACK PcbInfoWndProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-	switch (Msg)
-	{
-	case WM_ERASEBKGND:
-		return TRUE;
-	case WM_PAINT:
-	{
-		POINT p = { 0, 0 };
-		
-		/* get base point of background bitmap */
-		MapWindowPoints(hDlg,hPcbInfo,&p,1);
-		PaintBackgroundImage(hDlg, NULL, p.x, p.y);
-		/* to ensure our parent procedure repaints the whole client area */
-		InvalidateRect(hDlg, NULL, FALSE);
-		break;
-	}
-	}
-	return CallWindowProc(g_lpPcbInfoWndProc, hDlg, Msg, wParam, lParam);
 }
 
 /***************************************************************************

@@ -11,17 +11,24 @@ Second, select your operating system (default = Windows):
 	MAME32 version:  OS=32
 	MAME32 version for Windows XP:  OS=32xp
 
-Third, select your CPU optimization (default = none):
-	Athlon:  OPT=at
-	K6:  OPT=k6
-	Pentium Pro (I686):  OPT=pp
-	Pentium 4: OPT=p4
+Third, select your CPU optimization (default = Intel Pentium 1):
+	Intel Pentium MMX: OPT=pm
+	Intel Pentium Pro: OPT=pp
+	Intel Pentium 2: OPT=p2
+	Intel Pentium 3: OPT=p3
+	Intel Pentium 4: OPT=p4
+	AMD K6: OPT=k6
+	AMD K6-2: OPT=k62
+	AMD K6-3: OPT=k63
+	AMD Athlon: OPT=at
+	AMD Athlon Thunderbird: OPT=tb
+	AMD Athlon XP: OPT=ax
+	AMD Athlon MP: OPT=mp
 
 Fourth, decide if you want debug enabled (default = disabled):
 	Enabled:  DEBUG=1
 
 So, for examble, to compile a MAME32 version for Windows XP optomized for
-a Pentium 4 processor:  make OS=32xp OPT=p4
+an Intel Pentium 4 processor:  make OS=32xp OPT=p4
 
-I will probably make further modifications in the future, and when I do, I'll
-document them here.
+Total Number of Possible Options: 208
