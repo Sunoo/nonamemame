@@ -376,10 +376,12 @@ static READ16_HANDLER( adc_r )
 	return readinputport(3 + which_adc) | 0xff00;
 }
 
+
 static READ_HANDLER( leta_r )
 {
     if (pedal_count == -1)   /* 720 */
 	{
+/*start MAME:analog+*/
 		const int pos_values[]={0x00,0x12,0x24,0x34,0x48,0x5a,0x6c,0x7c };	// 8 dpad directions
 		static int old_position = 0, old_angle = 90;
 		static int num_rotations = 0;
@@ -387,10 +389,12 @@ static READ_HANDLER( leta_r )
 		int aj_x, aj_y, aj_delta = 0;
 		int dial_val;
 		int djoy_val;
-		
+/*end MAME:analog+  */
+
 		switch (offset & 3)
 		{
 			case 0:
+/*start MAME:analog+*/
 				// return readinputport(7) >> 8; // ORIGINAL LINE
 				// <jake>
 				// dial_val = readinputport(8) & 0xff;
@@ -445,14 +449,14 @@ static READ_HANDLER( leta_r )
 					current_angle = atan2(aj_x,aj_y) * 360 / (2*M_PI);	// dang radians!
 				else													// 0 degrees is straight up
 					current_angle = old_angle;
-				
+
 				// need this to figure the "straight up number"
 				// since 144 == once rotation, and input values range from 0 to 256
 				if (current_angle > 90 && old_angle < -90)
 					num_rotations--;
 				else if (current_angle < -90 && old_angle > 90)
 					num_rotations++;
-				
+
 				aj_delta = current_angle * 144/360;			/* convert from degrees to one game rotation */
 				current_position = ((144 * num_rotations) + aj_delta) & 0xff;
 											/* part before "+" figures the "straight up number" */
@@ -464,6 +468,7 @@ static READ_HANDLER( leta_r )
 				}
 
 				return current_position;
+/*end MAME:analog+  */
 			case 2: return 0xff;
 			case 3: return 0xff;
 		}
@@ -471,6 +476,7 @@ static READ_HANDLER( leta_r )
 
 	return readinputport(7 + (offset & 3));
 }
+
 
 
 /*************************************
@@ -766,14 +772,16 @@ INPUT_PORTS_START( 720 )
 	PORT_START	/* ADC3 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
 
+/*start MAME:analog+*/
+	//PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED ) // Original line
 	PORT_START	/* LETA0 */
 	PORT_ANALOG( 0xff, 0x0000, IPT_DIAL | IPF_PLAYER1, 30, 10, 0, 0 )	// mask was 0xffff, but should be 0xff
 
 	PORT_START	/* LETA1 */
 	/* <Jake> */
-	PORT_ANALOG( 0xff, 0x00, IPT_DIAL_V | IPF_PLAYER4, 1, 0, 0, 0 )		// increase sensitivity if you 
+	PORT_ANALOG( 0xff, 0x00, IPT_DIAL_V | IPF_PLAYER4, 1, 0, 0, 0 )		// increase sensitivity if you
 	/* </Jake> */														// have original controller
-	//PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED ) // Original line
+/*end MAME:analog+  */
 
 	PORT_START	/* LETA2 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -826,7 +834,8 @@ INPUT_PORTS_START( 720 )
 	PORT_DIPSETTING(    0xc0, "3 to Start, 1 to Continue" )
 	PORT_DIPSETTING(    0x00, "2 to Start, 1 to Continue" )
 	PORT_DIPSETTING(    0x40, "1 to Start, 1 to Continue" )
-	
+
+/*start MAME:analog+*/
 	/* fake ports for analog stick control hack */
 	/* listed as player 2 so AD stick and dial inputs aren't mixed */
 	PORT_START
@@ -834,7 +843,7 @@ INPUT_PORTS_START( 720 )
 
 	PORT_START
 	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_PLAYER2 | IPF_REVERSE, 100, 10, 0x00, 0xff)
-	
+
 	/* fake port for digital stick control hack */
 	/* listed as player 3 so AD stick and 8way stick inputs aren't mixed */
 	PORT_START
@@ -842,6 +851,7 @@ INPUT_PORTS_START( 720 )
 	PORT_BIT ( 0x02, IP_ACTIVE_HIGH, IPT_JOYSTICK_RIGHT | IPF_8WAY | IPF_PLAYER3 )
 	PORT_BIT ( 0x04, IP_ACTIVE_HIGH, IPT_JOYSTICK_DOWN  | IPF_8WAY | IPF_PLAYER3 )
 	PORT_BIT ( 0x08, IP_ACTIVE_HIGH, IPT_JOYSTICK_LEFT  | IPF_8WAY | IPF_PLAYER3 )
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 
@@ -1257,24 +1267,24 @@ static MACHINE_DRIVER_START( atarisy2 )
 	MDRV_CPU_CONFIG(t11_data)
 	MDRV_CPU_PROGRAM_MAP(main_map,0)
 	MDRV_CPU_VBLANK_INT(vblank_int,1)
-	
+
 	MDRV_CPU_ADD_TAG("sound", M6502, ATARI_CLOCK_14MHz/8)
 	MDRV_CPU_PROGRAM_MAP(sound_map,0)
 	MDRV_CPU_PERIODIC_INT(atarigen_6502_irq_gen,(UINT32)(1000000000.0/((double)ATARI_CLOCK_20MHz/2/16/16/16/10)))
-	
+
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_REAL_60HZ_VBLANK_DURATION)
-	
+
 	MDRV_MACHINE_INIT(atarisy2)
 	MDRV_NVRAM_HANDLER(atarigen)
-	
+
 	/* video hardware */
 	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_NEEDS_6BITS_PER_GUN | VIDEO_UPDATE_BEFORE_VBLANK)
 	MDRV_SCREEN_SIZE(64*8, 48*8)
 	MDRV_VISIBLE_AREA(0*8, 64*8-1, 0*8, 48*8-1)
 	MDRV_GFXDECODE(gfxdecodeinfo)
 	MDRV_PALETTE_LENGTH(256)
-	
+
 	MDRV_VIDEO_START(atarisy2)
 	MDRV_VIDEO_UPDATE(atarisy2)
 
@@ -1290,7 +1300,7 @@ static MACHINE_DRIVER_START( 720 )
 
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM(atarisy2)
-	
+
 	MDRV_CPU_REPLACE("sound", M6502, 2200000) /* artifically high to prevent deadlock at startup ATARI_CLOCK_14MHz/8,*/
 MACHINE_DRIVER_END
 
@@ -1299,7 +1309,7 @@ static MACHINE_DRIVER_START( sprint )
 
 	/* basic machine hardware */
 	MDRV_IMPORT_FROM(atarisy2)
-	
+
 	/* sound hardware */
 	MDRV_SOUND_REMOVE("tms")
 MACHINE_DRIVER_END
@@ -3182,7 +3192,7 @@ static void ssprint_init_common(const data16_t *default_eeprom)
 
 	pedal_count = 3;
 	has_tms5220 = 0;
-}	
+}
 
 static DRIVER_INIT( ssprint )
 {
@@ -3335,7 +3345,7 @@ GAME( 1986, 720r2,    720,      720,      720,      720,      ROT0,   "Atari Gam
 GAME( 1986, 720r1,    720,      720,      720,      720,      ROT0,   "Atari Games", "720 Degrees (rev 1)" )
 GAME( 1986, 720g,     720,      720,      720,      720,      ROT0,   "Atari Games", "720 Degrees (German, rev 2)" )
 GAME( 1986, 720gr1,   720,      720,      720,      720,      ROT0,   "Atari Games", "720 Degrees (German, rev 1)" )
-	
+
 GAME( 1986, ssprint,  0,        sprint,   ssprint,  ssprint,  ROT0,   "Atari Games", "Super Sprint (rev 4)" )
 GAME( 1986, ssprint3, ssprint,  sprint,   ssprint,  ssprint1, ROT0,   "Atari Games", "Super Sprint (rev 3)" )
 GAME( 1986, ssprint1, ssprint,  sprint,   ssprint,  ssprint1, ROT0,   "Atari Games", "Super Sprint (rev 1)" )

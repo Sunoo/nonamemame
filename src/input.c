@@ -908,7 +908,7 @@ int return_os_joycode(InputCode code)
 	return 0;
 }
 
-#if !defined( MSDOS )
+/*start MAME:analog+*/
 int is_joycode(unsigned code)
 {
 	if (code == CODE_NOT || code ==	CODE_OR)
@@ -930,11 +930,11 @@ int isNegativeSemiAxis(InputSeq* seqCode)
 {
 	const struct JoystickInfo *joyinfo;
 	int j;
-	
+
 	for(j=0;j<SEQ_MAX;++j)  	// SEQ_MAX defined in input.h
 	{
 		assert( (*seqCode)[j] < code_mac );
-	
+
 		if ( is_joystick_axis_code((*seqCode)[j]) )
 		{
 			if ((*seqCode)[j] < __code_max)
@@ -949,8 +949,7 @@ int isNegativeSemiAxis(InputSeq* seqCode)
 			}
 		}
 	}
-	
+
 	return 0;
 }
 /*end MAME:analog+*/
-#endif

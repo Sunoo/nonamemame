@@ -909,15 +909,21 @@ static READ32_HANDLER( le2_gun_H_r )
 	int p1x;
 	int p2x;
 	
+/*start MAME:analog+*/
 	if ( (p1x=readinputport(15)&0x04) )			/* if (player 1 button 4 (reload) is not pressed) */
 	{
+/*end MAME:analog+  */
 		p1x = readinputport(9)*287/0xff+22;
+/*start MAME:analog+*/
 	}
 	
 	if ( (p2x=readinputport(16)&0x04) )			/* if (player 2 button 4 (reload) is not pressed) */
 	{
+/*end MAME:analog+  */
 		p2x = readinputport(11)*287/0xff+22;
+/*start MAME:analog+*/
 	}
+/*end MAME:analog+  */
 
 	return (p1x<<16)|p2x;
 }
@@ -927,13 +933,19 @@ static READ32_HANDLER( le2_gun_V_r )
 	int p1y;
 	int p2y;
 	
+/*start MAME:analog+*/
 	if ( (p1y = readinputport(15)&0x04) ) {		/* if (player 1 button 4 (reload) is not pressed) */
+/*end MAME:analog+  */
 		p1y = readinputport(10)*223/0xff+1;
+/*start MAME:analog+*/
 	}
 	
 	if ( (p2y = readinputport(16)&0x04) ) {		/* if (player 2 button 4 (reload) is not pressed) */
+/*end MAME:analog+  */
 		p2y = readinputport(12)*223/0xff+1;
+/*start MAME:analog+*/
 	}
+/*end MAME:analog+  */
 
 	return (p1y<<16)|p2y;
 }
@@ -941,8 +953,11 @@ static READ32_HANDLER( le2_gun_V_r )
 /* reload hack -- thanks fosters! */
 static READ32_HANDLER( service_r )
 {
+/*start MAME:analog+*/
+//	int res = (readinputport(1)<<24) | (readinputport(8)<<8);
 	int res = (( ( (readinputport(15)|(~0x04) ) & readinputport(1) )<<24) | \
 	   		   ( ( (readinputport(16)|(~0x04) ) & readinputport(8) )<< 8));
+/*end MAME:analog+  */
 
 	if (init_eeprom_count)
 	{
@@ -1825,12 +1840,6 @@ INPUT_PORTS_START( le2 )
 
 	PORT_START
 	PORT_ANALOG( 0xff, 0x80, IPT_LIGHTGUN_Y | IPF_PLAYER2, 35, 15, 0, 0xff )
-	
-	PORT_START /* reload hack -- thanks fosters! */
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 )
-	
-	PORT_START
-	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
 INPUT_PORTS_END
 
 INPUT_PORTS_START( gokuparo )
@@ -2008,6 +2017,14 @@ INPUT_PORTS_START( puzldama )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 	PORT_DIPSETTING(    0x02, "High" )
+
+/*start MAME:analog+*/
+	PORT_START /* reload hack -- thanks fosters! */
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1 )
+
+	PORT_START
+	PORT_BIT( 0x04, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER2 )
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( dragoonj )

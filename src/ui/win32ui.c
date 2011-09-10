@@ -7249,6 +7249,7 @@ void ButtonUpListViewDrag(POINTS p)
 	{
 	   LVHITTESTINFO lvhtti;
 	   LPTREEFOLDER folder;
+	   RECT rcList;
 
 	   /* the user dragged a game onto something other than the treeview */
 	   /* try to remove if we're in a custom folder */
@@ -7257,7 +7258,9 @@ void ButtonUpListViewDrag(POINTS p)
 
 	   MapWindowPoints(hTreeView,hwndList,&pt,1);
 	   lvhtti.pt = pt;
-	   if (ListView_HitTest(hwndList,&lvhtti) >= 0)
+	   GetWindowRect(hwndList, &rcList);
+	   ClientToScreen(hwndList, &pt);
+	   if( PtInRect(&rcList, pt) != 0 )
 		   return;
 
 	   folder = GetCurrentFolder();

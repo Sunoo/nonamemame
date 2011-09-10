@@ -244,6 +244,7 @@ void osd_joystick_calibrate(void);
 void osd_joystick_end_calibration(void);
 
 void osd_lightgun_read(int player, int *deltax, int *deltay);
+/*start MAME:analog+*/
 void osd_lightgun_read2a(int player, int *deltax, int *deltay);
 void osd_lightgun_read2b(int player, int *deltax, int *deltay);
 #ifdef WINXPANANLOG
@@ -251,6 +252,7 @@ void osd_lightgun_read2b(int player, int *deltax, int *deltay);
 void osd_raw_mouse_lightgun_read(int player, int *deltax, int *deltay);
 /* </jake> */
 #endif /* WINXPANANLOG */
+/*end MAME:analog+  */
 void osd_trak_read(int player, int *deltax, int *deltay);
 
 /* return values in the range -128 .. 128 (yes, 128, not 127) */
@@ -285,6 +287,8 @@ int osd_setplayer_mousesplit(int player, int playeraxis, int mouse);
 int osd_getplayer_mouseaxis(int player, int playeraxis);
 int osd_setplayer_mouseaxis(int player, int playeraxis, int mouse, int axis);
 
+int osd_get49type(int type);
+
 //int osd_getplayer_mouseXaxis(int player);		// yes, player
 //int osd_getplayer_mouseYaxis(int player);
 /* axes setting: will change!! Should I use these??? */
@@ -297,7 +301,6 @@ int osd_setplayer_mouseaxis(int player, int playeraxis, int mouse, int axis);
 //int osd_setXaxis(int player, int mouse, int axis)
 //int osd_setYaxis(int player, int mouse, int axis)
 /*end MAME:analog+  */
-
 
 
 /******************************************************************************
@@ -409,12 +412,14 @@ void CLIB_DECL osd_die(const char *text,...)
 void CLIB_DECL osd_die(const char *text,...);
 #endif
 
+/*start MAME:analog+*/
 #ifdef WINXPANANLOG
 /* <jake> */
 /* Called immediately before all the input ports are read */
 void osd_new_input_read_cycle(void);
 /* </jake> */
 #endif /* WINXPANANLOG */
+/*end MAME:analog+  */
 
 #if defined MAME_NET || defined XMAME_NET
 /* network */

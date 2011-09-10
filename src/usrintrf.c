@@ -2069,7 +2069,9 @@ static int setdefcodesettings(struct mame_bitmap *bitmap,int selected)
 		return sel + 1;
 	}
 
+/*start MAME:analog+*/
 	init_analog_seq();
+/*end MAME:analog+  */
 
 	ui_displaymenu(bitmap,menu_item,menu_subitem,flag,sel,0);
 
@@ -2586,9 +2588,12 @@ static int settraksettings(struct mame_bitmap *bitmap,int selected)
 	}
 
 	return sel + 1;
+/*start MAME:analog+*/
 #undef ENTRIES
+/*end MAME:analog+  */
 }
 
+/*start MAME:analog+*/
 static int setplayermousesettings(struct mame_bitmap *bitmap,int selected)
 {
 #define MAX_LENGTH 40
@@ -2926,6 +2931,7 @@ static int setplayermouseaxessettings(struct mame_bitmap *bitmap,int selected)
 	return sel + 1;
 #undef ENTRIES
 }
+/*end MAME:analog+  */
 
 #ifndef MESS
 static int mame_stats(struct mame_bitmap *bitmap,int selected)
@@ -4443,7 +4449,10 @@ enum { UI_SWITCH = 0,UI_DEFCODE,UI_CODE,
 		UI_GAMEINFO,UI_FILEMANAGER,UI_TAPECONTROL,
 #endif
 		UI_GAMEDOCS,UI_CHEAT,
-		UI_MOUSECNTL,UI_MOUSEAXESCNTL,UI_RESET,UI_MEMCARD,
+/*start MAME:analog+*/
+		UI_MOUSECNTL,UI_MOUSEAXESCNTL,
+/*end MAME:analog+  */
+		UI_RESET,UI_MEMCARD,
 #ifdef XMAME
 		UI_RAPIDFIRE,
 #endif
@@ -4528,6 +4537,7 @@ static void setup_menu_init(void)
 			in++;
 		}
 
+/*start MAME:analog+*/
 		/* Determine if there are any mice controls */
 		if (osd_numbermice() && num)
 		{
@@ -4540,6 +4550,7 @@ static void setup_menu_init(void)
 				menu_item[menu_total] = ui_getstring (UI_mousecontrols); menu_action[menu_total++] = UI_MOUSECNTL;
 			}
 		}
+/*end MAME:analog+  */
 
 		if (num != 0)
 		{
@@ -4620,12 +4631,14 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 			case UI_ANALOG:
 				res = settraksettings(bitmap, sel >> SEL_BITS);
 				break;
+/*start MAME:analog+*/
 			case UI_MOUSECNTL:
 				res = setplayermousesettings(bitmap, sel >> SEL_BITS);
 				break;
 			case UI_MOUSEAXESCNTL:
 				res = setplayermouseaxessettings(bitmap, sel >> SEL_BITS);
 				break;
+/*end MAME:analog+  */
 			case UI_CALIBRATE:
 				res = calibratejoysticks(bitmap, sel >> SEL_BITS);
 				break;
@@ -4678,7 +4691,9 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 		else
 			sel = (sel & SEL_MASK) | (res << SEL_BITS);
 
+/*start MAME:analog+*/
 		init_analog_seq();
+/*end MAME:analog+  */
 
 		return sel + 1;
 	}
@@ -4705,8 +4720,10 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 			case UI_ANALOG:
 			case UI_CALIBRATE:
 			#ifndef MESS
+/*start MAME:analog+*/
 			case UI_MOUSECNTL:
 			case UI_MOUSEAXESCNTL:
+/*end MAME:analog+  */
 			case UI_STATS:
 			case UI_GAMEINFO:
 #else
@@ -5063,7 +5080,7 @@ static void onscrd_init(void)
 			onscrd_arg[item] = in - Machine->input_ports;
 			item++;
 		}
-	
+
 	if (options.cheat)
 	{
 		for (ch = 0;ch < cpu_gettotalcpu();ch++)

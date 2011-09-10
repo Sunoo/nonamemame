@@ -47,12 +47,14 @@ WRITE16_HANDLER( pow_video16_w );
 
 static int invert_controls;
 
+/*start MAME:analog+*/
 /* <jjs> */
 static int temp = 0;
 static unsigned char old_joydir[2];
 /* </jjs> */
 
 static int use_2button_rotary[] = {0,0};
+/*end MAME:analog+  */
 
 /******************************************************************************/
 
@@ -102,6 +104,7 @@ static READ16_HANDLER( dip_2_r )
 
 static READ16_HANDLER( rotary_1_r )
 {
+/*start MAME:analog+*/
 /* input from original buttons overides all other rotary inputs */
 	if ( (temp = readinputport(9)) )
 		return ( (~temp) << 8 ) & 0xff00;
@@ -128,12 +131,14 @@ static READ16_HANDLER( rotary_1_r )
 		return (( ~(1 <<old_joydir[0])) <<8)&0xff00;
 	}
 	/* </jjs> */
+/*end MAME:analog+  */
 
 	return (( ~(1 << (readinputport(5) * 12 / 256)) )<<8)&0xff00;	/* ORIGINAL LINE */
 }
 
 static READ16_HANDLER( rotary_2_r )
 {
+/*start MAME:analog+*/
 /* input from original buttons overides all other rotary inputs */
 	if ( (temp = readinputport(10)) )
 		return ( (~temp) << 8 ) & 0xff00;
@@ -160,12 +165,14 @@ static READ16_HANDLER( rotary_2_r )
 		return (( ~(1 <<old_joydir[1])) <<8)&0xff00;
 	}
 	/* </jjs> */
+/*end MAME:analog+  */
 
 	return (( ~(1 << (readinputport(6) * 12 / 256)) )<<8)&0xff00;	/* ORIGINAL LINE */
 }
 
 static READ16_HANDLER( rotary_lsb_r )
 {
+/*start MAME:analog+*/
 	int temp_lsb;
 
 	/* <jjs> */
@@ -185,6 +192,7 @@ static READ16_HANDLER( rotary_lsb_r )
 	/* </jjs> */
 
 	return temp_lsb;
+/*end MAME:analog+  */
 }
 
 static READ16_HANDLER( protcontrols_r )
@@ -535,6 +543,7 @@ INPUT_PORTS_START( searchar )
 	PORT_START	/* player 2 12-way rotary control - converted in controls_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, IP_JOY_NONE, IP_JOY_NONE )
 
+/*start MAME:analog+*/
 	/* <jjs> */
 	PORT_START	/* alternate player 1 12-way rotary control - converted in controls_r() */
 	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4, 1)
@@ -572,6 +581,7 @@ INPUT_PORTS_START( searchar )
 	PORT_BIT(0x200, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER4)
 	PORT_BIT(0x400, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER2)
 	PORT_BIT(0x800, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER2)
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( streetsm )
@@ -823,6 +833,7 @@ INPUT_PORTS_START( ikari3 )
 	PORT_START	/* player 2 12-way rotary control - converted in controls_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, IP_JOY_NONE, IP_JOY_NONE )
 
+/*start MAME:analog+*/
 	/* <jjs> */
 	PORT_START	/* alternate player 1 12-way rotary control - converted in controls_r() */
 	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4, 1)
@@ -860,6 +871,7 @@ INPUT_PORTS_START( ikari3 )
 	PORT_BIT(0x200, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER4)
 	PORT_BIT(0x400, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER2)
 	PORT_BIT(0x800, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER2)
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 /******************************************************************************/

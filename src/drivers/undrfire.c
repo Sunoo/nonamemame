@@ -231,10 +231,12 @@ static READ32_HANDLER( undrfire_input_r )
 	{
 		case 0x00:
 		{
+/*start MAME:analog+*/
+//			return (input_port_0_word_r(0,0) << 16) | input_port_1_word_r(0,0) |
+//					(EEPROM_read_bit() << 7) | frame_counter;
 			return ((input_port_0_word_r(0,0) & (~(input_port_8_word_r(0,0)))) << 16) | input_port_1_word_r(0,0) |
 					(EEPROM_read_bit() << 7) | frame_counter;
-//			return (input_port_0_word_r(0,0) << 16) | input_port_1_word_r(0,0) | 
-//					(EEPROM_read_bit() << 7) | frame_counter;
+/*end MAME:analog+  */
 		}
 
 		case 0x01:
@@ -313,8 +315,10 @@ static WRITE32_HANDLER( unknown_int_req_w )
 
 static READ32_HANDLER( undrfire_lightgun_r )
 {
+/*start MAME:analog+*/
 #define RELOADFRAMES 16
 	static int reload_count1 = 0, reload_count2 = 0;
+/*end MAME:analog+  */
 	int x,y;
 
 	switch (offset)
@@ -326,6 +330,7 @@ static READ32_HANDLER( undrfire_lightgun_r )
 
 		case 0x00:	/* P1 */
 		{
+/*start MAME:analog+*/
 			if (readinputport(8) & 0x0010)
 			{
 				reload_count1 = RELOADFRAMES;
@@ -336,7 +341,8 @@ static READ32_HANDLER( undrfire_lightgun_r )
 				reload_count1--;
 				return 0;
 			}
-			
+/*end MAME:analog+  */
+
 			x = input_port_3_word_r(0,0) << 6;
 			y = input_port_4_word_r(0,0) << 6;
 
@@ -346,6 +352,7 @@ static READ32_HANDLER( undrfire_lightgun_r )
 
 		case 0x01:	/* P2 */
 		{
+/*start MAME:analog+*/
 			if (readinputport(8) & 0x0040)
 			{
 				reload_count2 = RELOADFRAMES;
@@ -356,7 +363,8 @@ static READ32_HANDLER( undrfire_lightgun_r )
 				reload_count2--;
 				return 0;
 			}
-			
+/*end MAME:analog+  */
+
 			x = input_port_5_word_r(0,0) << 6;
 			y = input_port_6_word_r(0,0) << 6;
 
@@ -368,7 +376,9 @@ static READ32_HANDLER( undrfire_lightgun_r )
 logerror("CPU #0 PC %06x: warning - read unmapped lightgun offset %06x\n",activecpu_get_pc(),offset);
 
 	return 0x0;
+/*start MAME:analog+*/
 #undef RELOADFRAMES
+/*end MAME:analog+  */
 }
 
 
@@ -540,11 +550,11 @@ INPUT_PORTS_START( undrfire )
 	PORT_DIPSETTING(    0x00, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x01, DEF_STR( Yes ) )
 
-//#if 0
+/*start MAME:analog+*/
 	PORT_START	/* Fake reload button */
 	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1 )
 	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2 )
-//#endif
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 

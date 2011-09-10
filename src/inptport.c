@@ -43,7 +43,6 @@ extern unsigned int coins[COIN_COUNTERS];
 extern unsigned int lastcoin[COIN_COUNTERS];
 extern unsigned int coinlockedout[COIN_COUNTERS];
 
-#if !defined( MSDOS )
 /*start MAME:analog+*/
 extern int switchmice, switchaxes;			// from OS/input.c
 extern int splitmouse, resetmouse;			// from OS/input.c
@@ -51,7 +50,6 @@ extern int splitmouse, resetmouse;			// from OS/input.c
 
 static int joymouse;  // option to simulate trackball with analog joystick
 /*end MAME:analog+  */
-#endif
 
 static unsigned short input_port_value[MAX_INPUT_PORTS];
 static unsigned short input_vblank[MAX_INPUT_PORTS];
@@ -253,6 +251,9 @@ struct ipd inputport_defaults[] =
 	{ IPT_SERVICE2, "Service 2",     SEQ_DEF_1(KEYCODE_0) },
 	{ IPT_SERVICE3, "Service 3",     SEQ_DEF_1(KEYCODE_MINUS) },
 	{ IPT_SERVICE4, "Service 4",     SEQ_DEF_1(KEYCODE_EQUALS) },
+/*start Analog+*/
+	{ IPT_SERVICE, "Service Mode",   SEQ_DEF_1(KEYCODE_F2) },
+/*end Analog+*/
 #ifndef MESS
 	{ IPT_TILT,   "Tilt",            SEQ_DEF_1(KEYCODE_T) },
 #else
@@ -970,7 +971,7 @@ struct ik input_keywords[] =
 	{ "MOUSECODE_1_BUTTON1", 	IKT_STD,		JOYCODE_MOUSE_1_BUTTON1 },
 	{ "MOUSECODE_1_BUTTON2", 	IKT_STD,		JOYCODE_MOUSE_1_BUTTON2 },
 	{ "MOUSECODE_1_BUTTON3", 	IKT_STD,		JOYCODE_MOUSE_1_BUTTON3 },
-#if !defined( MSDOS )
+/*start MAME:analog+*/
 	{ "MOUSECODE_1_BUTTON4", 	IKT_STD,		JOYCODE_MOUSE_1_BUTTON4 },
 	{ "MOUSECODE_2_BUTTON1", 	IKT_STD,		JOYCODE_MOUSE_2_BUTTON1 },
 	{ "MOUSECODE_2_BUTTON2", 	IKT_STD,		JOYCODE_MOUSE_2_BUTTON2 },
@@ -1004,7 +1005,7 @@ struct ik input_keywords[] =
 	{ "MOUSECODE_SYS_BUTTON2", 	IKT_STD,		JOYCODE_MOUSE_SYS_BUTTON2 },
 	{ "MOUSECODE_SYS_BUTTON3", 	IKT_STD,		JOYCODE_MOUSE_SYS_BUTTON3 },
 	{ "MOUSECODE_SYS_BUTTON4", 	IKT_STD,		JOYCODE_MOUSE_SYS_BUTTON4 },
-#endif
+/*end MAME:analog+  */
 	
 	{ "KEYCODE_NONE",			IKT_STD,		CODE_NONE },
 	{ "CODE_NONE",			  	IKT_STD,		CODE_NONE },
@@ -1070,6 +1071,9 @@ struct ik input_keywords[] =
 	{ "SERVICE2",				IKT_IPT,		IPT_SERVICE2 },
 	{ "SERVICE3",				IKT_IPT,		IPT_SERVICE3 },
 	{ "SERVICE4",				IKT_IPT,		IPT_SERVICE4 },
+/*start MAME:analog+*/
+	{ "SERVICE",				IKT_IPT,		IPT_SERVICE },
+/*end MAME:analog+  */
 	{ "TILT",					IKT_IPT,		IPT_TILT },
 
 	{ "P1_JOYSTICK_UP",			IKT_IPT,		IPF_PLAYER1 | IPT_JOYSTICK_UP },
@@ -1545,7 +1549,7 @@ int num_ik = sizeof(input_keywords)/sizeof(struct ik);
 
 /***************************************************************************/
 /* Generic IO */
-
+#if 0
 static int readint(mame_file *f,UINT32 *num)
 {
 	unsigned i;
@@ -1579,6 +1583,7 @@ static void writeint(mame_file *f,UINT32 num)
 		num <<= 8;
 	}
 }
+#endif
 
 static int readword(mame_file *f,UINT16 *num)
 {
@@ -1615,7 +1620,6 @@ static void writeword(mame_file *f,UINT16 num)
 		num <<= 8;
 	}
 }
-
 
 
 /***************************************************************************/
@@ -2129,11 +2133,9 @@ void update_analog_port(int port)
 
 	player = IP_GET_PLAYER(in);
 
-#if !defined( MSDOS )
 /*start MAME:analog+*/
 	delta = mouse_delta_axis[player][axis] + (analog_current_axis[player][axis] >> 3);
 /*end MAME:analog+*/
-#endif
 
 	if (seq_pressed(decseq)) delta -= keydelta;
 
@@ -2283,14 +2285,12 @@ void update_analog_port(int port)
 		}
 	}
 
-#if !defined( MSDOS )
 /*start MAME:analog+*/
 	if (joymouse)
 	{
 		//special handling for using a joystick as a mouse
 	}
 /*end MAME:analog+  */
-#endif
 
 	input_analog_current_value[port] = current;
 }
@@ -2338,9 +2338,7 @@ profiler_mark(PROFILER_END);
 
 #define MAX_JOYSTICKS 3
 /*start MAME:analog+*/
-#ifdef MSDOS
-#define MAX_PLAYERS 8	/* defined in inptport.h */
-#endif
+//#define MAX_PLAYERS 8	/* defined in inptport.h */
 /*end MAME:analog+  */
 static int mJoyCurrent[MAX_JOYSTICKS*MAX_PLAYERS];
 static int mJoyPrevious[MAX_JOYSTICKS*MAX_PLAYERS];
@@ -2743,13 +2741,15 @@ profiler_mark(PROFILER_INPUT);
 		}
 	}
 
+/*start MAME:analog+*/
 #ifdef WINXPANANLOG
 	/* <jake> */
 	// Give the input osd_reads a chance to initialize themselves at the start of a cycle
 	osd_new_input_read_cycle();
 	/* <jake> */
-
 #endif /* WINXPANANLOG */
+/*end MAME:analog+  */
+
 	/* update the analog devices */
 	for (i = 0;i < OSD_MAX_JOY_ANALOG;i++)
 	{
@@ -2900,7 +2900,11 @@ struct InputPort* input_port_allocate(const struct InputPortTiny *src)
 
 	total = input_port_count(src);
 
-	base = (struct InputPort*)malloc(total * sizeof(struct InputPort));
+	base = (struct InputPort*) auto_malloc(total * sizeof(struct InputPort));
+	if (!base)
+		return NULL;
+	memset(base, 0, total * sizeof(struct InputPort));
+
 	dst = base;
 
 	while (src->type != IPT_END)
@@ -2998,11 +3002,6 @@ struct InputPort* input_port_allocate(const struct InputPortTiny *src)
 	dst->type = IPT_END;
 
 	return base;
-}
-
-void input_port_free(struct InputPort* dst)
-{
-	free(dst);
 }
 
 

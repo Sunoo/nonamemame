@@ -354,6 +354,7 @@ ROM_START( andromed )//Jumps to an unmapped sub-routine at $2fc9
 	ROM_LOAD( "am5",  0x2000, 0x0400, CRC(518a3b88) SHA1(5e20c905c2190b381a105327e112fcc0a127bb2f) )
 	ROM_LOAD( "am6",  0x2400, 0x0400, CRC(ce3d5fff) SHA1(c34178aca9ffb8b2dd468d9e3369a985f52daf9a) )
 	ROM_LOAD( "am7",  0x2800, 0x0400, CRC(30d3366f) SHA1(aa73bba194fa6d1f3909f8df517a0bff07583ea9) )
+	ROM_LOAD( "am8",  0x2c00, 0x0400, NO_DUMP ) // $60 entries 
 
 	ROM_REGION( 0x0800, REGION_GFX1, ROMREGION_DISPOSE )
 	ROM_LOAD( "am9",  0x0000, 0x0400, CRC(a1c8f4db) SHA1(bedf5d7126c7e9b91ad595188c69aa2c043c71e8) )

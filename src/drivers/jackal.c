@@ -310,6 +310,7 @@ INPUT_PORTS_START( topgunbl )
 	PORT_START	/* player 2 8-way rotary control - converted in topgunbl_rotary_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, IP_JOY_NONE, IP_JOY_NONE )
 
+/*start MAME:analog+*/
 	/* <jjs> */
 	PORT_START	/* alternate player 1 8-way rotary control - converted in rotary_0_r() */
 	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4, 1)
@@ -319,6 +320,7 @@ INPUT_PORTS_START( topgunbl )
 	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER2, 1)
 	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER2, 1)
 	/* </jjs> */
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 

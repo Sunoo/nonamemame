@@ -40,12 +40,15 @@ READ16_HANDLER( dec0_controls_r )
 
 READ16_HANDLER( dec0_rotary_r )
 {
+/*start MAME:analog+*/
 	static unsigned char old_joydir[2], updatetoggle[2];
 	static int temp, use_2button_rotary[]={0,0};
+/*end MAME:analog+  */
 
 	switch (offset<<1)
 	{
 		case 0: /* Player 1 rotary */
+/*start MAME:analog+*/
 			/* input from original buttons overides all other rotary inputs */
 			if ( (temp = readinputport(9)) )
 				return ~temp;
@@ -76,9 +79,11 @@ READ16_HANDLER( dec0_rotary_r )
 				return ~(1 << (old_joydir[0]));
 			}
 			else
+/*end MAME:analog+  */
 				return ~(1 << (readinputport(5) * 12 / 256));
 
 		case 8: /* Player 2 rotary */
+/*start MAME:analog+*/
 			/* input from original buttons overides all other rotary inputs */
 			if ( (temp = readinputport(10)) )
 				return ~temp;
@@ -110,6 +115,7 @@ READ16_HANDLER( dec0_rotary_r )
 				return (~(1<<(old_joydir[1])));
 			}
 			else
+/*end MAME:analog+  */
 				return ~(1 << (readinputport(6) * 12 / 256));
 
 		default:
@@ -123,8 +129,10 @@ READ16_HANDLER( dec0_rotary_r )
 
 READ16_HANDLER( midres_controls_r )
 {
+/*start MAME:analog+*/
 	static unsigned char old_joydir[2], updatetoggle[2];
 	static int temp, use_2button_rotary[]={0,0};
+/*end MAME:analog+  */
 
 	switch (offset<<1)
 	{
@@ -135,6 +143,7 @@ READ16_HANDLER( midres_controls_r )
 			return (readinputport(3) + (readinputport(4) << 8));
 
 		case 4: /* Player 1 rotary */
+/*start MAME:analog+*/
 			/* input from original buttons overides all other rotary inputs */
 			if ( (temp = readinputport(9)) )
 				return ~temp;
@@ -165,9 +174,11 @@ READ16_HANDLER( midres_controls_r )
 				return ~(1 << (old_joydir[0]));
 			}
 			else
+/*end MAME:analog+  */
 				return ~(1 << (readinputport(5) * 12 / 256));
 
 		case 6: /* Player 2 rotary */
+/*start MAME:analog+*/
 			/* input from original buttons overides all other rotary inputs */
 			if ( (temp = readinputport(10)) )
 				return ~temp;
@@ -199,6 +210,7 @@ READ16_HANDLER( midres_controls_r )
 				return (~(1<<(old_joydir[1])));
 			}
 			else
+/*end MAME:analog+  */
 				return ~(1 << (readinputport(6) * 12 / 256));
 
 		case 8: /* Credits, start buttons */

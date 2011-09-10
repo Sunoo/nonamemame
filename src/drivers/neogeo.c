@@ -5944,7 +5944,7 @@ ROM_START( jckeygpd )
 ROM_END
 
 
-
+#ifdef OUTLAW
 ROM_START( zupapa ) /* Original Version - Encrypted GFX */
 	ROM_REGION( 0x100000, REGION_CPU1, 0 )
 	ROM_LOAD16_WORD_SWAP( "070-p1.bin", 0x000000, 0x100000, CRC(5a96203e) SHA1(49cddec9ca6cc51e5ecf8a34e447a23e1f8a15a1) )
@@ -6454,6 +6454,7 @@ ROM_START( pwrinst4 )
    ROM_LOAD16_BYTE( "266-c7d.bin", 0x3000000, 0x800000, CRC(3C1FB02A) )
    ROM_LOAD16_BYTE( "266-c8d.bin", 0x3000001, 0x800000, CRC(5EE31F80) )
 ROM_END
+#endif
 /******************************************************************************/
 
 /* dummy entry for the dummy bios driver */
@@ -6826,6 +6827,7 @@ DRIVER_INIT( popbounc )
 
 	init_neogeo();
 }
+#ifdef OUTLAW
 DRIVER_INIT( zupapa )
 {
 	neogeo_fix_bank_type = 1;
@@ -7092,6 +7094,7 @@ DRIVER_INIT( pwrinst4 )
 
    init_neogeo();
 }
+#endif
 /******************************************************************************/
 
 static UINT32 cpu1_second_bankaddress;
@@ -7378,7 +7381,8 @@ GAMEBX( 2001, jckeygpd,   jockeygp,   neogeo, neogeo, neogeo,  neogeo,   ROT0, "
 GAMEB( 1994, diggermn, neogeo,  neogeo, neogeo,   neogeo,   neogeo, ROT0, "Face", "Digger Man" )
 GAMEB( 2002, neonopon, neogeo,  neogeo, neogeo,   neogeo,   neogeo, ROT0, "Blastar", "Neo No Panepon (beta)" )
 GAMEB( 2002, neonopnd, neogeo,  neogeo, neogeo,   neogeo,   neogeo, ROT0, "Blastar", "Neo No Panepon" )
-/* TEAM FETUS ADDITIONS */
+/* Outlaw Drivers: TEAM FETUS ADDITIONS */
+#ifdef OUTLAW
 GAMEB( 2001, zupapa,   neogeo,   neogeo, neogeo, neogeo,  zupapa,   ROT0, "SNK", "Zupapa!" )	/* Encrypted GFX */
 GAMEB( 2001, sengoku3, neogeo,   neogeo, neo320, neogeo,  sengoku3, ROT0, "SNK", "Sengoku 3" )	/* Encrypted GFX */
 GAMEB( 2001, kof2001,  neogeo,   neogeo, neogeo, neogeo,  kof2001,  ROT0, "Eolith / SNK", "The King of Fighters 2001" )
@@ -7397,3 +7401,4 @@ GAMEB( 2003, kof2003,  neogeo,	 neogeo, neogeo, neogeo,  kof2002,  ROT0, "Eolith
 GAMEB( 2003, digerman,   neogeo,   neogeo, neogeo, neogeo,  neogeo,   ROT0, "Mystery developer", "Digger Man" )
 GAMEB( 2002, pim,  neogeo,    neogeo, neogeo, neogeo,  neogeo,   ROT0, "Playmore / Atlus / Noise Factory", "Power Instinct Matrimelee. Lets hope its better than the other ones." )
 GAMEB( 2002, pwrinst4, neogeo,   neogeo,neogeo, neogeo,  pwrinst4, ROT0, "Noise Factory / Atlus Corporation","Power Instinct Matrimelee / Shin Gouketsuji-Ichizoku Tokon Matrimelee" )
+#endif

@@ -452,6 +452,7 @@ INPUT_PORTS_START( hbarrel )
 	PORT_START	/* player 2 12-way rotary control - fake dial type - converted in controls_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, IP_JOY_NONE, IP_JOY_NONE )
 
+/*start MAME:analog+*/
 	PORT_START	/* player 1 12-way rotary control - fake 2 button type - converted in controls_r() */
 	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1, 3)
 	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1, 3)
@@ -487,6 +488,7 @@ INPUT_PORTS_START( hbarrel )
 	PORT_BIT(0x200, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER4)
 	PORT_BIT(0x400, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER2)
 	PORT_BIT(0x800, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER2)
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( baddudes )
@@ -537,41 +539,43 @@ INPUT_PORTS_START( baddudes )
 	PORT_START	/* player 2 12-way rotary control - converted in controls_r() */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNKNOWN )	/* unused */
 
-	PORT_START	/* player 1 12-way rotary control - fake 2 button type - converted in controls_r() */
-	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN, 2)	/* unused */
-	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN, 2)	/* unused */
-
-	PORT_START	/* player 2 12-way rotary control - fake 2 button type - converted in controls_r() */
-	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN, 2)	/* unused */
-	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN, 2)	/* unused */
-
-	PORT_START	/* player 1 TRUE 12-way rotary control */
-	PORT_BIT(0x001, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x002, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x004, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x008, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x010, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x020, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x040, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x080, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x100, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x200, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x400, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x800, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-
-	PORT_START	/* player 2 TRUE 12-way rotary control */
-	PORT_BIT(0x001, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x002, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x004, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x008, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x010, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x020, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x040, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x080, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x100, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x200, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x400, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
-	PORT_BIT(0x800, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+/*start MAME:analog+*/
+//	PORT_START	/* player 1 12-way rotary control - fake 2 button type - converted in controls_r() */
+//	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN, 2)	/* unused */
+//	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN, 2)	/* unused */
+//
+//	PORT_START	/* player 2 12-way rotary control - fake 2 button type - converted in controls_r() */
+//	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_UNKNOWN, 2)	/* unused */
+//	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_UNKNOWN, 2)	/* unused */
+//
+//	PORT_START	/* player 1 TRUE 12-way rotary control */
+//	PORT_BIT(0x001, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x002, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x004, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x008, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x010, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x020, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x040, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x080, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x100, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x200, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x400, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x800, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//
+//	PORT_START	/* player 2 TRUE 12-way rotary control */
+//	PORT_BIT(0x001, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x002, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x004, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x008, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x010, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x020, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x040, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x080, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x100, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x200, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x400, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+//	PORT_BIT(0x800, IP_ACTIVE_HIGH, IPT_UNKNOWN )	/* unused */
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( robocop )
@@ -800,6 +804,7 @@ INPUT_PORTS_START( midres )
 	PORT_START	/* player 2 12-way rotary control - converted in controls_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, IP_JOY_NONE, IP_JOY_NONE )
 
+/*start MAME:analog+*/
 	PORT_START	/* player 1 12-way rotary control - button type - converted in controls_r() */
 	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1, 2)
 	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1, 2)
@@ -835,6 +840,7 @@ INPUT_PORTS_START( midres )
 	PORT_BIT(0x200, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER4)
 	PORT_BIT(0x400, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER2)
 	PORT_BIT(0x800, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER2)
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( bouldash )

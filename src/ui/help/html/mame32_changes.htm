@@ -1,6 +1,7 @@
 <html xmlns:v="urn:schemas-microsoft-com:vml"
 xmlns:o="urn:schemas-microsoft-com:office:office"
 xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:st1="urn:schemas-microsoft-com:office:smarttags"
 xmlns="http://www.w3.org/TR/REC-html40">
 
 <head>
@@ -10,22 +11,28 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <meta name=Originator content="Microsoft Word 11">
 <link rel=File-List href="mame32_changes_files/filelist.xml">
 <title>Mame32 Changes</title>
+<o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
+ name="country-region"/>
+<o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
+ name="City"/>
+<o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
+ name="place"/>
 <!--[if gte mso 9]><xml>
  <o:DocumentProperties>
   <o:Author>john4</o:Author>
   <o:Template>Normal</o:Template>
   <o:LastAuthor>john4</o:LastAuthor>
-  <o:Revision>58</o:Revision>
-  <o:TotalTime>79</o:TotalTime>
+  <o:Revision>59</o:Revision>
+  <o:TotalTime>80</o:TotalTime>
   <o:Created>2002-04-16T22:36:00Z</o:Created>
-  <o:LastSaved>2004-05-06T18:43:00Z</o:LastSaved>
+  <o:LastSaved>2004-06-05T00:18:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>370</o:Words>
-  <o:Characters>2114</o:Characters>
-  <o:Lines>17</o:Lines>
-  <o:Paragraphs>4</o:Paragraphs>
-  <o:CharactersWithSpaces>2480</o:CharactersWithSpaces>
-  <o:Version>11.5703</o:Version>
+  <o:Words>827</o:Words>
+  <o:Characters>4718</o:Characters>
+  <o:Lines>39</o:Lines>
+  <o:Paragraphs>11</o:Paragraphs>
+  <o:CharactersWithSpaces>5534</o:CharactersWithSpaces>
+  <o:Version>11.5606</o:Version>
  </o:DocumentProperties>
 </xml><![endif]--><!--[if gte mso 9]><xml>
  <w:WordDocument>
@@ -35,19 +42,22 @@ xmlns="http://www.w3.org/TR/REC-html40">
    NLCheck="1">1</w:ActiveWritingStyle>
   <w:ActiveWritingStyle Lang="FR" VendorID="64" DLLVersion="131078" NLCheck="1">1</w:ActiveWritingStyle>
   <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
   <w:ValidateAgainstSchemas/>
   <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
   <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
   <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
-  <w:Compatibility>
-   <w:UseFELayout/>
-  </w:Compatibility>
   <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
  </w:WordDocument>
 </xml><![endif]--><!--[if gte mso 9]><xml>
  <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
  </w:LatentStyles>
-</xml><![endif]-->
+</xml><![endif]--><!--[if !mso]><object
+ classid="clsid:38481807-CA0E-42D2-BF39-B33AF135CC4D" id=ieooui></object>
+<style>
+st1\:*{behavior:url(#ieooui) }
+</style>
+<![endif]-->
 <style>
 <!--
  /* Font Definitions */
@@ -56,12 +66,12 @@ xmlns="http://www.w3.org/TR/REC-html40">
 	panose-1:2 2 6 9 4 2 5 8 3 4;
 	mso-font-alt:"\FF2D\FF33 \660E\671D";
 	mso-font-charset:128;
-	mso-generic-font-family:modern;
+	mso-generic-font-family:roman;
+	mso-font-format:other;
 	mso-font-pitch:fixed;
-	mso-font-signature:-1610612033 1757936891 16 0 131231 0;}
+	mso-font-signature:1 134676480 16 0 131072 0;}
 @font-face
 	{font-family:"\@MS Mincho";
-	panose-1:2 2 6 9 4 2 5 8 3 4;
 	mso-font-charset:128;
 	mso-generic-font-family:modern;
 	mso-font-pitch:fixed;
@@ -130,6 +140,9 @@ p
 span.SpellE
 	{mso-style-name:"";
 	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
 @page Section1
 	{size:8.5in 11.0in;
 	margin:1.0in 1.25in 1.0in 1.25in;
@@ -155,13 +168,12 @@ div.Section1
 	mso-pagination:widow-orphan;
 	font-size:10.0pt;
 	font-family:"Times New Roman";
-	mso-fareast-font-family:"Times New Roman";
 	mso-ansi-language:#0400;
 	mso-fareast-language:#0400;
 	mso-bidi-language:#0400;}
 </style>
 <![endif]--><!--[if gte mso 9]><xml>
- <o:shapedefaults v:ext="edit" spidmax="9218"/>
+ <o:shapedefaults v:ext="edit" spidmax="10242"/>
 </xml><![endif]--><!--[if gte mso 9]><xml>
  <o:shapelayout v:ext="edit">
   <o:idmap v:ext="edit" data="1"/>
@@ -179,368 +191,687 @@ style='tab-interval:.5in'>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'>+| game added<o:p></o:p></span></p>
 
-<p class=MsoNormal><span style='font-family:"Courier New"'>c|&nbsp;game changed
-from<o:p></o:p></span></p>
+<p class=MsoNormal><span class=GramE><span style='font-family:"Courier New"'>c</span></span><span
+style='font-family:"Courier New"'>|&nbsp;game changed from<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'>C|&nbsp;game changed
 to<o:p></o:p></span></p>
 
-<h3>0.82 05/06/2004</h3>
+<h3>0.83 06/04/2004</h3>
 
 <p class=MsoNormal><o:p>&nbsp;</o:p></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|1945kiii<span style='mso-spacerun:yes'> 
-</span>&quot;1945k III&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>-|<span class=SpellE><span class=GramE>dadandrn</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>Kyukyoku</span> <span class=SpellE>Sentai</span> <span
+class=SpellE>Dadandarn</span>&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>agress</span><span
-style='mso-spacerun:yes'>    </span>&quot;<span class=SpellE>Agress</span>&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE>argusg</span><span
+style='mso-spacerun:yes'>    </span>&quot;Argus&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>cultname</span><span
-style='mso-spacerun:yes'>  </span>&quot;<span class=SpellE>Seimei-Kantei-Meimei-Ki</span>
-Cult Name&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=GramE>bldyror2<span
+style='mso-spacerun:yes'>  </span>&quot;</span>Bloody Roar 2&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>dendeg</span><span
-style='mso-spacerun:yes'>    </span>&quot;<span class=SpellE>Densya</span> De
-Go&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=GramE>bm5thmix<span
+style='mso-spacerun:yes'>  </span>&quot;</span>beatmania 5th MIX&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|dendeg2<span style='mso-spacerun:yes'>  
-</span>&quot;<span class=SpellE>Densya</span> De Go 2&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE>cball</span><span
+style='mso-spacerun:yes'>     </span>&quot;Cannonball&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>dynagear</span><span
-style='mso-spacerun:yes'>  </span>&quot;<span class=SpellE>Dyna</span>
-Gears&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE>dingoe</span><span
+style='mso-spacerun:yes'>    </span>&quot;Dingo&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>finalapr</span><span
-style='mso-spacerun:yes'>  </span>&quot;Final Lap R&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE><span class=GramE>getrivia</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Trivia&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>firehawk</span><span
-style='mso-spacerun:yes'>  </span>&quot;<span class=SpellE>Firehawk</span>&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|getrv1<span style='mso-spacerun:yes'>   
+</span>&quot;Trivia 1&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>ghostlop</span><span
-style='mso-spacerun:yes'>  </span>&quot;<span class=SpellE>Ghostlop</span>&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|getrv2<span style='mso-spacerun:yes'>   
+</span>&quot;Trivia 2&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>hyprdriv</span><span
-style='mso-spacerun:yes'>  </span>&quot;<span class=SpellE>Hyperdrive</span>&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|getrv3<span style='mso-spacerun:yes'>   
+</span>&quot;Trivia 3&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>jojo</span><span
-style='mso-spacerun:yes'>      </span>&quot;<span class=SpellE>JoJo's</span> Venture&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|getrv4<span style='mso-spacerun:yes'>   
+</span>&quot;Trivia 4&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|jojoba<span style='mso-spacerun:yes'>   
-</span>&quot;<span class=SpellE>JoJo's</span> Bizarre Adventure&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|gp500<span style='mso-spacerun:yes'>    
+</span>&quot;GP500&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>kisekaeh</span><span
-style='mso-spacerun:yes'>  </span>&quot;<span class=SpellE>Kisekae</span> <span
-class=SpellE>Hanafuda</span>&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=GramE>gpan2qiz<span
+style='mso-spacerun:yes'>  </span>&quot;</span>Gals Panic II - Quiz
+Version&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>kisekaem</span><span
-style='mso-spacerun:yes'>  </span>&quot;<span class=SpellE>Kisekae</span>
-Mahjong&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE>gpgolf</span><span
+style='mso-spacerun:yes'>    </span>&quot;Golden Par Golf&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>landgear</span><span
-style='mso-spacerun:yes'>  </span>&quot;Landing Gear&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE>headoni</span><span
+style='mso-spacerun:yes'>   </span>&quot;Head On&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>lordgun</span><span
-style='mso-spacerun:yes'>   </span>&quot;Lord of Gun&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE><span class=GramE>hvnsgate</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Heavens
+Gate&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>mayjinsn</span><span
-style='mso-spacerun:yes'>  </span>&quot;<span class=SpellE>Mayjinsen</span>&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE>jumppop</span><span
+style='mso-spacerun:yes'>   </span>&quot;Jumping Pop&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|mayjisn2<span style='mso-spacerun:yes'> 
-</span>&quot;<span class=SpellE>Mayjinsen</span> 2&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE><span class=GramE>mmaulers</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Monster
+Maulers&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>mgolf</span><span
-style='mso-spacerun:yes'>     </span>&quot;Atari Mini Golf&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE><span class=GramE>mspuzzle</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Miss
+Puzzle&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>misncrft</span><span
-style='mso-spacerun:yes'>  </span>&quot;Mission Craft&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=GramE>pbchmp95<span
+style='mso-spacerun:yes'>  </span>&quot;</span>Pinball Champ '95&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>mp_twc</span><span
-style='mso-spacerun:yes'>    </span>&quot;<span class=SpellE>MegaPlay</span>:
-Tecmo World Cup&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE>pkgnsh</span><span
+style='mso-spacerun:yes'>    </span>&quot;Pachinko <span class=SpellE>Gindama</span>
+<span class=SpellE>Shoubu</span>&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>mt_cols</span><span
+style='mso-spacerun:yes'> </span>+|<span class=SpellE><span class=GramE>pkgnshdx</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Pachinko <span
+class=SpellE>Gindama</span> <span class=SpellE>Shoubu</span> DX&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>+|<span class=SpellE>qdrmfgp</span><span
+style='mso-spacerun:yes'>   </span>&quot;Quiz Do Re Mi <span class=SpellE>Fa</span>
+Grand Prix&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>+|<span class=GramE>qdrmfgp2<span
+style='mso-spacerun:yes'>  </span>&quot;</span>Quiz Do Re Mi <span
+class=SpellE>Fa</span> Grand Prix2 - Shin-<span class=SpellE>Kyoku</span> <span
+class=SpellE>Nyuukadayo</span>&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>+|<span class=SpellE><span class=GramE>sfchampj</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Super Football
+Champ&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>+|<span class=SpellE><span class=GramE>victnine</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Victorious
+Nine&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>+|<span class=SpellE><span class=GramE>vidvince</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Video Vince
+and the Game Factory&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>+|<span class=SpellE>wizwarz</span><span
+style='mso-spacerun:yes'>   </span>&quot;Wiz <span class=SpellE>Warz</span>&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>c|<span class=GramE>columns2<span
+style='mso-spacerun:yes'>  </span>&quot;</span>Columns II - The Voyage Through
+Time&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>C|<span class=GramE>columns2<span
+style='mso-spacerun:yes'>  </span>&quot;</span>Columns II: The Voyage Through
+Time&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|<span class=GramE>firehawk</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Fire
+Hawk&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|<span class=GramE>firehawk</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>Firehawk</span>&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|<span class=GramE>ftimpcta</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Fighter's
+Impact Ace&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|<span class=GramE>ftimpcta</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Fighters'
+Impact A&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|<span class=GramE>mgcldate</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Magical
+Date&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|<span class=GramE>mgcldtex</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Magical Date
+EX&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>c|mp_<span class=GramE>gaxe2<span
+style='mso-spacerun:yes'>  </span>&quot;</span><span class=SpellE>MegaPlay</span>:
+Golden Axe 2&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>C|mp_<span class=GramE>gaxe2<span
+style='mso-spacerun:yes'>  </span>&quot;</span><span class=SpellE>MegaPlay</span>:
+Golden Axe II&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mp_<span class=GramE>sonic</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaPlay</span>: Sonic the Hedgehog&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mp_<span class=GramE>sonic</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaPlay</span>: Sonic The Hedgehog&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>aftrb</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+After Burner&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>aftrb</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Afterburner&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>astro</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Astro Warrior&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>astro</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Astro Warrior&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>bbros</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Bonanza Bros.&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>bbros</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Bonanza Bros.&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>beast</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Altered Beast&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>beast</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Altered Beast&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_cols</span><span
+style='mso-spacerun:yes'>   </span>&quot;Mega-Tech: Columns&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_cols</span><span
 style='mso-spacerun:yes'>   </span>&quot;<span class=SpellE>MegaTech</span>:
 Columns&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>mt_crack</span><span
-style='mso-spacerun:yes'>  </span>&quot;<span class=SpellE>MegaTech</span>:
-Crackdown&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>crack</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Crack Down&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|mt_soni2<span style='mso-spacerun:yes'> 
-</span>&quot;<span class=SpellE>MegaTech</span>: Sonic 2&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>crack</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Crackdown&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>mt_stf</span><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>eswat</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Cyber Police ESWAT: Enhanced Special Weapons and Tactics&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>eswat</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: E-Swat&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>fshrk</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Fire Shark&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>fshrk</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Fire Shark&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_gaxe</span><span
+style='mso-spacerun:yes'>   </span>&quot;Mega-Tech: Golden Axe&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_gaxe</span><span
+style='mso-spacerun:yes'>   </span>&quot;<span class=SpellE>MegaTech</span>:
+Golden Axe&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>C|mt_<span class=GramE>gaxe2<span
+style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech: Golden Axe II&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>c|mt_<span class=GramE>gaxe2<span
+style='mso-spacerun:yes'>  </span>&quot;</span><span class=SpellE>MegaTech</span>:
+Golden Axe 2&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>ggolf</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Great Golf&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>ggolf</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Great Golf&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_gng</span><span
+style='mso-spacerun:yes'>    </span>&quot;Mega-Tech: <span class=SpellE>Ghouls'n</span>
+Ghosts&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_gng</span><span
 style='mso-spacerun:yes'>    </span>&quot;<span class=SpellE>MegaTech</span>:
-Joe Montana II : Sports Talk Football&quot;<o:p></o:p></span></p>
+Ghouls and Ghosts&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>nratechu</span><span
-style='mso-spacerun:yes'>  </span>&quot;<span class=SpellE>Neratte</span> <span
-class=SpellE>Chu</span>&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>gsocr</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Great Soccer&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>onetwo</span><span
-style='mso-spacerun:yes'>    </span>&quot;One + Two&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>gsocr</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Great Soccer&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>piratetr</span><span
-style='mso-spacerun:yes'>  </span>&quot;Pirate Treasure&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>kcham</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech: Kid
+Chameleon&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>racingb</span><span
-style='mso-spacerun:yes'>   </span>&quot;Racing Beat&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>kcham</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Kid Chameleon&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>raidndx</span><span
-style='mso-spacerun:yes'>   </span>&quot;<span class=SpellE>Raiden</span>
-DX&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>lastb</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Last <st1:City w:st="on"><st1:place w:st="on">Battle</st1:place></st1:City>&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>renju</span><span
-style='mso-spacerun:yes'>     </span>&quot;<span class=SpellE>Renju</span> <span
-class=SpellE>Kizoku</span>&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>lastb</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Last <st1:City w:st="on"><st1:place w:st="on">Battle</st1:place></st1:City>.&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>sfiii</span><span
-style='mso-spacerun:yes'>     </span>&quot;Street Fighter III - New
-Generation&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>mwalk</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Moonwalker&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|sfiii2<span style='mso-spacerun:yes'>   
-</span>&quot;Street Fighter III 2nd Impact - Giant Attack&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>mwalk</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Moonwalker&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|sfiii3<span style='mso-spacerun:yes'>   
-</span>&quot;Street Fighter III 3rd Strike -<span style='mso-spacerun:yes'> 
-</span>Fight for the Future&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>mystd</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Mystic Defender&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>sfrushrk</span><span
-style='mso-spacerun:yes'>  </span>&quot;San Francisco Rush: The Rock&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>mystd</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Mystic Defender&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>sidebs</span><span
-style='mso-spacerun:yes'>    </span>&quot;Side By Side&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>parlg</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech: <span
+class=SpellE>Parlour</span> Games&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|sidebs2<span style='mso-spacerun:yes'>  
-</span>&quot;Side By Side 2&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>parlg</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: <span class=SpellE>Parlour</span> Games&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>speedrcr</span><span
-style='mso-spacerun:yes'>  </span>&quot;Speed Racer&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>revsh</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech: The
+Revenge Of Shinobi&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>speglsht</span><span
-style='mso-spacerun:yes'>  </span>&quot;Super Eagle Shot&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>revsh</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: The Revenge Of Shinobi&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|srmp5<span style='mso-spacerun:yes'>    
-</span>&quot;Super Real Mahjong P5&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>C|mt_<span class=GramE>shar2<span
+style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech: Space Harrier
+II&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>suprridr</span><span
-style='mso-spacerun:yes'>  </span>&quot;Super Rider&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>c|mt_<span class=GramE>shar2<span
+style='mso-spacerun:yes'>  </span>&quot;</span><span class=SpellE>MegaTech</span>:
+Space Harrier 2.&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>swa</span><span
-style='mso-spacerun:yes'>       </span>&quot;Star Wars Arcade&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>shnbi</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Shinobi&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>sws</span><span
-style='mso-spacerun:yes'>       </span>&quot;Super World Stadium&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>shnbi</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Shinobi&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>tylz</span><span
-style='mso-spacerun:yes'>      </span>&quot;<span class=SpellE>Tylz</span>&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_smgp</span><span
+style='mso-spacerun:yes'>   </span>&quot;Mega-Tech: Super <st1:country-region
+w:st="on"><st1:place w:st="on">Monaco</st1:place></st1:country-region> GP&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>vaportrx</span><span
-style='mso-spacerun:yes'>  </span>&quot;Vapor TRX&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_smgp</span><span
+style='mso-spacerun:yes'>   </span>&quot;<span class=SpellE>MegaTech</span>:
+Super Monaco Grand Prix&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|vf1<span style='mso-spacerun:yes'>      
-</span>&quot;Virtua Fighter 1&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>C|mt_<span class=GramE>soni2<span
+style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech: Sonic the Hedgehog
+2&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>vr</span><span
-style='mso-spacerun:yes'>        </span>&quot;Virtua Racing&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>c|mt_<span class=GramE>soni2<span
+style='mso-spacerun:yes'>  </span>&quot;</span><span class=SpellE>MegaTech</span>:
+Sonic 2&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>warzard</span><span
-style='mso-spacerun:yes'>   </span>&quot;<span class=SpellE>Warzard</span>&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>sonic</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Sonic the Hedgehog&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>wingwar</span><span
-style='mso-spacerun:yes'>   </span>&quot;Wing War&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>sonic</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Sonic the Hedgehog&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>yujan</span><span
-style='mso-spacerun:yes'>     </span>&quot;Yu-Jan&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>stbld</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Super Thunder Blade&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>yuka</span><span
-style='mso-spacerun:yes'>      </span>&quot;Yu-Ka&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>stbld</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Super Thunder Blade&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>zeroteam</span><span
-style='mso-spacerun:yes'>  </span>&quot;Zero Team&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_stf</span><span
+style='mso-spacerun:yes'>    </span>&quot;Mega-Tech: Joe Montana II: Sports
+Talk Football&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span><span class=SpellE>c|cbaj</span><span
-style='mso-spacerun:yes'>      </span>&quot;Cool Boarder Arcade Jam&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_stf</span><span
+style='mso-spacerun:yes'>    </span>&quot;<span class=SpellE>MegaTech</span>:
+Joe Montana <span class=GramE>II :</span> Sports Talk Football&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span><span class=SpellE>C|cbaj</span><span
-style='mso-spacerun:yes'>      </span>&quot;Cool Boarders Arcade Jam&quot;<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>tetri</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Tetris&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>tetri</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Tetris&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>C|mt_<span class=GramE>tfor2 <span
+style='mso-spacerun:yes'> </span>&quot;</span>Mega-Tech: Thunder Force II
+MD&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>c|mt_<span class=GramE>tfor2<span
+style='mso-spacerun:yes'>  </span>&quot;</span><span class=SpellE>MegaTech</span>:
+Thunder Force 2&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>tgolf</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech: <st1:City
+w:st="on"><st1:place w:st="on">Arnold</st1:place></st1:City> Palmer Tournament
+Golf&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>tgolf</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: <st1:City w:st="on"><st1:place w:st="on">Arnold</st1:place></st1:City>
+Palmer Tournament Golf&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>tlbba</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+Tommy <span class=SpellE>Lasorda</span> Baseball&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>tlbba</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: Tommy <span class=SpellE>Lasorda</span>
+Baseball&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mt_<span class=GramE>wcsoc</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Mega-Tech:
+World Championship Soccer&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|mt_<span class=GramE>wcsoc</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span><span
+class=SpellE>MegaTech</span>: World Cup Soccer&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|pc_<span class=GramE>bstar</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10:
+Baseball Stars&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|pc_<span class=GramE>bstar</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10:
+Baseball Stars: Be a Champ!&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|pc_<span class=GramE>ftqst</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10:
+Uncle <span class=SpellE>Fester's</span> Quest - The Addams Family&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|pc_<span class=GramE>ftqst</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10:
+Uncle <span class=SpellE>Fester's</span> Quest: The Addams Family&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|pc_<span class=GramE>miket</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10:
+Mike Tyson's Punch-Out!!&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|pc_<span class=GramE>miket</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10:
+Mike Tyson's Punchout&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>c|pc_<span class=GramE>mman3<span
+style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10: Mega Man 3&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>C|pc_<span class=GramE>mman3<span
+style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10: Mega Man
+III&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>c|pc_<span class=GramE>ngai2<span
+style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10: Ninja <span
+class=SpellE>Gaiden</span> 2&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>C|pc_<span class=GramE>ngai2<span
+style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10: Ninja <span
+class=SpellE>Gaiden</span> Episode II: The Dark Sword of Chaos&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>c|pc_<span class=GramE>ngai3<span
+style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10: Ninja <span
+class=SpellE>Gaiden</span> 3&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>C|pc_<span class=GramE>ngai3<span
+style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10: Ninja <span
+class=SpellE>Gaiden</span> Episode III: The Ancient Ship of Doom&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|pc_<span class=GramE>rcpam</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10:
+R.C. Pro-Am&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|pc_<span class=GramE>rcpam</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10:
+RC Pro Am&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|pc_<span class=GramE>rnatk</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10:
+<span class=SpellE>Rush'n</span> Attack&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|pc_<span class=GramE>rnatk</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10:
+Rush N' Attack&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|pc_<span class=GramE>rrngr</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10:
+<span class=SpellE>Chip'n</span> Dale - Rescue Rangers&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|pc_<span class=GramE>rrngr</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10:
+<span class=SpellE>Chip'n</span> Dale: Rescue Rangers&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>c|pc_<span class=GramE>tmnt2<span
+style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10: Teenage Mutant
+Ninja Turtles II&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span>C|pc_<span class=GramE>tmnt2<span
+style='mso-spacerun:yes'>  </span>&quot;</span>PlayChoice-10: Teenage Mutant
+Ninja Turtles II: The <st1:place w:st="on">Arcade</st1:place> Game&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|<span class=GramE>psyforce</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Psychic
+Force&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|<span class=GramE>psyfrcex</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>&quot;</span>Psychic Force
+EX&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>C|toutrun</span><span
+style='mso-spacerun:yes'>   </span>&quot;Turbo <span class=GramE>Out</span>
+Run&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><span class=SpellE>c|toutrun</span><span
+style='mso-spacerun:yes'>   </span>&quot;Turbo Outrun&quot;<o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
 
-<p class=MsoNormal><span style='font-family:"Courier New"'>clones<o:p></o:p></span></p>
+<p class=MsoNormal><span class=GramE><span style='font-family:"Courier New"'>clones</span></span><span
+style='font-family:"Courier New"'><o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|a51r3k<span style='mso-spacerun:yes'>  
+style='mso-spacerun:yes'> </span>-|a51r3k<span style='mso-spacerun:yes'>  
 </span>area51<span style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>anteatg</span><span
-style='mso-spacerun:yes'>  </span>anteater<o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=GramE>area51t<span
+style='mso-spacerun:yes'>  </span>area51</span><span style='mso-spacerun:yes'> 
+</span><o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>batlbala</span> <span
-class=SpellE>senkyu</span><span style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE>dadandrn</span> <span
+class=SpellE>mmaulers</span><o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>contcrua</span> <span
-class=SpellE>contcirc</span><o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|dendeg2x dendeg2 <o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>dendegx</span><span
-style='mso-spacerun:yes'>  </span><span class=SpellE>dendeg</span><span
+style='mso-spacerun:yes'> </span>+|<span class=SpellE><span class=GramE>jojobaa</span></span><span
+class=GramE><span style='mso-spacerun:yes'>  </span>jojoba</span><span
 style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>drivfrcb</span> <span
-class=SpellE>drivfrcp</span><o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|le2j<span style='mso-spacerun:yes'>    
+</span>le2<span style='mso-spacerun:yes'>     </span><o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>inca</span><span
-style='mso-spacerun:yes'>     </span><span class=SpellE>maya</span><span
-style='mso-spacerun:yes'>    </span><o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|opengol2 <span class=SpellE>opengolf</span><o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|kinst13<span style='mso-spacerun:yes'> 
-</span><span class=SpellE>kinst</span><span style='mso-spacerun:yes'>   </span><o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE>qbtrktst</span> <span
+class=SpellE>qbert</span><span style='mso-spacerun:yes'>   </span><o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|kinst14<span style='mso-spacerun:yes'> 
-</span><span class=SpellE>kinst</span><span style='mso-spacerun:yes'>   </span><o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span>+|<span class=SpellE>tgtballa</span> <span
+class=SpellE>tgtball</span> <o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|kinst211 kinst2<span
-style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|mgcldate</span> <span
+class=SpellE>mgcldtex</span><o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|kinst213 kinst2<span
-style='mso-spacerun:yes'>  </span><o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE><span class=GramE>c|mgcldtea</span></span>
+<span class=SpellE>mgcldate</span><o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>leprechp</span> <span
-class=SpellE>leprechn</span><o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE><span class=GramE>c|psyforce</span></span>
+<span class=SpellE>psyfrcex</span><o:p></o:p></span></p>
 
 <p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|monster2 <span class=SpellE>monsterb</span><o:p></o:p></span></p>
+style='mso-spacerun:yes'> </span><span class=SpellE>C|psyforcj</span> <span
+class=SpellE>psyforce</span><o:p></o:p></span></p>
 
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>mt_sonia</span> <span
-class=SpellE>mt_sonic</span><o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|ninja<span style='mso-spacerun:yes'>   
-</span><span class=SpellE>seganinj</span><o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>nzerotea</span> <span
-class=SpellE>zeroteam</span><o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|raiden2a raiden2 <o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|raiden2b raiden2 <o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|raiden2c raiden2 <o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|raiden2e raiden2 <o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>raidndxa</span> <span
-class=SpellE>raidndx</span> <o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>raidndxb</span> <span
-class=SpellE>raidndx</span> <o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>raidndxj</span> <span
-class=SpellE>raidndx</span> <o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>snowbroc</span> <span
-class=SpellE>snowbros</span><o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>spangj</span><span
-style='mso-spacerun:yes'>   </span><span class=SpellE>spang</span><span
-style='mso-spacerun:yes'>   </span><o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>+|<span class=SpellE>speglsha</span> <span
-class=SpellE>speglsht</span><o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span><span class=SpellE>c|nbamaxht</span> <span
-class=SpellE>nbahangt</span><o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span><span class=SpellE>C|nbamht</span><span
-style='mso-spacerun:yes'>   </span><span class=SpellE>nbahangt</span><o:p></o:p></span></p>
-
-<p class=MsoNormal><span style='font-family:"Courier New"'><span
-style='mso-spacerun:yes'> </span>C|nbamht1<span style='mso-spacerun:yes'> 
-</span><span class=SpellE>nbahangt</span><o:p></o:p></span></p>
+<p class=MsoNormal><span style='font-family:"Courier New"'><o:p>&nbsp;</o:p></span></p>
 
 </div>
 

@@ -124,9 +124,11 @@ static const char *mame_default_text[] =
 #endif /* MESS */
 	"Game Cheats",
 	"Memory Card",
+/*start MAME:analog+*/
 	"Mouse Controls",
 	"Mouse Axes",
 	"Analog Joystick Controls",
+/*end MAME:analog+  */
 
 	/* documents menu */
 	"Game History",
@@ -138,11 +140,12 @@ static const char *mame_default_text[] =
 	"Game Command List",
 #endif /* CMD_LIST */
 
-	/* input */
+	/* analog input stuff */
 	"Key/Joy Speed",
 	"Reverse",
 	"Sensitivity",
 
+/*start MAME:analog+*/
 	/* analog+ input stuff */
 	"Mouse control",
 	"Mouse",
@@ -155,6 +158,7 @@ static const char *mame_default_text[] =
 	"rY-axis",
 	"rZ-axis",
 #endif
+/*end MAME:analog+  */
 
 	/* stats */
 	"Tickets dispensed",

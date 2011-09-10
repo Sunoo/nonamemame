@@ -459,12 +459,14 @@ READ_HANDLER( williams_input_port_1_4_r )
 
 READ_HANDLER( williams_49way_port_0_r )
 {
-	static int truestickmem = 0;
 	int joy_x, joy_y;
 /*analog+ start*/
 //	int bits_x, bits_y;
+	static int truestickmem = 0;
 	int truestick = readinputport(0);
 	int result = 0x0000;
+
+	if (williams49)	truestick = ~truestick;
 
 	if (truestick & 0x0070)
 	{
@@ -475,7 +477,9 @@ READ_HANDLER( williams_49way_port_0_r )
 		truestickmem &= ~0x00f0;
 	else
 	{
+/*end MAME:analog+  */
 		joy_x = readinputport(3) >> 4;	/* 0 = left 3 = center 6 = right */
+/*start MAME:analog+*/
 		result |= ((0x70 >> (7 - joy_x)) & 0x0f) << 4;
 	}
 
@@ -488,9 +492,12 @@ READ_HANDLER( williams_49way_port_0_r )
 		truestickmem &= ~0x000f;
 	else
 	{
+/*end MAME:analog+  */
 		joy_y = readinputport(4) >> 4;	/* 0 = down 3 = center 6 = up */
+/*start MAME:analog+*/
 		result |= (0x70 >> (7 - joy_y)) & 0x0f;
 	}
+
 
 	return result;
 /*analog+ end*/

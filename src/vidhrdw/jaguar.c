@@ -717,21 +717,28 @@ READ32_HANDLER( cojag_gun_input_r )
 	switch (offset)
 	{
 		case 0:
+/*start MAME:analog+*/
 			if (!(readinputport(8) & 0x04))  return 0;
+/*end MAME:analog+  */
 			get_crosshair_xy(1, &beamx, &beamy);
 			beamx += 52;
 			beamy += 17;
 			return (beamy << 16) | (beamx ^ 0x1ff);
 
 		case 1:
+/*start MAME:analog+*/
 			if (!(readinputport(8) & 0x08)) return 0;
+/*end MAME:analog+  */
 			get_crosshair_xy(0, &beamx, &beamy);
 			beamx += 52;
 			beamy += 17;
 			return (beamy << 16) | (beamx ^ 0x1ff);
 
 		case 2:
+/*start MAME:analog+*/
+//			return readinputport(7) << 16;
 			return (readinputport(7) & readinputport(8)) << 16;
+/*end MAME:analog+  */
 	}
 	return 0;
 }

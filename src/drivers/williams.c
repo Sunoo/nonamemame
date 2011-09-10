@@ -963,16 +963,16 @@ INPUT_PORTS_END
 INPUT_PORTS_START( sinistar )
 	PORT_START      /* IN0 */
 	/* pseudo analog joystick, see below */
-/*Analog+ start */	/* original 49-way joystick goes here */
-	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER3 )  /* P1  up-down   (A1) opto 4 (joy pin 2?) */
-	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER3 )  /* P1  up-down   (B1) opto 5 (joy pin 3?) */
-	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER3 )  /* P1  up-down   (C1) opto 6 (joy pin 4?) */
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER3 )  /* P1  up-down   direction bit (joy pin 5?) */ /* high?low */
-	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER3 )  /* P1 left-right (A1) opto 1 (joy pin 6?) */
-	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER3 )  /* P1 left-right (B1) opto 2 (joy pin 7?) */
-	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER3 )  /* P1 left-right (C1) opto 3 (joy pin 8?) */
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON8 | IPF_PLAYER3 )  /* P1 left-right direction bit (joy pin 9?) */ /* high?low */
-/*Analog+ end*/
+/*start MAME:analog+*/		/* original 49-way joystick goes here */
+	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER5 )  /* P1  up-down   (A1) opto 4 (joy pin 2?) */
+	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER5 )  /* P1  up-down   (B1) opto 5 (joy pin 3?) */
+	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER5 )  /* P1  up-down   (C1) opto 6 (joy pin 4?) */
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER5 )  /* P1  up-down   direction bit (joy pin 5?) */ /* high?low */
+	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER5 )  /* P1 left-right (A1) opto 1 (joy pin 6?) */
+	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER5 )  /* P1 left-right (B1) opto 2 (joy pin 7?) */
+	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER5 )  /* P1 left-right (C1) opto 3 (joy pin 8?) */
+	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON8 | IPF_PLAYER5 )  /* P1 left-right direction bit (joy pin 9?) */ /* high?low */
+/*end MAME:analog+  */
 
 	PORT_START      /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON1 )
@@ -1045,16 +1045,16 @@ INPUT_PORTS_END
 INPUT_PORTS_START( blaster )
 	PORT_START      /* IN0 */
 	/* pseudo analog joystick, see below */
-/*Analog+ start */	/* original 49-way joystick goes here */
-	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER3 )  /* P1  up-down   (A1) opto 4 (joy pin 2?) */
-	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER3 )  /* P1  up-down   (B1) opto 5 (joy pin 3?) */
-	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER3 )  /* P1  up-down   (C1) opto 6 (joy pin 4?) */
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER3 )  /* P1  up-down   direction bit (joy pin 5?) */ /* high?low */
-	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER3 )  /* P1 left-right (A1) opto 1 (joy pin 6?) */
-	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER3 )  /* P1 left-right (B1) opto 2 (joy pin 7?) */
-	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER3 )  /* P1 left-right (C1) opto 3 (joy pin 8?) */
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON8 | IPF_PLAYER3 )  /* P1 left-right direction bit (joy pin 9?) */ /* high?low */
-/*Analog+ end*/
+/*start MAME:analog+*/		/* original 49-way joystick goes here */
+	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER5 )  /* P1  up-down   (A1) opto 4 (joy pin 2?) */
+	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER5 )  /* P1  up-down   (B1) opto 5 (joy pin 3?) */
+	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER5 )  /* P1  up-down   (C1) opto 6 (joy pin 4?) */
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER5 )  /* P1  up-down   direction bit (joy pin 5?) */ /* high?low */
+	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER5 )  /* P1 left-right (A1) opto 1 (joy pin 6?) */
+	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER5 )  /* P1 left-right (B1) opto 2 (joy pin 7?) */
+	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER5 )  /* P1 left-right (C1) opto 3 (joy pin 8?) */
+	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON8 | IPF_PLAYER5 )  /* P1 left-right direction bit (joy pin 9?) */ /* high?low */
+/*end MAME:analog+  */
 
 	PORT_START      /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 )
@@ -1085,16 +1085,16 @@ INPUT_PORTS_END
 INPUT_PORTS_START( blastkit )
 	PORT_START      /* IN0 */
 	/* pseudo analog joystick, see below */
-/*Analog+ start */	/* original 49-way joystick goes here */
-	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER3 )  /* P1  up-down   (A1) opto 4 (joy pin 2?) */
-	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER3 )  /* P1  up-down   (B1) opto 5 (joy pin 3?) */
-	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER3 )  /* P1  up-down   (C1) opto 6 (joy pin 4?) */
-	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER3 )  /* P1  up-down   direction bit (joy pin 5?) */ /* high?low */
-	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER3 )  /* P1 left-right (A1) opto 1 (joy pin 6?) */
-	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER3 )  /* P1 left-right (B1) opto 2 (joy pin 7?) */
-	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER3 )  /* P1 left-right (C1) opto 3 (joy pin 8?) */
-	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON8 | IPF_PLAYER3 )  /* P1 left-right direction bit (joy pin 9?) */ /* high?low */
-/*Analog+ end*/
+/*start MAME:analog+*/		/* original 49-way joystick goes here */
+	PORT_BIT( 0x0001, IP_ACTIVE_HIGH, IPT_BUTTON1 | IPF_PLAYER5 )  /* P1  up-down   (A1) opto 4 (joy pin 2?) */
+	PORT_BIT( 0x0002, IP_ACTIVE_HIGH, IPT_BUTTON2 | IPF_PLAYER5 )  /* P1  up-down   (B1) opto 5 (joy pin 3?) */
+	PORT_BIT( 0x0004, IP_ACTIVE_HIGH, IPT_BUTTON3 | IPF_PLAYER5 )  /* P1  up-down   (C1) opto 6 (joy pin 4?) */
+	PORT_BIT( 0x0008, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER5 )  /* P1  up-down   direction bit (joy pin 5?) */ /* high?low */
+	PORT_BIT( 0x0010, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER5 )  /* P1 left-right (A1) opto 1 (joy pin 6?) */
+	PORT_BIT( 0x0020, IP_ACTIVE_HIGH, IPT_BUTTON6 | IPF_PLAYER5 )  /* P1 left-right (B1) opto 2 (joy pin 7?) */
+	PORT_BIT( 0x0040, IP_ACTIVE_HIGH, IPT_BUTTON7 | IPF_PLAYER5 )  /* P1 left-right (C1) opto 3 (joy pin 8?) */
+	PORT_BIT( 0x0080, IP_ACTIVE_LOW, IPT_BUTTON8 | IPF_PLAYER5 )  /* P1 left-right direction bit (joy pin 9?) */ /* high?low */
+/*end MAME:analog+  */
 
 	PORT_START      /* IN1 */
 	PORT_BIT( 0x01, IP_ACTIVE_HIGH, IPT_BUTTON2 )
@@ -2427,6 +2427,10 @@ static DRIVER_INIT( sinistar )
 	/* install RAM instead of ROM in the Dxxx slot */
 	install_mem_read_handler (0, 0xd000, 0xdfff, MRA8_RAM);
 	install_mem_write_handler(0, 0xd000, 0xdfff, MWA8_RAM);
+
+/*start MAME:analog+*/
+	osd_get49type(williams49);
+/*end MAME:analog+  */
 }
 
 
@@ -2470,6 +2474,10 @@ static DRIVER_INIT( blaster )
 
 	/* PIA configuration */
 	CONFIGURE_PIAS(williams_49way_pia_0_intf, williams_pia_1_intf, williams_snd_pia_intf);
+
+/*start MAME:analog+*/
+	osd_get49type(williams49);
+/*end MAME:analog+  */
 }
 
 
@@ -2483,6 +2491,10 @@ static DRIVER_INIT( blastkit )
 
 	/* PIA configuration */
 	CONFIGURE_PIAS(williams_49way_muxed_pia_0_intf, williams_pia_1_intf, williams_snd_pia_intf);
+
+/*start MAME:analog+*/
+	osd_get49type(williams49);
+/*end MAME:analog+  */
 }
 
 

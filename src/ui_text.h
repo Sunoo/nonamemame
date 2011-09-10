@@ -94,9 +94,11 @@ enum
 	UI_returntogame,
 	UI_cheat,
 	UI_memorycard,
+/*start MAME:analog+*/
 	UI_mousecontrols,
 	UI_mouseaxescontrols,
 	UI_analogjoycntls,
+/*end MAME:analog+  */
 
 	/* documents menu */
 	UI_history,
@@ -108,11 +110,12 @@ enum
 	UI_command,
 #endif /* CMD_LIST */
 
-	/* input stuff */
+	/* analog input stuff */
 	UI_keyjoyspeed,
 	UI_reverse,
 	UI_sensitivity,
 
+/*start MAME:analog+*/
 	/* analog+ input stuff */
 	UI_switchmouse,
 	UI_mouse,
@@ -125,6 +128,7 @@ enum
 	UI_rYaxis,
 	UI_rZaxis,
 #endif
+/*end MAME:analog+  */
 
 	/* stats */
 	UI_tickets,

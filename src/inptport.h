@@ -266,12 +266,15 @@ enum { IPT_END=1,IPT_PORT,
 
 
 #define PORT_SERVICE(mask,default)	\
-	PORT_BITX(    mask, mask & default, IPT_DIPSWITCH_NAME | IPF_TOGGLE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )	\
+	PORT_BITX(    mask, mask & default, IPT_DIPSWITCH_NAME | IPF_TOGGLE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_DEFAULT )	\
 	PORT_DIPSETTING(    mask & default, DEF_STR( Off ) )	\
 	PORT_DIPSETTING(    mask &~default, DEF_STR( On ) )
 
 #define PORT_SERVICE_NO_TOGGLE(mask,default)	\
-	PORT_BITX(    mask, mask & default, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
+/*start MAME:analog+*/ \
+	PORT_BITX(    mask, mask & default, IPT_SERVICE, IP_NAME_DEFAULT, IP_KEY_DEFAULT, IP_JOY_DEFAULT )
+//	PORT_BITX(    mask, mask & default, IPT_SERVICE, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_DEFAULT )
+/*end MAME:analog+  */
 
 #define MAX_DEFSTR_LEN 20
 extern const char ipdn_defaultstrings[][MAX_DEFSTR_LEN];
@@ -389,11 +392,9 @@ enum { IKT_STD, IKT_IPT, IKT_IPT_EXT, IKT_OSD_KEY, IKT_OSD_JOY };
 
 #define MAX_INPUT_PORTS 30
 
-#if !defined( MSDOS )
 /*start MAME:analog+*/
 #define MAX_PLAYERS 8		// moved from update_input_ports() in inptport.c
 /*end MAME:analog+  */
-#endif
 
 int load_input_port_settings(void);
 void save_input_port_settings(void);
@@ -403,7 +404,6 @@ InputSeq* input_port_type_seq(int type);
 InputSeq* input_port_seq(const struct InputPort *in);
 
 struct InputPort* input_port_allocate(const struct InputPortTiny *src);
-void input_port_free(struct InputPort* dst);
 
 #ifdef MAME_NET
 void set_default_player_controls(int player);

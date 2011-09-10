@@ -112,3 +112,7 @@ VIDEO_START( williams2 );
 
 WRITE_HANDLER( williams2_fg_select_w );
 WRITE_HANDLER( williams2_bg_select_w );
+
+/*start MAME:analog+*/
+int williams49;
+/*end MAME:analog+  */

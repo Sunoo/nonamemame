@@ -264,7 +264,9 @@ typedef enum {
 } SNK_INPUT_PORT_TYPE;
 
 static unsigned char *shared_ram, *io_ram, *shared_ram2;
+/*start MAME:analog+*/
 static const SNK_INPUT_PORT_TYPE *snk_io; /* input port configuration */
+/*end MAME:analog+  */
 
 static int hard_flags;
 static int guerilla_fix=0;
@@ -288,6 +290,7 @@ static int snk_sound_register;
 
 static int snk_rot8( int which ){
 	const int dial_8[8]   = { 0xf0,0x30,0x10,0x50,0x40,0xc0,0x80,0xa0 };
+/*start MAME:analog+*/
 	int value_dial = readinputport(which+1);		// dial fake input
 	int value_2button = readinputport( which+6 );	// 2 button fake input
 	int joypos16, joydir;
@@ -326,6 +329,7 @@ static int snk_rot8( int which ){
 
 	joypos16 = value_dial>>4;
 	return (value_dial&0x0f) | dial_8[joypos16>>1];
+/*end MAME:analog+  */
 }
 
 static int snk_rot12( int which ){
@@ -334,11 +338,13 @@ static int snk_rot12( int which ){
 	directional input that many SNK games require.
 */
 	const int dial_12[12] = {
+/*start MAME:analog+*/
 	0xb0,0xa0,0x90,0x80,0x70,0x60,
 	0x50,0x40,0x30,0x20,0x10,0x00
 	};
 
 	const int dial_12gwar[13] = {
+/*end MAME:analog+  */
 	0xb0,0xa0,0x90,0x80,0x70,0x60,
 	0xf0,
 	/* 0xf0 isn't a valid direction, but avoids the "joystick error" protection
@@ -347,6 +353,7 @@ static int snk_rot12( int which ){
 	*/
 	0x50,0x40,0x30,0x20,0x10,0x00
 	};
+/*start MAME:analog+*/
 	int value_dial = readinputport( which+1 );		// dial fake input & 8-way joystick
 	int value_2button = readinputport( which+6 );	// 2 button fake input
 	int value_12true = readinputport( which+8 );	// 12 switch original input
@@ -413,6 +420,7 @@ static int snk_rot12( int which ){
 	if (guerilla_fix)
 		return (value_dial&0x0f) | dial_12gwar[dial_select[which]];
 	return (value_dial&0x0f) | dial_12[dial_select[which]];
+/*end MAME:analog+  */
 }
 
 static int snk_input_port_r( int which ){
@@ -2734,6 +2742,7 @@ ROM_END
 	PORT_DIPSETTING(    0x80, DEF_STR( 1C_4C ) ) \
 	PORT_DIPSETTING(    0xc0, DEF_STR( 1C_6C ) )
 
+/*start MAME:analog+*/
 #define SNK_FAKE_ROTARY_INPUTS \
 	PORT_START	/* player 1 12-way rotary control - FAKE 2 button type */ \
 	PORT_BIT_IMPULSE(0x10, IP_ACTIVE_LOW, IPT_BUTTON4 | IPF_PLAYER1, 1) \
@@ -2767,7 +2776,7 @@ ROM_END
 	PORT_BIT(0xa0, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER4) \
 	PORT_BIT(0xb0, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER2) \
 	PORT_BIT(0xc0, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER2)
-
+/*end MAME:analog+  */
 
 INPUT_PORTS_START( ikari )
 	PORT_START
@@ -2799,7 +2808,6 @@ INPUT_PORTS_START( ikari )
 	PORT_DIPNAME( 0x08, 0x08, DEF_STR( Lives ) )
 	PORT_DIPSETTING(    0x08, "3" )
 	PORT_DIPSETTING(    0x00, "5" )
-
 	SNK_COINAGE
 
 	PORT_START /* DSW 2 */
@@ -2825,7 +2833,9 @@ INPUT_PORTS_START( ikari )
 	PORT_DIPSETTING(    0x80, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
 
+/*start MAME:analog+*/
 	SNK_FAKE_ROTARY_INPUTS
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( ikarijp )
@@ -2883,7 +2893,9 @@ INPUT_PORTS_START( ikarijp )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
+/*start MAME:analog+*/
 	SNK_FAKE_ROTARY_INPUTS
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 
@@ -2942,7 +2954,9 @@ INPUT_PORTS_START( victroad )
 	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x80, DEF_STR( On ) )
 
+/*start MAME:analog+*/
 	SNK_FAKE_ROTARY_INPUTS
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 
@@ -3059,7 +3073,9 @@ INPUT_PORTS_START( gwar )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
+/*start MAME:analog+*/
 	SNK_FAKE_ROTARY_INPUTS
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( athena )
@@ -3216,7 +3232,9 @@ INPUT_PORTS_START( tnk3 )
 	PORT_DIPSETTING(    0x80, DEF_STR( No ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
 
+/*start MAME:analog+*/
 	SNK_FAKE_ROTARY_INPUTS
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( bermudat )
@@ -3273,7 +3291,9 @@ INPUT_PORTS_START( bermudat )
 	PORT_DIPSETTING(    0x40, "Time attack 3 minutes" )
 	PORT_DIPSETTING(    0x00, "Time attack 5 minutes" )
 
+/*start MAME:analog+*/
 	SNK_FAKE_ROTARY_INPUTS
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( bermudaa )
@@ -3334,7 +3354,9 @@ INPUT_PORTS_START( bermudaa )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
+/*start MAME:analog+*/
 	SNK_FAKE_ROTARY_INPUTS
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 /* Same as Bermudaa, but has different Bonus Life */
@@ -3393,7 +3415,9 @@ INPUT_PORTS_START( worldwar )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
+/*start MAME:analog+*/
 	SNK_FAKE_ROTARY_INPUTS
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( psychos )
@@ -4115,7 +4139,9 @@ static DRIVER_INIT( gwar ){
 	hard_flags = 0;
 	snk_bg_tilemap_baseaddr = 0xd800;
 	snk_gamegroup = 2;
+/*start MAME:analog+*/
 	guerilla_fix = 1;
+/*end MAME:analog+  */
 }
 
 static DRIVER_INIT( gwara ){
@@ -4124,7 +4150,9 @@ static DRIVER_INIT( gwara ){
 	hard_flags = 0;
 	snk_bg_tilemap_baseaddr = 0xd800;
 	snk_gamegroup = 4;
+/*start MAME:analog+*/
 	guerilla_fix = 1;
+/*end MAME:analog+  */
 }
 
 static DRIVER_INIT( chopper ){

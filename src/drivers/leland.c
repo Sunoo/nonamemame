@@ -230,6 +230,7 @@ INPUT_PORTS_START( wseries )		/* complete, verified from code */
 	PORT_START
 	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_PLAYER2, 100, 10, 0, 255 )
 
+/*start MAME:analog+*/
 #if 0
 	/* added hacks for easier play with standard analog joysticks */
 	/* need to add extra data processing functions */
@@ -238,6 +239,7 @@ INPUT_PORTS_START( wseries )		/* complete, verified from code */
 	PORT_START
 	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 10, 0, 255 )
 #endif
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 
@@ -347,6 +349,7 @@ INPUT_PORTS_START( basebal2 )		/* complete, verified from code */
 	PORT_START
 	PORT_ANALOG( 0xff, 0x80, IPT_AD_STICK_Y | IPF_PLAYER2, 100, 10, 0, 255 )
 
+/*start MAME:analog+*/
 #if 0
 	/* added hacks for easier play with standard analog joysticks */
 	/* need to add extra data processing functions */
@@ -355,13 +358,17 @@ INPUT_PORTS_START( basebal2 )		/* complete, verified from code */
 	PORT_START
 	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 10, 0, 255 )
 #endif
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 
 INPUT_PORTS_START( redline )		/* complete, verified in code */
 	PORT_START      /* 0xC0 */
 	PORT_BIT( 0x1f, IP_ACTIVE_LOW, IPT_UNUSED )
+/*start MAME:analog+*/
+//	PORT_ANALOG( 0xe0, 0xe0, IPT_PEDAL | IPF_PLAYER1, 100, 64, 0x00, 0xff )
 	PORT_ANALOG( 0xe0, 0x00, IPT_PEDAL | IPF_PLAYER1, 100, 64, 0x00, 0xff )
+/*end MAME:analog+  */
 
 	PORT_START      /* 0xC1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_SLAVEHALT )
@@ -373,7 +380,10 @@ INPUT_PORTS_START( redline )		/* complete, verified in code */
 
 	PORT_START      /* 0xD0 */
 	PORT_BIT( 0x1f, IP_ACTIVE_LOW, IPT_UNUSED )
+/*start MAME:analog+*/
+	PORT_ANALOG( 0xe0, 0xe0, IPT_PEDAL | IPF_PLAYER2, 100, 64, 0x00, 0xff )
 	PORT_ANALOG( 0xe0, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 64, 0x00, 0xff )
+/*end MAME:analog+  */
 
 	PORT_START      /* 0xD1 */
 	PORT_BIT( 0x01, IP_ACTIVE_LOW, IPT_EEPROM_DATA )
@@ -429,6 +439,7 @@ INPUT_PORTS_START( quarterb )		/* complete, verified in code */
 	PORT_START      /* Analog spring stick 5 */
 	PORT_START      /* Analog spring stick 6 */
 
+/*start MAME:analog+*/
 #if 0
 	/* added hacks for easier play with standard analog joysticks */
 	/* need to add extra data processing functions */
@@ -437,6 +448,7 @@ INPUT_PORTS_START( quarterb )		/* complete, verified in code */
 	PORT_START
 	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 10, 0, 255 )
 #endif
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 
@@ -500,6 +512,7 @@ INPUT_PORTS_START( teamqb )		/* complete, verified in code */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER3 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER3 )
 
+/*start MAME:analog+*/
 #if 0
 	/* added hacks for easier play with standard analog joysticks */
 	/* need to add extra data processing functions */
@@ -508,6 +521,7 @@ INPUT_PORTS_START( teamqb )		/* complete, verified in code */
 	PORT_START
 	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 10, 0, 255 )
 #endif
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 
@@ -563,6 +577,7 @@ INPUT_PORTS_START( aafb2p )		/* complete, verified in code */
 	PORT_BIT( 0x40, IP_ACTIVE_LOW, IPT_JOYSTICK_DOWN  | IPF_PLAYER2 )
 	PORT_BIT( 0x80, IP_ACTIVE_LOW, IPT_JOYSTICK_UP    | IPF_PLAYER2 )
 
+/*start MAME:analog+*/
 #if 0
 	/* added hacks for easier play with standard analog joysticks */
 	/* need to add extra data processing functions */
@@ -571,6 +586,7 @@ INPUT_PORTS_START( aafb2p )		/* complete, verified in code */
 	PORT_START
 	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER2, 100, 10, 0, 255 )
 #endif
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 
@@ -755,7 +771,7 @@ static MACHINE_DRIVER_START( leland )
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION((1000000*16)/(256*60))
-	
+
 	MDRV_MACHINE_INIT(leland)
 	MDRV_NVRAM_HANDLER(leland)
 
@@ -784,7 +800,7 @@ static MACHINE_DRIVER_START( redline )
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_PROGRAM_MAP(leland_i86_map_program,0)
 	MDRV_CPU_IO_MAP(redline_i86_map_io,0)
-	
+
 	/* sound hardware */
 	MDRV_SOUND_REPLACE("custom", CUSTOM, redline_custom_interface)
 MACHINE_DRIVER_END
@@ -796,7 +812,7 @@ static MACHINE_DRIVER_START( quarterb )
 	MDRV_IMPORT_FROM(redline)
 	MDRV_CPU_MODIFY("sound")
 	MDRV_CPU_IO_MAP(leland_i86_map_io,0)
-	
+
 	/* sound hardware */
 	MDRV_SOUND_REPLACE("custom", CUSTOM, i186_custom_interface)
 MACHINE_DRIVER_END

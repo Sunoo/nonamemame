@@ -171,8 +171,8 @@ static READ16_HANDLER( input_ports_3_and_7_word_r )
 	return readinputport(3);
     }
 }
-
 /* </jake> */
+
 
 /*************************************
  *

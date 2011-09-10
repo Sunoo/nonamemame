@@ -1,3 +1,15 @@
+0.83.13:
+ - Updated to MAME 0.83 source
+ - Updated to MAME32 0.83 source
+ - Updated to MameAnalog+ 0.83 source (u_rebelscum)
+ - XP versions now unneeded (u_rebelscum)
+ - Fixed some minor issues
+ - Fixed missing bm6thmix in driver.c (robber804)
+ - Added "fixed" version of Cannonball as cballfix.zip (MASH)
+ - Added MASH's bug fixes
+ - Updated MameAnalog+ ctrlr files (u_rebelscum)
+ - Updated MAWS folder (cutebutwrong)
+
 0.82u3.12 "OMG FURRIES!":
  - Updated to MAME 0.82u3 source
  - Reverted / updated to MadeInMame32 0.82 source

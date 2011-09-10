@@ -9,30 +9,17 @@ TARGET = noname
 endif
 
 # Operating System
-ifeq ($(OS),xp)
-MAMEOS = windows
-WINXPANANLOG = 1
-SUFFIX = xp
-else
 ifeq ($(OS),32)
 MAMEOS = windows
 WINUI = 1
 SUFFIX = 32
 else
-ifeq ($(OS),32xp)
 MAMEOS = windows
-WINUI = 1
-WINXPANANLOG = 1
-SUFFIX = 32xp
-else
-MAMEOS = windows
-endif
-endif
 endif
 
 # WinXP compile option: if defined, compile the winXP version
 # default is undefined;  uncomment next line or include in mame commandline to define
-# WINXPANANLOG = 1
+WINXPANANLOG = 1
 ifeq ($(WINXPANANLOG),0)
 undef WINXPANANLOG
 endif

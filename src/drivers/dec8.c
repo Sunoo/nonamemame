@@ -114,11 +114,14 @@ static WRITE_HANDLER( i8751_reset_w )
 
 static READ_HANDLER( gondo_player_1_r )
 {
+/*start MAME:analog+*/
 	static unsigned char old_joydir, updatetoggle;
 	static int temp, use_2button_rotary = 0;
+/*end MAME:analog+  */
 
 	switch (offset) {
 		case 0: /* Rotary low byte */
+/*start MAME:analog+*/
 			/* input from original buttons overides all other rotary inputs */
 			if ( (temp = readinputport(11)) )
 				return ~(temp&0xff);
@@ -147,14 +150,17 @@ static READ_HANDLER( gondo_player_1_r )
 				return ~((1 << (old_joydir)                 )&0xff);
 			}
 			else
+/*end MAME:analog+  */
 				return ~((1 << (readinputport(5) * 12 / 256))&0xff);
 
 		case 1: /* Joystick = bottom 4 bits, rotary = top 4 */
+/*start MAME:analog+*/
 			if ( (temp = readinputport(11)) )
 				return ((~( temp                               >>4))&0xf0) | (readinputport(0)&0xf);
 			else if ( use_2button_rotary )
 				return ((~((1 << (old_joydir)                 )>>4))&0xf0) | (readinputport(0)&0xf);
 			else
+/*end MAME:analog+  */
 				return ((~((1 << (readinputport(5) * 12 / 256))>>4))&0xf0) | (readinputport(0)&0xf);
 	}
 	return 0xff;
@@ -162,11 +168,14 @@ static READ_HANDLER( gondo_player_1_r )
 
 static READ_HANDLER( gondo_player_2_r )
 {
+/*start MAME:analog+*/
 	static unsigned char old_joydir, updatetoggle;
 	static int temp, use_2button_rotary = 0;
+/*end MAME:analog+  */
 
 	switch (offset) {
 		case 0: /* Rotary low byte */
+/*start MAME:analog+*/
 			/* input from original buttons overides all other rotary inputs */
 			if ( (temp = readinputport(12)) )
 				return ~(temp&0xff);
@@ -195,14 +204,17 @@ static READ_HANDLER( gondo_player_2_r )
 				return ~((1 << (old_joydir)                 )&0xff);
 			}
 			else
+/*end MAME:analog+  */
 				return ~((1 << (readinputport(6) * 12 / 256))&0xff);
 
 		case 1: /* Joystick = bottom 4 bits, rotary = top 4 */
+/*start MAME:analog+*/
 			if ( (temp = readinputport(12)) )
 				return ((~( temp                               >>4))&0xf0) | (readinputport(1)&0xf);
 			else if ( use_2button_rotary )
 				return ((~((1 << (old_joydir)                 )>>4))&0xf0) | (readinputport(1)&0xf);
 			else
+/*end MAME:analog+  */
 				return ((~((1 << (readinputport(6) * 12 / 256))>>4))&0xf0) | (readinputport(1)&0xf);
 	}
 	return 0xff;
@@ -1476,6 +1488,7 @@ INPUT_PORTS_START( gondo )
 	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
+/*start MAME:analog+*/
 	PORT_START	/* player 1 12-way rotary control - 2 button type */	/**JW */
 	PORT_BIT_IMPULSE(0x01, IP_ACTIVE_HIGH, IPT_BUTTON4 | IPF_PLAYER1, 2)	 /*clockwise*/
 	PORT_BIT_IMPULSE(0x02, IP_ACTIVE_HIGH, IPT_BUTTON5 | IPF_PLAYER1, 2)	 /*counter-clockwise*/
@@ -1511,6 +1524,7 @@ INPUT_PORTS_START( gondo )
 	PORT_BIT(0x200, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER4)
 	PORT_BIT(0x400, IP_ACTIVE_HIGH, IPT_BUTTON9 | IPF_PLAYER2)
 	PORT_BIT(0x800, IP_ACTIVE_HIGH, IPT_BUTTON10 | IPF_PLAYER2)
+/*end MAME:analog+  */
 INPUT_PORTS_END
 
 INPUT_PORTS_START( oscar )

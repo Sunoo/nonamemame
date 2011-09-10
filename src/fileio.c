@@ -152,19 +152,19 @@ mame_file *mame_fopen(const char *gamename, const char *filename, int filetype, 
 			{
 				int flags = FILEFLAG_ALLOW_ABSOLUTE;
 				switch(openforwrite) {
-				case OSD_FOPEN_READ:   
+				case OSD_FOPEN_READ:
 					flags |= FILEFLAG_OPENREAD | FILEFLAG_ZIP_PATHS;
-					break;   
-				case OSD_FOPEN_WRITE:   
-					flags |= FILEFLAG_OPENWRITE;   
 					break;
-				case OSD_FOPEN_RW:   
-					flags |= FILEFLAG_OPENREAD | FILEFLAG_OPENWRITE | FILEFLAG_MUST_EXIST;   
-					break;   
+				case OSD_FOPEN_WRITE:
+					flags |= FILEFLAG_OPENWRITE;
+					break;
+				case OSD_FOPEN_RW:
+					flags |= FILEFLAG_OPENREAD | FILEFLAG_OPENWRITE | FILEFLAG_MUST_EXIST;
+					break;
 				case OSD_FOPEN_RW_CREATE:
 					flags |= FILEFLAG_OPENREAD | FILEFLAG_OPENWRITE;
 					break;
-				} 
+				}
 				if (mess_ghost_images)
 					flags |= FILEFLAG_GHOST;
 
@@ -206,9 +206,11 @@ mame_file *mame_fopen(const char *gamename, const char *filename, int filetype, 
 		case FILETYPE_CONFIG:
 			return generic_fopen(filetype, NULL, gamename, 0, openforwrite ? FILEFLAG_OPENWRITE : FILEFLAG_OPENREAD);
 
+/*start MAME:analog+*/
 		/* Analog+ config files */
 		case FILETYPE_CONFIG_ANALOGPLUS:
 			return generic_fopen(filetype, NULL, gamename, 0, openforwrite ? FILEFLAG_OPENWRITE : FILEFLAG_OPENREAD);
+/*end MAME:analog+  */
 
 		/* input logs */
 		case FILETYPE_INPUTLOG:
@@ -277,7 +279,7 @@ mame_file *mame_fopen(const char *gamename, const char *filename, int filetype, 
 	mame_fopen_rom
 ***************************************************************************/
 
-/* Similar to mame_fopen(,,FILETYPE_ROM), but lets you specify an expected checksum 
+/* Similar to mame_fopen(,,FILETYPE_ROM), but lets you specify an expected checksum
    (better encapsulation of the load by CRC used for ZIP files) */
 mame_file *mame_fopen_rom(const char *gamename, const char *filename, const char* exphash)
 {
@@ -575,7 +577,7 @@ int mame_fgetc(mame_file *file)
 int mame_ungetc(int c, mame_file *file)
 {
 	file->back_char = c;
-  
+
 	return c;
 }
 
@@ -839,9 +841,11 @@ static const char *get_extension_for_filetype(int filetype)
 			extension = "cfg";
 			break;
 
+/*start MAME:analog+*/
 		case FILETYPE_CONFIG_ANALOGPLUS:	/* Analog+ config files */
 			extension = "ana";
 			break;
+/*end MAME:analog+  */
 
 		case FILETYPE_INPUTLOG:		/* input logs */
 			extension = "inp";
@@ -1064,7 +1068,7 @@ static mame_file *generic_fopen(int pathtype, const char *gamename, const char *
 					}
 
 					hash_data_clear(file.hash);
-						
+
 					if (checksum_zipped_file(pathtype, pathindex, name, tempname, &ziplength, &crc) == 0)
 					{
 						file.length = ziplength;
@@ -1087,8 +1091,8 @@ static mame_file *generic_fopen(int pathtype, const char *gamename, const char *
 					/* Try loading the file */
 					err = load_zipped_file(pathtype, pathindex, name, tempname, &file.data, &ziplength);
 
-					/* If it failed, since this is a ZIP file, we can try to load by CRC 
-					   if an expected hash has been provided. unzip.c uses this ugly hack 
+					/* If it failed, since this is a ZIP file, we can try to load by CRC
+					   if an expected hash has been provided. unzip.c uses this ugly hack
 					   of specifying the CRC as filename. */
 					if (err && hash)
 					{
@@ -1199,7 +1203,7 @@ static int checksum_file(int pathtype, int pathindex, const char *file, UINT8 **
 
 	*size = length;
 
-	
+
 	/* compute the checksums (only the functions for which we have an expected
 	   checksum). Take also care of crconly: if the user asked, we will calculate
 	   only the CRC, but only if there is an expected CRC for this file. */

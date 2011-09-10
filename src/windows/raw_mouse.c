@@ -6,12 +6,11 @@
 //     To do:
 //
 //     - Improve the method for weeding out the RDP Mouse.  Find "status bits" (see below).
-//     - Find out if this collects any info about serial and ps/2 mice
 //
 //================================================================
 
 #ifndef WINUI
-#define _WIN32_WINNT 0x501   // This specifies WinXP or later - it is needed to access rawmouse from the user32.dll
+#define _WIN32_WINNT 0x501	// This specifies WinXP or later - it is needed to access rawmouse from the user32.dll
 #endif /* WINUI */
 
 #include <windows.h>
@@ -20,10 +19,23 @@
 #include "raw_mouse.h"
 
 //============================================================
+//	Dynamically linked functions from rawinput
+//============================================================
+typedef WINUSERAPI UINT (WINAPI *pGetRawInputDeviceList)(OUT PRAWINPUTDEVICELIST pRawInputDeviceList, IN OUT PUINT puiNumDevices, IN UINT cbSize);
+typedef WINUSERAPI UINT(WINAPI *pGetRawInputData)(IN HRAWINPUT hRawInput, IN UINT uiCommand, OUT LPVOID pData, IN OUT PUINT pcbSize, IN UINT cbSizeHeader);
+typedef WINUSERAPI UINT(WINAPI *pGetRawInputDeviceInfoA)(IN HANDLE hDevice, IN UINT uiCommand, OUT LPVOID pData, IN OUT PUINT pcbSize);
+typedef WINUSERAPI BOOL (WINAPI *pRegisterRawInputDevices)(IN PCRAWINPUTDEVICE pRawInputDevices, IN UINT uiNumDevices, IN UINT cbSize);
+
+pGetRawInputDeviceList _GRIDL;
+pGetRawInputData _GRID;
+pGetRawInputDeviceInfoA _GRIDIA;
+pRegisterRawInputDevices _RRID;
+
+//============================================================
 //	PARAMETERS
 //============================================================
 
-#define RAW_SYS_MOUSE 0      // The sys mouse combines all the other usb mice into one
+#define RAW_SYS_MOUSE 0			// The sys mouse combines all the other usb mice into one
 #define MAX_RAW_MOUSE_BUTTONS 3
 
 //============================================================
@@ -32,32 +44,32 @@
 
 typedef struct STRUCT_RAW_MOUSE {
 
-	  // Identifier for the mouse.  WM_INPUT passes the device HANDLE as lparam when registering a mousemove
-	  HANDLE device_handle;
+	// Identifier for the mouse.  WM_INPUT passes the device HANDLE as lparam when registering a mousemove
+	HANDLE device_handle;
 
-	  // The running tally of mouse moves received from WM_INPUT (mouse delta).  
-	  //    Calling get_raw_mouse_[x | y] will reset the value so that every time
-	  //    get_raw_mouse_[x | y] is called, the relative value from the last time
-	  //    get_raw_mouse_[x | y] was called will be returned.
-	  ULONG x;
-	  ULONG y;
-          ULONG z;
+	// The running tally of mouse moves received from WM_INPUT (mouse delta).
+	//    Calling get_raw_mouse_[x | y] will reset the value so that every time
+	//    get_raw_mouse_[x | y] is called, the relative value from the last time
+	//    get_raw_mouse_[x | y] was called will be returned.
+	ULONG x;
+	ULONG y;
+	ULONG z;
 
-	  // Used to determine if the HID is using absolute mode or relative mode
-	  //    The Act Labs PC USB Light Gun is absolute mode (returns screen coordinates)
-	  //    and mice are relative mode (returns delta)
-	  // NOTE: this value isn't updated until the device registers a WM_INPUT message
-	  BOOL is_absolute;
-	  // This indicates if the coordinates are coming from a multi-monitor setup
-	  // NOTE: this value isn't updated until the device registers a WM_INPUT message
-	  BOOL is_virtual_desktop;
+	// Used to determine if the HID is using absolute mode or relative mode
+	//    The Act Labs PC USB Light Gun is absolute mode (returns screen coordinates)
+	//    and mice are relative mode (returns delta)
+	// NOTE: this value isn't updated until the device registers a WM_INPUT message
+	BOOL is_absolute;
+	// This indicates if the coordinates are coming from a multi-monitor setup
+	// NOTE: this value isn't updated until the device registers a WM_INPUT message
+	BOOL is_virtual_desktop;
 
-	  int buttonpressed[MAX_RAW_MOUSE_BUTTONS];
+	int buttonpressed[MAX_RAW_MOUSE_BUTTONS];
 
-	  // Identifying the name of the button may be useful in the future as a way to 
-	  //   use a mousewheel as a button and other neat tricks (button name: "wheel up", "wheel down")
-	  //   -- not a bad way to look at it for a rotary joystick
-	  char *button_name[MAX_RAW_MOUSE_BUTTONS];
+	// Identifying the name of the button may be useful in the future as a way to
+	//   use a mousewheel as a button and other neat tricks (button name: "wheel up", "wheel down")
+	//   -- not a bad way to look at it for a rotary joystick
+	char *button_name[MAX_RAW_MOUSE_BUTTONS];
 
 } RAW_MOUSE, *PRAW_MOUSE;
 
@@ -97,20 +109,20 @@ static BOOL register_raw_mouse(void);
 
 static BOOL is_rm_rdp_mouse(char cDeviceString[])
 {
-	  int i;
-	  char cRDPString[] = "\\??\\Root#RDP_MOU#0000#";
+	int i;
+	char cRDPString[] = "\\??\\Root#RDP_MOU#0000#";
 
-	  if (strlen(cDeviceString) < 22) {
-			return 0;
-	  }
+	if (strlen(cDeviceString) < 22) {
+		return 0;
+	}
 
-	  for (i = 0; i < 22; i++) {
-			if (cRDPString[i] != cDeviceString[i]) {
-				return 0;
-			}
-	  }  
+	for (i = 0; i < 22; i++) {
+		if (cRDPString[i] != cDeviceString[i]) {
+		return 0;
+		}
+	}
 
-	  return 1;
+	return 1;
 }
 
 //============================================================
@@ -130,6 +142,17 @@ BOOL init_raw_mouse(BOOL in_include_sys_mouse, BOOL in_include_rdp_mouse, BOOL i
 
 	char buffer[80];
 
+	// Return 0 if rawinput is not available
+	HMODULE user32 = LoadLibrary("user32.dll");
+	if (!user32) return 0;
+	_RRID = (pRegisterRawInputDevices)GetProcAddress(user32,"RegisterRawInputDevices");
+	if (!_RRID) return 0;
+	_GRIDL = (pGetRawInputDeviceList)GetProcAddress(user32,"GetRawInputDeviceList");
+	if (!_GRIDL) return 0;
+	_GRIDIA = (pGetRawInputDeviceInfoA)GetProcAddress(user32,"GetRawInputDeviceInfoA");
+	if (!_GRIDIA) return 0;
+	_GRID = (pGetRawInputData)GetProcAddress(user32,"GetRawInputData");
+	if (!_GRID) return 0;
 
 	excluded_sysmouse_devices_count = 0;
 	raw_mouse_count = 0;
@@ -145,7 +168,7 @@ BOOL init_raw_mouse(BOOL in_include_sys_mouse, BOOL in_include_rdp_mouse, BOOL i
 	include_individual_mice = in_include_individual_mice;
 
 	// 1st call to GetRawInputDeviceList: Pass NULL to get the number of devices.
-	if (GetRawInputDeviceList(NULL, &nInputDevices, sizeof(RAWINPUTDEVICELIST)) != 0) {
+	if (/* GetRawInputDeviceList */ (*_GRIDL)(NULL, &nInputDevices, sizeof(RAWINPUTDEVICELIST)) != 0) {
 		fprintf(stderr, "ERROR: Unable to count raw input devices.\n");
 		return 0;
 	}
@@ -157,7 +180,7 @@ BOOL init_raw_mouse(BOOL in_include_sys_mouse, BOOL in_include_rdp_mouse, BOOL i
 	}
 
 	// 2nd call to GetRawInputDeviceList: Pass the pointer to our DeviceList and GetRawInputDeviceList() will fill the array
-	if (GetRawInputDeviceList(pRawInputDeviceList, &nInputDevices, sizeof(RAWINPUTDEVICELIST)) == -1)  {
+	if (/* GetRawInputDeviceList */ (*_GRIDL)(pRawInputDeviceList, &nInputDevices, sizeof(RAWINPUTDEVICELIST)) == -1)  {
 		fprintf(stderr, "ERROR: Unable to get raw input device list.\n");
 		return 0;
 	}
@@ -165,11 +188,10 @@ BOOL init_raw_mouse(BOOL in_include_sys_mouse, BOOL in_include_rdp_mouse, BOOL i
 	// Loop through all devices and count the mice
 	for (i = 0; i < nInputDevices; i++) {
 		if (pRawInputDeviceList[i].dwType == RIM_TYPEMOUSE) {
-			/* Get the device name and use it to determine if it's the RDP Terminal Services virtual device.  There must be a better way
-			to identify the root device than by parsing a string.  What the heck is a root device, anyway? */
+			/* Get the device name and use it to determine if it's the RDP Terminal Services virtual device. */
 
 			// 1st call to GetRawInputDeviceInfo: Pass NULL to get the size of the device name 
-			if (GetRawInputDeviceInfo(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, NULL, &nSize) != 0) {
+			if (/* GetRawInputDeviceInfo */ (*_GRIDIA)(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, NULL, &nSize) != 0) {
 				fprintf(stderr, "ERROR: Unable to get size of raw input device name.\n");
 				return 0;
 			}
@@ -181,7 +203,7 @@ BOOL init_raw_mouse(BOOL in_include_sys_mouse, BOOL in_include_rdp_mouse, BOOL i
 			}
 
 			// 2nd call to GetRawInputDeviceInfo: Pass our pointer to get the device name
-			if ((int)GetRawInputDeviceInfo(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, psName, &nSize) < 0)  {
+			if ((int)/* GetRawInputDeviceInfo */ (*_GRIDIA)(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, psName, &nSize) < 0)  {
 				fprintf(stderr, "ERROR: Unable to get raw input device name.\n");
 				return 0;
 			} 
@@ -190,9 +212,9 @@ BOOL init_raw_mouse(BOOL in_include_sys_mouse, BOOL in_include_rdp_mouse, BOOL i
 			if (is_rm_rdp_mouse(psName)) {
 				if (include_rdp_mouse) raw_mouse_count++;
 			}
-			else { // It's an ordinary mouse
+			else {	// It's an ordinary mouse
 				raw_mouse_count++;
-				if (!include_individual_mice) excluded_sysmouse_devices_count++;     // Don't count this in the final raw_mouse_count value
+				if (!include_individual_mice) excluded_sysmouse_devices_count++;	// Don't count this in the final raw_mouse_count value
 			}
 		}
 	}
@@ -220,7 +242,7 @@ BOOL init_raw_mouse(BOOL in_include_sys_mouse, BOOL in_include_rdp_mouse, BOOL i
 	for (i = 0; i < nInputDevices; i++) {
 		if (pRawInputDeviceList[i].dwType == RIM_TYPEMOUSE) {
 			// 1st call to GetRawInputDeviceInfo: Pass NULL to get the size of the device name 
-			if (GetRawInputDeviceInfo(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, NULL, &nSize) != 0)  {
+			if (/* GetRawInputDeviceInfo */ (*_GRIDIA)(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, NULL, &nSize) != 0)  {
 				fprintf(stderr, "ERROR: Unable to get size of raw input device name (2).\n");
 				return 0;
 			}
@@ -232,7 +254,7 @@ BOOL init_raw_mouse(BOOL in_include_sys_mouse, BOOL in_include_rdp_mouse, BOOL i
 			}
 		  
 			// 2nd call to GetRawInputDeviceInfo: Pass our pointer to get the device name
-			if ((int)GetRawInputDeviceInfo(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, psName, &nSize) < 0) {
+			if ((int)/* GetRawInputDeviceInfo */ (*_GRIDIA)(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, psName, &nSize) < 0) {
 				fprintf(stderr, "ERROR: Unable to get raw input device name (2).\n");
 				return 0;
 			} 
@@ -280,20 +302,20 @@ BOOL init_raw_mouse(BOOL in_include_sys_mouse, BOOL in_include_rdp_mouse, BOOL i
 
 BOOL register_raw_mouse(void)
 {
-	  // This function registers to receive the WM_INPUT messages
-	  RAWINPUTDEVICE Rid[1]; // Register only for mouse messages from wm_input.  
+	// This function registers to receive the WM_INPUT messages
+	RAWINPUTDEVICE Rid[1];	// Register only for mouse messages from wm_input.
 
-	  //register to get wm_input messages
-	  Rid[0].usUsagePage = 0x01; 
-	  Rid[0].usUsage = 0x02; 
-	  Rid[0].dwFlags = 0;// RIDEV_NOLEGACY;   // adds HID mouse and also ignores legacy mouse messages
-	  Rid[0].hwndTarget = NULL;
+	//register to get wm_input messages
+	Rid[0].usUsagePage = 0x01;
+	Rid[0].usUsage = 0x02;
+	Rid[0].dwFlags = 0;// RIDEV_NOLEGACY;	// adds HID mouse and also ignores legacy mouse messages
+	Rid[0].hwndTarget = NULL;
 
-	  // Register to receive the WM_INPUT message for any change in mouse (buttons, wheel, and movement will all generate the same message)
-	  if (!RegisterRawInputDevices(Rid, 1, sizeof (Rid[0])))
-			return 0;
- 
-	  return 1;
+	// Register to receive the WM_INPUT message for any change in mouse (buttons, wheel, and movement will all generate the same message)
+	if (!/* RegisterRawInputDevices*/ (*_RRID)(Rid, 1, sizeof (Rid[0])))
+		return 0;
+
+	return 1;
 }
 
 //============================================================
@@ -311,90 +333,104 @@ void destroy_raw_mouse(void)
 
 BOOL read_raw_input(PRAWINPUT raw)
 {
-	  // should be static when I get around to it
+	// should be static when I get around to it
 
-	  int i;
+	int i;
 
-	  // mouse 0 is sysmouse, so if there is not sysmouse start loop @0
-	  i = 0;
-	  if (include_sys_mouse) i++; 
+	// mouse 0 is sysmouse, so if there is not sysmouse start loop @0
+	i = 0;
+	if (include_sys_mouse) i++;
 
-	  for ( ; i < (raw_mouse_count + excluded_sysmouse_devices_count); i++) {
-			if (raw_mice[i].device_handle == raw->header.hDevice)
+	for ( ; i < (raw_mouse_count + excluded_sysmouse_devices_count); i++)
+	{
+		if (raw_mice[i].device_handle == raw->header.hDevice)
+		{
+			// Update the values for the specified mouse
+			if (include_individual_mice)
 			{
-				// Update the values for the specified mouse
-				if (include_individual_mice) {
-					if (raw_mice[i].is_absolute) {
-						raw_mice[i].x = raw->data.mouse.lLastX;
-						raw_mice[i].y = raw->data.mouse.lLastY;
-					}
-					else { // relative
-						raw_mice[i].x += raw->data.mouse.lLastX;
-						raw_mice[i].y += raw->data.mouse.lLastY;
-					}
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_DOWN) raw_mice[i].buttonpressed[0] = 1;
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_UP)   raw_mice[i].buttonpressed[0] = 0;
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_DOWN) raw_mice[i].buttonpressed[1] = 1;
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_UP)   raw_mice[i].buttonpressed[1] = 0;
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_DOWN) raw_mice[i].buttonpressed[2] = 1;
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_UP)   raw_mice[i].buttonpressed[2] = 0;
-
-					if (raw->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE)          raw_mice[i].is_absolute = 1;
-					else if (raw->data.mouse.usFlags & MOUSE_MOVE_RELATIVE)     raw_mice[i].is_absolute = 0;
-					if (raw->data.mouse.usFlags & MOUSE_VIRTUAL_DESKTOP)        raw_mice[i].is_virtual_desktop = 1;
-					else                                                        raw_mice[i].is_virtual_desktop = 0;
-
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_WHEEL) {      // If the current message has a mouse_wheel message
-						if ((SHORT)raw->data.mouse.usButtonData > 0) {
-							raw_mice[i].z++;
-						}
-						if ((SHORT)raw->data.mouse.usButtonData < 0) {
-							raw_mice[i].z--;
-						}
-					}
+				if (raw_mice[i].is_absolute)
+				{
+					raw_mice[i].x = raw->data.mouse.lLastX;
+					raw_mice[i].y = raw->data.mouse.lLastY;
+				}
+				else	// relative
+				{
+					raw_mice[i].x += raw->data.mouse.lLastX;
+					raw_mice[i].y += raw->data.mouse.lLastY;
 				}
 
-				// Feed the values for every mouse into the system mouse
-				if (include_sys_mouse) { 
-					if (raw_mice[i].is_absolute) {
-						raw_mice[RAW_SYS_MOUSE].x = raw->data.mouse.lLastX;
-						raw_mice[RAW_SYS_MOUSE].y = raw->data.mouse.lLastY;
-					}
-					else { // relative
-						raw_mice[RAW_SYS_MOUSE].x += raw->data.mouse.lLastX;
-						raw_mice[RAW_SYS_MOUSE].y += raw->data.mouse.lLastY;
-					}
-			  
-					// This is innacurate:  If 2 mice have their buttons down and I lift up on one, this will register the
-					//   system mouse as being "up".  I checked out on my windows desktop, and Microsoft was just as
-					//   lazy as I'm going to be.  Drag an icon with the 2 left mouse buttons held down & let go of one.
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_DOWN) raw_mice[i].buttonpressed[0] = 1;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_UP)   raw_mice[i].buttonpressed[0] = 0;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_DOWN) raw_mice[i].buttonpressed[1] = 1;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_UP)   raw_mice[i].buttonpressed[1] = 0;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_DOWN) raw_mice[i].buttonpressed[2] = 1;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_UP)   raw_mice[i].buttonpressed[2] = 0;
 
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_DOWN) raw_mice[RAW_SYS_MOUSE].buttonpressed[0] = 1;
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_UP) raw_mice[RAW_SYS_MOUSE].buttonpressed[0] = 0;
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_DOWN) raw_mice[RAW_SYS_MOUSE].buttonpressed[1] = 1;
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_UP) raw_mice[RAW_SYS_MOUSE].buttonpressed[1] = 0;
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_DOWN) raw_mice[RAW_SYS_MOUSE].buttonpressed[2] = 1;
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_UP) raw_mice[RAW_SYS_MOUSE].buttonpressed[2] = 0;
-				  
-					// If an absolute mouse is triggered, sys mouse will be considered absolute till the end of time.
-					if (raw->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE)          raw_mice[RAW_SYS_MOUSE].is_absolute = 1;
-					// Same goes for virtual desktop
-					if (raw->data.mouse.usFlags & MOUSE_VIRTUAL_DESKTOP)        raw_mice[RAW_SYS_MOUSE].is_virtual_desktop = 1;
+				if (raw->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE)          raw_mice[i].is_absolute = 1;
+				else if (raw->data.mouse.usFlags & MOUSE_MOVE_RELATIVE)     raw_mice[i].is_absolute = 0;
 
-					if (raw->data.mouse.usButtonFlags & RI_MOUSE_WHEEL) {      // If the current message has a mouse_wheel message
-						if ((SHORT)raw->data.mouse.usButtonData > 0) {
-							raw_mice[RAW_SYS_MOUSE].z++;
-						}
-						if ((SHORT)raw->data.mouse.usButtonData < 0) {
-							raw_mice[RAW_SYS_MOUSE].z--;
-						}
+				if (raw->data.mouse.usFlags & MOUSE_VIRTUAL_DESKTOP)        raw_mice[i].is_virtual_desktop = 1;
+				else                                                        raw_mice[i].is_virtual_desktop = 0;
+
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_WHEEL)			// If the current message has a mouse_wheel message
+				{
+					if ((SHORT)raw->data.mouse.usButtonData > 0)
+					{
+						raw_mice[i].z++;
 					}
-
+					if ((SHORT)raw->data.mouse.usButtonData < 0)
+					{
+						raw_mice[i].z--;
+					}
 				}
 			}
-	  }
-	  
-	  return 1;
+
+			// Feed the values for every mouse into the system mouse
+			if (include_sys_mouse)
+			{
+				if (raw_mice[i].is_absolute)
+				{
+					raw_mice[RAW_SYS_MOUSE].x = raw->data.mouse.lLastX;
+					raw_mice[RAW_SYS_MOUSE].y = raw->data.mouse.lLastY;
+				}
+				else	// relative
+				{
+					raw_mice[RAW_SYS_MOUSE].x += raw->data.mouse.lLastX;
+					raw_mice[RAW_SYS_MOUSE].y += raw->data.mouse.lLastY;
+				}
+
+				// This is innacurate:  If 2 mice have their buttons down and I lift up on one, this will register the
+				//   system mouse as being "up".  I checked out on my windows desktop, and Microsoft was just as
+				//   lazy as I'm going to be.  Drag an icon with the 2 left mouse buttons held down & let go of one.
+
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_DOWN)	raw_mice[RAW_SYS_MOUSE].buttonpressed[0] = 1;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_UP)	raw_mice[RAW_SYS_MOUSE].buttonpressed[0] = 0;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_DOWN)	raw_mice[RAW_SYS_MOUSE].buttonpressed[1] = 1;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_UP)	raw_mice[RAW_SYS_MOUSE].buttonpressed[1] = 0;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_DOWN)	raw_mice[RAW_SYS_MOUSE].buttonpressed[2] = 1;
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_UP)	raw_mice[RAW_SYS_MOUSE].buttonpressed[2] = 0;
+
+				// If an absolute mouse is triggered, sys mouse will be considered absolute till the end of time.
+				if (raw->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE)			raw_mice[RAW_SYS_MOUSE].is_absolute = 1;
+				// Same goes for virtual desktop
+				if (raw->data.mouse.usFlags & MOUSE_VIRTUAL_DESKTOP)		raw_mice[RAW_SYS_MOUSE].is_virtual_desktop = 1;
+
+				if (raw->data.mouse.usButtonFlags & RI_MOUSE_WHEEL)			// If the current message has a mouse_wheel message
+				{
+					if ((SHORT)raw->data.mouse.usButtonData > 0)
+					{
+						raw_mice[RAW_SYS_MOUSE].z++;
+					}
+					if ((SHORT)raw->data.mouse.usButtonData < 0)
+					{
+						raw_mice[RAW_SYS_MOUSE].z--;
+					}
+				}
+			}
+		}
+	}
+
+	return 1;
 }
 
 //============================================================
@@ -446,7 +482,7 @@ BOOL add_to_raw_mouse_x_and_y(HANDLE in_device_handle)
 	LPBYTE lpb;
 	int dwSize;
 
-	if (GetRawInputData(in_device_handle, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER)) == -1) {
+	if (/* GetRawInputData */(*_GRID)(in_device_handle, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER)) == -1) {
 		fprintf(stderr, "ERROR: Unable to add to get size of raw input header.\n");
 		return 0;
 	}
@@ -457,7 +493,7 @@ BOOL add_to_raw_mouse_x_and_y(HANDLE in_device_handle)
 		return 0;
 	} 
   
-	if (GetRawInputData(in_device_handle, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER)) != dwSize ) {
+	if (/* GetRawInputData */(*_GRID)(in_device_handle, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER)) != dwSize ) {
 		fprintf(stderr, "ERROR: Unable to add to get raw input header.\n");
 		return 0;
 	} 
